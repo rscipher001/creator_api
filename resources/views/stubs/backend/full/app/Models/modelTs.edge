@@ -1,0 +1,86 @@
+import { DateTime } from 'luxon'
+@if(isAuth)
+  import Hash from '@ioc:Adonis/Core/Hash'
+@endif
+import {
+  column,
+  beforeSave,
+  BaseModel,
+} from '@ioc:Adonis/Lucid/Orm'
+
+export default class {{ table.names.pascalCase }} extends BaseModel {
+  public static table = '{{ table.tableName }}'
+
+  @column({ isPrimary: true })
+  public id: number
+
+  @each(column in table.columns)
+
+    @if(column.type === 'date')
+      @if(column.names.camelCase === column.names.snakeCase || !input.camelCaseStrategy)
+        @column.dateTime()
+      @else
+        @column.dateTime({
+          serializeAs: {{ column.names.camelCase }},
+          columnName: {{ column.names.camelCase }},
+        })
+      @endif
+      public {{ column.names.camelCase }}{{ column.meta.required ? '?': '' }}: DateTime
+    @else
+      @if(column.names.camelCase === column.names.snakeCase || !input.camelCaseStrategy)
+        @if(column.meta.secret)
+          @column({
+            serializeAs: null
+          })
+        @else
+          @column()
+        @endif
+      @else
+        @column({
+          serializeAs: {{{ column.meta.secret ? null: `'${column.names.camelCase}'` }}},
+          columnName: '{{ column.names.camelCase }}',
+        })
+      @endif
+      public {{ column.names.camelCase }}{{ column.meta.required ? '': '?' }}: {{
+        ['decimal', 'integer'].includes(column.type) ? 'number' : column.type
+      }}
+    @endif
+  @endeach
+
+  @if(table.timestamps)
+    @if(input.camelCaseStrategy)
+
+      @column.dateTime({ 
+        autoCreate: true,
+        serializeAs: 'createdAt',
+        columnName: 'createdAt',
+      })
+      public createdAt: DateTime
+
+      @column.dateTime({
+        autoCreate: true,
+        autoUpdate: true,
+        serializeAs: 'updatedAt',
+        columnName: 'updatedAt',
+      })
+      public updatedAt: DateTime
+    @else
+
+      @column.dateTime({ autoCreate: true })
+      public createdAt: DateTime
+
+      @column.dateTime({ autoCreate: true, autoUpdate: true })
+      public updatedAt: DateTime
+    @endif
+  @endif
+
+  @if(isAuth)
+
+    @beforeSave()
+    public static async hashPassword (user: User) {
+      if (user.$dirty.password) {
+        user.password = await Hash.make(user.password)
+      }
+    }
+  @endif
+}

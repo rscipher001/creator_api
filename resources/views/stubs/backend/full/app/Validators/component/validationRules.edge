@@ -1,0 +1,27 @@
+{{ column.columnName }}: schema.{{
+  ['integer', 'decimal'].includes(column.type) ? 'number' : column.type
+}}{{ column.meta.required ? '' : '.optional' }}(
+  {{ column.meta.trim ? '{ trim: true },': column.type === 'string' ? '{},': '' }}
+  [
+    @if(column.meta.maxLength)
+      rules.maxLength({{ column.meta.maxLength }}),
+    @endif
+    @if(column.meta.minLength)
+      rules.minLength({{ column.meta.minLength }}),
+    @endif
+    @if(column.meta.email)
+      rules.email(),
+    @endif
+    @if(column.meta.unique)
+      rules.unique({
+        table: '{{ table.tableName }}',
+        column: '{{ column.columnName }}',
+        @if(action === 'update')
+          whereNot: {
+            id: this.ctx.request.param('{{table.names.camelCase }}Id'),
+          },
+        @endif
+      }),
+    @endif
+  ]
+),

@@ -1,0 +1,249 @@
+<template>
+  <section class="container mt-5">
+    <div class="level">
+      <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{ table.names.pascalCase }}</div>
+      <div class="level-right"><b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-light">Back</b-button></div>
+    </div>
+    <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
+      @each(column in table.columns)
+      @if(input.type === 'string')
+      <b-field
+        horizontal
+        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+        :message="errors.{{ column.names.camelCase }}"
+      >
+        <b-input
+          v-model="form.{{ column.names.camelCase }}"
+          @if(column.meta.multiline)
+          type="textarea"
+          @endif
+          @if(column.meta.maxLength !== undefined)
+          maxlength="{{ column.meta.maxLength }}"
+          @endif
+          @if(column.meta.minLength !== undefined)
+          minlength="{{ column.meta.minLength }}"
+          @endif
+          @if(column.meta.required)
+          required
+          @endif
+        ></b-input>
+      </b-field>
+
+      @elseif(input.type === 'integer')
+      <b-field
+        horizontal
+        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+        :message="errors.{{ column.names.camelCase }}"
+      >
+        <b-input
+          v-model="form.{{ column.names.camelCase }}"
+          type="number"
+          @if(column.meta.max !== undefined)
+          max="{{ column.meta.max }}"
+          @endif
+          @if(column.meta.min !== undefined)
+          min="{{ column.meta.min }}"
+          @endif
+          @if(column.meta.required)
+          required
+          @endif
+        ></b-input>
+      </b-field>
+
+      @elseif(column.type === 'decimal')
+      <b-field
+        horizontal
+        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+        :message="errors.{{ column.names.camelCase }}"
+      >
+        <b-input
+          v-model="form.{{ column.names.camelCase }}"
+          type="number"
+          @if(column.input?.decimal?.step)
+          step="{{ column.input?.decimal?.step }}"
+          @endif
+          @if(column.meta.max !== undefined)
+          max="{{ column.meta.max }}"
+          @endif
+          @if(column.meta.min !== undefined)
+          min="{{ column.meta.min }}"
+          @endif
+          @if(column.meta.required)
+          required
+          @endif
+        ></b-input>
+      </b-field>
+
+      @elseif(column.type === 'boolean')
+      <b-field
+        horizontal
+        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+        :message="errors.{{ column.names.camelCase }}"
+      >
+        <b-switch v-model="form.{{ column.names.camelCase }}">{{ column.input?.displayName ?? column.names.camelCase }}</b-switch>
+      </b-field>
+
+      @elseif(column.input?.type === 'radio')
+      <b-field
+        horizontal
+        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+        :message="errors.{{ column.names.camelCase }}"
+      >
+        @each(option in column.input.radio.options)
+        <b-radio-button
+          v-model="form.{{ column.names.camelCase }}"
+          native-value="{{ option }}"
+          type="is-primary is-outlined is-light"
+        >
+          <span>{{ option }}</span>
+        </b-radio-button>
+        @endeach
+      </b-field>
+
+      @elseif(column.input?.type === 'select')
+      <b-field
+        horizontal
+        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+        :message="errors.{{ column.names.camelCase }}"
+      >
+        <b-select
+          v-model="form.{{ column.names.camelCase }}"
+          expanded
+          @if(column.meta.required)
+          required
+          @endif
+        >
+          @each(option in column.input.select.options)
+          @if (option.value)
+          <option value="{{ option.value }}">{{ option.label }}</option>
+          @else
+          <option value="{{ option }}">{{ option }}</option>
+          @endif
+          @endeach
+        </b-select>
+      </b-field>
+      @endif
+      @endeach
+
+      <div class="is-flex is-justify-content-flex-end">
+        <b-button type="is-primary" native-type="submit" :loading="isLoading">
+          @{{ editMode.enabled ? 'Update' : 'Create' }} {{ table.names.pascalCase }}
+        </b-button>
+      </div>
+    </form>
+  </section>
+</template>
+
+<script>
+import { mapState, mapActions } from 'vuex';
+import ValidationException from '../exceptions/ValidationException';
+
+export default {
+  name: '{{ table.names.pascalCase }}Create',
+  created() {
+    if (this.$route.params.{{ table.names.camelCase }}Id) {
+      const {{ table.names.camelCase }}Id = parseInt(this.$route.params.{{ table.names.camelCase }}Id, 10);
+      this.editMode.enabled = true;
+      this.editMode.id = {{ table.names.camelCase }}Id;
+      const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
+      @each(column in table.columns)
+      this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}
+      @endeach
+    }
+  },
+
+  data() {
+    return {
+      editMode: {
+        enabled: false,
+        {{ table.names.camelCase }}Id: null,
+      },
+      errors: {},
+      form: {
+        @each(column in table.columns)
+        {{ column.names.camelCase }}: '',
+        @endeach
+      },
+    };
+  },
+
+  methods: {
+    ...mapActions('{{ table.names.camelCase }}', {
+      storeAction: 'store',
+      updateAction: 'update',
+    }),
+
+    async store() {
+      try {
+        await this.storeAction({
+          @each(column in table.columns)
+          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+          @endeach
+        });
+        this.$router.push('/{{ table.names.camelCase }}');
+        this.$buefy.toast.open({
+          message: '{{ table.names.pascalCase }} created',
+          position: 'is-bottom-right',
+          type: 'is-success',
+        });
+      } catch (e) {
+        let message = 'Unable to create {{ table.names.pascalCase }}';
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = 'Validation failed';
+        }
+        this.$buefy.toast.open({
+          message,
+          type: 'is-danger',
+          position: 'is-bottom-right',
+        });
+      }
+    },
+
+    async update() {
+      try {
+        await this.updateAction({
+          id: this.editMode.id,
+          input: {
+            @each(column in table.columns)
+            {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+            @endeach
+          },
+        });
+        this.$router.push('/{{ table.names.camelCase }}');
+        this.$buefy.toast.open({ message: '{{ table.names.pascalCase }} update', position: 'is-bottom-right', type: 'is-success' });
+      } catch (e) {
+        let message = 'Unable to update {{ table.names.pascalCase }}';
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = 'Validation failed';
+        }
+        this.$buefy.toast.open({
+          message,
+          type: 'is-danger',
+          position: 'is-bottom-right',
+        });
+      }
+    },
+  },
+
+  computed: {
+    ...mapState('auth', {
+      user: (state) => state.user,
+    }),
+    ...mapState('{{ table.names.camelCase }}', {
+      {{ table.names.camelCasePlural }}: (state) => state.items,
+      loading: (state) => state.loading,
+    }),
+    isLoading() {
+      return this.loading.store || this.loading.update;
+    },
+  },
+};
+</script>

@@ -12,6 +12,7 @@ Route.group(() => {
 
 Route.group(() => {
   Route.get('/me', 'API/AuthController.me')
+  Route.post('/project/generate', 'API/ProjectsController.generate')
 })
   .middleware(['auth'])
   .prefix('/api')

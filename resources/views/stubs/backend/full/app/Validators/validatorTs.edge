@@ -1,0 +1,17 @@
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+
+export default class {{ action === 'store' ? 'Store' : 'Update' }}{{ table.names.pascalCase }}Validator {
+  constructor(protected ctx: HttpContextContract) {}
+
+  public schema = schema.create({
+    @each(column in table.columns)
+      @!component('stubs/backend/full/app/Validators/component/validationRules', {
+        table,
+        column,
+        input
+      })
+    @endeach
+  })
+  public messages = {}
+}
