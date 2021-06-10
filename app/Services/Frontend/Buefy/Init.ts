@@ -1,5 +1,4 @@
 import View from '@ioc:Adonis/Core/View'
-import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import mkdirp from 'mkdirp'
@@ -98,7 +97,7 @@ export default class SPAGenerator {
   public async addNavbar() {
     const filePath = `${this.input.spaPath}/src/components/NavBar.vue`
     const content = await View.render(
-      `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/components/navBarVue`,
+      `stubs/frontend/${this.input.tech.frontend}/full/src/components/navBarVue`,
       {
         input: this.input,
         auth: true, // Tell navbar that generate auth only route
@@ -112,7 +111,7 @@ export default class SPAGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/services/httpServicejs`
+        `stubs/frontend/${this.input.tech.frontend}/full/src/services/httpServiceJs`
       )
       await HelperService.writeFile(filePath, content)
     }
@@ -123,7 +122,7 @@ export default class SPAGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/exceptions/validationExceptionJs`
+        `stubs/frontend/${this.input.tech.frontend}/full/src/exceptions/validationExceptionJs`
       )
       await HelperService.writeFile(filePath, content)
     }
@@ -134,7 +133,7 @@ export default class SPAGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/router/middlewares/authMiddlewareJs`
+        `stubs/frontend/${this.input.tech.frontend}/full/src/router/middlewares/authMiddlewareJs`
       )
       await HelperService.writeFile(filePath, content)
     }
@@ -145,7 +144,7 @@ export default class SPAGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/router/middlewares/guestMiddlewareJs`
+        `stubs/frontend/${this.input.tech.frontend}/full/src/router/middlewares/guestMiddlewareJs`
       )
       await HelperService.writeFile(filePath, content)
     }
@@ -156,7 +155,7 @@ export default class SPAGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/appVue`
+        `stubs/frontend/${this.input.tech.frontend}/full/src/appVue`
       )
       await HelperService.writeFile(filePath, content)
     }
@@ -165,7 +164,7 @@ export default class SPAGenerator {
   protected async addNavBar() {
     const filePath = `${this.input.spaPath}/src/components/NavBar.vue`
     const content = await View.render(
-      `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/components/navBarVue`,
+      `stubs/frontend/${this.input.tech.frontend}/full/src/components/navBarVue`,
       {
         input: this.input,
         auth: true, // Generate all routes, not nav only

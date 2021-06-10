@@ -21,7 +21,7 @@ export default class RegisterValidator {
     ]),
     @each(column in input.auth.table.columns)
       @if(!['Email', 'Password', 'RememberMeToken'].includes(column.name))
-      @!component('stubs/backend/full/app/Validators/component/validationRules', {
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRules`, {
         table,
         column,
         input

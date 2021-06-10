@@ -1,8 +1,6 @@
 import View from '@ioc:Adonis/Core/View'
-// import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
-// import mkdirp from 'mkdirp'
 
 export default class CRUDGenerator {
   private input: ProjectInput
@@ -22,7 +20,7 @@ export default class CRUDGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/views/modelCreateVue`,
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/modelCreateVue`,
         {
           input: this.input,
           table,
@@ -41,7 +39,7 @@ export default class CRUDGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/views/modelListVue`,
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/modelListVue`,
         {
           input: this.input,
           table,
@@ -60,7 +58,7 @@ export default class CRUDGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/store/modules/modelStateJs`,
+        `stubs/frontend/${this.input.tech.frontend}/full/src/store/modules/modelStateJs`,
         {
           input: this.input,
           table,
@@ -129,7 +127,7 @@ export default class CRUDGenerator {
   protected async addRoutes() {
     const filePath = `${this.input.spaPath}/src/components/NavBar.vue`
     const content = await View.render(
-      `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/components/navBarVue`,
+      `stubs/frontend/${this.input.tech.frontend}/full/src/components/navBarVue`,
       {
         input: this.input,
         auth: false, // Generate all routes, not nav only

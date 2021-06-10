@@ -6,7 +6,7 @@ export default class {{ action === 'store' ? 'Store' : 'Update' }}{{ table.names
 
   public schema = schema.create({
     @each(column in table.columns)
-      @!component('stubs/backend/full/app/Validators/component/validationRules', {
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRules`, {
         table,
         column,
         input

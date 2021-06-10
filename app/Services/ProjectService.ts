@@ -56,6 +56,7 @@ class BackendProjectService {
     projectInput.database = this.input.database.toLocaleLowerCase()
     projectInput.types = this.input.types.map((t) => t.toLowerCase())
     projectInput.auth = this.input.auth
+    projectInput.tech = this.input.tech
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
     if (!this.input.git) {

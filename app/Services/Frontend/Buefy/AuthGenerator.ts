@@ -28,11 +28,14 @@ export default class AuthGenerator {
         const table = this.input.auth.table
         const email = table.columns.find((c) => c.name === 'Email')
         const password = table.columns.find((c) => c.name === 'Password')
-        const content = await View.render('stubs/frontend/full/buefy/src/views/registerVue', {
-          input: this.input,
-          email,
-          password,
-        })
+        const content = await View.render(
+          `stubs/frontend/${this.input.tech.frontend}/full/src/views/registerVue`,
+          {
+            input: this.input,
+            email,
+            password,
+          }
+        )
         await HelperService.writeFile(path, content)
       }
     }
@@ -45,11 +48,14 @@ export default class AuthGenerator {
       const table = this.input.auth.table
       const email = table.columns.find((c) => c.name === 'Email')
       const password = table.columns.find((c) => c.name === 'Password')
-      const content = await View.render('stubs/frontend/full/buefy/src/views/loginVue', {
-        input: this.input,
-        email,
-        password,
-      })
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/loginVue`,
+        {
+          input: this.input,
+          email,
+          password,
+        }
+      )
       await HelperService.writeFile(path, content)
     }
   }
@@ -92,9 +98,12 @@ export default class AuthGenerator {
     const path = `${this.input.spaPath}/src/store/modules/auth.state.js`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
-      const content = await View.render('stubs/frontend/full/buefy/src/store/modules/authStateJs', {
-        input: this.input,
-      })
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/store/modules/authStateJs`,
+        {
+          input: this.input,
+        }
+      )
       await HelperService.writeFile(path, content)
     }
   }
@@ -135,9 +144,12 @@ export default class AuthGenerator {
    */
   protected async addRoutes() {
     const path = `${this.input.spaPath}/src/router/index.js`
-    const content = await View.render('stubs/frontend/full/buefy/src/router/indexJs', {
-      input: this.input,
-    })
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/src/router/indexJs`,
+      {
+        input: this.input,
+      }
+    )
     await HelperService.writeFile(path, content)
   }
 

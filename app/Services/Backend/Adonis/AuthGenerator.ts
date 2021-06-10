@@ -1,7 +1,6 @@
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
-import Application from '@ioc:Adonis/Core/Application'
 import mkdirp from 'mkdirp'
 
 export default class AuthGenerator {
@@ -17,7 +16,7 @@ export default class AuthGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/backend/full/${this.input.tech.backend}/config/corsTs`,
+        `stubs/backend/${this.input.tech.backend}/full/config/corsTs`,
         {
           types: this.input.types,
         }
@@ -53,9 +52,12 @@ export default class AuthGenerator {
     const filePath = `${this.input.path}/contracts/auth.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      const content = await View.render('stubs/backend/full/contracts/authTs', {
-        types: this.input.types,
-      })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/contracts/authTs`,
+        {
+          types: this.input.types,
+        }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -65,9 +67,12 @@ export default class AuthGenerator {
     const filePath = `${this.input.path}/config/auth.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      const content = await View.render('stubs/backend/full/config/authTs', {
-        types: this.input.types,
-      })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/config/authTs`,
+        {
+          types: this.input.types,
+        }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -86,7 +91,7 @@ export default class AuthGenerator {
       const timestamp = new Date().getTime()
       const filePath = `${this.input.path}/database/migrations/${timestamp}_${namePart}`
       const content = await View.render(
-        `stubs/backend/full/${this.input.tech.backend}/database/migrations/apiTokensTs.edge`,
+        `stubs/backend/${this.input.tech.backend}/full/database/migrations/apiTokensTs.edge`,
         {
           types: this.input.types,
         }
@@ -101,11 +106,14 @@ export default class AuthGenerator {
     const filePath = `${this.input.path}/app/Models/${table.names.pascalCase}.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      const content = await View.render('stubs/backend/full/app/Models/modelTs', {
-        isAuth: true,
-        input: this.input,
-        table,
-      })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/app/Models/modelTs`,
+        {
+          isAuth: true,
+          input: this.input,
+          table,
+        }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -122,11 +130,14 @@ export default class AuthGenerator {
     }
     if (!fileExists) {
       await HelperService.sleep(1000) // Ensure migrations get unique timestamps
-      const content = await View.render('stubs/backend/full/database/migrations/migrationTs', {
-        isAuth: true,
-        input: this.input,
-        table,
-      })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/database/migrations/migrationTs`,
+        {
+          isAuth: true,
+          input: this.input,
+          table,
+        }
+      )
       const timestamp = new Date().getTime()
       const filePath = `${this.input.path}/database/migrations/${timestamp}_${namePart}`
       await HelperService.writeFile(filePath, content)
@@ -142,7 +153,7 @@ export default class AuthGenerator {
       const email = table.columns.find((c) => c.name === 'Email')
       const password = table.columns.find((c) => c.name === 'Password')
       const content = await View.render(
-        'stubs/backend/full/app/Controllers/Http/API/authControllerTs',
+        `stubs/backend/${this.input.tech.backend}/full/app/Controllers/Http/API/authControllerTs`,
         {
           input: this.input,
           table,
@@ -159,9 +170,12 @@ export default class AuthGenerator {
     const filePath = `${this.input.path}/start/routes.ts`
     let content = await HelperService.readFile(filePath)
     if (content.indexOf('API/AuthController') === -1) {
-      const part = await View.render('stubs/backend/partials/authGenerator/apiRoutesTs', {
-        input: this.input,
-      })
+      const part = await View.render(
+        `stubs/backend/${this.input.tech.backend}/partials/authGenerator/apiRoutesTs`,
+        {
+          input: this.input,
+        }
+      )
       content += part
       await HelperService.writeFile(filePath, content)
     }
@@ -175,7 +189,9 @@ export default class AuthGenerator {
 
     // If no named middlewares are registered then register auth middleware
     if (content.indexOf(searchFor) !== -1) {
-      const part = await View.render('stubs/backend/partials/authGenerator/kernelTs')
+      const part = await View.render(
+        `stubs/backend/${this.input.tech.backend}/partials/authGenerator/kernelTs`
+      )
       content = content.replace(searchFor, part)
       await HelperService.writeFile(filePath, content)
     }
@@ -188,12 +204,15 @@ export default class AuthGenerator {
     if (!fileExists) {
       const email = this.input.auth.table.columns.find((c) => c.name === 'Email')
       const password = this.input.auth.table.columns.find((c) => c.name === 'Password')
-      const content = await View.render('stubs/backend/full/app/Validators/registerValidatorTs', {
-        input: this.input,
-        table: this.input.auth.table,
-        email,
-        password,
-      })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/app/Validators/registerValidatorTs`,
+        {
+          input: this.input,
+          table: this.input.auth.table,
+          email,
+          password,
+        }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -205,12 +224,15 @@ export default class AuthGenerator {
     if (!fileExists) {
       const email = this.input.auth.table.columns.find((c) => c.name === 'Email')
       const password = this.input.auth.table.columns.find((c) => c.name === 'Password')
-      const content = await View.render('stubs/backend/full/app/Validators/loginValidatorTs', {
-        input: this.input,
-        table: this.input.auth.table,
-        email,
-        password,
-      })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/app/Validators/loginValidatorTs`,
+        {
+          input: this.input,
+          table: this.input.auth.table,
+          email,
+          password,
+        }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -221,7 +243,7 @@ export default class AuthGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/backend/full/${this.input.tech.backend}/app/Middleware/silentAuthTs.edge`,
+        `stubs/backend/${this.input.tech.backend}/full/app/Middleware/silentAuthTs`,
         {
           types: this.input.types,
         }
@@ -236,7 +258,7 @@ export default class AuthGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/backend/full/${this.input.tech.backend}/app/Middleware/authTs.edge`,
+        `stubs/backend/${this.input.tech.backend}/full/app/Middleware/authTs`,
         {
           types: this.input.types,
         }
