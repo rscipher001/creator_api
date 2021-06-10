@@ -23,45 +23,10 @@ export default class SPAGenerator {
       mkdirp(`${this.input.spaPath}/src/router/middlewares`),
     ])
 
-    // Copy httpService
-    const httpServicePath = `${this.input.spaPath}/src/services/http.service.js`
-    const httpServiceExists = await HelperService.fileExists(httpServicePath)
-    if (!httpServiceExists) {
-      await HelperService.copyFile(
-        Application.resourcesPath('files/frontend/buefy/services/http.service.js'),
-        httpServicePath
-      )
-    }
-
-    // Copy validationException
-    const validationExceptionPath = `${this.input.spaPath}/src/exceptions/ValidationException.js`
-    const validationExceptionExists = await HelperService.fileExists(validationExceptionPath)
-    if (!validationExceptionExists) {
-      await HelperService.copyFile(
-        Application.resourcesPath('files/frontend/buefy/exceptions/ValidationException.js'),
-        validationExceptionPath
-      )
-    }
-
-    // Copy auth middleware
-    const authMiddlewarePath = `${this.input.spaPath}/src/router/middlewares/auth.middleware.js`
-    const authMiddlewareExists = await HelperService.fileExists(authMiddlewarePath)
-    if (!authMiddlewareExists) {
-      await HelperService.copyFile(
-        Application.resourcesPath('files/frontend/buefy/router/middlewares/auth.middleware.js'),
-        authMiddlewarePath
-      )
-    }
-
-    // Copy guest middleware
-    const guestMiddlewarePath = `${this.input.spaPath}/src/router/middlewares/guest.middleware.js`
-    const guestMiddlewareExists = await HelperService.fileExists(guestMiddlewarePath)
-    if (!guestMiddlewareExists) {
-      await HelperService.copyFile(
-        Application.resourcesPath('files/frontend/buefy/router/middlewares/guest.middleware.js'),
-        guestMiddlewarePath
-      )
-    }
+    await this.copyHttpService()
+    await this.copyValidationException()
+    await this.copyAuthMiddleware()
+    await this.copyGuestMiddleware()
   }
 
   public async installBuefy() {
@@ -142,6 +107,61 @@ export default class SPAGenerator {
     await HelperService.writeFile(filePath, content)
   }
 
+  public async copyHttpService() {
+    const filePath = `${this.input.spaPath}/src/services/http.service.js`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/services/httpServicejs`
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  public async copyValidationException() {
+    const filePath = `${this.input.spaPath}/src/exceptions/ValidationException.js`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/exceptions/validationExceptionJs`
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  public async copyAuthMiddleware() {
+    const filePath = `${this.input.spaPath}/src/router/middlewares/auth.middleware.js`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/router/middlewares/authMiddlewareJs`
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  public async copyGuestMiddleware() {
+    const filePath = `${this.input.spaPath}/src/router/middlewares/guest.middleware.js`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/router/middlewares/guestMiddlewareJs`
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  public async addAppView() {
+    const filePath = `${this.input.spaPath}/src/App.vue`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/${this.input.tech.frontend}/src/appVue`
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
   protected async addNavBar() {
     const filePath = `${this.input.spaPath}/src/components/NavBar.vue`
     const content = await View.render(
@@ -159,12 +179,7 @@ export default class SPAGenerator {
    */
   public async addBasicStuff() {
     await this.addNavBar()
-
-    // Copy App.vue
-    await HelperService.copyFile(
-      Application.resourcesPath('files/frontend/buefy/App.vue'),
-      `${this.input.spaPath}/src/App.vue`
-    )
+    await this.addAppView()
   }
 
   /**

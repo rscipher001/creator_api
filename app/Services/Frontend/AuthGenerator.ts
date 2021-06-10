@@ -1,5 +1,4 @@
 import View from '@ioc:Adonis/Core/View'
-import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import mkdirp from 'mkdirp'
@@ -18,15 +17,7 @@ export default class AuthGenerator {
   protected async copyPages() {
     await this.copyLoginView()
     await this.copyRegisterView()
-
-    const dashboardViewPath = `${this.input.spaPath}/src/views/Dashboard.vue`
-    const dashboardViewExists = await HelperService.fileExists(dashboardViewPath)
-    if (!dashboardViewExists) {
-      await HelperService.copyFile(
-        Application.resourcesPath('files/frontend/buefy/views/Dashboard.vue'),
-        dashboardViewPath
-      )
-    }
+    await this.copyDashboardView()
   }
 
   protected async copyRegisterView() {
@@ -59,6 +50,17 @@ export default class AuthGenerator {
         email,
         password,
       })
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copyDashboardView() {
+    const path = `${this.input.spaPath}/src/views/Dashboard.vue`
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/dashboardVue`
+      )
       await HelperService.writeFile(path, content)
     }
   }
