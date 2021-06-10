@@ -78,12 +78,27 @@ export default interface ProjectInput {
   path: string // project folder full path
   spaPath: string // project folder full path
   basePath: string // Project folder name
-  skip: {
-    init: boolean
-    auth: boolean
-    db: boolean
-    crud: boolean
-    test: boolean
+  generate: {
+    api: {
+      generate: boolean
+      init: boolean
+      db: boolean
+      auth: boolean
+      crud: boolean
+      test: boolean
+    }
+    spa: {
+      generate: boolean
+      init: boolean
+      auth: boolean
+      crud: boolean
+    }
+    app: {
+      generate: boolean
+    }
+    website: {
+      generate: boolean
+    }
   }
   auth: {
     login: boolean
