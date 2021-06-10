@@ -271,7 +271,10 @@ export default class DatabaseGenerator {
     let content = await HelperService.readFile(filePath)
 
     // The following code can be improved
-    const part = await View.render('stubs/backend/partials/databaseGenerator/dotEnv', { database })
+    const part = await View.render(
+      `stubs/backend/${this.input.tech.backend}/partials/databaseGenerator/dotEnv`,
+      { database }
+    )
     switch (database) {
       case 'mysql':
         if (content.indexOf('MYSQL_HOST') === -1) {
@@ -294,7 +297,10 @@ export default class DatabaseGenerator {
     let content = await HelperService.readFile(filePath)
 
     // Can be improved
-    const part = await View.render('stubs/backend/partials/databaseGenerator/envTs', { database })
+    const part = await View.render(
+      `stubs/backend/${this.input.tech.backend}/partials/databaseGenerator/envTs`,
+      { database }
+    )
     switch (database) {
       case 'mysql':
         if (content.indexOf('MYSQL_HOST') === -1) {
@@ -330,7 +336,24 @@ export default class DatabaseGenerator {
     const filePath = `${this.input.path}/config/database.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      const content = await View.render('stubs/backend/full/config/databaseTs', { database })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/config/databaseTs`,
+        { database }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  // Create database/factories/index.ts
+  protected async createFactoryIndex() {
+    const database = this.input.database
+    const filePath = `${this.input.path}/database/factories/index.ts`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/database/factories/indexTs`,
+        { database }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -352,14 +375,7 @@ export default class DatabaseGenerator {
     await mkdirp(`${this.input.path}/database/factories`)
 
     // Copy database/factories/index.ts
-    const factoryIndexTsPath = `${this.input.path}/database/factories/index.ts`
-    const factoryIndexTsExists = await HelperService.fileExists(factoryIndexTsPath)
-    if (!factoryIndexTsExists) {
-      await HelperService.copyFile(
-        Application.resourcesPath('files/backend/database/factories/index.ts'),
-        factoryIndexTsPath
-      )
-    }
+    await this.createFactoryIndex()
 
     // Install MySQL
     await HelperService.execute('npm', ['install', 'mysql', 'luxon'], {

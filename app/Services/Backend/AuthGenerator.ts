@@ -1,4 +1,3 @@
-// import os from 'os'
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
@@ -15,10 +14,16 @@ export default class AuthGenerator {
   // Copy cors config
   protected async createCorsConfigTs() {
     const filePath = `${this.input.path}/config/cors.ts`
-    await HelperService.copyFile(
-      Application.resourcesPath('files/backend/config/cors.ts'),
-      filePath
-    )
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/full/${this.input.tech.backend}/config/corsTs`,
+        {
+          types: this.input.types,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
   }
 
   // Update .adonisrc.json
@@ -77,13 +82,16 @@ export default class AuthGenerator {
       fileExists = !!migrationFileNames.find((fileName) => fileName.indexOf(namePart) !== -1)
     }
     if (!fileExists) {
-      await HelperService.sleep(1000) // Ensure unique timestamp
+      await HelperService.sleep(1000) // Ensure unique timestamp in user and token files
       const timestamp = new Date().getTime()
       const filePath = `${this.input.path}/database/migrations/${timestamp}_${namePart}`
-      await HelperService.copyFile(
-        Application.resourcesPath('files/backend/database/migrations/api_tokens.ts'),
-        filePath
+      const content = await View.render(
+        `stubs/backend/full/${this.input.tech.backend}/database/migrations/apiTokensTs.edge`,
+        {
+          types: this.input.types,
+        }
       )
+      await HelperService.writeFile(filePath, content)
     }
   }
 
@@ -207,10 +215,39 @@ export default class AuthGenerator {
     }
   }
 
+  // Create app/Middleware/SilentAuth.ts
+  protected async createSilentAuthMiddleware() {
+    const filePath = `${this.input.path}/app/Middleware/SilentAuth.ts`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/full/${this.input.tech.backend}/app/Middleware/silentAuthTs.edge`,
+        {
+          types: this.input.types,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  // Create app/Middleware/Auth.ts
+  protected async createAuthMiddleware() {
+    const filePath = `${this.input.path}/app/Middleware/Auth.ts`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/full/${this.input.tech.backend}/app/Middleware/authTs.edge`,
+        {
+          types: this.input.types,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
   /**
    * Copy module files
    * 1. app/Middleware/Auth.ts
-   * 2. app/Middleware/SilentAuth.ts
    * 3. contracts/auth.ts
    * 4. config/auth.ts // Dynamic
    * 5. app/Models/User.ts // Dynamic
@@ -222,24 +259,10 @@ export default class AuthGenerator {
    */
   protected async initModuleFiles() {
     // Create app/Middleware/Auth.ts
-    const middlewareAuthPath = `${this.input.path}/app/Middleware/Auth.ts`
-    const middlewareAuthExists = await HelperService.fileExists(middlewareAuthPath)
-    if (!middlewareAuthExists) {
-      await HelperService.copyFile(
-        Application.resourcesPath('files/backend/app/Middleware/Auth.ts'),
-        middlewareAuthPath
-      )
-    }
+    await this.createAuthMiddleware()
 
     // Create app/Middleware/SilentAuth.ts
-    const middlewareSilentAuthPath = `${this.input.path}/app/Middleware/SilentAuth.ts`
-    const middlewareSilentAuthExists = await HelperService.fileExists(middlewareSilentAuthPath)
-    if (!middlewareSilentAuthExists) {
-      await HelperService.copyFile(
-        Application.resourcesPath('files/backend/app/Middleware/SilentAuth.ts'),
-        middlewareSilentAuthPath
-      )
-    }
+    await this.createSilentAuthMiddleware()
 
     // Create Validators
     await this.createLoginValidator()

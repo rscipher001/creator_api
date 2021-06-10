@@ -98,4 +98,9 @@ export default interface ProjectInput {
   types: string[] // should be smallcaps, can be api or web
   camelCaseStrategy: boolean
   tables: Table[]
+  tech: {
+    backend?: string
+    frontend?: string
+    app?: string
+  }
 }

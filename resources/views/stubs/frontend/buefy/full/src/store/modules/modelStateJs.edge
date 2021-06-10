@@ -11,8 +11,7 @@ export default {
       store: false,
       update: false,
       destroy: false,
-      secret: false,
-      storeMultiple: false,
+      storeMany: false,
     },
     meta: {},
     items: [],
@@ -48,14 +47,14 @@ export default {
       }
     },
 
-    async storeMultiple({ commit }, input) {
-      commit('setLoading', { key: 'storeMultiple', value: true });
+    async storeMany({ commit }, input) {
+      commit('setLoading', { key: 'storeMany', value: true });
       try {
-        const items = await HttpService.authPost(`/${resource}/multiple`, input);
-        commit('setLoading', { key: 'storeMultiple', value: false });
-        commit('addMultiple', items);
+        const items = await HttpService.authPost(`/${resource}/many`, input);
+        commit('setLoading', { key: 'storeMany', value: false });
+        commit('addMany', items);
       } catch (e) {
-        commit('setLoading', { key: 'storeMultiple', value: false });
+        commit('setLoading', { key: 'storeMany', value: false });
         if (e.response && e.response.status === 422) {
           throw new ValidationException(e.message, e.response.data.errors);
         }
@@ -93,21 +92,6 @@ export default {
         throw e;
       }
     },
-
-    // Secret is required for adding card to stripe
-    async getSecret({ commit }, id) {
-      commit('setLoading', { key: 'secret', value: true });
-      try {
-        const secret = await HttpService.authPost('/paymentMethod/secret', {
-          {{ table.names.camelCase }}Id: id,
-        });
-        commit('setLoading', { key: 'secret', value: false });
-        return secret;
-      } catch (e) {
-        commit('setLoading', { key: 'secret', value: false });
-        throw e;
-      }
-    },
   },
 
   mutations: {
@@ -120,7 +104,7 @@ export default {
       state.items.push(item);
     },
 
-    addMultiple(state, items) {
+    addMany(state, items) {
       state.items.push(...items);
     },
 

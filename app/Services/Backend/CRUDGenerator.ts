@@ -17,11 +17,14 @@ export default class CRUDGenerator {
     const filePath = `${this.input.path}/app/Models/${table.names.pascalCase}.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      const content = await View.render('stubs/backend/full/app/Models/modelTs', {
-        isAuth: false,
-        input: this.input,
-        table,
-      })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/app/Models/modelTs`,
+        {
+          isAuth: false,
+          input: this.input,
+          table,
+        }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -38,11 +41,14 @@ export default class CRUDGenerator {
     }
     if (!fileExists) {
       await HelperService.sleep(1000) // Ensure migrations get unique timestamps
-      const content = await View.render('stubs/backend/full/database/migrations/migrationTs', {
-        isAuth: false,
-        input: this.input,
-        table,
-      })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/database/migrations/migrationTs`,
+        {
+          isAuth: false,
+          input: this.input,
+          table,
+        }
+      )
       const timestamp = new Date().getTime()
       const filePath = `${this.input.path}/database/migrations/${timestamp}_${namePart}`
       await HelperService.writeFile(filePath, content)
@@ -57,11 +63,14 @@ export default class CRUDGenerator {
       const filePath = `${this.input.path}/app/Validators/Store${table.names.pascalCase}Validator.ts`
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {
-        const content = await View.render('stubs/backend/full/app/Validators/validatorTs', {
-          action: 'store',
-          input: this.input,
-          table,
-        })
+        const content = await View.render(
+          `stubs/backend/${this.input.tech.backend}/full/app/Validators/validatorTs`,
+          {
+            action: 'store',
+            input: this.input,
+            table,
+          }
+        )
         await HelperService.writeFile(filePath, content)
       }
     }
@@ -70,11 +79,14 @@ export default class CRUDGenerator {
       const filePath = `${this.input.path}/app/Validators/Update${table.names.pascalCase}Validator.ts`
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {
-        const content = await View.render('stubs/backend/full/app/Validators/validatorTs', {
-          action: 'update',
-          input: this.input,
-          table,
-        })
+        const content = await View.render(
+          `stubs/backend/${this.input.tech.backend}/full/app/Validators/validatorTs`,
+          {
+            action: 'update',
+            input: this.input,
+            table,
+          }
+        )
         await HelperService.writeFile(filePath, content)
       }
     }
@@ -88,7 +100,7 @@ export default class CRUDGenerator {
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {
         const content = await View.render(
-          'stubs/backend/full/app/Controllers/Http/API/controllerTs',
+          `stubs/backend/${this.input.tech.backend}/full/app/Controllers/Http/API/controllerTs`,
           {
             input: this.input,
             table,
@@ -105,10 +117,13 @@ export default class CRUDGenerator {
     if (this.input.types.includes('api')) {
       const filePath = `${this.input.path}/start/routes.ts`
       let content = await HelperService.readFile(filePath)
-      const part = await View.render('stubs/backend/partials/crudGenerator/routesTs', {
-        table,
-        type: 'api',
-      })
+      const part = await View.render(
+        `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/routesTs`,
+        {
+          table,
+          type: 'api',
+        }
+      )
       content += part
       await HelperService.writeFile(filePath, content)
     }

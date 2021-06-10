@@ -15,7 +15,7 @@ export default class CRUDGenerator {
     const filePath = `${this.input.path}/japaFile.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      const content = await View.render('stubs/backend/full/japaFileTs')
+      const content = await View.render(`stubs/backend/${this.input.tech.backend}/full/japaFileTs`)
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -34,7 +34,10 @@ export default class CRUDGenerator {
     const filePath = `${this.input.path}/test/auth.spec.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      const content = await View.render('stubs/backend/full/test/authSpecTs', { input: this.input })
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/test/authSpecTs`,
+        { input: this.input }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }

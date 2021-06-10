@@ -21,10 +21,13 @@ export default class CRUDGenerator {
     const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}Create.vue`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      const content = await View.render('stubs/frontend/full/buefy/src/views/modelCreateVue', {
-        input: this.input,
-        table,
-      })
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/views/modelCreateVue`,
+        {
+          input: this.input,
+          table,
+        }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -37,10 +40,13 @@ export default class CRUDGenerator {
     const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}List.vue`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      const content = await View.render('stubs/frontend/full/buefy/src/views/modelListVue', {
-        input: this.input,
-        table,
-      })
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/views/modelListVue`,
+        {
+          input: this.input,
+          table,
+        }
+      )
       await HelperService.writeFile(filePath, content)
     }
   }
@@ -54,7 +60,7 @@ export default class CRUDGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        'stubs/frontend/full/buefy/src/store/modules/modelStateJs',
+        `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/store/modules/modelStateJs`,
         {
           input: this.input,
           table,
@@ -87,10 +93,13 @@ export default class CRUDGenerator {
    */
   protected async registerRoutes(i: number) {
     const table = this.input.tables[i]
-    const part = await View.render('stubs/frontend/partial/crudGenerator/routerJs', {
-      input: this.input,
-      table,
-    })
+    const part = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/partial/crudGenerator/routerJs`,
+      {
+        input: this.input,
+        table,
+      }
+    )
 
     const filePath = `${this.input.spaPath}/src/router/index.js`
     let content = await HelperService.readFile(filePath)
@@ -119,10 +128,13 @@ export default class CRUDGenerator {
    */
   protected async addRoutes() {
     const filePath = `${this.input.spaPath}/src/components/NavBar.vue`
-    const content = await View.render('stubs/frontend/full/buefy/src/components/navBarVue', {
-      input: this.input,
-      auth: false, // Generate all routes, not nav only
-    })
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/components/navBarVue`,
+      {
+        input: this.input,
+        auth: false, // Generate all routes, not nav only
+      }
+    )
     await HelperService.writeFile(filePath, content)
   }
 

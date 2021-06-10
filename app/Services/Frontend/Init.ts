@@ -132,19 +132,25 @@ export default class SPAGenerator {
 
   public async addNavbar() {
     const filePath = `${this.input.spaPath}/src/components/NavBar.vue`
-    const content = await View.render('stubs/frontend/full/buefy/src/components/navBarVue', {
-      input: this.input,
-      auth: true, // Tell navbar that generate auth only route
-    })
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/components/navBarVue`,
+      {
+        input: this.input,
+        auth: true, // Tell navbar that generate auth only route
+      }
+    )
     await HelperService.writeFile(filePath, content)
   }
 
   protected async addNavBar() {
     const filePath = `${this.input.spaPath}/src/components/NavBar.vue`
-    const content = await View.render('stubs/frontend/full/buefy/src/components/navBarVue', {
-      input: this.input,
-      auth: true, // Generate all routes, not nav only
-    })
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/buefy/src/components/navBarVue`,
+      {
+        input: this.input,
+        auth: true, // Generate all routes, not nav only
+      }
+    )
     await HelperService.writeFile(filePath, content)
   }
 
