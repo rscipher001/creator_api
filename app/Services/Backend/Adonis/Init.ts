@@ -30,7 +30,7 @@ export default class Init {
         'init',
         'adonis-ts-app@latest',
         this.input.basePath, // ProjectPath
-        `--boilerplate=${type}`, // Don't install views
+        `--boilerplate=${type}`, // API or web type project
         `--name=${this.input.name}`, // Project name
         '--eslint', // Enable ESLint
         '--prettier', // Enable prettiter

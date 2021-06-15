@@ -2,7 +2,6 @@ import os from 'os'
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
-import Application from '@ioc:Adonis/Core/Application'
 import mkdirp from 'mkdirp'
 
 export default class DatabaseGenerator {
@@ -331,7 +330,7 @@ export default class DatabaseGenerator {
   }
 
   // Create config/dataabse.ts
-  protected async createDatabaseTs() {
+  protected async createConfigDatabaseTs() {
     const database = this.input.database
     const filePath = `${this.input.path}/config/database.ts`
     const fileExists = await HelperService.fileExists(filePath)
@@ -345,7 +344,7 @@ export default class DatabaseGenerator {
   }
 
   // Create database/factories/index.ts
-  protected async createFactoryIndex() {
+  protected async createDatabaseFactoryIndex() {
     const database = this.input.database
     const filePath = `${this.input.path}/database/factories/index.ts`
     const fileExists = await HelperService.fileExists(filePath)
@@ -371,11 +370,11 @@ export default class DatabaseGenerator {
     await this.updateDotEnv('.env')
     await this.updateDotEnv('.env.example')
     await this.updateEnvTs()
-    await this.createDatabaseTs()
+    await this.createConfigDatabaseTs()
     await mkdirp(`${this.input.path}/database/factories`)
 
     // Copy database/factories/index.ts
-    await this.createFactoryIndex()
+    await this.createDatabaseFactoryIndex()
 
     // Install MySQL
     await HelperService.execute('npm', ['install', 'mysql', 'luxon'], {

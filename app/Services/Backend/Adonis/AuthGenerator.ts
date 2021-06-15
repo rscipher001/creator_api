@@ -11,22 +11,20 @@ export default class AuthGenerator {
   }
 
   // Copy cors config
-  protected async createCorsConfigTs() {
+  protected async updateConfigCorsTs() {
     const filePath = `${this.input.path}/config/cors.ts`
-    const fileExists = await HelperService.fileExists(filePath)
-    if (!fileExists) {
-      const content = await View.render(
-        `stubs/backend/${this.input.tech.backend}/full/config/corsTs`,
-        {
-          types: this.input.types,
-        }
-      )
-      await HelperService.writeFile(filePath, content)
-    }
+
+    const content = await View.render(
+      `stubs/backend/${this.input.tech.backend}/full/config/corsTs`,
+      {
+        types: this.input.types,
+      }
+    )
+    await HelperService.writeFile(filePath, content)
   }
 
   // Update .adonisrc.json
-  protected async updateAdonisrcJson() {
+  protected async updateDotAdonisrcJson() {
     const filePath = `${this.input.path}/.adonisrc.json`
     const content = await HelperService.readJson(filePath)
     const provider = '@adonisjs/auth'
@@ -48,7 +46,7 @@ export default class AuthGenerator {
   }
 
   // Create contracts/auth.ts
-  protected async createAuthContractTs() {
+  protected async createContractsAuthTs() {
     const filePath = `${this.input.path}/contracts/auth.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -63,7 +61,7 @@ export default class AuthGenerator {
   }
 
   // Create config/auth.ts
-  protected async createAuthConfigTs() {
+  protected async createConfigAuthTs() {
     const filePath = `${this.input.path}/config/auth.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -198,7 +196,7 @@ export default class AuthGenerator {
   }
 
   // Create app/Validators/RegisterValidator.ts
-  protected async createRegisterValidator() {
+  protected async createAppValidatorsRegisterValidatorTs() {
     const filePath = `${this.input.path}/app/Validators/RegisterValidator.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -218,7 +216,7 @@ export default class AuthGenerator {
   }
 
   // Create app/Validators/LoginValidator.ts
-  protected async createLoginValidator() {
+  protected async createAppValidatorsLoginValidatorTs() {
     const filePath = `${this.input.path}/app/Validators/LoginValidator.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -238,7 +236,7 @@ export default class AuthGenerator {
   }
 
   // Create app/Middleware/SilentAuth.ts
-  protected async createSilentAuthMiddleware() {
+  protected async createAppMiddlewareSilentAuthTs() {
     const filePath = `${this.input.path}/app/Middleware/SilentAuth.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -253,7 +251,7 @@ export default class AuthGenerator {
   }
 
   // Create app/Middleware/Auth.ts
-  protected async createAuthMiddleware() {
+  protected async createAppMiddlewareAuthTs() {
     const filePath = `${this.input.path}/app/Middleware/Auth.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -281,28 +279,28 @@ export default class AuthGenerator {
    */
   protected async initModuleFiles() {
     // Create app/Middleware/Auth.ts
-    await this.createAuthMiddleware()
+    await this.createAppMiddlewareAuthTs()
 
     // Create app/Middleware/SilentAuth.ts
-    await this.createSilentAuthMiddleware()
+    await this.createAppMiddlewareSilentAuthTs()
 
     // Create Validators
-    await this.createLoginValidator()
+    await this.createAppValidatorsLoginValidatorTs()
     if (this.input.auth.register) {
-      await this.createRegisterValidator()
+      await this.createAppValidatorsRegisterValidatorTs()
     }
 
     // Create contracts/auth.ts
-    await this.createAuthContractTs()
+    await this.createContractsAuthTs()
 
     // Update start/kernel.ts
     await this.addMiddlewaresToKernel()
 
     // Create config/auth.ts
-    await this.createAuthConfigTs()
+    await this.createConfigAuthTs()
 
-    // Create config/cors.ts
-    await this.createCorsConfigTs()
+    // Update config/cors.ts
+    await this.updateConfigCorsTs()
 
     // Create app/Models/{Auth}.ts
     await this.createAuthModel()
@@ -334,7 +332,7 @@ export default class AuthGenerator {
     // Update common files related to database
     // 1. .adonisrc.json
     // 2. tsconfig.json
-    await this.updateAdonisrcJson()
+    await this.updateDotAdonisrcJson()
     await this.updateTsconfigJson()
 
     await Promise.all([
