@@ -39,7 +39,7 @@ export interface Input {
   displayName?: string // Display name will be used as label when displaying a field
   type?: string // input, select, radio, checkbox, file(String only)
   decimal?: {
-    step: number // Only allowed for decimal inputs
+    step: number|string // Only allowed for decimal inputs
   }
   select?: {
     options: any[]

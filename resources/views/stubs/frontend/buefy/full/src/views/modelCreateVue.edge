@@ -90,8 +90,10 @@
         <b-input
           v-model="form.{{ column.names.camelCase }}"
           type="number"
-          @if(column.input.decimal?.step !== undefined)
+          @if(column.input.decimal.step !== undefined)
           step="{{ column.input.decimal.step }}"
+          @else
+          step="any"
           @endif
           @if(column.meta.max !== undefined)
           max="{{ column.meta.max }}"
