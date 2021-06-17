@@ -26,9 +26,9 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
           column.meta.unique ? '.unique()': ''
         }}{{
           column.meta.required ? '.notNullable()': '.nullable()'
-        }}{{
-          column.meta.defaultTo ? `.defaultTo('column.meta.defaultTo')`: ''
-        }}
+        }}{{{
+          column.meta.defaultTo ? `.defaultTo('${column.meta.defaultTo}')`: ''
+        }}}
       @endeach
       @if(table.timestamps)
         /**

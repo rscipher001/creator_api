@@ -6,13 +6,14 @@
     </div>
     <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
       @each(column in table.columns)
-      @if(input.type === 'string')
+      @if(column.type === 'string')
       <b-field
         horizontal
-        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
+        @if(column.input.type === 'input')
         <b-input
           v-model="form.{{ column.names.camelCase }}"
           @if(column.meta.multiline)
@@ -28,12 +29,39 @@
           required
           @endif
         ></b-input>
+        @elseif(column.input.type === 'select')
+        <b-select
+          v-model="form.{{ column.names.camelCase }}"
+          expanded
+          @if(column.meta.required)
+          required
+          @endif
+        >
+          @each(option in column.input.select.options)
+          @if (option.value)
+          <option value="{{ option.value }}">{{ option.label }}</option>
+          @else
+          <option value="{{ option }}">{{ option }}</option>
+          @endif
+          @endeach
+        </b-select>
+        @elseif(column.input.type === 'radio')
+        @each(option in column.input.radio.options)
+        <b-radio-button
+          v-model="form.{{ column.names.camelCase }}"
+          native-value="{{ option }}"
+          type="is-primary is-outlined is-light"
+        >
+          <span>{{ option }}</span>
+        </b-radio-button>
+        @endeach
+        @endif
       </b-field>
 
-      @elseif(input.type === 'integer')
+      @elseif(column.type === 'integer')
       <b-field
         horizontal
-        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -55,15 +83,15 @@
       @elseif(column.type === 'decimal')
       <b-field
         horizontal
-        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
         <b-input
           v-model="form.{{ column.names.camelCase }}"
           type="number"
-          @if(column.input?.decimal?.step)
-          step="{{ column.input?.decimal?.step }}"
+          @if(column.input.decimal?.step !== undefined)
+          step="{{ column.input.decimal.step }}"
           @endif
           @if(column.meta.max !== undefined)
           max="{{ column.meta.max }}"
@@ -80,53 +108,20 @@
       @elseif(column.type === 'boolean')
       <b-field
         horizontal
-        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
         <b-switch v-model="form.{{ column.names.camelCase }}">{{ column.input?.displayName ?? column.names.camelCase }}</b-switch>
       </b-field>
-
-      @elseif(column.input?.type === 'radio')
+      @elseif(column.type === 'date')
       <b-field
         horizontal
-        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
-        @each(option in column.input.radio.options)
-        <b-radio-button
-          v-model="form.{{ column.names.camelCase }}"
-          native-value="{{ option }}"
-          type="is-primary is-outlined is-light"
-        >
-          <span>{{ option }}</span>
-        </b-radio-button>
-        @endeach
-      </b-field>
-
-      @elseif(column.input?.type === 'select')
-      <b-field
-        horizontal
-        label="{{ column.input?.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
-        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
-        :message="errors.{{ column.names.camelCase }}"
-      >
-        <b-select
-          v-model="form.{{ column.names.camelCase }}"
-          expanded
-          @if(column.meta.required)
-          required
-          @endif
-        >
-          @each(option in column.input.select.options)
-          @if (option.value)
-          <option value="{{ option.value }}">{{ option.label }}</option>
-          @else
-          <option value="{{ option }}">{{ option }}</option>
-          @endif
-          @endeach
-        </b-select>
+        <b-datepicker v-model="form.{{ column.names.camelCase }}" />
       </b-field>
       @endif
       @endeach
