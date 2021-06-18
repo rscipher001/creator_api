@@ -1,7 +1,8 @@
 {{ column.columnName }}: schema.{{
   ['integer', 'decimal'].includes(column.type) ? 'number' : column.type
 }}{{ column.meta.required ? '' : '.optional' }}(
-  {{ column.meta.trim ? '{ trim: true },': column.type === 'string' ? '{},': '' }}
+  {{{ column.meta.trim ? '{ trim: true },': column.type === 'string' ? '{},' :
+    column.type === 'date' ? "{ format: 'iso' },": '' }}}
   [
     @if(column.meta.maxLength)
       rules.maxLength({{ column.meta.maxLength }}),

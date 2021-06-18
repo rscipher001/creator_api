@@ -7,19 +7,19 @@ export default class ProjectsController {
     return Project.query().where('userId', auth.user!.id)
   }
 
-  public async store({ request, auth, logger }: HttpContextContract) {
+  public async store({ request, auth }: HttpContextContract) {
     const input = request.body()
-    this.generateProject(auth.user!.id, input)
-    return 'Project is being generated'
+    const project = await Project.create({
+      status: 'queued',
+      rawInput: JSON.stringify(input),
+      userId :auth.user!.id,
+    })
+    this.generateProject(input, project)
+    return project
   }
 
-  protected async generateProject(userId: number, input) {
+  protected async generateProject(input, project: Project) {
     try {
-      const project = await Project.create({
-        status: 'queued',
-        rawInput: JSON.stringify(input),
-        userId,
-      })
       const generator = new Generator(input)
       await generator.init()
       project.status = 'done'

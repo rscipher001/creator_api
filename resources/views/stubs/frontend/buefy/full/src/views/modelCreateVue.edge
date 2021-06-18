@@ -18,6 +18,8 @@
           v-model="form.{{ column.names.camelCase }}"
           @if(column.meta.multiline)
           type="textarea"
+          @elseif(column.meta.email)
+          type="email"
           @endif
           @if(column.meta.maxLength !== undefined)
           maxlength="{{ column.meta.maxLength }}"
