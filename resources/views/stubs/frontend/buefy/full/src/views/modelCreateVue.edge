@@ -49,6 +49,15 @@
         </b-select>
         @elseif(column.input.type === 'radio')
         @each(option in column.input.radio.options)
+        @if (option.value)
+        <b-radio-button
+          v-model="form.{{ column.names.camelCase }}"
+          native-value="{{ option.value }}"
+          type="is-primary is-outlined is-light"
+        >
+          <span>{{ option.label }}</span>
+        </b-radio-button>
+        @else
         <b-radio-button
           v-model="form.{{ column.names.camelCase }}"
           native-value="{{ option }}"
@@ -56,6 +65,7 @@
         >
           <span>{{ option }}</span>
         </b-radio-button>
+        @endif
         @endeach
         @endif
       </b-field>
