@@ -30,6 +30,15 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
           column.meta.defaultTo ? `.defaultTo('${column.meta.defaultTo}')`: ''
         }}}
       @endeach
+      @each(relation in table.relations)
+        @if(relation.type === 'belongsTo')
+        table.integer('{{
+          input.camelCaseStrategy ? relation.names.camelCase + 'Id': relation.names.snakeCase + '_id'
+        }}').unsigned().references('id').inTable('{{
+          input.camelCaseStrategy ? relation.names.camelCasePlural : relation.names.snakeCasePlural
+        }}').notNullable()
+        @endif
+      @endeach
       @if(table.timestamps)
         /**
         * Uses timestampz for PostgreSQL and DATETIME2 for MSSQL

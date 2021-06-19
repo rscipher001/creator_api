@@ -106,13 +106,13 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @each(relation in table.relations)
     @if(relation.type === 'hasOne')
       @hasOne(() => {{ relation.names.pascalCase }})
-      public {{ relation.names.camelcase }}: HasOne<typeof {{ relation.names.pascalCase }}>
+      public {{ relation.names.camelCase }}: HasOne<typeof {{ relation.names.pascalCase }}>
     @elseif(relation.type === 'hasMany')
       @hasMany(() => {{ relation.names.pascalCase }})
-      public {{ relation.names.camelcase }}: HasMany<typeof {{ relation.names.pascalCase }}>
+      public {{ relation.names.camelCasePlural }}: HasMany<typeof {{ relation.names.pascalCase }}>
     @elseif(relation.type === 'belongsTo')
       @belongsTo(() => {{ relation.names.pascalCase }})
-      public {{ relation.names.camelcase }}: BelongsTo<typeof {{ relation.names.pascalCase }}>
+      public {{ relation.names.camelCase }}: BelongsTo<typeof {{ relation.names.pascalCase }}>
     @elseif(relation.type === 'manyToMany')
       @manyToMany(() => {{ relation.names.pascalCase }})
       public {{ relation.names.camelCasePlural }}: ManyToMany<typeof {{ relation.names.pascalCase }}>
