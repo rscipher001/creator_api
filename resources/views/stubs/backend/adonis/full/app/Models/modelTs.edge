@@ -60,30 +60,11 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @endeach
 
   @if(table.timestamps)
-    @if(input.camelCaseStrategy)
-
-      @column.dateTime({
-        autoCreate: true,
-        serializeAs: 'createdAt',
-        columnName: 'createdAt',
-      })
-      public createdAt: DateTime
-
-      @column.dateTime({
-        autoCreate: true,
-        autoUpdate: true,
-        serializeAs: 'updatedAt',
-        columnName: 'updatedAt',
-      })
-      public updatedAt: DateTime
-    @else
-
       @column.dateTime({ autoCreate: true })
       public createdAt: DateTime
 
       @column.dateTime({ autoCreate: true, autoUpdate: true })
       public updatedAt: DateTime
-    @endif
   @endif
 
   @each(relation in table.relations)
