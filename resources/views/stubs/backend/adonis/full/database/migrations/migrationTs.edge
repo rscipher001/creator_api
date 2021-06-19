@@ -6,12 +6,13 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
   public async up () {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
-      @each(column in table.columns)
+      @each(column in table.columns)~
         @if(column.type === 'string')
           table.{{
             column.meta.multiline ? 'text': 'string'
           }}('{{ column.columnName }}'{{
-            column.meta.dbLength ? `, ${column.meta.dbLength}` : column.meta.maxLength ? `, ${column.meta.maxLength}`: ''
+            column.meta.dbLength ? `, ${column.meta.dbLength}`:
+            column.meta.maxLength && !column.meta.multiline ? `, ${column.meta.maxLength}`: ''
           }})
         @elseif(column.type === 'integer')
           table.integer('{{ column.columnName }}')
@@ -30,12 +31,16 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
           column.meta.defaultTo ? `.defaultTo('${column.meta.defaultTo}')`: ''
         }}}
       @endeach
-      @each(relation in table.relations)
+      @each(relation in table.relations)~
         @if(relation.type === 'belongsTo')
         table.integer('{{
-          input.camelCaseStrategy ? relation.names.camelCase + 'Id': relation.names.snakeCase + '_id'
+          input.camelCaseStrategy ?
+          (relation.withModel === '$auth' ? input.auth.table.names.camelCase : relation.names.camelCase) + 'Id':
+          (relation.withModel === '$auth' ? input.auth.table.names.snakeCase : relation.names.snakeCase) + '_id'
         }}').unsigned().references('id').inTable('{{
-          input.camelCaseStrategy ? relation.names.camelCasePlural : relation.names.snakeCasePlural
+          input.camelCaseStrategy ?
+          (relation.withModel === '$auth' ? input.auth.table.names.camelCasePlural : relation.names.camelCasePlural):
+          (relation.withModel === '$auth' ? input.auth.table.names.snakeCasePlural : relation.names.snakeCasePlural)
         }}').notNullable()
         @endif
       @endeach

@@ -39,8 +39,10 @@ class BackendProjectService {
     })
     if (Array.isArray(table.relations)) {
       table.relations = table.relations.map((relation: Relation): Relation => {
-        relation.names = HelperService.generateNames(relation.withModel)
-        relation.withModel = relation.names.pascalCase
+        if (relation.withModel !== '$auth') {
+          relation.names = HelperService.generateNames(relation.withModel)
+          relation.withModel = relation.names.pascalCase
+        }
         return relation
       })
     } else {

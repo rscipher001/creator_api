@@ -11,6 +11,28 @@ export default class DatabaseGenerator {
     this.input = input
   }
 
+  // Create app/NamingStrategy/CamelCaseStrategy.ts
+  protected async createAppNamingStrategyCamelCaseStrategyTs() {
+    await mkdirp(`${this.input.path}/app/NamingStrategy`)
+    const filePath = `${this.input.path}/app/NamingStrategy/CamelCaseStrategy.ts`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/app/NamingStrategy/camelCaseStrategyTs`
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  // Update providers/AppProvider.ts
+  protected async updateProvidersAppProviderTs() {
+    const filePath = `${this.input.path}/providers/AppProvider.ts`
+    const content = await View.render(
+      `stubs/backend/${this.input.tech.backend}/full/providers/appProviderTs`
+    )
+    await HelperService.writeFile(filePath, content)
+  }
+
   // Update .adonisrc.json
   protected async updateAdonisrcJson() {
     const filePath = `${this.input.path}/.adonisrc.json`
@@ -367,6 +389,10 @@ export default class DatabaseGenerator {
    * 6. Install mysql and luxon
    */
   protected async initMysql() {
+    if (this.input.camelCaseStrategy) {
+      await this.createAppNamingStrategyCamelCaseStrategyTs()
+      await this.updateProvidersAppProviderTs()
+    }
     await this.updateDotEnv('.env')
     await this.updateDotEnv('.env.example')
     await this.updateEnvTs()

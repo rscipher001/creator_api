@@ -4,7 +4,9 @@ import { DateTime } from 'luxon'
 @endif
 import {
   column,
+  @if(isAuth)
   beforeSave,
+  @endif
   BaseModel,
   @if(table.relations.find(relation => relation.type === 'hasOne'))
   hasOne,
@@ -24,11 +26,14 @@ import {
   @endif
 } from '@ioc:Adonis/Lucid/Orm'
 @each(relation in table.relations)
-import {{ relation.names.pascalCase }} from 'App/Models/{{ relation.names.pascalCase }}'
+import {{
+  relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
+}} from 'App/Models/{{
+  relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
+}}'
 @endeach
 
 export default class {{ table.names.pascalCase }} extends BaseModel {
-  public static table = '{{ table.tableName }}'
 
   @column({ isPrimary: true })
   public id: number
@@ -36,29 +41,17 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @each(column in table.columns)
 
     @if(column.type === 'date')
-      @if(column.names.camelCase === column.names.snakeCase || !input.camelCaseStrategy)
-        @column.dateTime()
-      @else
-        @column.dateTime({
-          serializeAs: {{ column.names.camelCase }},
-          columnName: {{ column.names.camelCase }},
-        })
-      @endif
+      @column.dateTime()
       public {{ column.names.camelCase }}{{ column.meta.required ? '?': '' }}: DateTime
     @else
-      @if(column.names.camelCase === column.names.snakeCase || !input.camelCaseStrategy)
-        @if(column.meta.secret)
-          @column({
-            serializeAs: null
-          })
-        @else
-          @column()
-        @endif
-      @else
+      @if(column.meta.secret)
         @column({
-          serializeAs: {{{ column.meta.secret ? null: `'${column.names.camelCase}'` }}},
-          columnName: '{{ column.names.camelCase }}',
+          serializeAs: null
         })
+      @elseif(column.type === 'boolean' && input.database === 'mysql')
+        @column({ serialize: (value) => !!value })
+      @else
+        @column()
       @endif
       public {{ column.names.camelCase }}{{ column.meta.required ? '': '?' }}: {{
         ['decimal', 'integer'].includes(column.type) ? 'number' : column.type
@@ -93,29 +86,51 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
     @endif
   @endif
 
-  @if(isAuth)
-
-    @beforeSave()
-    public static async hashPassword (user: User) {
-      if (user.$dirty.password) {
-        user.password = await Hash.make(user.password)
-      }
-    }
-  @endif
-
   @each(relation in table.relations)
     @if(relation.type === 'hasOne')
-      @hasOne(() => {{ relation.names.pascalCase }})
-      public {{ relation.names.camelCase }}: HasOne<typeof {{ relation.names.pascalCase }}>
+      @hasOne(() => {{
+        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
+      }})
+      public {{
+        relation.withModel === '$auth' ? input.auth.table.names.camelCase : relation.names.camelCase
+      }}: HasOne<typeof {{
+        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
+      }}>
     @elseif(relation.type === 'hasMany')
-      @hasMany(() => {{ relation.names.pascalCase }})
-      public {{ relation.names.camelCasePlural }}: HasMany<typeof {{ relation.names.pascalCase }}>
+      @hasMany(() => {{
+        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
+      }})
+      public {{
+        relation.withModel === '$auth' ? input.auth.table.names.camelCasePlural : relation.names.camelCasePlural
+      }}: HasMany<typeof {{ relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase }}>
     @elseif(relation.type === 'belongsTo')
-      @belongsTo(() => {{ relation.names.pascalCase }})
-      public {{ relation.names.camelCase }}: BelongsTo<typeof {{ relation.names.pascalCase }}>
+      @belongsTo(() => {{
+        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
+      }})
+      public {{
+        relation.withModel === '$auth' ? input.auth.table.names.camelCase : relation.names.camelCase
+      }}: BelongsTo<typeof {{
+        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
+      }}>
     @elseif(relation.type === 'manyToMany')
-      @manyToMany(() => {{ relation.names.pascalCase }})
-      public {{ relation.names.camelCasePlural }}: ManyToMany<typeof {{ relation.names.pascalCase }}>
+      @manyToMany(() => {{
+        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
+      }})
+      public {{
+        relation.withModel === '$auth' ? input.auth.table.names.camelCasePlural : relation.names.camelCasePlural
+      }}: ManyToMany<typeof {{
+        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
+      }}>
     @endif
   @endeach
+
+  @if(isAuth)
+
+  @beforeSave()
+  public static async hashPassword (user: User) {
+    if (user.$dirty.password) {
+      user.password = await Hash.make(user.password)
+    }
+  }
+@endif
 }
