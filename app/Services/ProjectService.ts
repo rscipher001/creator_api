@@ -1,6 +1,6 @@
 import Application from '@ioc:Adonis/Core/Application'
 import { string } from '@ioc:Adonis/Core/Helpers'
-import ProjectInput, { Table } from 'App/Interfaces/ProjectInput'
+import ProjectInput, { Table, Relation, RelationType } from 'App/Interfaces/ProjectInput'
 import HelperService from 'App/Services/HelperService'
 
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
@@ -37,7 +37,16 @@ class BackendProjectService {
       column.type = column.type.toLowerCase()
       return column
     })
-    return table as Table
+    if (Array.isArray(table.relations)) {
+      table.relations = table.relations.map((relation: Relation): Relation => {
+        relation.names = HelperService.generateNames(relation.withModel)
+        relation.withModel = relation.names.pascalCase
+        return relation
+      })
+    } else {
+      table.relations = []
+    }
+    return table
   }
 
   /**

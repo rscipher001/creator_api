@@ -12,7 +12,7 @@ export default class ProjectsController {
     const project = await Project.create({
       status: 'queued',
       rawInput: JSON.stringify(input),
-      userId :auth.user!.id,
+      userId: auth.user!.id,
     })
     this.generateProject(input, project)
     return project

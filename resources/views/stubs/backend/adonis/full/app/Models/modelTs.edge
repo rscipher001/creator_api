@@ -6,7 +6,26 @@ import {
   column,
   beforeSave,
   BaseModel,
+  @if(table.relations.find(relation => relation.type === 'hasOne'))
+  hasOne,
+  HasOne,
+  @endif
+  @if(table.relations.find(relation => relation.type === 'hasMany'))
+  hasMany,
+  HasMany,
+  @endif
+  @if(table.relations.find(relation => relation.type === 'belongsTo'))
+  belongsTo,
+  BelongsTo,
+  @endif
+  @if(table.relations.find(relation => relation.type === 'manyToMany'))
+  manyToMany,
+  manyToMany,
+  @endif
 } from '@ioc:Adonis/Lucid/Orm'
+@each(relation in table.relations)
+import {{ relation.names.pascalCase }} from 'App/Models/{{ relation.names.pascalCase }}'
+@endeach
 
 export default class {{ table.names.pascalCase }} extends BaseModel {
   public static table = '{{ table.tableName }}'
@@ -50,7 +69,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @if(table.timestamps)
     @if(input.camelCaseStrategy)
 
-      @column.dateTime({ 
+      @column.dateTime({
         autoCreate: true,
         serializeAs: 'createdAt',
         columnName: 'createdAt',
@@ -83,4 +102,20 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
       }
     }
   @endif
+
+  @each(relation in table.relations)
+    @if(relation.type === 'hasOne')
+      @hasOne(() => {{ relation.names.pascalCase }})
+      public {{ relation.names.camelcase }}: HasOne<typeof {{ relation.names.pascalCase }}>
+    @elseif(relation.type === 'hasMany')
+      @hasMany(() => {{ relation.names.pascalCase }})
+      public {{ relation.names.camelcase }}: HasMany<typeof {{ relation.names.pascalCase }}>
+    @elseif(relation.type === 'belongsTo')
+      @belongsTo(() => {{ relation.names.pascalCase }})
+      public {{ relation.names.camelcase }}: BelongsTo<typeof {{ relation.names.pascalCase }}>
+    @elseif(relation.type === 'manyToMany')
+      @manyToMany(() => {{ relation.names.pascalCase }})
+      public {{ relation.names.camelCasePlural }}: ManyToMany<typeof {{ relation.names.pascalCase }}>
+    @endif
+  @endeach
 }

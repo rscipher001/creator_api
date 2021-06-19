@@ -39,7 +39,7 @@ export interface Input {
   displayName?: string // Display name will be used as label when displaying a field
   type?: string // input, select, radio, checkbox, file(String only)
   decimal?: {
-    step: number|string // Only allowed for decimal inputs
+    step: number | string // Only allowed for decimal inputs
   }
   select?: {
     options: any[]
@@ -69,6 +69,19 @@ export interface Table {
   columns: Column[]
   timestamps: boolean
   role: string
+  relations: Relation[]
+}
+
+export enum RelationType {
+  hasOne = 'hasOne',
+  hasMany = 'hasMany',
+  belongsTo = 'belongsTo',
+  manyToMany = 'manyToMany',
+}
+export interface Relation {
+  type: RelationType
+  withModel: string
+  names: Names
 }
 
 export default interface ProjectInput {
