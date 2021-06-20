@@ -210,7 +210,9 @@ export default {
         {{ column.names.camelCase }}: '',
         @endeach
         @each(relation in table.relations)
+        @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
         {{ relation.names.camelCase }}Id: null,
+        @endif
         @endeach
       },
     };
@@ -226,10 +228,12 @@ export default {
       try {
         await this.storeAction({
           @each(column in table.columns)
-          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}Id,
           @endeach
           @each(relation in table.relations)
-          {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }},
+          @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+          {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
+          @endif
           @endeach
         });
         this.$router.push('/{{ table.names.camelCase }}');
@@ -258,10 +262,12 @@ export default {
           id: this.editMode.id,
           input: {
             @each(column in table.columns)
-            {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+            {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}Id,
             @endeach
             @each(relation in table.relations)
-            {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }},
+            @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+            {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
+            @endif
             @endeach
           },
         });
