@@ -148,7 +148,13 @@
         :message="errors.{{ relation.names.camelCase }}"
         horizontal
       >
-        <b-select v-model="form.{{ relation.names.camelCase }}Id">
+        <b-select
+          v-model="form.{{ relation.names.camelCase }}Id"
+          expanded
+          @if(relation.required)
+          required
+          @endif
+        >
           <option v-for="({{
             relation.names.camelCase
           }}, {{
@@ -222,6 +228,9 @@ export default {
           @each(column in table.columns)
           {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
           @endeach
+          @each(relation in table.relations)
+          {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }},
+          @endeach
         });
         this.$router.push('/{{ table.names.camelCase }}');
         this.$buefy.toast.open({
@@ -250,6 +259,9 @@ export default {
           input: {
             @each(column in table.columns)
             {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+            @endeach
+            @each(relation in table.relations)
+            {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }},
             @endeach
           },
         });
