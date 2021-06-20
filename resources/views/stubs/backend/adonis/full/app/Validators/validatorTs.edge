@@ -10,17 +10,15 @@ export default class {{ action === 'store' ? 'Store' : 'Update' }}{{ table.names
         table,
         column,
         input
-      })
+      })~
     @endeach
     @each(relation in table.relations)~
-      @if(table.relations.find(relation => relation.type === 'belongsTo'))
-        @if(table.withModel !== '$auth')
-          @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRulesForRelation`, {
-            table,
-            relation,
-            input
-          })
-        @endif
+      @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+        @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRulesForRelation`, {
+          table,
+          relation,
+          input
+        })~
       @endif
     @endeach
   })
