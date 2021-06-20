@@ -140,6 +140,31 @@
       @endif
       @endeach
 
+      @each(relation in table.relations)
+      @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+      <b-field
+        label="{{ relation.names.pascalCase }}"
+        :type="errors.{{ relation.names.camelCase }} ? 'is-danger' : ''"
+        :message="errors.{{ relation.names.camelCase }}"
+        horizontal
+      >
+        <b-select v-model="form.{{ relation.names.camelCase }}Id">
+          <option v-for="({{
+            relation.names.camelCase
+          }}, {{
+            relation.names.camelCase
+          }}Index) in {{ relation.names.camelCasePlural }}" :key="{{
+            relation.names.camelCase
+          }}Index" :value="{{
+            relation.names.camelCase
+          }}.id">
+            {{ safe(`{{ ${relation.names.camelCase}.name }}`) }}
+          </option>
+        </b-select>
+      </b-field>
+      @endif
+      @endeach
+
       <div class="is-flex is-justify-content-flex-end">
         <b-button type="is-primary" native-type="submit" :loading="isLoading">
           @{{ editMode.enabled ? 'Update' : 'Create' }} {{ table.names.pascalCase }}
@@ -177,6 +202,9 @@ export default {
       form: {
         @each(column in table.columns)
         {{ column.names.camelCase }}: '',
+        @endeach
+        @each(relation in table.relations)
+        {{ relation.names.camelCase }}Id: null,
         @endeach
       },
     };
@@ -250,6 +278,13 @@ export default {
       {{ table.names.camelCasePlural }}: (state) => state.items,
       loading: (state) => state.loading,
     }),
+    @each(relation in table.relations)~
+      @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+        ...mapState('{{ relation.names.camelCase }}', {
+          {{ relation.names.camelCasePlural }}: (state) => state.items,
+        }),
+      @endif
+    @endeach
     isLoading() {
       return this.loading.store || this.loading.update;
     },

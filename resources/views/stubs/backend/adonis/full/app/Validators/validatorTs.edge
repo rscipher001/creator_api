@@ -5,20 +5,22 @@ export default class {{ action === 'store' ? 'Store' : 'Update' }}{{ table.names
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    @each(column in table.columns)
+    @each(column in table.columns)~
       @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRulesForColumn`, {
         table,
         column,
         input
       })
     @endeach
-    @each(relation in table.relations)
+    @each(relation in table.relations)~
       @if(table.relations.find(relation => relation.type === 'belongsTo'))
-        @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRulesForRelation`, {
-          table,
-          relation,
-          input
-        })
+        @if(table.withModel !== '$auth')
+          @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRulesForRelation`, {
+            table,
+            relation,
+            input
+          })
+        @endif
       @endif
     @endeach
   })
