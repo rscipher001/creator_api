@@ -5,32 +5,28 @@ import { DateTime } from 'luxon'
 import {
   column,
   @if(isAuth)
-  beforeSave,
+    beforeSave,
   @endif
   BaseModel,
   @if(table.relations.find(relation => relation.type === 'hasOne'))
-  hasOne,
-  HasOne,
+    hasOne,
+    HasOne,
   @endif
   @if(table.relations.find(relation => relation.type === 'hasMany'))
-  hasMany,
-  HasMany,
+    hasMany,
+    HasMany,
   @endif
   @if(table.relations.find(relation => relation.type === 'belongsTo'))
-  belongsTo,
-  BelongsTo,
+    belongsTo,
+    BelongsTo,
   @endif
   @if(table.relations.find(relation => relation.type === 'manyToMany'))
-  manyToMany,
-  manyToMany,
+    manyToMany,
+    manyToMany,
   @endif
 } from '@ioc:Adonis/Lucid/Orm'
 @each(relation in table.relations)
-import {{
-  relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
-}} from 'App/Models/{{
-  relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
-}}'
+import {{ relation.modelNames.pascalCase }} from 'App/Models/{{ relation.modelNames.pascalCase }}'
 @endeach
 
 export default class {{ table.names.pascalCase }} extends BaseModel {
@@ -59,6 +55,13 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
     @endif
   @endeach
 
+  @each(relation in table.relations)
+    @if(relation.type === 'belongsTo')
+    @column()
+    public {{ relation.names.camelCase }}Id{{relation.required ? '?': '' }}: number
+    @endif
+  @endeach
+
   @if(table.timestamps)
       @column.dateTime({ autoCreate: true })
       public createdAt: DateTime
@@ -69,39 +72,25 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
 
   @each(relation in table.relations)
     @if(relation.type === 'hasOne')
-      @hasOne(() => {{
-        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
-      }})
+      @hasOne(() => {{ relation.modelNames.pascalCase }})
       public {{
-        relation.withModel === '$auth' ? input.auth.table.names.camelCase : relation.names.camelCase
-      }}: HasOne<typeof {{
-        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
-      }}>
+        relation.names.camelCase
+      }}{{relation.required ? '?': '' }}: HasOne<typeof {{ relation.modelNames.pascalCase }}>
     @elseif(relation.type === 'hasMany')
-      @hasMany(() => {{
-        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
-      }})
+      @hasMany(() => {{ relation.modelNames.pascalCase }})
       public {{
-        relation.withModel === '$auth' ? input.auth.table.names.camelCasePlural : relation.names.camelCasePlural
-      }}: HasMany<typeof {{ relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase }}>
+        relation.names.camelCasePlural
+      }}{{relation.required ? '?': '' }}: HasMany<typeof {{ relation.modelNames.pascalCase }}>
     @elseif(relation.type === 'belongsTo')
-      @belongsTo(() => {{
-        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
-      }})
+      @belongsTo(() => {{ relation.modelNames.pascalCase }})
       public {{
-        relation.withModel === '$auth' ? input.auth.table.names.camelCase : relation.names.camelCase
-      }}: BelongsTo<typeof {{
-        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
-      }}>
+        relation.names.camelCase
+      }}{{relation.required ? '?': '' }}: BelongsTo<typeof {{ relation.modelNames.pascalCase }}>
     @elseif(relation.type === 'manyToMany')
-      @manyToMany(() => {{
-        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
-      }})
+      @manyToMany(() => {{ relation.modelNames.pascalCase }})
       public {{
-        relation.withModel === '$auth' ? input.auth.table.names.camelCasePlural : relation.names.camelCasePlural
-      }}: ManyToMany<typeof {{
-        relation.withModel === '$auth' ? input.auth.table.names.pascalCase : relation.names.pascalCase
-      }}>
+        relation.modelNames.camelCasePlural
+      }}{{relation.required ? '?': '' }}: ManyToMany<typeof {{ relation.modelNames.pascalCase }}>
     @endif
   @endeach
 

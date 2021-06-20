@@ -80,12 +80,8 @@ export default {
     async destroy({ commit }, id) {
       commit('setLoading', { key: 'destroy', value: true });
       try {
-        const [deleteResult] = await HttpService.authDelete(`/${resource}/${id}`);
-        if (deleteResult) {
-          commit('remove', id);
-        } else {
-          throw new Error('Unable to delete');
-        }
+        await HttpService.authDelete(`/${resource}/${id}`);
+        commit('remove', id);
         commit('setLoading', { key: 'destroy', value: false });
       } catch (e) {
         commit('setLoading', { key: 'destroy', value: false });

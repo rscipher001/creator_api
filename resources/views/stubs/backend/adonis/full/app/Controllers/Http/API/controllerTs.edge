@@ -1,55 +1,104 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}';
 @if(table.operations.includes('store'))
-    import Store{{ table.names.pascalCase }}Validator from 'App/Validators/Store{{ table.names.pascalCase }}Validator';
+  import Store{{
+    table.names.pascalCase
+  }}Validator from 'App/Validators/Store{{ table.names.pascalCase }}Validator';
 @endif
 @if(table.operations.includes('update'))
-    import Update{{ table.names.pascalCase }}Validator from 'App/Validators/Update{{ table.names.pascalCase }}Validator';
+  import Update{{
+    table.names.pascalCase
+  }}Validator from 'App/Validators/Update{{ table.names.pascalCase }}Validator';
 @endif
 
 export default class {{ table.names.pascalCasePlural }}Controller {
-    @if(table.operations.includes('index'))
-        public async index({ request }: HttpContextContract) {
-            const page = request.input('page', 1)
-            const size = request.input('size', 10)
-            return {{ table.names.pascalCase }}.query().paginate(page, size)
-        }
-    @endif
+  @if(table.operations.includes('index'))
+    public async index({ auth, request }: HttpContextContract) {
+      const page = request.input('page', 1)
+      const size = request.input('size', 10)
+      return {{ table.names.pascalCase }}.query()
+      @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
+      .where({
+        {{
+          input.camelCaseStrategy ?
+            `${input.auth.table.names.camelCase}Id` :
+            `${input.auth.table.names.snakeCase}_id`
+        }}: auth.user!.id
+      })
+      @endif
+      .paginate(page, size)
+    }
+  @endif
 
-    @if(table.operations.includes('store'))
-        public async store({ request }: HttpContextContract) {
-            const input = await request.validate(Store{{ table.names.pascalCase }}Validator)
-            return {{ table.names.pascalCase }}.create(input)
-        }
-    @endif
+  @if(table.operations.includes('store'))
+    public async store({ auth, request }: HttpContextContract) {
+      const input: { [key: string]: any } = await request.validate(Store{{
+        table.names.pascalCase
+      }}Validator)
+      @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
+        input.{{
+          input.camelCaseStrategy ?
+            `${input.auth.table.names.camelCase}Id` :
+            `${input.auth.table.names.snakeCase}_id`
+        }} = auth.user!.id
+      @endif
+      return {{ table.names.pascalCase }}.create(input)
+    }
+  @endif
 
-    @if(table.operations.includes('show'))
-        public async show({ request }: HttpContextContract) {
-            const {{ table.names.camelCase }}Id = request.params('{{ table.names.camelCase }}Id')
-            return {{ table.names.pascalCase }}.find({{ table.names.camelCase }}Id)
-        }
-    @endif
+  @if(table.operations.includes('show'))
+    public async show({ auth, request }: HttpContextContract) {
+      const id = request.param('id')
+      const condition: { [key: string]: any } = { id }
+      @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
+        condition.{{
+          input.camelCaseStrategy ?
+            `${input.auth.table.names.camelCase}Id` :
+            `${input.auth.table.names.snakeCase}_id`
+        }} = auth.user!.id
+      @endif
+      return {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
+    }
+  @endif
 
-    @if(table.operations.includes('update'))
-        public async update({ request }: HttpContextContract) {
-            const {{ table.names.camelCase }}Id = request.param('{{ table.names.camelCase }}Id')
-            const input = await request.validate(Update{{ table.names.pascalCase }}Validator)
-            const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.findOrFail({{ table.names.camelCase }}Id)
-            return {{ table.names.camelCase }}
-                .merge(input)
-                .save()
-        }
-    @endif
+  @if(table.operations.includes('update'))
+    public async update({ auth, request }: HttpContextContract) {
+      const id = request.param('id')
+      const condition: { [key: string]: any } = { id }
+      @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
+        condition.{{
+          input.camelCaseStrategy ?
+            `${input.auth.table.names.camelCase}Id` :
+            `${input.auth.table.names.snakeCase}_id`
+        }} = auth.user!.id
+      @endif
+      const input: { [key: string]: any } = await request.validate(Update{{ table.names.pascalCase }}Validator)
+      const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
+      return {{ table.names.camelCase }}
+        .merge(input)
+        .save()
+    }
+  @endif
 
-    @if(table.operations.includes('destroy'))
-        public async destroy({ request }: HttpContextContract) {
-            return {{ table.names.pascalCase }}.query().where('id', request.param('{{ table.names.camelCase }}Id')).delete()
-        }
-    @endif
+  @if(table.operations.includes('destroy'))
+    public async destroy({ auth, request }: HttpContextContract) {
+      const id = request.param('id')
+      const condition: { [key: string]: any } = { id }
+      @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
+        condition.{{
+          input.camelCaseStrategy ?
+            `${input.auth.table.names.camelCase}Id` :
+            `${input.auth.table.names.snakeCase}_id`
+        }} = auth.user!.id
+      @endif
+      const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
+      return {{ table.names.camelCase }}.delete()
+    }
+  @endif
 
-    @if(table.operations.includes('destroyMany'))
-        public async destroyMany({ request }: HttpContextContract) {
-            return {{ table.names.pascalCase }}.query().whereIn('id', request.input('{{ table.names.camelCase }}Ids')).delete()
-        }
-    @endif
+  @if(table.operations.includes('destroyMany'))
+    public async destroyMany({ request }: HttpContextContract) {
+      return {{ table.names.pascalCase }}.query().whereIn('id', request.input('ids')).delete()
+    }
+  @endif
 }

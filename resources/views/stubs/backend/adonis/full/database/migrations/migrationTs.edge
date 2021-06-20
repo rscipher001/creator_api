@@ -34,14 +34,10 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
       @each(relation in table.relations)~
         @if(relation.type === 'belongsTo')
         table.integer('{{
-          input.camelCaseStrategy ?
-          (relation.withModel === '$auth' ? input.auth.table.names.camelCase : relation.names.camelCase) + 'Id':
-          (relation.withModel === '$auth' ? input.auth.table.names.snakeCase : relation.names.snakeCase) + '_id'
+          input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
         }}').unsigned().references('id').inTable('{{
-          input.camelCaseStrategy ?
-          (relation.withModel === '$auth' ? input.auth.table.names.camelCasePlural : relation.names.camelCasePlural):
-          (relation.withModel === '$auth' ? input.auth.table.names.snakeCasePlural : relation.names.snakeCasePlural)
-        }}').notNullable()
+          input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakCasePlural
+        }}').{{ relation.required ? 'notNullable()' : 'nullable()' }}
         @endif
       @endeach
       @if(table.timestamps)

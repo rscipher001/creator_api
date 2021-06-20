@@ -1,6 +1,6 @@
 import Application from '@ioc:Adonis/Core/Application'
 import { string } from '@ioc:Adonis/Core/Helpers'
-import ProjectInput, { Table, Relation, RelationType } from 'App/Interfaces/ProjectInput'
+import ProjectInput, { Table, Relation } from 'App/Interfaces/ProjectInput'
 import HelperService from 'App/Services/HelperService'
 
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
@@ -39,10 +39,21 @@ class BackendProjectService {
     })
     if (Array.isArray(table.relations)) {
       table.relations = table.relations.map((relation: Relation): Relation => {
-        if (relation.withModel !== '$auth') {
-          relation.names = HelperService.generateNames(relation.withModel)
-          relation.withModel = relation.names.pascalCase
+        if (relation.withModel === '$auth') {
+          relation.modelNames = HelperService.generateNames(this.input.auth.table.name)
+        } else {
+          relation.modelNames = HelperService.generateNames(relation.withModel)
+          relation.withModel = relation.modelNames.pascalCase
         }
+
+        if (relation.name) {
+          relation.names = HelperService.generateNames(relation.names)
+          relation.name = relation.names.pascalCase
+        } else {
+          relation.names = relation.modelNames
+          relation.name = relation.withModel
+        }
+
         return relation
       })
     } else {

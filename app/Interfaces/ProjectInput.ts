@@ -81,7 +81,10 @@ export enum RelationType {
 export interface Relation {
   type: RelationType
   withModel: string
-  names: Names
+  modelNames: Names // Model name in all forms
+  names: Names // Relation name in all forms
+  name: string // Relation name, by default table name is used
+  required: boolean
 }
 
 export default interface ProjectInput {

@@ -12,17 +12,17 @@ Route.group(() => {
   @if(table.operations.includes('show'))
     Route.get('/{{
       table.names.camelCase
-    }}/:{{ table.names.camelCase }}Id', 'API/{{ table.names.pascalCasePlural }}Controller.show')
+    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.show')
   @endif
   @if(table.operations.includes('update'))
     Route.put('/{{
       table.names.camelCase
-    }}/:{{ table.names.camelCase }}Id', 'API/{{ table.names.pascalCasePlural }}Controller.update')
+    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update')
   @endif
   @if(table.operations.includes('destroy'))
     Route.delete('/{{
       table.names.camelCase
-    }}/:{{ table.names.camelCase }}Id', 'API/{{ table.names.pascalCasePlural }}Controller.destroy')
+    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.destroy')
   @endif
   @if(table.operations.includes('storeMany'))
     Route.post('/{{
