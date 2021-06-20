@@ -228,7 +228,7 @@ export default {
       try {
         await this.storeAction({
           @each(column in table.columns)
-          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}Id,
+          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
           @endeach
           @each(relation in table.relations)
           @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
@@ -262,7 +262,7 @@ export default {
           id: this.editMode.id,
           input: {
             @each(column in table.columns)
-            {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}Id,
+            {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
             @endeach
             @each(relation in table.relations)
             @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
