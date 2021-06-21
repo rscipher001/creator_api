@@ -279,7 +279,11 @@ export default {
           },
         });
         this.$router.push('/{{ table.names.camelCase }}');
-        this.$buefy.toast.open({ message: '{{ table.names.pascalCase }} update', position: 'is-bottom-right', type: 'is-success' });
+        this.$buefy.toast.open({
+          message: '{{ table.names.pascalCase }} updated',
+          position: 'is-bottom-right',
+          type: 'is-success'
+        });
       } catch (e) {
         let message = 'Unable to update {{ table.names.pascalCase }}';
         if (e instanceof ValidationException) {

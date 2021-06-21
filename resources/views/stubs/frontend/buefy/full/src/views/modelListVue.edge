@@ -63,10 +63,10 @@
       </div>
     </div>
     <b-pagination
-      :total="meta.total"
       v-model="current"
-      order="is-centered"
+      :total="meta.total"
       :per-page="meta.per_page"
+      order="is-centered"
       aria-next-label="Next page"
       aria-previous-label="Previous page"
       aria-page-label="Page"
@@ -124,7 +124,7 @@ export default {
             await this.destroyAction(id);
             this.$buefy.toast.open({
               message: 'Deleted',
-              type: 'is-succes',
+              type: 'is-success',
               position: 'is-bottom-right',
             });
           } catch(e) {
