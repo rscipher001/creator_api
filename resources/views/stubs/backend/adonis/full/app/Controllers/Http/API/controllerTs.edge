@@ -81,7 +81,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
   @endif
 
   @if(table.operations.includes('destroy'))
-    public async destroy({ auth, request }: HttpContextContract) {
+    public async destroy({ auth, request, response }: HttpContextContract) {
       const id = request.param('id')
       const condition: { [key: string]: any } = { id }
       @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
@@ -92,7 +92,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         }} = auth.user!.id
       @endif
       const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
-      return {{ table.names.camelCase }}.delete()
+      await {{ table.names.camelCase }}.delete()
+      return response.status(204)
     }
   @endif
 

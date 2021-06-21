@@ -193,7 +193,14 @@ export default {
       this.editMode.id = {{ table.names.camelCase }}Id;
       const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
       @each(column in table.columns)
+      @if(!column.secret)
       this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}
+      @endif
+      @endeach
+      @each(relation in table.relations)
+      @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+      this.form.{{ relation.names.camelCase }}Id = {{ table.names.camelCase }}.{{ relation.names.camelCase }}Id
+      @endif
       @endeach
     }
   },

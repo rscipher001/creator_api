@@ -9,7 +9,7 @@
           @if(column.meta.expose !== false)
           @if(!['Email', 'Password'].includes(column.name))
           <b-field label="{{
-            column.input?.displayName || column.names.pascalCase 
+            column.input?.displayName || column.names.pascalCase
           }}{{
             column.meta.required ? '*' : ''
           }}" :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''" :message="errors.{{ column.names.camelCase }}">
@@ -33,7 +33,13 @@
           </b-field>
 
           <b-field label="Password *" :type="errors.password ? 'is-danger' : ''" :message="errors.password">
-            <b-input v-model="form.password" type="password" maxlength="{{ password.meta.maxLength || 72 }}" password-reveal required></b-input>
+            <b-input
+              v-model="form.password"
+              type="password"
+              maxlength="{{ password.meta.maxLength || 72 }}"
+              password-reveal
+              required
+            ></b-input>
           </b-field>
 
           <b-field
@@ -44,7 +50,7 @@
             <b-input
               v-model="form.passwordConfirmation"
               type="password"
-              maxlength="72"
+              maxlength="{{ password.meta.maxLength || 72 }}"
               password-reveal
               required
             ></b-input>

@@ -103,7 +103,7 @@ export default {
 
     index() {
       this.indexAction({
-        size: 1000, // We need all records in create invoice => large page size
+        size: 1000,
         page: this.current,
       });
     },
@@ -120,8 +120,21 @@ export default {
         type: 'is-danger',
         hasIcon: true,
         onConfirm: async () => {
-          await this.destroyAction(id);
-          this.$buefy.toast.open('Deleted!');
+          try {
+            await this.destroyAction(id);
+            this.$buefy.toast.open({
+              message: 'Deleted',
+              type: 'is-succes',
+              position: 'is-bottom-right',
+            });
+          } catch(e) {
+            console.error(e);
+            this.$buefy.toast.open({
+              message: 'Unable to delte',
+              type: 'is-danger',
+              position: 'is-bottom-right',
+            });
+          }
         },
       });
     },
