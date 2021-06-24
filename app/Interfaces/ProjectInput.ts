@@ -85,6 +85,7 @@ export interface Relation {
   names: Names // Relation name in all forms
   name: string // Relation name, by default table name is used
   required: boolean
+  lazy?: boolean // Migration will be created separately for foreign key
 }
 
 export default interface ProjectInput {
@@ -133,5 +134,11 @@ export default interface ProjectInput {
     backend?: string
     frontend?: string
     app?: string
+  }
+  tenantSettings: {
+    user: number | string
+    tenant: number | string
+    table?: string
+    tableNames?: Names
   }
 }

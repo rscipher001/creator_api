@@ -1,6 +1,6 @@
 import Application from '@ioc:Adonis/Core/Application'
 import { string } from '@ioc:Adonis/Core/Helpers'
-import ProjectInput, { Table, Relation } from 'App/Interfaces/ProjectInput'
+import ProjectInput, { Table, Relation, RelationType } from 'App/Interfaces/ProjectInput'
 import HelperService from 'App/Services/HelperService'
 
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
@@ -81,6 +81,7 @@ class BackendProjectService {
     projectInput.tech = this.input.tech
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
+    projectInput.tenantSettings = this.input.tenantSettings
     if (!this.input.git) {
       projectInput.git = {
         email: '22148496+RSCipher001@users.noreply.github.com',
@@ -91,6 +92,136 @@ class BackendProjectService {
     }
     this.projectInput = projectInput as ProjectInput
     return this.projectInput
+  }
+
+  protected prepareTenantSettings() {
+    this.projectInput.tenantSettings.tableNames = HelperService.generateNames(
+      this.projectInput.tenantSettings.table
+    )
+    const tenantCount = this.projectInput.tenantSettings.tenant
+    const userCount = this.projectInput.tenantSettings.user
+
+    // Prepare input if there is tenant(s)
+    if (this.projectInput.tenantSettings.tenant !== 0) {
+      const tenantTableIndex = this.projectInput.tables.findIndex(
+        (table) => table.names.pascalCase === this.projectInput.tenantSettings.table
+      )
+      if (tenantTableIndex === -1) {
+        throw new Error('Tenant table not found')
+      }
+
+      if (userCount == 1 && tenantCount === 1) {
+        /**
+         * One user & one tenant
+         * User belongs to tenant so user collection will have tenant Id
+         * 1. Create a lazy migration for adding tenant foreign key to auth table after both are created
+         * 2. Add relation to models
+         */
+        const authTable = this.projectInput.auth.table
+        const tenantTable = this.projectInput.tables[tenantTableIndex]
+        authTable.relations.push({
+          type: RelationType['belongsTo'],
+          withModel: tenantTable.names.pascalCase,
+          modelNames: tenantTable.names,
+          names: tenantTable.names,
+          name: tenantTable.names.pascalCase,
+          required: false,
+          lazy: true,
+        })
+        tenantTable.relations.push({
+          type: RelationType['hasOne'],
+          withModel: authTable.names.pascalCase,
+          modelNames: authTable.names,
+          names: authTable.names,
+          name: authTable.names.pascalCase,
+          required: false,
+          lazy: false,
+        })
+      }
+
+      if (userCount == 1 && tenantCount === 'n') {
+        /**
+         * One user & multiple tenant
+         * Tenant belongs to user so tenant have userId
+         * 1. Add relation models
+         */
+        const authTable = this.projectInput.auth.table
+        const tenantTable = this.projectInput.tables[tenantTableIndex]
+        tenantTable.relations.push({
+          type: RelationType['belongsTo'],
+          withModel: authTable.names.pascalCase,
+          modelNames: authTable.names,
+          names: authTable.names,
+          name: authTable.names.pascalCase,
+          required: true,
+          lazy: false,
+        })
+        authTable.relations.push({
+          type: RelationType['hasMany'],
+          withModel: tenantTable.names.pascalCase,
+          modelNames: tenantTable.names,
+          names: tenantTable.names,
+          name: tenantTable.names.pascalCase,
+          required: true,
+          lazy: false,
+        })
+      }
+
+      if (tenantCount === 1 && userCount == 'n') {
+        /**
+         * One tenant & multiple user
+         * User belongs to tenant so user have tenantId
+         * 1. Add relation to models
+         */
+        const authTable = this.projectInput.auth.table
+        const tenantTable = this.projectInput.tables[tenantTableIndex]
+        authTable.relations.push({
+          type: RelationType['belongsTo'],
+          withModel: tenantTable.names.pascalCase,
+          modelNames: tenantTable.names,
+          names: tenantTable.names,
+          name: tenantTable.names.pascalCase,
+          required: false,
+          lazy: true,
+        })
+        tenantTable.relations.push({
+          type: RelationType['hasMany'],
+          withModel: authTable.names.pascalCase,
+          modelNames: authTable.names,
+          names: authTable.names,
+          name: authTable.names.pascalCase,
+          required: false,
+          lazy: false,
+        })
+      }
+
+      if (tenantCount === 'n' && userCount == 'n') {
+        /**
+         * Many to many
+         * 1. Add relation to models
+         */
+        const authTable = this.projectInput.auth.table
+        const tenantTable = this.projectInput.tables[tenantTableIndex]
+        authTable.relations.push({
+          type: RelationType['hasMany'],
+          withModel: tenantTable.names.pascalCase,
+          modelNames: tenantTable.names,
+          names: tenantTable.names,
+          name: tenantTable.names.pascalCase,
+          required: false,
+          lazy: true,
+        })
+        tenantTable.relations.push({
+          type: RelationType['hasMany'],
+          withModel: authTable.names.pascalCase,
+          modelNames: authTable.names,
+          names: authTable.names,
+          name: authTable.names.pascalCase,
+          required: false,
+          lazy: false,
+        })
+      }
+    }
   }
 
   /**
