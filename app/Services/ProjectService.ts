@@ -136,8 +136,7 @@ class BackendProjectService {
           modelNames: authTable.names,
           names: authTable.names,
           name: authTable.names.pascalCase,
-          required: false,
-          lazy: false,
+          required: true,
         })
       }
 
@@ -165,7 +164,6 @@ class BackendProjectService {
           names: tenantTable.names,
           name: tenantTable.names.pascalCase,
           required: true,
-          lazy: false,
         })
       }
 
@@ -192,8 +190,7 @@ class BackendProjectService {
           modelNames: authTable.names,
           names: authTable.names,
           name: authTable.names.pascalCase,
-          required: false,
-          lazy: false,
+          required: true,
         })
       }
 
@@ -211,7 +208,7 @@ class BackendProjectService {
           names: tenantTable.names,
           name: tenantTable.names.pascalCase,
           required: false,
-          lazy: true,
+          lazy: false,
         })
         tenantTable.relations.push({
           type: RelationType['hasMany'],
