@@ -1,6 +1,6 @@
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
-import ProjectInput from 'App/Interfaces/ProjectInput'
+import ProjectInput, { Table, RelationType } from 'App/Interfaces/ProjectInput'
 import mkdirp from 'mkdirp'
 
 export default class CRUDGenerator {
@@ -54,20 +54,15 @@ export default class CRUDGenerator {
     }
   }
 
-  // Create foreign key relationship between two existing tables
-  protected async createLazyMigration(i: number) {
-    const table = this.input.tables[i]
-    const namePart = `${table.names.camelCasePlural}.ts`
-    const migrationsPath = `${this.input.path}/database/migrations`
-    const migrationFileNames = await HelperService.readdir(migrationsPath)
-    let fileExists = false
-    if (migrationFileNames.length) {
-      fileExists = !!migrationFileNames.find((fileName) => fileName.indexOf(namePart) !== -1)
-    }
-    if (!fileExists) {
-      await HelperService.sleep(1000) // Ensure migrations get unique timestamps
+  // Create foreign key where relation is circular
+  protected async createLazyMigration(table: Table) {
+    const namePart = `add_foreign_keys_to_${table.names.snakeCasePlural}.ts`
+    await HelperService.sleep(1000) // Ensure migrations get unique timestamps
+    if (
+      table.relations.find((relation) => relation.type === RelationType.belongsTo && relation.lazy)
+    ) {
       const content = await View.render(
-        `stubs/backend/${this.input.tech.backend}/full/database/migrations/migrationTs`,
+        `stubs/backend/${this.input.tech.backend}/full/database/migrations/lazyMigrationTs`,
         {
           isAuth: false,
           input: this.input,
@@ -182,8 +177,9 @@ export default class CRUDGenerator {
       )
     }
 
+    await this.createLazyMigration(this.input.auth.table)
     for (let i = 0; i < this.input.tables.length; i += 1) {
-      await this.createLazyMigration(i)
+      await this.createLazyMigration(this.input.tables[i])
     }
   }
 

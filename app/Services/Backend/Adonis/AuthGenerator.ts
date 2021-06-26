@@ -119,7 +119,7 @@ export default class AuthGenerator {
   // Create database/migrations/{Auth}.ts
   protected async createAuthMigration() {
     const table = this.input.auth.table
-    const namePart = `${table.names.camelCasePlural}.ts`
+    const namePart = `${table.names.snakeCasePlural}.ts`
     const migrationsPath = `${this.input.path}/database/migrations`
     const migrationFileNames = await HelperService.readdir(migrationsPath)
     let fileExists = false

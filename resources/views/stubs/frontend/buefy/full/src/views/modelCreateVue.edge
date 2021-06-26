@@ -254,6 +254,8 @@ export default {
         if (e instanceof ValidationException) {
           this.errors = e.errors;
           message = 'Validation failed';
+        } else {
+          console.error(e);
         }
         this.$buefy.toast.open({
           message,
@@ -289,6 +291,8 @@ export default {
         if (e instanceof ValidationException) {
           this.errors = e.errors;
           message = 'Validation failed';
+        } else {
+          console.error(e);
         }
         this.$buefy.toast.open({
           message,

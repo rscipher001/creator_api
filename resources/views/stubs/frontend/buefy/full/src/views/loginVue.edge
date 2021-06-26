@@ -77,6 +77,8 @@ export default {
         if (e instanceof ValidationException) {
           this.errors = e.errors;
           message = 'Validation Error';
+        } else {
+          console.error(e);
         }
         this.$buefy.toast.open({
           message,
