@@ -136,9 +136,9 @@ export default interface ProjectInput {
     app?: string
   }
   tenantSettings: {
-    user: number | string
-    tenant: number | string
-    table?: string
-    tableNames?: Names
+    user: number | string // 1 or n
+    tenant: number | string // 0, 1 or n
+    table?: string // Table name
+    tableNames?: ExtendedNames // Table names in all cases
   }
 }

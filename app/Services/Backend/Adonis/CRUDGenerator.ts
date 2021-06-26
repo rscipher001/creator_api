@@ -1,4 +1,3 @@
-// import os from 'os'
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
@@ -11,7 +10,7 @@ export default class CRUDGenerator {
     this.input = input
   }
 
-  // Create app/Models/{Auth}.ts
+  // Create app/Models/{Model}.ts
   protected async createModel(i: number) {
     const table = this.input.tables[i]
     const filePath = `${this.input.path}/app/Models/${table.names.pascalCase}.ts`

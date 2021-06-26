@@ -22,7 +22,7 @@ class HttpService {
   }
 
   async authGet(url, queryParams) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     const { data } = await this.client.get(url, {
       params: queryParams,
       headers: {
@@ -33,7 +33,7 @@ class HttpService {
   }
 
   async authPost(url, payload, queryParams) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     const { data } = await this.client.post(url, payload, {
       params: queryParams,
       headers: {
@@ -44,7 +44,7 @@ class HttpService {
   }
 
   async authPatch(url, payload, queryParams) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     const { data } = await this.client.patch(url, payload, {
       params: queryParams,
       headers: {
@@ -55,7 +55,7 @@ class HttpService {
   }
 
   async authPut(url, payload, queryParams) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     const { data } = await this.client.put(url, payload, {
       params: queryParams,
       headers: {
@@ -66,7 +66,7 @@ class HttpService {
   }
 
   async authDelete(url, queryParams) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     const { data } = await this.client.delete(url, {
       params: queryParams,
       headers: {
@@ -75,6 +75,93 @@ class HttpService {
     });
     return data;
   }
+
+  @if(this.projectInput.tenantSettings.tenant !== 0)
+  async tenantGet(url, queryParams) {
+    const token = localStorage.getItem('authToken');
+    const {{
+      input.tenant.names.camelCase
+    }}Token = localStorage.getItem('{{
+      input.tenant.names.camelCase
+    }}Token');
+    const { data } = await this.client.get(url, {
+      params: queryParams,
+      headers: {
+        authorization: `Bearer ${token}`,
+        'x-{{ input.tenant.names.dashCase }}-id': tenantToken,
+      },
+    });
+    return data;
+  }
+
+  async tenantPost(url, payload, queryParams) {
+    const token = localStorage.getItem('authToken');
+    const {{
+      input.tenant.names.camelCase
+    }}Token = localStorage.getItem('{{
+      input.tenant.names.camelCase
+    }}Token');
+    const { data } = await this.client.post(url, payload, {
+      params: queryParams,
+      headers: {
+        authorization: `Bearer ${token}`,
+        'x-{{ input.tenant.names.dashCase }}-id': tenantToken,
+      },
+    });
+    return data;
+  }
+
+  async tenantPatch(url, payload, queryParams) {
+    const token = localStorage.getItem('authToken');
+    const {{
+      input.tenant.names.camelCase
+    }}Token = localStorage.getItem('{{
+      input.tenant.names.camelCase
+    }}Token');
+    const { data } = await this.client.patch(url, payload, {
+      params: queryParams,
+      headers: {
+        authorization: `Bearer ${token}`,
+        'x-{{ input.tenant.names.dashCase }}-id': tenantToken,
+      },
+    });
+    return data;
+  }
+
+  async tenantPut(url, payload, queryParams) {
+    const token = localStorage.getItem('authToken');
+    const {{
+      input.tenant.names.camelCase
+    }}Token = localStorage.getItem('{{
+      input.tenant.names.camelCase
+    }}Token');
+    const { data } = await this.client.put(url, payload, {
+      params: queryParams,
+      headers: {
+        authorization: `Bearer ${token}`,
+        'x-{{ input.tenant.names.dashCase }}-id': tenantToken,
+      },
+    });
+    return data;
+  }
+
+  async tenantDelete(url, queryParams) {
+    const token = localStorage.getItem('authToken');
+    const {{
+      input.tenant.names.camelCase
+    }}Token = localStorage.getItem('{{
+      input.tenant.names.camelCase
+    }}Token');
+    const { data } = await this.client.delete(url, {
+      params: queryParams,
+      headers: {
+        authorization: `Bearer ${token}`,
+        'x-{{ input.tenant.names.dashCase }}-id': tenantToken,
+      },
+    });
+    return data;
+  }
+  @endif
 }
 
 export default new HttpService();

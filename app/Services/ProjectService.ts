@@ -6,6 +6,7 @@ import HelperService from 'App/Services/HelperService'
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
 import AdonisDatabaseGenerator from 'App/Services/Backend/Adonis/DatabaseGenerator'
 import AdonisAuthGenerator from 'App/Services/Backend/Adonis/AuthGenerator'
+import AdonisTenantGenerator from 'App/Services/Backend/Adonis/TenantGenerator'
 import AdonisCRUDGenerator from 'App/Services/Backend/Adonis/CRUDGenerator'
 import AdonisTestGenerator from 'App/Services/Backend/Adonis/TestGenerator'
 
@@ -91,11 +92,12 @@ class BackendProjectService {
       projectInput.git = this.input.git
     }
     this.projectInput = projectInput as ProjectInput
+    this.prepareTenantSettings()
     return this.projectInput
   }
 
   protected prepareTenantSettings() {
-    this.projectInput.tenantSettings.tableNames = HelperService.generateNames(
+    this.projectInput.tenantSettings.tableNames = HelperService.generateExtendedNames(
       this.projectInput.tenantSettings.table
     )
     const tenantCount = this.projectInput.tenantSettings.tenant
@@ -244,6 +246,12 @@ class BackendProjectService {
         if (this.projectInput.generate.api.db && this.projectInput.generate.api.auth) {
           const auth = new AdonisAuthGenerator(this.projectInput)
           await auth.init()
+        }
+
+        // Add Tenant
+        if (this.projectInput.tenantSettings.tenant !== 0) {
+          const tenant = new AdonisTenantGenerator(this.projectInput)
+          await tenant.init()
         }
 
         // Add CRUD for models
