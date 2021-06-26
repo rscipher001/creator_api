@@ -27,6 +27,8 @@ export default class ProjectsController {
       // Send an email or something
     } catch (e) {
       // Delete project files or something to undo the process
+      project.status = 'error'
+      await project.save()
       console.error(e)
     }
   }

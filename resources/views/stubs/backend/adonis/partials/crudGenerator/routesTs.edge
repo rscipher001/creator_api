@@ -1,38 +1,40 @@
 Route.group(() => {
-  @if(table.operations.includes('index'))
-    Route.get('/{{
-      table.names.camelCase
-    }}', 'API/{{ table.names.pascalCasePlural }}Controller.index')
-  @endif
-  @if(table.operations.includes('store'))
-    Route.post('/{{
-      table.names.camelCase
-    }}', 'API/{{ table.names.pascalCasePlural }}Controller.store')
-  @endif
-  @if(table.operations.includes('show'))
-    Route.get('/{{
-      table.names.camelCase
-    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.show')
-  @endif
-  @if(table.operations.includes('update'))
-    Route.put('/{{
-      table.names.camelCase
-    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update')
-  @endif
-  @if(table.operations.includes('destroy'))
-    Route.delete('/{{
-      table.names.camelCase
-    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.destroy')
-  @endif
-  @if(table.operations.includes('storeMany'))
-    Route.post('/{{
-      table.names.camelCase
-    }}/store/many', 'API/{{ table.names.pascalCasePlural }}Controller.storeMany')
-  @endif
-  @if(table.operations.includes('destroyMany'))
-    Route.post('/{{
-      table.names.camelCase
-    }}/destroy/many', 'API/{{ table.names.pascalCasePlural }}Controller.destroyMany')
+  @if(table.generateRoute)
+    @if(table.operations.includes('index'))
+      Route.get('/{{
+        table.names.camelCase
+      }}', 'API/{{ table.names.pascalCasePlural }}Controller.index')
+    @endif
+    @if(table.operations.includes('store'))
+      Route.post('/{{
+        table.names.camelCase
+      }}', 'API/{{ table.names.pascalCasePlural }}Controller.store')
+    @endif
+    @if(table.operations.includes('show'))
+      Route.get('/{{
+        table.names.camelCase
+      }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.show')
+    @endif
+    @if(table.operations.includes('update'))
+      Route.put('/{{
+        table.names.camelCase
+      }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update')
+    @endif
+    @if(table.operations.includes('destroy'))
+      Route.delete('/{{
+        table.names.camelCase
+      }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.destroy')
+    @endif
+    @if(table.operations.includes('storeMany'))
+      Route.post('/{{
+        table.names.camelCase
+      }}/store/many', 'API/{{ table.names.pascalCasePlural }}Controller.storeMany')
+    @endif
+    @if(table.operations.includes('destroyMany'))
+      Route.post('/{{
+        table.names.camelCase
+      }}/destroy/many', 'API/{{ table.names.pascalCasePlural }}Controller.destroyMany')
+    @endif
   @endif
 })
 .middleware(['auth'])

@@ -65,7 +65,8 @@ export interface Table {
   name: string
   names: Names
   tableName: string // In DB
-  operations: string[]
+  generateRoute: boolean // Route only generated if true
+  operations: string[] // CRUD operations
   columns: Column[]
   timestamps: boolean
   role: string
