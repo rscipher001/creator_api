@@ -18,12 +18,16 @@ export default class Users extends BaseSchema {
 
   public async down () {
     this.schema.table(this.tableName, (table) => {
-      table.dropForeign('{{
-        input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
-      }}')
-      table.dropColumn('{{
-        input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
-      }}')
+      @each(relation in table.relations)~
+        @if(relation.type === 'belongsTo' && relation.lazy)
+          table.dropForeign('{{
+            input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+          }}')
+          table.dropColumn('{{
+            input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+          }}')
+        @endif
+      @endeach
     })
   }
 }

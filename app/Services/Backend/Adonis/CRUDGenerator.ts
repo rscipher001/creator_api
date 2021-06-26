@@ -58,6 +58,7 @@ export default class CRUDGenerator {
   protected async createLazyMigration(table: Table) {
     const namePart = `add_foreign_keys_to_${table.names.snakeCasePlural}.ts`
     await HelperService.sleep(1000) // Ensure migrations get unique timestamps
+    debugger
     if (
       table.relations.find((relation) => relation.type === RelationType.belongsTo && relation.lazy)
     ) {
