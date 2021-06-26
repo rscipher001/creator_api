@@ -1,9 +1,11 @@
 import axios from 'axios';
+import localStorageService from './localStorage.service'
+import { API_URL } from '../constants'
 
 class HttpService {
   constructor() {
     this.client = axios.create({
-      baseURL: `${process.env.VUE_APP_API_URL}/api`,
+      baseURL: API_URL,
     });
   }
 
@@ -22,55 +24,55 @@ class HttpService {
   }
 
   async authGet(url, queryParams) {
-    const token = localStorage.getItem('authToken');
+    const authToken = localStorageService.getAuthToken();
     const { data } = await this.client.get(url, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${authToken}`,
       },
     });
     return data;
   }
 
   async authPost(url, payload, queryParams) {
-    const token = localStorage.getItem('authToken');
+    const authToken = localStorageService.getAuthToken();
     const { data } = await this.client.post(url, payload, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${authToken}`,
       },
     });
     return data;
   }
 
   async authPatch(url, payload, queryParams) {
-    const token = localStorage.getItem('authToken');
+    const authToken = localStorageService.getAuthToken();
     const { data } = await this.client.patch(url, payload, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${authToken}`,
       },
     });
     return data;
   }
 
   async authPut(url, payload, queryParams) {
-    const token = localStorage.getItem('authToken');
+    const authToken = localStorageService.getAuthToken();
     const { data } = await this.client.put(url, payload, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${authToken}`,
       },
     });
     return data;
   }
 
   async authDelete(url, queryParams) {
-    const token = localStorage.getItem('authToken');
+    const authToken = localStorageService.getAuthToken();
     const { data } = await this.client.delete(url, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${authToken}`,
       },
     });
     return data;
@@ -78,105 +80,60 @@ class HttpService {
 
   @if(input.tenantSettings.tenant !== 0)
   async tenantGet(url, queryParams) {
-    const token = localStorage.getItem('authToken');
-    const {{
-      input.tenantSettings.names.camelCase
-    }}Token = localStorage.getItem('{{
-      input.tenantSettings.names.camelCase
-    }}Token');
+    const { authToken, tenantToken } = localStorageService.getAuthAndTenantToken();
     const { data } = await this.client.get(url, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
-        'x-{{
-          input.tenantSettings.names.dashCase
-        }}-id': {{
-          input.tenantSettings.names.camelCase
-        }}Token,
+        authorization: `Bearer ${authToken}`,
+        'x-{{ input.tenantSettings.names.dashCase }}-id': tenantToken,
       },
     });
     return data;
   }
 
   async tenantPost(url, payload, queryParams) {
-    const token = localStorage.getItem('authToken');
-    const {{
-      input.tenantSettings.names.camelCase
-    }}Token = localStorage.getItem('{{
-      input.tenantSettings.names.camelCase
-    }}Token');
+    const { authToken, tenantToken } = localStorageService.getAuthAndTenantToken();
     const { data } = await this.client.post(url, payload, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
-        'x-{{
-          input.tenantSettings.names.dashCase
-        }}-id': {{
-          input.tenantSettings.names.camelCase
-        }}Token,
+        authorization: `Bearer ${authToken}`,
+        'x-{{ input.tenantSettings.names.dashCase }}-id': tenantToken,
       },
     });
     return data;
   }
 
   async tenantPatch(url, payload, queryParams) {
-    const token = localStorage.getItem('authToken');
-    const {{
-      input.tenantSettings.names.camelCase
-    }}Token = localStorage.getItem('{{
-      input.tenantSettings.names.camelCase
-    }}Token');
+    const { authToken, tenantToken } = localStorageService.getAuthAndTenantToken();
     const { data } = await this.client.patch(url, payload, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
-        'x-{{
-          input.tenantSettings.names.dashCase
-        }}-id': {{
-          input.tenantSettings.names.camelCase
-        }}Token,
+        authorization: `Bearer ${authToken}`,
+        'x-{{ input.tenantSettings.names.dashCase }}-id': tenantToken,
       },
     });
     return data;
   }
 
   async tenantPut(url, payload, queryParams) {
-    const token = localStorage.getItem('authToken');
-    const {{
-      input.tenantSettings.names.camelCase
-    }}Token = localStorage.getItem('{{
-      input.tenantSettings.names.camelCase
-    }}Token');
+    const { authToken, tenantToken } = localStorageService.getAuthAndTenantToken();
     const { data } = await this.client.put(url, payload, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
-        'x-{{
-          input.tenantSettings.names.dashCase
-        }}-id': {{
-          input.tenantSettings.names.camelCase
-        }}Token,
+        authorization: `Bearer ${authToken}`,
+        'x-{{ input.tenantSettings.names.dashCase }}-id': tenantToken,
       },
     });
     return data;
   }
 
   async tenantDelete(url, queryParams) {
-    const token = localStorage.getItem('authToken');
-    const {{
-      input.tenantSettings.names.camelCase
-    }}Token = localStorage.getItem('{{
-      input.tenantSettings.names.camelCase
-    }}Token');
+    const { authToken, tenantToken } = localStorageService.getAuthAndTenantToken();
     const { data } = await this.client.delete(url, {
       params: queryParams,
       headers: {
-        authorization: `Bearer ${token}`,
-        'x-{{
-          input.tenantSettings.names.dashCase
-        }}-id': {{
-          input.tenantSettings.names.camelCase
-        }}Token,
+        authorization: `Bearer ${authToken}`,
+        'x-{{ input.tenantSettings.names.dashCase }}-id': tenantToken,
       },
     });
     return data;

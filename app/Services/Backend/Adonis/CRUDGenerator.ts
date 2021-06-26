@@ -54,6 +54,32 @@ export default class CRUDGenerator {
     }
   }
 
+  // Create foreign key relationship between two existing tables
+  protected async createLazyMigration(i: number) {
+    const table = this.input.tables[i]
+    const namePart = `${table.names.camelCasePlural}.ts`
+    const migrationsPath = `${this.input.path}/database/migrations`
+    const migrationFileNames = await HelperService.readdir(migrationsPath)
+    let fileExists = false
+    if (migrationFileNames.length) {
+      fileExists = !!migrationFileNames.find((fileName) => fileName.indexOf(namePart) !== -1)
+    }
+    if (!fileExists) {
+      await HelperService.sleep(1000) // Ensure migrations get unique timestamps
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/database/migrations/migrationTs`,
+        {
+          isAuth: false,
+          input: this.input,
+          table,
+        }
+      )
+      const timestamp = new Date().getTime()
+      const filePath = `${this.input.path}/database/migrations/${timestamp}_${namePart}`
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
   // Create Validators
   protected async createValidators(i: number) {
     const table = this.input.tables[i]
@@ -154,6 +180,10 @@ export default class CRUDGenerator {
         `CRUD Added for ${this.input.tables[i].names.pascalCase}`,
         this.input.path
       )
+    }
+
+    for (let i = 0; i < this.input.tables.length; i += 1) {
+      await this.createLazyMigration(i)
     }
   }
 

@@ -19,10 +19,13 @@ export default class SPAGenerator {
     await Promise.all([
       mkdirp(`${this.input.spaPath}/src/exceptions`),
       mkdirp(`${this.input.spaPath}/src/services`),
+      mkdirp(`${this.input.spaPath}/src/constants`),
       mkdirp(`${this.input.spaPath}/src/router/middlewares`),
     ])
 
+    await this.createSrcConstantsIndexJs()
     await this.createSrcServicesHttpServiceJs()
+    await this.createSrcServicesLocalStorageServiceJs()
     await this.createSrcExceptionsValidationExceptionJs()
     await this.createSrcRouterMiddlewaresAuthMiddlewareJs()
     await this.createSrcRouterMiddlewaresGuestMiddlewareJs()
@@ -112,6 +115,34 @@ export default class SPAGenerator {
     if (!fileExists) {
       const content = await View.render(
         `stubs/frontend/${this.input.tech.frontend}/full/src/services/httpServiceJs`,
+        {
+          input: this.input,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  public async createSrcServicesLocalStorageServiceJs() {
+    const filePath = `${this.input.spaPath}/src/services/localStorage.service.js`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/services/localStorageServiceJs`,
+        {
+          input: this.input,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  public async createSrcConstantsIndexJs() {
+    const filePath = `${this.input.spaPath}/src/constants/index.js`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/constants/indexJs`,
         {
           input: this.input,
         }

@@ -1,4 +1,5 @@
 import HttpService from '../../services/http.service';
+import LocalStorageService from '../../services/localStorage.service';
 import ValidationException from '../../exceptions/ValidationException';
 
 export default {
@@ -12,30 +13,30 @@ export default {
       @endif
       logout: false,
     },
-    token: undefined, // Authorization token
-    user: undefined, // Logged in user basic profile
+    token: null, // Authorization token
+    user: null, // Logged in user
   }),
 
   actions: {
     // Initialize state from localStorage
     bootstrap({ commit }) {
       try {
-        const token = localStorage.getItem('token');
+        const token = LocalStorageService.getAuthToken();
         if (token) {
-          const user = JSON.parse(localStorage.getItem('user'));
-          commit('setTokens', { token, user });
+          const user = LocalStorageService.getJson('user');
+          commit('setTokens', { token: token, user });
         }
       } catch (e) { console.error(e); }
     },
 
     setUserToken({ commit }, { user, token }) {
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('token', token);
+      LocalStorageService.setJson('user', user);
+      LocalStorageService.setAuthToken(token);
       commit('setUserToken', { user, token });
     },
 
     unsetTokens({ commit }) {
-      localStorage.clear();
+      LocalStorageService.clear();
       commit('unsetTokens');
     },
 
