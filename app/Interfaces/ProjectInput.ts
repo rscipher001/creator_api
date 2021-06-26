@@ -139,6 +139,6 @@ export default interface ProjectInput {
     user: number | string // 1 or n
     tenant: number | string // 0, 1 or n
     table?: string // Table name
-    tableNames?: ExtendedNames // Table names in all cases
+    names?: ExtendedNames // Table names in all cases
   }
 }

@@ -97,7 +97,7 @@ class BackendProjectService {
   }
 
   protected prepareTenantSettings() {
-    this.projectInput.tenantSettings.tableNames = HelperService.generateExtendedNames(
+    this.projectInput.tenantSettings.names = HelperService.generateExtendedNames(
       this.projectInput.tenantSettings.table
     )
     const tenantCount = this.projectInput.tenantSettings.tenant

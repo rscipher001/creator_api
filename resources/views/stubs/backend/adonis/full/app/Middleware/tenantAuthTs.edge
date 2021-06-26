@@ -6,9 +6,9 @@ export default class AuthenticateCompany {
   public async handle({ request }: HttpContextContract, next: () => Promise<void>) {
     try {
       request.{{
-        input.tenant.names.camelCase
+        input.tenantSettings.names.camelCase
       }} = Encryption.decrypt(request.headers()['x-{{
-        input.tenant.names.dashCase
+        input.tenantSettings.names.dashCase
       }}-id'])
     } catch (e) {
       throw new AuthenticationException('Unauthorized access', 'E_UNAUTHORIZED_ACCESS')
