@@ -23,14 +23,14 @@ export default {
       try {
         const token = LocalStorageService.getAuthToken();
         if (token) {
-          const user = LocalStorageService.getJson('user');
+          const user = LocalStorageService.getJSON('user');
           commit('setTokens', { token: token, user });
         }
       } catch (e) { console.error(e); }
     },
 
     setUserToken({ commit }, { user, token }) {
-      LocalStorageService.setJson('user', user);
+      LocalStorageService.setJSON('user', user);
       LocalStorageService.setAuthToken(token);
       commit('setUserToken', { user, token });
     },
