@@ -66,6 +66,7 @@ export interface Table {
   names: Names
   tableName: string // In DB
   generateRoute: boolean // Route only generated if true
+  routeParents: string[] // Route parents are parent models for routing
   operations: string[] // CRUD operations
   columns: Column[]
   timestamps: boolean

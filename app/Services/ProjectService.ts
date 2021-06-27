@@ -38,6 +38,13 @@ class BackendProjectService {
       column.type = column.type.toLowerCase()
       return column
     })
+    if (Array.isArray(table.routeParents)) {
+      table.routeParents = table.routeParents
+        .reverse()
+        .map((modelName: string) => string.camelCase(modelName))
+    } else {
+      table.routeParents = []
+    }
     if (Array.isArray(table.relations)) {
       table.relations = table.relations.map((relation: Relation): Relation => {
         if (relation.withModel === '$auth') {
