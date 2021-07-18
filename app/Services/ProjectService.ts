@@ -104,14 +104,14 @@ class BackendProjectService {
   }
 
   protected prepareTenantSettings() {
-    this.projectInput.tenantSettings.names = HelperService.generateExtendedNames(
-      this.projectInput.tenantSettings.table
-    )
-    const tenantCount = this.projectInput.tenantSettings.tenant
-    const userCount = this.projectInput.tenantSettings.user
-
-    // Prepare input if there is tenant(s)
     if (this.projectInput.tenantSettings.tenant !== 0) {
+      const tenantCount = this.projectInput.tenantSettings.tenant
+      const userCount = this.projectInput.tenantSettings.user
+
+      // Prepare input if there is tenant(s)
+      this.projectInput.tenantSettings.names = HelperService.generateExtendedNames(
+        this.projectInput.tenantSettings.table
+      )
       const tenantTableIndex = this.projectInput.tables.findIndex(
         (table) => table.names.pascalCase === this.projectInput.tenantSettings.table
       )

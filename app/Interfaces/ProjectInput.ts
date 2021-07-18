@@ -64,6 +64,7 @@ export interface Column {
 export interface Table {
   name: string
   names: Names
+  singleton: boolean // False by default
   tableName: string // In DB
   generateRoute: boolean // Route only generated if true
   routeParents: string[] // Route parents are parent models for routing

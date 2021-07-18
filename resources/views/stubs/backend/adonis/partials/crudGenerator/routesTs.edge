@@ -1,11 +1,13 @@
 Route.group(() => {
   @if(table.generateRoute)
     @if(table.operations.includes('index'))
-      Route.get('{{
-        table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
-      }}/{{
-        table.names.camelCase
-      }}', 'API/{{ table.names.pascalCasePlural }}Controller.index')
+      @if (!table.singleton)
+        Route.get('{{
+          table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
+        }}/{{
+          table.names.camelCase
+        }}', 'API/{{ table.names.pascalCasePlural }}Controller.index')
+      @endif
     @endif
     @if(table.operations.includes('store'))
       Route.post('{{
@@ -15,25 +17,43 @@ Route.group(() => {
       }}', 'API/{{ table.names.pascalCasePlural }}Controller.store')
     @endif
     @if(table.operations.includes('show'))
-      Route.get('{{
-        table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
-      }}/{{
-        table.names.camelCase
-      }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.show')
+      @if (table.singleton)
+        Route.get('{{
+          table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
+        }}/{{ table.names.camelCase }}', 'API/{{ table.names.pascalCasePlural }}Controller.show')
+      @else
+        Route.get('{{
+          table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
+        }}/{{
+          table.names.camelCase
+        }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.show')
+      @endif
     @endif
     @if(table.operations.includes('update'))
-      Route.put('{{
-        table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
-      }}/{{
-        table.names.camelCase
-      }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update')
+      @if(table.singleton)
+        Route.put('{{
+          table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
+        }}/{{ table.names.camelCase }}', 'API/{{ table.names.pascalCasePlural }}Controller.update')
+      @else
+        Route.put('{{
+          table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
+        }}/{{
+          table.names.camelCase
+        }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update')
+      @endif
     @endif
     @if(table.operations.includes('destroy'))
-      Route.delete('{{
-        table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
-      }}/{{
-        table.names.camelCase
-      }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.destroy')
+      @if(table.singleton)
+        Route.delete('{{
+          table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
+        }}/{{ table.names.camelCase }}', 'API/{{ table.names.pascalCasePlural }}Controller.destroy')
+      @else
+        Route.delete('{{
+          table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
+        }}/{{
+          table.names.camelCase
+        }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.destroy')
+      @endif
     @endif
     @if(table.operations.includes('storeMany'))
       Route.post('{{
@@ -48,6 +68,15 @@ Route.group(() => {
       }}/{{
         table.names.camelCase
       }}/destroy/many', 'API/{{ table.names.pascalCasePlural }}Controller.destroyMany')
+    @endif
+    @if(Array.isArray(table.relations) && table.relations.length)
+      @each(relation in table.relations.filter((relation) => relation.type === 'manyToMany'))
+        Route.post('{{
+          table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
+        }}/:id/{{ table.names.camelCase }}/{{
+          relation.modelNames.camelCase
+        }}', 'API/{{ table.names.pascalCasePlural }}Controller.sync{{ relation.modelNames.pascalCase }}')
+      @endeach
     @endif
   @endif
 })
