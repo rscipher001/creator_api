@@ -10,22 +10,41 @@ import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }
     table.names.pascalCase
   }}Validator from 'App/Validators/Update{{ table.names.pascalCase }}Validator';
 @endif
+@if(Array.isArray(table.routeParents) && table.routeParents.length)
+  @each(parent in table.routeParents)
+    import {{ pascalCase(parent) }} from 'App/Models/{{ pascalCase(parent) }}';
+  @endeach
+@endif
 
 export default class {{ table.names.pascalCasePlural }}Controller {
   @if(table.operations.includes('index'))
     public async index({ auth, request }: HttpContextContract) {
       const page = request.input('page', 1)
       const size = request.input('size', 10)
+      @each(parent in table.routeParents)
+        const {{ parent }}Id = request.param('{{ parent }}Id');
+      @endeach
+
+      @each(parent in table.routeParents)
+        await {{ pascalCase(parent) }}.query().where({
+          id: {{ parent }}Id
+        }).firstOrFail()
+      @endeach
+
       return {{ table.names.pascalCase }}.query()
-      @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
       .where({
+      @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
         {{
           input.camelCaseStrategy ?
             `${input.auth.table.names.camelCase}Id` :
             `${input.auth.table.names.snakeCase}_id`
-        }}: auth.user!.id
-      })
+        }}: auth.user!.id,
       @endif
+      @if(Array.isArray(table.routeParents) && table.routeParents.length)
+        @set('lastIndex', table.routeParents.length - 1)
+        {{ table.routeParents[lastIndex] }}Id,
+      @endif
+      })
       .paginate(page, size)
     }
   @endif
