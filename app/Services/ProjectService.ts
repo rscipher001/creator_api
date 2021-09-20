@@ -2,6 +2,7 @@ import Application from '@ioc:Adonis/Core/Application'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import ProjectInput, { Table, Relation, RelationType } from 'App/Interfaces/ProjectInput'
 import HelperService from 'App/Services/HelperService'
+import Env from '@ioc:Adonis/Core/Env'
 
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
 import AdonisDatabaseGenerator from 'App/Services/Backend/Adonis/DatabaseGenerator'
@@ -79,7 +80,7 @@ class BackendProjectService {
     projectInput.generate = this.input.generate
     projectInput.names = HelperService.generateExtendedNames(this.input.name)
     projectInput.name = projectInput.names.pascalCase
-    projectInput.projectsPath = Application.makePath('../projects')
+    projectInput.projectsPath = Application.makePath(Env.get('PROJECT_PATH'))
     projectInput.path = `${projectInput.projectsPath}/${projectInput.names.dashCase}`
     projectInput.spaPath = `${projectInput.projectsPath}/${projectInput.names.dashCase}-spa`
     projectInput.basePath = projectInput.names.dashCase
