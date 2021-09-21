@@ -39,6 +39,7 @@ class BackendProjectService {
       column.type = column.type.toLowerCase()
       return column
     })
+    debugger
     if (Array.isArray(table.routeParents)) {
       table.routeParents = table.routeParents
         .reverse()
@@ -101,6 +102,7 @@ class BackendProjectService {
     }
     this.projectInput = projectInput as ProjectInput
     this.prepareTenantSettings()
+    this.prepareRouteParentTables()
     return this.projectInput
   }
 
@@ -231,6 +233,22 @@ class BackendProjectService {
     }
   }
 
+  protected prepareRouteParentTables() {
+    this.projectInput.tables.forEach((table: Table) => {
+      if (Array.isArray(table.routeParents) && table.routeParents.length) {
+        table.routeParents.forEach((routeParent: string) => {
+          // Find the table and push it into routeParentTables array
+          const routeParentTable = this.projectInput.tables.find(
+            (table) => table.names.pascalCase === routeParent
+          )
+          if (!routeParentTable) {
+            throw new Error('Table data is not correct')
+          }
+          table.routeParentTables.push(routeParentTable)
+        })
+      }
+    })
+  }
   /**
    * Handle complete project creation
    */
@@ -242,16 +260,12 @@ class BackendProjectService {
         await init.init() // Initialize project
 
         // Add database
-        if (this.projectInput.generate.api.db) {
-          const db = new AdonisDatabaseGenerator(this.projectInput)
-          await db.init()
-        }
+        const db = new AdonisDatabaseGenerator(this.projectInput)
+        await db.init()
 
         // Add Auth
-        if (this.projectInput.generate.api.db && this.projectInput.generate.api.auth) {
-          const auth = new AdonisAuthGenerator(this.projectInput)
-          await auth.init()
-        }
+        const auth = new AdonisAuthGenerator(this.projectInput)
+        await auth.init()
 
         // Add Tenant
         if (this.projectInput.tenantSettings.tenant !== 0) {
@@ -260,13 +274,13 @@ class BackendProjectService {
         }
 
         // Add CRUD for models
-        if (this.projectInput.generate.api.db && this.projectInput.generate.api.crud) {
+        if (this.projectInput.generate.api.crud) {
           const crud = new AdonisCRUDGenerator(this.projectInput)
           await crud.init()
         }
 
         // Add Tests for everything
-        if (this.projectInput.generate.api.auth && this.projectInput.generate.api.test) {
+        if (this.projectInput.generate.api.test) {
           const test = new AdonisTestGenerator(this.projectInput)
           await test.init()
         }
@@ -278,10 +292,8 @@ class BackendProjectService {
         await spa.init()
 
         // Prepare frontend auth
-        if (this.projectInput.generate.spa.auth) {
-          const auth = new BuefyAuthGenerator(this.projectInput)
-          await auth.init()
-        }
+        const auth = new BuefyAuthGenerator(this.projectInput)
+        await auth.init()
 
         // Add CRUD for models
         if (this.projectInput.generate.spa.crud) {

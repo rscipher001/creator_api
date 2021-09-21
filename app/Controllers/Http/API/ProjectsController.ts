@@ -1,6 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Generator from 'App/Services/ProjectService'
 import Project from 'App/Models/Project'
+import CreateProjectValidator from 'App/Validators/CreateProjectValidator'
 
 export default class ProjectsController {
   public async index({ auth }: HttpContextContract) {
@@ -8,7 +9,7 @@ export default class ProjectsController {
   }
 
   public async store({ request, auth }: HttpContextContract) {
-    const input = request.body()
+    const input = await request.validate(CreateProjectValidator)
     const project = await Project.create({
       status: 'queued',
       rawInput: JSON.stringify(input),

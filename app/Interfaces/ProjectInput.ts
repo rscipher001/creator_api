@@ -64,10 +64,11 @@ export interface Column {
 export interface Table {
   name: string
   names: Names
-  singleton: boolean // False by default
+  singleton: boolean // Singleton means only one instace per parent.
   tableName: string // In DB
   generateRoute: boolean // Route only generated if true
   routeParents: string[] // Route parents are parent models for routing
+  routeParentTables: Table[] // Route parents table for use in controller
   operations: string[] // CRUD operations
   columns: Column[]
   timestamps: boolean
@@ -101,23 +102,23 @@ export default interface ProjectInput {
   generate: {
     api: {
       generate: boolean
-      init: boolean
-      db: boolean
-      auth: boolean
       crud: boolean
       test: boolean
     }
     spa: {
       generate: boolean
-      init: boolean
-      auth: boolean
       crud: boolean
+      test: boolean
     }
     app: {
       generate: boolean
+      crud: boolean
+      test: boolean
     }
     website: {
       generate: boolean
+      crud: boolean
+      test: boolean
     }
   }
   auth: {

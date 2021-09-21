@@ -2,6 +2,7 @@ import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import mkdirp from 'mkdirp'
+import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class AuthGenerator {
   private input: ProjectInput
@@ -325,7 +326,7 @@ export default class AuthGenerator {
    */
   protected async start() {
     // Install auth module
-    await HelperService.execute('npm', ['install', '@adonisjs/auth', 'phc-argon2'], {
+    await HelperService.execute('npm', ['install', '@adonisjs/auth'], {
       cwd: this.input.path,
     })
 
@@ -347,6 +348,14 @@ export default class AuthGenerator {
     await this.initModuleFiles()
     await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
     await HelperService.commit('Auth added', this.input.path)
+    try {
+      await HelperService.execute('npm', ['install', 'phc-argon2'], {
+        cwd: this.input.path,
+      })
+      await HelperService.commit('Argon Added', this.input.path)
+    } catch (e) {
+      Logger.fatal('Argon installation failed:', e)
+    }
   }
 
   public async init() {
