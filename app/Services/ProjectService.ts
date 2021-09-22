@@ -239,7 +239,7 @@ class BackendProjectService {
         table.routeParents.forEach((routeParent: string) => {
           // Find the table and push it into routeParentTables array
           const routeParentTable = this.projectInput.tables.find(
-            (table) => table.names.pascalCase === routeParent
+            (table) => table.names.camelCase === routeParent
           )
           if (!routeParentTable) {
             throw new Error('Table data is not correct')

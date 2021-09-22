@@ -63,6 +63,15 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
+      @each(parent in table.routeParents)
+        const {{ parent }}Id = request.param('{{ parent }}Id');
+      @endeach
+
+      @each(parent in table.routeParents)
+        await {{ pascalCase(parent) }}.query().where({
+          id: {{ parent }}Id
+        }).firstOrFail()
+      @endeach
       @if(table.singleton)
         const condition: { [key: string]: any } = {}
         @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
@@ -87,6 +96,15 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.includes('show'))
     public async show({ auth, request }: HttpContextContract) {
+      @each(parent in table.routeParents)
+        const {{ parent }}Id = request.param('{{ parent }}Id');
+      @endeach
+
+      @each(parent in table.routeParents)
+        await {{ pascalCase(parent) }}.query().where({
+          id: {{ parent }}Id
+        }).firstOrFail()
+      @endeach
       const condition: { [key: string]: any } = {}
       @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
         condition.{{
@@ -106,6 +124,15 @@ export default class {{ table.names.pascalCasePlural }}Controller {
   @if(table.operations.includes('update') && !table.singleton)
     public async update({ auth, request }: HttpContextContract) {
       const input: { [key: string]: any } = await request.validate(Update{{ table.names.pascalCase }}Validator)
+      @each(parent in table.routeParents)
+        const {{ parent }}Id = request.param('{{ parent }}Id');
+      @endeach
+
+      @each(parent in table.routeParents)
+        await {{ pascalCase(parent) }}.query().where({
+          id: {{ parent }}Id
+        }).firstOrFail()
+      @endeach
       const id = request.param('id')
       const condition: { [key: string]: any } = { id }
       @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
@@ -124,6 +151,15 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.includes('destroy'))
     public async destroy({ auth, request, response }: HttpContextContract) {
+      @each(parent in table.routeParents)
+        const {{ parent }}Id = request.param('{{ parent }}Id');
+      @endeach
+
+      @each(parent in table.routeParents)
+        await {{ pascalCase(parent) }}.query().where({
+          id: {{ parent }}Id
+        }).firstOrFail()
+      @endeach
       const condition: { [key: string]: any } = {}
       @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
         condition.{{
@@ -144,6 +180,15 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.includes('destroyMany'))
     public async destroyMany({ request }: HttpContextContract) {
+      @each(parent in table.routeParents)
+        const {{ parent }}Id = request.param('{{ parent }}Id');
+      @endeach
+
+      @each(parent in table.routeParents)
+        await {{ pascalCase(parent) }}.query().where({
+          id: {{ parent }}Id
+        }).firstOrFail()
+      @endeach
       return {{ table.names.pascalCase }}.query().whereIn('id', request.input('ids')).delete()
     }
   @endif

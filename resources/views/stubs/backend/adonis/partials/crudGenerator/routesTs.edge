@@ -1,6 +1,7 @@
 @if(table.generateRoute)
+
 Route.group(() => {
-  @if(table.operations.includes('index'))
+  @if(table.operations.includes('index'))~
     @if (!table.singleton)
       Route.get('{{
         table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
@@ -16,7 +17,7 @@ Route.group(() => {
       table.names.camelCase
     }}', 'API/{{ table.names.pascalCasePlural }}Controller.store')
   @endif
-  @if(table.operations.includes('show'))
+  @if(table.operations.includes('show'))~
     @if (table.singleton)
       Route.get('{{
         table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
@@ -31,7 +32,7 @@ Route.group(() => {
       }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.show')
     @endif
   @endif
-  @if(table.operations.includes('update'))
+  @if(table.operations.includes('update'))~
     @if(!table.singleton)
       Route.put('{{
         table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
@@ -40,7 +41,7 @@ Route.group(() => {
       }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update')
     @endif
   @endif
-  @if(table.operations.includes('destroy'))
+  @if(table.operations.includes('destroy'))~
     @if(table.singleton)
       Route.delete('{{
         table.routeParents.length ? table.routeParents.map(parent => `/${parent}/:${parent}Id`).join('') : ''
