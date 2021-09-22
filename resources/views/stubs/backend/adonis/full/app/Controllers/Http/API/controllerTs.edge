@@ -63,7 +63,25 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      return {{ table.names.pascalCase }}.create(input)
+      @if(table.singleton)
+        const condition: { [key: string]: any } = {}
+        @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
+          condition.{{
+            input.camelCaseStrategy ?
+              `${input.auth.table.names.camelCase}Id` :
+              `${input.auth.table.names.snakeCase}_id`
+          }} = auth.user!.id
+        @endif
+        const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).first()
+        if ({{ table.names.camelCase }}) {
+          return {{ table.names.camelCase }}
+            .merge(input)
+            .save()
+        }
+        return {{ table.names.pascalCase }}.create(input)
+      @else
+        return {{ table.names.pascalCase }}.create(input)
+      @endif
     }
   @endif
 
@@ -87,8 +105,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.includes('update') && !table.singleton)
     public async update({ auth, request }: HttpContextContract) {
-      const condition: { [key: string]: any } = {}
-
+      const input: { [key: string]: any } = await request.validate(Update{{ table.names.pascalCase }}Validator)
+      const id = request.param('id')
+      const condition: { [key: string]: any } = { id }
       @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
         condition.{{
           input.camelCaseStrategy ?
@@ -96,11 +115,6 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(!table.singleton)
-        const id = request.param('id')
-        condition.id = id
-      @endif
-      const input: { [key: string]: any } = await request.validate(Update{{ table.names.pascalCase }}Validator)
       const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
       return {{ table.names.camelCase }}
         .merge(input)
