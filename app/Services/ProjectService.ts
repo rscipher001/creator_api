@@ -102,6 +102,7 @@ class BackendProjectService {
     this.projectInput = projectInput as ProjectInput
     this.prepareTenantSettings()
     this.prepareRouteParentTables()
+    debugger
     return this.projectInput
   }
 

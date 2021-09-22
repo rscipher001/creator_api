@@ -70,6 +70,7 @@ export default class CRUDGenerator {
     await Promise.all([await mkdirp(`${this.input.path}/test`)])
     await this.copyAuthTests()
     await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
+    await HelperService.commit('First Test added', this.input.path)
   }
 
   public async init() {
