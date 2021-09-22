@@ -39,7 +39,6 @@ class BackendProjectService {
       column.type = column.type.toLowerCase()
       return column
     })
-    debugger
     if (Array.isArray(table.routeParents)) {
       table.routeParents = table.routeParents
         .reverse()
@@ -235,6 +234,7 @@ class BackendProjectService {
 
   protected prepareRouteParentTables() {
     this.projectInput.tables.forEach((table: Table) => {
+      table.routeParentTables = []
       if (Array.isArray(table.routeParents) && table.routeParents.length) {
         table.routeParents.forEach((routeParent: string) => {
           // Find the table and push it into routeParentTables array
