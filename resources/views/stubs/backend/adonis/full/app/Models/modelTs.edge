@@ -22,7 +22,7 @@ import {
   @endif
   @if(table.relations.find(relation => relation.type === 'manyToMany'))
     manyToMany,
-    manyToMany,
+    ManyToMany,
   @endif
 } from '@ioc:Adonis/Lucid/Orm'
 @each(relation in table.relations)
@@ -90,7 +90,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
       @manyToMany(() => {{ relation.modelNames.pascalCase }})
       public {{
         relation.modelNames.camelCasePlural
-      }}{{relation.required ? '?': '' }}: ManyToMany<typeof {{ relation.modelNames.pascalCase }}>
+      }}: ManyToMany<typeof {{ relation.modelNames.pascalCase }}>
     @endif
   @endeach
 
