@@ -85,7 +85,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
       @belongsTo(() => {{ relation.modelNames.pascalCase }})
       public {{
         relation.names.camelCase
-      }}{{relation.required ? '?': '' }}: BelongsTo<typeof {{ relation.modelNames.pascalCase }}>
+      }}: BelongsTo<typeof {{ relation.modelNames.pascalCase }}>
     @elseif(relation.type === 'manyToMany')
       @manyToMany(() => {{ relation.modelNames.pascalCase }})
       public {{
