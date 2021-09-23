@@ -23,29 +23,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     public async index({ auth, request }: HttpContextContract) {
       const page = request.input('page', 1)
       const size = request.input('size', 10)
-      @each((parentTable, parentTableIndex) in table.routeParentTables)
-        const {{ parentTable.names.camelCase }}Id = request.param('{{ parentTable.names.camelCase }}Id');
-        await {{ parentTable.names.pascalCase }}.query().where({
-          id: {{ parentTable.names.camelCase }}Id,
-          @if(parentTable.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
-          {{
-            input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
-          }}: auth.user!.id,
-          @endif
-          @if(parentTableIndex !== 0)~
-            @if(input.camelCaseStrategy)
-              {{ table.routeParentTables[parentTableIndex - 1].names.camelCase }}Id,
-            @else
-            {{ table.routeParentTables[parentTableIndex - 1].names.snakeCase }}_id: {{
-              table.routeParentTables[parentTableIndex - 1].names.camelCase
-            }}Id,
-            @endif
-          @endif
-        }).firstOrFail()
-      @endeach
-
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        input, table
+      })
       return {{ table.names.pascalCase }}.query()
       .where({
       @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
@@ -76,19 +56,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @each(parentTable in table.routeParentTables)
-        const {{ parentTable.names.camelCase }}Id = request.param('{{ parentTable.names.camelCase }}Id');
-        await {{ parentTable.names.pascalCase }}.query().where({
-          id: {{ parentTable.names.camelCase }}Id,
-          @if(parentTable.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
-          {{
-            input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
-          }}: auth.user!.id,
-          @endif
-        }).firstOrFail()
-      @endeach
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        input, table
+      })
       @if(table.singleton)
         const condition: { [key: string]: any } = {}
         @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
@@ -113,19 +83,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.includes('show'))
     public async show({ auth, request }: HttpContextContract) {
-      @each(parentTable in table.routeParentTables)
-        const {{ parentTable.names.camelCase }}Id = request.param('{{ parentTable.names.camelCase }}Id');
-        await {{ parentTable.names.pascalCase }}.query().where({
-          id: {{ parentTable.names.camelCase }}Id,
-          @if(parentTable.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
-          {{
-            input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
-          }}: auth.user!.id,
-          @endif
-        }).firstOrFail()
-      @endeach
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        input, table
+      })
       const condition: { [key: string]: any } = {}
       @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
         condition.{{
@@ -145,19 +105,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
   @if(table.operations.includes('update') && !table.singleton)
     public async update({ auth, request }: HttpContextContract) {
       const input: { [key: string]: any } = await request.validate(Update{{ table.names.pascalCase }}Validator)
-      @each(parentTable in table.routeParentTables)
-        const {{ parentTable.names.camelCase }}Id = request.param('{{ parentTable.names.camelCase }}Id');
-        await {{ parentTable.names.pascalCase }}.query().where({
-          id: {{ parentTable.names.camelCase }}Id,
-          @if(parentTable.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
-          {{
-            input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
-          }}: auth.user!.id,
-          @endif
-        }).firstOrFail()
-      @endeach
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        input, table
+      })
       const id = request.param('id')
       const condition: { [key: string]: any } = { id }
       @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
@@ -176,19 +126,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.includes('destroy'))
     public async destroy({ auth, request, response }: HttpContextContract) {
-      @each(parentTable in table.routeParentTables)
-        const {{ parentTable.names.camelCase }}Id = request.param('{{ parentTable.names.camelCase }}Id');
-        await {{ parentTable.names.pascalCase }}.query().where({
-          id: {{ parentTable.names.camelCase }}Id,
-          @if(parentTable.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
-          {{
-            input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
-          }}: auth.user!.id,
-          @endif
-        }).firstOrFail()
-      @endeach
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        input, table
+      })
       const condition: { [key: string]: any } = {}
       @if(table.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
         condition.{{
@@ -209,19 +149,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.includes('destroyMany'))
     public async destroyMany({ request }: HttpContextContract) {
-      @each(parentTable in table.routeParentTables)
-        const {{ parentTable.names.camelCase }}Id = request.param('{{ parentTable.names.camelCase }}Id');
-        await {{ parentTable.names.pascalCase }}.query().where({
-          id: {{ parentTable.names.camelCase }}Id,
-          @if(parentTable.relations.find(relation => relation.type === 'belongsTo' && relation.withModel === '$auth'))
-          {{
-            input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
-          }}: auth.user!.id,
-          @endif
-        }).firstOrFail()
-      @endeach
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        input, table
+      })
       return {{ table.names.pascalCase }}.query().whereIn('id', request.input('ids')).delete()
     }
   @endif

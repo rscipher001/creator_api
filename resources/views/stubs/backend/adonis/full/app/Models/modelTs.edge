@@ -95,12 +95,11 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @endeach
 
   @if(isAuth)
-
-  @beforeSave()
-  public static async hashPassword (user: User) {
-    if (user.$dirty.password) {
-      user.password = await Hash.make(user.password)
+    @beforeSave()
+    public static async hashPassword (user: User) {
+      if (user.$dirty.password) {
+        user.password = await Hash.make(user.password)
+      }
     }
-  }
-@endif
+  @endif
 }
