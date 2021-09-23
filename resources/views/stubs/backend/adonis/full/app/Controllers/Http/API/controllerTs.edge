@@ -23,7 +23,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     public async index({ auth, request }: HttpContextContract) {
       const page = request.input('page', 1)
       const size = request.input('size', 10)
-      @each(parentTable in table.routeParentTables)
+      @each((parentTable, parentTableIndex) in table.routeParentTables)
         const {{ parentTable.names.camelCase }}Id = request.param('{{ parentTable.names.camelCase }}Id');
         await {{ parentTable.names.pascalCase }}.query().where({
           id: {{ parentTable.names.camelCase }}Id,
@@ -33,6 +33,15 @@ export default class {{ table.names.pascalCasePlural }}Controller {
               `${input.auth.table.names.camelCase}Id` :
               `${input.auth.table.names.snakeCase}_id`
           }}: auth.user!.id,
+          @endif
+          @if(parentTableIndex !== 0)~
+            @if(input.camelCaseStrategy)
+              {{ table.routeParentTables[parentTableIndex - 1].names.camelCase }}Id,
+            @else
+            {{ table.routeParentTables[parentTableIndex - 1].names.snakeCase }}_id: {{
+              table.routeParentTables[parentTableIndex - 1].names.camelCase
+            }}Id,
+            @endif
           @endif
         }).firstOrFail()
       @endeach
