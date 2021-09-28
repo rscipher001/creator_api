@@ -93,6 +93,7 @@ export interface Relation {
 }
 
 export default interface ProjectInput {
+  id: number,
   name: string // should be camelcase
   names: ExtendedNames
   projectsPath: string // Folder where all prjoects are stored

@@ -17,10 +17,12 @@ import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
 
 class BackendProjectService {
   private input: any
+  private projectId: number
   private projectInput: ProjectInput
 
-  constructor(input) {
+  constructor(input, projectId) {
     this.input = input
+    this.projectId = projectId
   }
 
   public prepareTable(table): Table {
@@ -76,14 +78,15 @@ class BackendProjectService {
    */
   public prepare(): ProjectInput {
     const projectInput: any = {}
+    projectInput.id = this.projectId
     projectInput.camelCaseStrategy = !!this.input.camelCaseStrategy
     projectInput.generate = this.input.generate
     projectInput.names = HelperService.generateExtendedNames(this.input.name)
     projectInput.name = projectInput.names.pascalCase
     projectInput.projectsPath = Application.makePath(Env.get('PROJECT_PATH'))
-    projectInput.path = `${projectInput.projectsPath}/${projectInput.names.dashCase}`
-    projectInput.spaPath = `${projectInput.projectsPath}/${projectInput.names.dashCase}-spa`
-    projectInput.basePath = projectInput.names.dashCase
+    projectInput.basePath = `${this.projectId}-${projectInput.names.dashCase}`
+    projectInput.path = `${projectInput.projectsPath}/${projectInput.basePath}`
+    projectInput.spaPath = `${projectInput.projectsPath}/${projectInput.basePath}-spa`
     projectInput.database = this.input.database.toLocaleLowerCase()
     projectInput.types = this.input.types.map((t) => t.toLowerCase())
     projectInput.auth = this.input.auth
@@ -102,7 +105,6 @@ class BackendProjectService {
     this.projectInput = projectInput as ProjectInput
     this.prepareTenantSettings()
     this.prepareRouteParentTables()
-    debugger
     return this.projectInput
   }
 

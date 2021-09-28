@@ -70,7 +70,7 @@ export default class ProjectsController {
 
   protected async generateProject(input, project: Project) {
     try {
-      const generator = new Generator(input)
+      const generator = new Generator(input, project.id)
       await generator.init()
       project.status = 'done'
       await project.save()
@@ -81,7 +81,7 @@ export default class ProjectsController {
       const apiPath = `${basePath}/${names.dashCase}`
       const uiPath = `${basePath}/${names.dashCase}-spa`
       try {
-        await HelperService.execute('rm', ['-f', apiPath, uiPath], {
+        await HelperService.execute('rm', ['-rf', apiPath, uiPath], {
           cwd: basePath,
         })
       } catch (e) {}
