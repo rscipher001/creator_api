@@ -39,7 +39,7 @@ export default class Init {
         cwd: this.input.projectsPath,
       }
     )
-    
+
     // 2. Initiate git repo
     await HelperService.execute('git', ['init'], {
       cwd: this.input.path,

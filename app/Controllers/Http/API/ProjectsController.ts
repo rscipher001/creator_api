@@ -39,13 +39,14 @@ export default class ProjectsController {
     if (project.status === 'queued') throw new Error('Build is in progress')
     if (project.status === 'failed') throw new Error('Build failed')
     return Route.makeSignedUrl('projectDownload', {
-      projectId, type,
+      projectId,
+      type,
     })
   }
 
   public async download({ request, response }: HttpContextContract) {
     if (!request.hasValidSignature()) {
-      throw new Error('Signature is invalid');
+      throw new Error('Signature is invalid')
     }
     const id = request.param('projectId')
     const type = request.param('type')
@@ -57,9 +58,13 @@ export default class ProjectsController {
     // const uiPath = `${basePath}/${names.dashCase}-spa`
 
     if (type === 'api') {
-      await HelperService.execute('git', ['archive', '--format', 'zip', '--output', 'api.zip', 'master'], {
-        cwd: apiPath
-      });
+      await HelperService.execute(
+        'git',
+        ['archive', '--format', 'zip', '--output', 'api.zip', 'master'],
+        {
+          cwd: apiPath,
+        }
+      )
       return response.download(`${apiPath}/api.zip`, true)
     }
     if (type === 'web') {

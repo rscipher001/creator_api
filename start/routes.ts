@@ -10,7 +10,9 @@ Route.group(() => {
   Route.post('/logout', 'API/AuthController.logout')
 
   // Public API for downloading project
-  Route.get('/project/:projectId/download/:type', 'API/ProjectsController.download').as('projectDownload')
+  Route.get('/project/:projectId/download/:type', 'API/ProjectsController.download').as(
+    'projectDownload'
+  )
 }).prefix('/api')
 
 Route.group(() => {
@@ -20,7 +22,9 @@ Route.group(() => {
   Route.post('/project', 'API/ProjectsController.store')
 
   // Project link generate and download options
-  Route.get('/project/:projectId/generate/:type', 'API/ProjectsController.generateSignedUrl').as('generateSignedUrl')
+  Route.get('/project/:projectId/generate/:type', 'API/ProjectsController.generateSignedUrl').as(
+    'generateSignedUrl'
+  )
 })
   .middleware(['auth'])
   .prefix('/api')
