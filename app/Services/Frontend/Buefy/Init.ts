@@ -23,6 +23,7 @@ export default class SPAGenerator {
       mkdirp(`${this.input.spaPath}/src/router/middlewares`),
     ])
 
+    await this.createJsConfigJson()
     await this.createSrcConstantsIndexJs()
     await this.createSrcServicesHttpServiceJs()
     await this.createSrcServicesLocalStorageServiceJs()
@@ -129,6 +130,20 @@ export default class SPAGenerator {
     if (!fileExists) {
       const content = await View.render(
         `stubs/frontend/${this.input.tech.frontend}/full/src/services/localStorageServiceJs`,
+        {
+          input: this.input,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  public async createJsConfigJson() {
+    const filePath = `${this.input.spaPath}/jsconfig.json`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/jsConfigJson`,
         {
           input: this.input,
         }
