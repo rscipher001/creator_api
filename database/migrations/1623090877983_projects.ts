@@ -7,6 +7,7 @@ export default class Projects extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.text('rawInput')
+      table.string('name')
       table.string('status')
       table.integer('userId').unsigned().references('id').inTable('users')
 

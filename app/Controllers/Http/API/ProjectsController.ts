@@ -19,6 +19,7 @@ export default class ProjectsController {
     const input = await request.validate(CreateProjectValidator)
     const project = await Project.create({
       status: 'queued',
+      name: input.name,
       rawInput: JSON.stringify(input),
       userId: auth.user!.id,
     })
@@ -54,8 +55,8 @@ export default class ProjectsController {
     const input = JSON.parse(project.rawInput)
     const basePath = Application.makePath(Env.get('PROJECT_PATH'))
     const names = HelperService.generateExtendedNames(input.name)
-    const apiPath = `${basePath}/${names.dashCase}`
-    // const uiPath = `${basePath}/${names.dashCase}-spa`
+    const apiPath = `${basePath}/${id}-${names.dashCase}`
+    const uiPath = `${basePath}/${id}-${names.dashCase}-spa`
 
     if (type === 'api') {
       await HelperService.execute(
@@ -67,9 +68,15 @@ export default class ProjectsController {
       )
       return response.download(`${apiPath}/api.zip`, true)
     }
-    if (type === 'web') {
-      // Generate a zip for API folder
-      // Download it
+    if (type === 'spa') {
+      await HelperService.execute(
+        'git',
+        ['archive', '--format', 'zip', '--output', 'spa.zip', 'master'],
+        {
+          cwd: uiPath,
+        }
+      )
+      return response.download(`${uiPath}/spa.zip`, true)
     }
   }
 

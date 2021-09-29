@@ -10,6 +10,9 @@ export default class Project extends BaseModel {
   public rawInput: string
 
   @column()
+  public name: string
+
+  @column()
   public status: string
 
   @column.dateTime({ autoCreate: true })

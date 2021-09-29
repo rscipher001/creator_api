@@ -124,7 +124,7 @@ class BackendProjectService {
         throw new Error('Tenant table not found')
       }
 
-      if (userCount == 1 && tenantCount === 1) {
+      if (userCount === 1 && tenantCount === 1) {
         /**
          * One user & one tenant
          * User belongs to tenant so user collection will have tenant Id
@@ -152,7 +152,7 @@ class BackendProjectService {
         })
       }
 
-      if (userCount == 1 && tenantCount === 'n') {
+      if (userCount === 1 && tenantCount === 'n') {
         /**
          * One user & multiple tenant
          * Tenant belongs to user so tenant have userId
@@ -179,7 +179,7 @@ class BackendProjectService {
         })
       }
 
-      if (tenantCount === 1 && userCount == 'n') {
+      if (tenantCount === 1 && userCount === 'n') {
         /**
          * One tenant & multiple user
          * User belongs to tenant so user have tenantId
@@ -206,7 +206,7 @@ class BackendProjectService {
         })
       }
 
-      if (tenantCount === 'n' && userCount == 'n') {
+      if (tenantCount === 'n' && userCount === 'n') {
         /**
          * Many to many
          * 1. Add relation to models
