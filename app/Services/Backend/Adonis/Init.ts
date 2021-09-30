@@ -1,5 +1,7 @@
-import HelperService from 'App/Services/HelperService'
+import mkdirp from 'mkdirp'
+import View from '@ioc:Adonis/Core/View'
 import ProjectInput from 'App/Interfaces/ProjectInput'
+import HelperService from 'App/Services/HelperService'
 
 export default class Init {
   private input: ProjectInput
@@ -8,12 +10,26 @@ export default class Init {
     this.input = input
   }
 
+  // Create .vscode/extensions.json
+  protected async createVscodeExtenstionsJson() {
+    await mkdirp(`${this.input.path}/.vscode`)
+    const filePath = `${this.input.path}/.vscode/extensions.json`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/dotVscode/extensionsJson`
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
   /**
    * Steps
    * 0. Determine project type
    * 1. Create Project
-   * 2. Setup git repo
-   * 3. Initial commit
+   * 2. Add .vscode folder
+   * 3. Setup git repo
+   * 4. Initial commit
    */
   protected async start() {
     let type: string
@@ -40,7 +56,10 @@ export default class Init {
       }
     )
 
-    // 2. Initiate git repo
+    // 2. Add .vscode folder
+    await this.createVscodeExtenstionsJson()
+
+    // 3. Initiate git repo
     await HelperService.execute('git', ['init'], {
       cwd: this.input.path,
     })
@@ -52,7 +71,7 @@ export default class Init {
       cwd: this.input.path,
     })
 
-    // 3 Initial commit
+    // 4. Initial commit
     await HelperService.commit('Initial Commit', this.input.path)
   }
 
