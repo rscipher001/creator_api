@@ -17,7 +17,6 @@ declare module '@ioc:Adonis/Core/Env' {
 	| module.
   |
   */
- =>
 
   type CustomTypes = typeof import('../env').default
   interface EnvTypes extends CustomTypes {}

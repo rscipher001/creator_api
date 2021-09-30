@@ -143,7 +143,7 @@ export default class SPAGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/jsConfigJson`,
+        `stubs/frontend/${this.input.tech.frontend}/full/jsconfigJson`,
         {
           input: this.input,
         }

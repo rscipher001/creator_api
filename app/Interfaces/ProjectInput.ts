@@ -100,6 +100,8 @@ export default interface ProjectInput {
   path: string // project folder full path
   spaPath: string // project folder full path
   basePath: string // Project folder name
+  defaultMailer: string
+  mailers: string[]
   generate: {
     api: {
       generate: boolean

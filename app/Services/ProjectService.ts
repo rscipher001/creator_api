@@ -10,6 +10,7 @@ import AdonisAuthGenerator from 'App/Services/Backend/Adonis/AuthGenerator'
 import AdonisTenantGenerator from 'App/Services/Backend/Adonis/TenantGenerator'
 import AdonisCRUDGenerator from 'App/Services/Backend/Adonis/CRUDGenerator'
 import AdonisTestGenerator from 'App/Services/Backend/Adonis/TestGenerator'
+import AdonisMailerGenerator from 'App/Services/Backend/Adonis/MailerGenerator'
 
 import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
@@ -90,6 +91,8 @@ class BackendProjectService {
     projectInput.database = this.input.database.toLocaleLowerCase()
     projectInput.types = this.input.types.map((t) => t.toLowerCase())
     projectInput.auth = this.input.auth
+    projectInput.mailers = this.input.mailers
+    projectInput.defaultMailer = this.input.defaultMailer
     projectInput.tech = this.input.tech
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
@@ -265,6 +268,12 @@ class BackendProjectService {
         // Add database
         const db = new AdonisDatabaseGenerator(this.projectInput)
         await db.init()
+
+        // Add mailer
+        if (this.input.mailers.length) {
+          const mailer = new AdonisMailerGenerator(this.projectInput)
+          await mailer.init()
+        }
 
         // Add Auth
         const auth = new AdonisAuthGenerator(this.projectInput)
