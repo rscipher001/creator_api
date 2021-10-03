@@ -13,6 +13,11 @@ Route.group(() => {
   Route.get('/project/:projectId/download/:type', 'API/ProjectsController.download').as(
     'projectDownload'
   )
+
+  // Route forgot password
+  Route.post('/password/forget/request', 'API/PasswordResetController.sendResetEmail')
+  Route.post('/password/forget/verify', 'API/PasswordResetController.verifyToken')
+  Route.post('/password/forget/update', 'API/PasswordResetController.updatePassword')
 }).prefix('/api')
 
 Route.group(() => {

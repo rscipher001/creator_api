@@ -63,6 +63,10 @@ export interface Column {
 
 export interface Table {
   name: string
+  skipController: boolean // Don't generate controller if true
+  skipModel: boolean // Don't generate model if true
+  skipMigration: boolean // Don't generate migration if true
+  skipUI: boolean //Don't generate CRUD if true
   names: Names
   singleton: boolean // Singleton means only one instace per parent.
   tableName: string // In DB
@@ -127,6 +131,8 @@ export default interface ProjectInput {
   auth: {
     login: boolean
     register: boolean
+    password_reset: boolean
+    password_change: boolean
     table: Table
   }
   git: {

@@ -26,4 +26,5 @@ export default Env.rules({
   MYSQL_PASSWORD: Env.schema.string.optional(),
   MYSQL_DB_NAME: Env.schema.string(),
   PROJECT_PATH: Env.schema.string(),
+  MAIL_FROM_ADDRESS: Env.schema.string({ format: 'email' }),
 })

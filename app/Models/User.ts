@@ -1,7 +1,16 @@
 import { DateTime } from 'luxon'
-import { column, beforeSave, BaseModel, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 import Hash from '@ioc:Adonis/Core/Hash'
-import Project from './Project'
+import Project from 'App/Models/Project'
+import ResetToken from 'App/Models/ResetToken'
+import {
+  column,
+  beforeSave,
+  BaseModel,
+  hasMany,
+  HasMany,
+  hasOne,
+  HasOne,
+} from '@ioc:Adonis/Lucid/Orm'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -34,4 +43,7 @@ export default class User extends BaseModel {
 
   @hasMany(() => Project)
   public projects: HasMany<typeof Project>
+
+  @hasOne(() => ResetToken)
+  public resetToken: HasOne<typeof ResetToken>
 }
