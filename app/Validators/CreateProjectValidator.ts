@@ -31,6 +31,10 @@ export default class CreateProjectValidator {
 
   protected tableSchema = schema.object().members({
     name: schema.string({ trim: true }, rules.maxLength['127']),
+    skipController: schema.boolean.optional(),
+    skipModel: schema.boolean.optional(),
+    skipMigration: schema.boolean.optional(),
+    skipUI: schema.boolean.optional(),
     timestamp: schema.boolean.optional(),
     generateRoute: schema.boolean.optional(),
     singleton: schema.boolean.optional(),
@@ -87,6 +91,8 @@ export default class CreateProjectValidator {
     }),
     auth: schema.object().members({
       register: schema.boolean(),
+      passwordReset: schema.boolean(),
+      passwordChange: schema.boolean(),
       table: this.tableSchema,
     }),
     tenantSettings: schema.object().members({

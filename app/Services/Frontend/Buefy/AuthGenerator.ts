@@ -15,9 +15,10 @@ export default class AuthGenerator {
    * Changes maxlength and adds other fields if required
    */
   protected async copyPages() {
-    await this.copyLoginView()
-    await this.copyRegisterView()
-    await this.copyDashboardView()
+    await Promise.all([this.copyLoginView(), this.copyRegisterView(), this.copyDashboardView()])
+    if (this.input.auth.passwordReset) {
+      await Promise.all([this.copyForgotPasswordRequestView(), this.copyForgotPasswordUpdateView()])
+    }
   }
 
   protected async copyRegisterView() {
@@ -66,6 +67,32 @@ export default class AuthGenerator {
     if (!exists) {
       const content = await View.render(
         `stubs/frontend/${this.input.tech.frontend}/full/src/views/dashboardVue`
+      )
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copyForgotPasswordRequestView() {
+    const path = `${this.input.spaPath}/src/views/ForgotPasswordRequest.vue`
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const email = this.input.auth.table.columns.find((c) => c.name === 'Email')
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/ForgotPasswordRequestVue`,
+        {
+          email,
+        }
+      )
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copyForgotPasswordUpdateView() {
+    const path = `${this.input.spaPath}/src/views/ForgotPasswordUpdate.vue`
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/ForgotPasswordUpdateVue`
       )
       await HelperService.writeFile(path, content)
     }

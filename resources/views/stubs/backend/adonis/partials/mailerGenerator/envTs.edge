@@ -1,3 +1,7 @@
+
+CACHE_VIEWS: Env.schema.boolean(),
+UI_URL: Env.schema.string(),
+MAIL_FROM_ADDRESS: Env.schema.string({ format: 'email' }),
 @if(mailers.includes('smtp'))
 SMTP_HOST: Env.schema.string(),
 SMTP_PORT: Env.schema.number(),

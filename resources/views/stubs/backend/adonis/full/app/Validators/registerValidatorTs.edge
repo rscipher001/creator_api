@@ -8,7 +8,7 @@ export default class RegisterValidator {
   public schema = schema.create({
     email: schema.string({ trim: true }, [
       rules.email(),
-      rules.maxLength({{ email.meta.maxLength || 255 }}),
+      rules.maxLength({{ email.meta.maxLength || 256 }}),
       rules.unique({
         table: {{ table.names.pascalCase }}.table,
         column: 'email'

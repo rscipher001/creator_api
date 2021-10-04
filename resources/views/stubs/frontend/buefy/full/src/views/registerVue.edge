@@ -7,7 +7,7 @@
 
           @each(column in input.auth.table.columns)
           @if(column.meta.expose !== false)
-          @if(!['Email', 'Password'].includes(column.name))
+          @if(!['Email', 'Password', 'RememberMeToken'].includes(column.name))
           <b-field label="{{
             column.input?.displayName || column.names.pascalCase
           }}{{
@@ -29,7 +29,7 @@
           @endeach
 
           <b-field label="Email *" :type="errors.email ? 'is-danger' : ''" :message="errors.email">
-            <b-input v-model="form.email" maxlength="{{ email.meta.maxLength || 255 }}" required></b-input>
+            <b-input v-model="form.email" maxlength="{{ email.meta.maxLength || 256 }}" required></b-input>
           </b-field>
 
           <b-field label="Password *" :type="errors.password ? 'is-danger' : ''" :message="errors.password">

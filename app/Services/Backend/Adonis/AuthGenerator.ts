@@ -1,8 +1,8 @@
+import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
+import Logger from '@ioc:Adonis/Core/Logger'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
-import mkdirp from 'mkdirp'
-import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class AuthGenerator {
   private input: ProjectInput

@@ -1,16 +1,17 @@
-import Application from '@ioc:Adonis/Core/Application'
-import { string } from '@ioc:Adonis/Core/Helpers'
-import ProjectInput, { Table, Relation, RelationType } from 'App/Interfaces/ProjectInput'
-import HelperService from 'App/Services/HelperService'
 import Env from '@ioc:Adonis/Core/Env'
+import { string } from '@ioc:Adonis/Core/Helpers'
+import Application from '@ioc:Adonis/Core/Application'
+import HelperService from 'App/Services/HelperService'
+import ProjectInput, { Table, Relation, RelationType } from 'App/Interfaces/ProjectInput'
 
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
-import AdonisDatabaseGenerator from 'App/Services/Backend/Adonis/DatabaseGenerator'
 import AdonisAuthGenerator from 'App/Services/Backend/Adonis/AuthGenerator'
-import AdonisTenantGenerator from 'App/Services/Backend/Adonis/TenantGenerator'
 import AdonisCRUDGenerator from 'App/Services/Backend/Adonis/CRUDGenerator'
 import AdonisTestGenerator from 'App/Services/Backend/Adonis/TestGenerator'
 import AdonisMailerGenerator from 'App/Services/Backend/Adonis/MailerGenerator'
+import AdonisTenantGenerator from 'App/Services/Backend/Adonis/TenantGenerator'
+import AdonisDatabaseGenerator from 'App/Services/Backend/Adonis/DatabaseGenerator'
+import AdonisPasswordResetGenerator from 'App/Services/Backend/Adonis/PasswordResetGenerator'
 
 import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
@@ -90,11 +91,16 @@ class BackendProjectService {
     projectInput.spaPath = `${projectInput.projectsPath}/${projectInput.basePath}-spa`
     projectInput.database = this.input.database.toLocaleLowerCase()
     projectInput.types = this.input.types.map((t) => t.toLowerCase())
-    projectInput.auth = this.input.auth
     projectInput.mailers = this.input.mailers
     projectInput.defaultMailer = this.input.defaultMailer
     projectInput.tech = this.input.tech
+    projectInput.auth = this.input.auth
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
+
+    if (this.input.auth.passwordReset) {
+      this.addPasswordResetTable()
+    }
+
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
     projectInput.tenantSettings = this.input.tenantSettings
     if (!this.input.git) {
@@ -255,6 +261,46 @@ class BackendProjectService {
       }
     })
   }
+
+  /**
+   * Add tokens table if password reset is enabled
+   */
+  protected addPasswordResetTable() {
+    const emailColumn = this.input.auth.table.columns.find((column) => column.name === 'email')
+    const passwordResetTable = {
+      skipController: true,
+      skipModel: true,
+      skipUI: true,
+      operations: [],
+      relations: [],
+      name: 'ResetToken',
+      timestamps: true,
+      columns: [
+        {
+          name: 'email',
+          type: 'string',
+          meta: {
+            ...emailColumn,
+            ...{
+              expose: false,
+            },
+          },
+        },
+        {
+          name: 'token',
+          type: 'string',
+          meta: {
+            expose: false,
+            index: true,
+            length: 128,
+            required: true,
+          },
+        },
+      ],
+    }
+    this.input.tables.push(passwordResetTable)
+  }
+
   /**
    * Handle complete project creation
    */
@@ -270,7 +316,7 @@ class BackendProjectService {
         await db.init()
 
         // Add mailer
-        if (this.input.mailers.length) {
+        if (this.projectInput.mailers.length) {
           const mailer = new AdonisMailerGenerator(this.projectInput)
           await mailer.init()
         }
@@ -278,6 +324,15 @@ class BackendProjectService {
         // Add Auth
         const auth = new AdonisAuthGenerator(this.projectInput)
         await auth.init()
+
+        if (
+          this.projectInput.mailers.length &&
+          (this.projectInput.auth.passwordChange || this.projectInput.auth.passwordReset)
+        ) {
+          // Add Password reset
+          const passwordReset = new AdonisPasswordResetGenerator(this.projectInput)
+          await passwordReset.init()
+        }
 
         // Add Tenant
         if (this.projectInput.tenantSettings.tenant !== 0) {

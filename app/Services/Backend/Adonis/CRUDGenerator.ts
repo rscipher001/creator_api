@@ -13,6 +13,7 @@ export default class CRUDGenerator {
   // Create app/Models/{Model}.ts
   protected async createModel(i: number) {
     const table = this.input.tables[i]
+    if (table.skipModel) return
     const filePath = `${this.input.path}/app/Models/${table.names.pascalCase}.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -31,7 +32,8 @@ export default class CRUDGenerator {
   // Create migration
   protected async createMigration(i: number) {
     const table = this.input.tables[i]
-    const namePart = `${table.names.camelCasePlural}.ts`
+    if (table.skipMigration) return
+    const namePart = `${table.names.snakeCasePlural}.ts`
     const migrationsPath = `${this.input.path}/database/migrations`
     const migrationFileNames = await HelperService.readdir(migrationsPath)
     let fileExists = false
@@ -115,6 +117,7 @@ export default class CRUDGenerator {
   // Create Controller
   protected async createController(i: number) {
     const table = this.input.tables[i]
+    if (table.skipController) return
     if (this.input.types.includes('api')) {
       const filePath = `${this.input.path}/app/Controllers/Http/API/${table.names.pascalCasePlural}Controller.ts`
       const fileExists = await HelperService.fileExists(filePath)
@@ -134,6 +137,7 @@ export default class CRUDGenerator {
   // Add routes
   protected async addRoutes(i: number) {
     const table = this.input.tables[i]
+    if (table.skipController) return
     if (this.input.types.includes('api')) {
       const filePath = `${this.input.path}/start/routes.ts`
       let content = await HelperService.readFile(filePath)
