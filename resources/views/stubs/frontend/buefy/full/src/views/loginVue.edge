@@ -10,7 +10,7 @@
               ref="loginEmail"
               type="email"
               v-model="form.email"
-              maxlength="{{ email.meta.maxLength || 255 }}"
+              maxlength="{{ email.meta.maxLength || 256 }}"
               @if(email.minLength !== undefined)
               minlength="{{ email.meta.minLength }}"
               @endif
@@ -27,6 +27,16 @@
         @if(input.auth.register)
         <b-button class="is-fullwidth mt-2" tag="router-link" to="/register" type="is-light">
           Create an Account
+        </b-button>
+        @endif
+        @if(input.auth.passwordReset)
+        <b-button
+          class="is-fullwidth mt-2"
+          tag="router-link"
+          to="/forgot_password/request"
+          type="is-ghost"
+        >
+          Forgot password?
         </b-button>
         @endif
       </div>

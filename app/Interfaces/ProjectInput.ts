@@ -131,8 +131,8 @@ export default interface ProjectInput {
   auth: {
     login: boolean
     register: boolean
-    password_reset: boolean
-    password_change: boolean
+    passwordReset: boolean
+    passwordChange: boolean
     table: Table
   }
   git: {

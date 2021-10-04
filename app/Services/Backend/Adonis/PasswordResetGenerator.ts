@@ -22,7 +22,7 @@ export default class PasswordResetGenerator {
   }
 
   // Create app/Controllers/Http/Api/PasswordResetController.ts
-  protected async createApiPasswordResetController() {
+  protected async createController() {
     const table = this.input.auth.table
     const filePath = `${this.input.path}/app/Controllers/Http/API/PasswordResetController.ts`
     const fileExists = await HelperService.fileExists(filePath)
@@ -40,7 +40,7 @@ export default class PasswordResetGenerator {
   }
 
   // Add start/routes.ts
-  protected async addApiAuthRoutes() {
+  protected async addRoutes() {
     const filePath = `${this.input.path}/start/routes.ts`
     let content = await HelperService.readFile(filePath)
     const part = await View.render(
@@ -63,8 +63,8 @@ export default class PasswordResetGenerator {
   protected async start() {
     if (this.input.types.includes('api')) {
       await this.createModel()
-      await this.createApiPasswordResetController()
-      await this.addApiAuthRoutes()
+      await this.createController()
+      await this.addRoutes()
     }
     await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
     await HelperService.commit('Password reset added', this.input.path)

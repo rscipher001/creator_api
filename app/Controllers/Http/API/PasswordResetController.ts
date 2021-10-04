@@ -23,9 +23,11 @@ export default class PasswordResetController {
           .to(resetToken.email)
           .from(Env.get('MAIL_FROM_ADDRESS'))
           .subject('Password reset mail')
-          .htmlView('emails/password_reset', {
+          .htmlView('emails/passwordReset', {
             user,
-            url: `/?token=${resetToken.token}&email=${encryptedEmail}`,
+            url: `${Env.get('UI_URL')}/forgot_password/verify?token=${
+              resetToken.token
+            }&email=${encryptedEmail}`,
           })
       })
     }

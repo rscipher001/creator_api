@@ -1,4 +1,5 @@
 import os from 'os'
+import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
@@ -130,6 +131,18 @@ export default class MailerGenerator {
     }
   }
 
+  // Copy emails
+  protected async generateMailViews() {
+    const filePath = `${this.input.path}/resouces/views/mails/passwordReset.edge`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/resouces/views/mails/passwordReset.edge`,
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
   /**
    * Copy module files
    * 1. contracts/mail.ts
@@ -141,6 +154,7 @@ export default class MailerGenerator {
 
     // Create config/mail.ts
     await this.createConfigMailTs()
+    await this.generateMailViews()
   }
 
   /**
@@ -150,12 +164,19 @@ export default class MailerGenerator {
    * 3. Copy & update mailer module related files
    */
   protected async start() {
-    // Install auth module
-    const npmModules = ['install', '@adonisjs/mail']
+    await mkdirp(`${this.input.path}/resouces/views`)
+
+    // Install mail and view module
+    const npmArguments = ['install', '@adonisjs/mail', '@adonisjs/view']
     if (this.input.mailers.includes('ses')) {
-      npmModules.push('aws-sdk')
+      npmArguments.push('aws-sdk')
     }
-    await HelperService.execute('npm', npmModules, {
+    await HelperService.execute('npm', npmArguments, {
+      cwd: this.input.path,
+    })
+
+    // Setup views
+    await HelperService.execute('node', ['ace', 'configure', '@adonisjs/view'], {
       cwd: this.input.path,
     })
 

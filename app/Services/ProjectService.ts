@@ -97,7 +97,7 @@ class BackendProjectService {
     projectInput.auth = this.input.auth
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
 
-    if (this.input.auth.password_reset) {
+    if (this.input.auth.passwordReset) {
       this.addPasswordResetTable()
     }
 
@@ -327,7 +327,7 @@ class BackendProjectService {
 
         if (
           this.projectInput.mailers.length &&
-          (this.projectInput.auth.password_change || this.projectInput.auth.password_reset)
+          (this.projectInput.auth.passwordChange || this.projectInput.auth.passwordReset)
         ) {
           // Add Password reset
           const passwordReset = new AdonisPasswordResetGenerator(this.projectInput)

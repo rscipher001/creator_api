@@ -300,12 +300,14 @@ export default class DatabaseGenerator {
       case 'mysql':
         if (content.indexOf('MYSQL_HOST') === -1) {
           content += part
+          content += '\n'
           await HelperService.writeFile(filePath, content)
         }
         break
       case 'pg':
         if (content.indexOf('PG_HOST') === -1) {
           content += part
+          content += '\n'
           await HelperService.writeFile(filePath, content)
         }
     }

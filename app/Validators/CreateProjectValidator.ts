@@ -91,8 +91,8 @@ export default class CreateProjectValidator {
     }),
     auth: schema.object().members({
       register: schema.boolean(),
-      password_reset: schema.boolean(),
-      password_change: schema.boolean(),
+      passwordReset: schema.boolean(),
+      passwordChange: schema.boolean(),
       table: this.tableSchema,
     }),
     tenantSettings: schema.object().members({

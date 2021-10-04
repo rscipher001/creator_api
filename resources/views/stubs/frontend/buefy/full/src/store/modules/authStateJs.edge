@@ -12,6 +12,11 @@ export default {
       register: false,
       @endif
       logout: false,
+      @if(input.auth.passwordReset)
+      forgotPasswordRequest: false,
+      forgotPasswordVerify: false,
+      forgotPasswordUpdate: false,
+      @endif
     },
     token: null, // Authorization token
     user: null, // Logged in user
@@ -76,6 +81,62 @@ export default {
       await HttpService.post('/logout');
       dispatch('unsetTokens');
     },
+
+    @if(input.auth.passwordReset)
+    async forgotPasswordRequest({ commit }, input) {
+      commit("setLoading", { key: "forgotPasswordRequest", value: true });
+      try {
+        const message = await HttpService.post(
+          "/password/forget/request",
+          input
+        );
+        commit("setLoading", { key: "forgotPasswordRequest", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "forgotPasswordRequest", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async forgotPasswordVerify({ commit }, input) {
+      commit("setLoading", { key: "forgotPasswordVerify", value: true });
+      try {
+        const message = await HttpService.post(
+          "/password/forget/verify",
+          input
+        );
+        commit("setLoading", { key: "forgotPasswordVerify", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "forgotPasswordVerify", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async forgotPasswordUpdate({ commit }, input) {
+      commit("setLoading", { key: "forgotPasswordUpdate", value: true });
+      try {
+        const message = await HttpService.post(
+          "/password/forget/update",
+          input
+        );
+        commit("setLoading", { key: "forgotPasswordUpdate", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "forgotPasswordUpdate", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+    @endif
   },
 
   mutations: {
