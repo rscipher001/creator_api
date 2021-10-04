@@ -43,7 +43,4 @@ export default class User extends BaseModel {
 
   @hasMany(() => Project)
   public projects: HasMany<typeof Project>
-
-  @hasOne(() => ResetToken)
-  public resetToken: HasOne<typeof ResetToken>
 }
