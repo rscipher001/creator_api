@@ -28,4 +28,5 @@ export default Env.rules({
   PROJECT_PATH: Env.schema.string(),
   MAIL_FROM_ADDRESS: Env.schema.string({ format: 'email' }),
   UI_URL: Env.schema.string(),
+  CACHE_VIEWS: Env.schema.boolean(),
 })

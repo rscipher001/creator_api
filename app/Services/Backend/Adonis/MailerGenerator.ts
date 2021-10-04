@@ -15,10 +15,20 @@ export default class MailerGenerator {
   protected async updateDotAdonisrcJson() {
     const filePath = `${this.input.path}/.adonisrc.json`
     const content = await HelperService.readJson(filePath)
-    const provider = '@adonisjs/mail'
+    const mailProvider = '@adonisjs/mail'
+    const viewProvider = '@adonisjs/view'
     const command = '@adonisjs/mail/build/commands'
-    if (!content.providers.includes(provider)) {
-      content.providers.push(provider)
+    content.metaFiles = [
+      {
+        pattern: 'resources/views/**/*.edge',
+        reloadServer: false,
+      },
+    ]
+    if (!content.providers.includes(mailProvider)) {
+      content.providers.push(mailProvider)
+    }
+    if (!content.providers.includes(viewProvider)) {
+      content.providers.push(viewProvider)
     }
     if (!content.commands.includes(command)) {
       content.commands.push(command)
@@ -30,11 +40,15 @@ export default class MailerGenerator {
   protected async updateTsconfigJson() {
     const filePath = `${this.input.path}/tsconfig.json`
     const content = await HelperService.readJson(filePath)
-    const type = '@adonisjs/mail'
-    if (!content.compilerOptions.types.includes(type)) {
-      content.compilerOptions.types.push(type)
-      await HelperService.writeJson(filePath, content)
+    const mailType = '@adonisjs/mail'
+    const viewType = '@adonisjs/view'
+    if (!content.compilerOptions.types.includes(mailType)) {
+      content.compilerOptions.types.push(mailType)
     }
+    if (!content.compilerOptions.types.includes(viewType)) {
+      content.compilerOptions.types.push(viewType)
+    }
+    await HelperService.writeJson(filePath, content)
   }
 
   // Update ace-manifest.json
@@ -133,11 +147,11 @@ export default class MailerGenerator {
 
   // Copy emails
   protected async generateMailViews() {
-    const filePath = `${this.input.path}/resouces/views/mails/passwordReset.edge`
+    const filePath = `${this.input.path}/resources/views/emails/passwordReset.edge`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/backend/${this.input.tech.backend}/full/resouces/views/mails/passwordReset.edge`,
+        `stubs/backend/${this.input.tech.backend}/full/resources/views/emails/passwordReset.edge`
       )
       await HelperService.writeFile(filePath, content)
     }
@@ -164,7 +178,7 @@ export default class MailerGenerator {
    * 3. Copy & update mailer module related files
    */
   protected async start() {
-    await mkdirp(`${this.input.path}/resouces/views`)
+    await mkdirp(`${this.input.path}/resources/views/emails`)
 
     // Install mail and view module
     const npmArguments = ['install', '@adonisjs/mail', '@adonisjs/view']
@@ -172,11 +186,6 @@ export default class MailerGenerator {
       npmArguments.push('aws-sdk')
     }
     await HelperService.execute('npm', npmArguments, {
-      cwd: this.input.path,
-    })
-
-    // Setup views
-    await HelperService.execute('node', ['ace', 'configure', '@adonisjs/view'], {
       cwd: this.input.path,
     })
 

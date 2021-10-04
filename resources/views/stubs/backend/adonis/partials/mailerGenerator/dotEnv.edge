@@ -1,3 +1,7 @@
+CACHE_VIEWS=false
+UI_URL=http://locahost:8080
+
+MAIL_FROM_ADDRESS=
 @if(mailers.includes('smtp'))
 SMTP_HOST=localhost
 SMTP_PORT=587
@@ -16,5 +20,3 @@ MAILGUN_DOMAIN=
 @if(mailers.includes('sparkpost'))
 SPARKPOST_API_KEY=
 @endif
-
-MAIL_FROM_ADDRESS=
