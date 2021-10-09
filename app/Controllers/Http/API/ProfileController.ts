@@ -1,4 +1,5 @@
 import Hash from '@ioc:Adonis/Core/Hash'
+import Database from '@ioc:Adonis/Lucid/Database'
 import ProfileValidator from 'App/Validators/ProfileValidator'
 import AccountValidator from 'App/Validators/AccountValidator'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
@@ -39,6 +40,11 @@ export default class ProfileController {
 
     user.password = newPassword
     await user.save()
+
+    // revoke other tokens
+    const id: number = auth.use('api').token!.meta!.id
+    await Database.from('api_tokens').where('user_id', auth.user!.id).whereNot('id', id).delete()
+
     return 'Password updated successfully'
   }
 }

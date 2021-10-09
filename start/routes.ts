@@ -7,7 +7,6 @@ Route.get('/', async () => {
 Route.group(() => {
   Route.post('/login', 'API/AuthController.login')
   Route.post('/register', 'API/AuthController.register')
-  Route.post('/logout', 'API/AuthController.logout')
 
   // Public API for downloading project
   Route.get('/project/:projectId/download/:type', 'API/ProjectsController.download').as(
@@ -22,6 +21,10 @@ Route.group(() => {
 
 Route.group(() => {
   Route.get('/me', 'API/AuthController.me')
+  Route.post('/logout', 'API/AuthController.logout')
+  // Route.post('/test', function ({ auth }) {
+  //   return auth.use('api').token
+  // })
 
   // Profile routes
   Route.post('/profile', 'API/ProfileController.updateProfile')
