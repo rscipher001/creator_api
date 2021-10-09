@@ -23,6 +23,11 @@ Route.group(() => {
 Route.group(() => {
   Route.get('/me', 'API/AuthController.me')
 
+  // Profile routes
+  Route.post('/profile', 'API/ProfileController.updateProfile')
+  Route.post('/profile/account', 'API/ProfileController.updateAccount')
+  Route.post('/profile/password', 'API/ProfileController.updatePassword')
+
   Route.get('/project', 'API/ProjectsController.index')
   Route.post('/project', 'API/ProjectsController.store')
 
