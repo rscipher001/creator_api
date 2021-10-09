@@ -13,6 +13,9 @@ Route.group(() => {
     'projectDownload'
   )
 
+  // Email verification
+  Route.post('/email/verify', 'API/EmailVerificationController.verifyEmail')
+
   // Route forgot password
   Route.post('/password/forget/request', 'API/PasswordResetController.sendResetEmail')
   Route.post('/password/forget/verify', 'API/PasswordResetController.verifyToken')
