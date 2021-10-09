@@ -25,22 +25,23 @@ Route.group(() => {
 Route.group(() => {
   Route.get('/me', 'API/AuthController.me')
   Route.post('/logout', 'API/AuthController.logout')
-  // Route.post('/test', function ({ auth }) {
-  //   return auth.use('api').token
-  // })
-
-  // Profile routes
-  Route.post('/profile', 'API/ProfileController.updateProfile')
-  Route.post('/profile/account', 'API/ProfileController.updateAccount')
-  Route.post('/profile/password', 'API/ProfileController.updatePassword')
-
-  Route.get('/project', 'API/ProjectsController.index')
-  Route.post('/project', 'API/ProjectsController.store')
-
-  // Project link generate and download options
-  Route.get('/project/:projectId/generate/:type', 'API/ProjectsController.generateSignedUrl').as(
-    'generateSignedUrl'
-  )
 })
   .middleware(['auth'])
   .prefix('/api')
+
+Route.group(() => {
+    // Profile routes
+    Route.post('/profile', 'API/ProfileController.updateProfile')
+    Route.post('/profile/account', 'API/ProfileController.updateAccount')
+    Route.post('/profile/password', 'API/ProfileController.updatePassword')
+  
+    Route.get('/project', 'API/ProjectsController.index')
+    Route.post('/project', 'API/ProjectsController.store')
+  
+    // Project link generate and download options
+    Route.get('/project/:projectId/generate/:type', 'API/ProjectsController.generateSignedUrl').as(
+      'generateSignedUrl'
+    )
+})
+.middleware(['auth', 'ensureEmailIsVerified'])
+.prefix('/api')
