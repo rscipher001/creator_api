@@ -1,22 +1,22 @@
 <template>
   <div id="app">
-    <nav-bar></nav-bar>
-    <router-view/>
+    <div class="section">
+      <nav-bar></nav-bar>
+    </div>
+    <div class="section">
+      <router-view/>
+    </div>
   </div>
 </template>
 
 <script>
-import NavBar from './components/NavBar.vue';
+import NavBar from '@/components/NavBar.vue';
 
 export default {
+  name: 'App',
   components: {
     'nav-bar': NavBar,
   },
-  created() {
-
-  },
-  methods: {
-
-  },
+  methods: {},
 };
 </script>

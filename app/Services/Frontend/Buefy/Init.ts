@@ -11,6 +11,45 @@ export default class SPAGenerator {
   }
 
   /**
+   * Package saves state in local storage
+   */
+  public async addVuexPersistPackage() {
+    await HelperService.execute('npm', ['install', 'vuex-persistedstate'], {
+      cwd: this.input.spaPath,
+    })
+    const path = `${this.input.spaPath}/src/store/index.js`
+    let content = await HelperService.readFile(path)
+
+    // Add if import createPersistedState statement doesn't exists
+    if (content.indexOf('import createPersistedState') === -1) {
+      const importVuexLine = 'import Vuex from "vuex";'
+      const importCreatePersistedStateLine =
+        'import createPersistedState from "vuex-persistedstate";'
+      const index = content.indexOf(importVuexLine) + importVuexLine.length + 1
+      content = await HelperService.insertLines(content, index, importCreatePersistedStateLine)
+      await HelperService.writeFile(path, content)
+      await this.registerCreatePersistedStatePlugin()
+    }
+  }
+
+  /**
+   * Registers createPersistedState plugin
+   */
+  protected async registerCreatePersistedStatePlugin() {
+    const path = `${this.input.spaPath}/src/store/index.js`
+    let content = await HelperService.readFile(path)
+
+    // If createPersistedState() not exists then add it
+    if (content.indexOf('createPersistedState()') === -1) {
+      const moduleLine = 'modules: {},'
+      await HelperService.writeFile(
+        path,
+        content.replace(moduleLine, 'modules: {},\nplugins: [createPersistedState()],')
+      )
+    }
+  }
+
+  /**
    * 1. Add httpService
    * 2. Add validation exception
    * 3. Add middlewares
@@ -38,6 +77,9 @@ export default class SPAGenerator {
     })
   }
 
+  /**
+   * Adds buefy imports
+   */
   public async configureBuefy() {
     // Add buefy to main.js
     const importBuefy = 'import Buefy from "buefy";\n'
@@ -138,6 +180,9 @@ export default class SPAGenerator {
     }
   }
 
+  /**
+   * Used by vetur extension
+   */
   public async createJsConfigJson() {
     const filePath = `${this.input.spaPath}/jsconfig.json`
     const fileExists = await HelperService.fileExists(filePath)
@@ -238,6 +283,7 @@ export default class SPAGenerator {
    */
   public async start() {
     await this.createProject()
+    await this.addVuexPersistPackage()
     await this.configureBuefy()
     await this.addCommonFiles()
     await this.addBasicStuff()

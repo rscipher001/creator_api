@@ -7,12 +7,14 @@ Route.get('/', async () => {
 Route.group(() => {
   Route.post('/login', 'API/AuthController.login')
   Route.post('/register', 'API/AuthController.register')
-  Route.post('/logout', 'API/AuthController.logout')
 
   // Public API for downloading project
   Route.get('/project/:projectId/download/:type', 'API/ProjectsController.download').as(
     'projectDownload'
   )
+
+  // Email verification
+  Route.post('/email/verify', 'API/EmailVerificationController.verifyEmail')
 
   // Route forgot password
   Route.post('/password/forget/request', 'API/PasswordResetController.sendResetEmail')
@@ -22,6 +24,19 @@ Route.group(() => {
 
 Route.group(() => {
   Route.get('/me', 'API/AuthController.me')
+  Route.post('/logout', 'API/AuthController.logout')
+
+  // Email verification
+  Route.post('/email/resend', 'API/EmailVerificationController.resendEmail')
+})
+  .middleware(['auth'])
+  .prefix('/api')
+
+Route.group(() => {
+  // Profile routes
+  Route.post('/profile', 'API/ProfileController.updateProfile')
+  Route.post('/profile/account', 'API/ProfileController.updateAccount')
+  Route.post('/profile/password', 'API/ProfileController.updatePassword')
 
   Route.get('/project', 'API/ProjectsController.index')
   Route.post('/project', 'API/ProjectsController.store')
@@ -31,5 +46,5 @@ Route.group(() => {
     'generateSignedUrl'
   )
 })
-  .middleware(['auth'])
+  .middleware(['auth', 'ensureEmailIsVerified'])
   .prefix('/api')
