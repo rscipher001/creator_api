@@ -408,7 +408,6 @@ export default class DatabaseGenerator {
     await HelperService.execute('npm', ['install', 'mysql', 'luxon'], {
       cwd: this.input.path,
     })
-    await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
   }
 
   /**

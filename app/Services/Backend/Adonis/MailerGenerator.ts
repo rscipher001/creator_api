@@ -202,7 +202,6 @@ export default class MailerGenerator {
 
     // Copy config, contracts, etc
     await this.initModuleFiles()
-    await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
     await HelperService.commit('Mailer added', this.input.path)
   }
 
