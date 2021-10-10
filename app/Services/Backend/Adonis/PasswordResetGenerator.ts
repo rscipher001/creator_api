@@ -66,7 +66,6 @@ export default class PasswordResetGenerator {
       await this.createController()
       await this.addRoutes()
     }
-    await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
     await HelperService.commit('Password reset added', this.input.path)
   }
 

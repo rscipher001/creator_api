@@ -174,7 +174,6 @@ export default class CRUDGenerator {
       await this.createValidators(i)
       await this.createController(i)
       await this.addRoutes(i)
-      await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
       await HelperService.commit(
         `CRUD Added for ${this.input.tables[i].names.pascalCase}`,
         this.input.path

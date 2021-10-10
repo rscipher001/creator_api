@@ -346,7 +346,6 @@ export default class AuthGenerator {
 
     // Copy migration, model, controller and routes
     await this.initModuleFiles()
-    await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
     await HelperService.commit('Auth added', this.input.path)
     try {
       await HelperService.execute('npm', ['install', 'phc-argon2'], {

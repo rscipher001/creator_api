@@ -45,7 +45,6 @@ export default class TenantGenerator {
   protected async start() {
     await this.extendRequest()
     await this.createTenantAuthMiddleware()
-    await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
     await HelperService.commit('Tenant support added', this.input.path)
   }
 

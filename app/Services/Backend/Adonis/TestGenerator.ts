@@ -64,12 +64,10 @@ export default class CRUDGenerator {
     await this.updatePackageJson()
     await this.copyTestEnv()
     await this.createJapaFile()
-    await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
     await HelperService.commit('Test dependencies added', this.input.path)
 
     await Promise.all([await mkdirp(`${this.input.path}/test`)])
     await this.copyAuthTests()
-    await HelperService.execute('npm', ['run', 'format'], { cwd: this.input.path })
     await HelperService.commit('First Test added', this.input.path)
   }
 

@@ -23,6 +23,21 @@ export default class Init {
     }
   }
 
+  protected async addPreCommitHook() {
+    await HelperService.execute('npx', ['husky-init'], {
+      cwd: this.input.path,
+    })
+    await HelperService.execute('npm', ['install'], {
+      cwd: this.input.path,
+    })
+    const filePath = `${this.input.path}/.husky/pre-commit`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (fileExists) {
+      let content = await HelperService.readFile(filePath)
+      await HelperService.writeFile(filePath, content.replace('npm test', 'npm run format'))
+    }
+  }
+
   /**
    * Steps
    * 0. Determine project type
@@ -30,6 +45,7 @@ export default class Init {
    * 2. Add .vscode folder
    * 3. Setup git repo
    * 4. Initial commit
+   * 5. Add pre commit hooks
    */
   protected async start() {
     let type: string
@@ -73,6 +89,10 @@ export default class Init {
 
     // 4. Initial commit
     await HelperService.commit('Initial Commit', this.input.path)
+
+    // 5. Add pre commit hook
+    await this.addPreCommitHook()
+    await HelperService.commit('Pre commit hook added', this.input.path)
   }
 
   public async init() {
