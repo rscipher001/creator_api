@@ -23,6 +23,13 @@ export default class Init {
     }
   }
 
+  // Create .nvmrc
+  protected async createDotNvmrc() {
+    const filePath = `${this.input.path}/.nvmrc`
+    const content = await View.render(`stubs/backend/${this.input.tech.backend}/full/dotNvmrc`)
+    await HelperService.writeFile(filePath, content)
+  }
+
   protected async addPreCommitHook() {
     await HelperService.execute('npx', ['husky-init'], {
       cwd: this.input.path,
@@ -74,6 +81,7 @@ export default class Init {
 
     // 2. Add .vscode folder
     await this.createVscodeExtenstionsJson()
+    await this.createDotNvmrc()
 
     // 3. Initiate git repo
     await HelperService.execute('git', ['init'], {
