@@ -3,9 +3,10 @@ Route.group(() => {
   @if(input.auth.register)
     Route.post('/register', 'API/AuthController.register')
   @endif
-  Route.post('/logout', 'API/AuthController.logout')
 }).prefix('/api')
 
 Route.group(() => {
   Route.get('/me', 'API/AuthController.me')
+  Route.post('/logout', 'API/AuthController.logout')
+  Route.post('/email/resend', 'API/EmailVerificationController.resendEmail')
 }).middleware(['auth']).prefix('/api')

@@ -38,7 +38,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
 
     @if(column.type === 'date')
       @column.dateTime()
-      public {{ column.names.camelCase }}{{ column.meta.required ? '?': '' }}: DateTime
+      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: DateTime
     @else
       @if(column.meta.secret)
         @column({
@@ -58,7 +58,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @each(relation in table.relations)
     @if(relation.type === 'belongsTo')
     @column()
-    public {{ relation.names.camelCase }}Id{{relation.required ? '?': '' }}: number
+    public {{ relation.names.camelCase }}Id{{relation.required ? '' : '?' }}: number
     @endif
   @endeach
 
@@ -75,12 +75,12 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
       @hasOne(() => {{ relation.modelNames.pascalCase }})
       public {{
         relation.names.camelCase
-      }}{{relation.required ? '?': '' }}: HasOne<typeof {{ relation.modelNames.pascalCase }}>
+      }}{{relation.required ? '': '?' }}: HasOne<typeof {{ relation.modelNames.pascalCase }}>
     @elseif(relation.type === 'hasMany')
       @hasMany(() => {{ relation.modelNames.pascalCase }})
       public {{
         relation.names.camelCasePlural
-      }}{{relation.required ? '?': '' }}: HasMany<typeof {{ relation.modelNames.pascalCase }}>
+      }}{{relation.required ? '': '?' }}: HasMany<typeof {{ relation.modelNames.pascalCase }}>
     @elseif(relation.type === 'belongsTo')
       @belongsTo(() => {{ relation.modelNames.pascalCase }})
       public {{
