@@ -6,14 +6,21 @@
       </b-navbar-item>
     </template>
     <template #start>
-      <b-navbar-item tag="router-link" :to="{ path: '/' }">
+      <b-navbar-item
+        tag="router-link"
+        :to="{ path: '/' }"
+        :active="currentRouteName === 'Home'"
+      >
         Home
       </b-navbar-item>
-      <b-navbar-item tag="router-link" :to="{ path: '/dashboard' }">
+      <b-navbar-item
+        tag="router-link"
+        :to="{ path: '/dashboard' }"
+        :active="currentRouteName === 'Dashboard'"
+      >
         Dashboard
       </b-navbar-item>
       <b-navbar-dropdown label="Pages">
-        <b-navbar-item tag="router-link" :to="{ path: '/about' }">About</b-navbar-item>
         @if(!auth)
         @each(table in input.tables)
         @if(table.operations.includes('index'))
@@ -60,6 +67,9 @@ export default {
   computed: mapState('auth', {
     user: (state) => state.user,
     token: (state) => state.token,
+    currentRouteName() {
+      return this.$route.name;
+    },
   }),
 
   methods: {

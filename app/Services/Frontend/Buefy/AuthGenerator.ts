@@ -15,10 +15,17 @@ export default class AuthGenerator {
    * Changes maxlength and adds other fields if required
    */
   protected async copyPages() {
+    await mkdirp(`${this.input.spaPath}/src/views/setting`)
     await Promise.all([this.copyLoginView(), this.copyRegisterView(), this.copyDashboardView()])
     if (this.input.auth.passwordReset) {
       await Promise.all([this.copyForgotPasswordRequestView(), this.copyForgotPasswordUpdateView()])
     }
+    await this.copyEmailVerificationPendingView()
+    await this.copyVerifyEmailView()
+    await this.copySettingView()
+    await this.copySettingProfileView()
+    await this.copySettingAccountView()
+    await this.copySettingSecurityView()
   }
 
   protected async copyRegisterView() {
@@ -93,6 +100,87 @@ export default class AuthGenerator {
     if (!exists) {
       const content = await View.render(
         `stubs/frontend/${this.input.tech.frontend}/full/src/views/ForgotPasswordUpdateVue`
+      )
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copyEmailVerificationPendingView() {
+    const path = `${this.input.spaPath}/src/views/EmailVerificationPending.vue`
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/emailVerificationPendingVue`
+      )
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copySettingView() {
+    const path = `${this.input.spaPath}/src/views/Setting.vue`
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/SettingVue`
+      )
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copyVerifyEmailView() {
+    const path = `${this.input.spaPath}/src/views/VerifyEmail.vue`
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/VerifyEmailVue`
+      )
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copySettingAccountView() {
+    const table = this.input.auth.table
+    const email = table.columns.find((c) => c.name === 'Email')
+    const path = `${this.input.spaPath}/src/views/setting/Account.vue`
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/setting/AccountVue`,
+        {
+          email,
+        }
+      )
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copySettingProfileView() {
+    const table = this.input.auth.table
+    const path = `${this.input.spaPath}/src/views/setting/Profile.vue`
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/setting/ProfileVue`,
+        {
+          table,
+          input: this.input,
+        }
+      )
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copySettingSecurityView() {
+    const table = this.input.auth.table
+    const path = `${this.input.spaPath}/src/views/setting/Security.vue`
+    const password = table.columns.find((c) => c.name === 'Password')
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/setting/SecurityVue`,
+        {
+          password,
+        }
       )
       await HelperService.writeFile(path, content)
     }

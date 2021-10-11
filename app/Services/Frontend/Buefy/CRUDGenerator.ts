@@ -79,7 +79,7 @@ export default class CRUDGenerator {
     // If import auth statement is not in file then it is not registered
     if (storeContent.indexOf(`import ${table.names.camelCase}`) === -1) {
       const importVuexLine = 'import Vuex from "vuex";'
-      const importResourceStateLine = `import ${table.names.camelCase} from "./modules/${table.names.camelCase}.state";\n`
+      const importResourceStateLine = `import ${table.names.camelCase} from "@/store/modules/${table.names.camelCase}.state";\n`
       const index = storeContent.indexOf(importVuexLine) + importVuexLine.length + 1
       storeContent = await HelperService.insertLines(storeContent, index, importResourceStateLine)
       await HelperService.writeFile(storePath, storeContent)

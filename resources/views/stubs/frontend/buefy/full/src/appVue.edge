@@ -1,22 +1,29 @@
 <template>
   <div id="app">
-    <div class="section">
-      <nav-bar></nav-bar>
-    </div>
-    <div class="section">
-      <router-view/>
-    </div>
+    <nav-bar></nav-bar>
+    <router-view/>
   </div>
 </template>
 
 <script>
+import { mapActions } from "vuex";
 import NavBar from '@/components/NavBar.vue';
 
 export default {
   name: 'App',
+
+  mounted() {
+    this.refreshUser();
+  },
+
   components: {
     'nav-bar': NavBar,
   },
-  methods: {},
+
+  methods: {
+    ...mapActions("auth", {
+      refreshUser: "refreshUser",
+    }),
+  },
 };
 </script>
