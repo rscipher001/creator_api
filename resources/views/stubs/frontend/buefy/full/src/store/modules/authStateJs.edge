@@ -89,7 +89,11 @@ export default {
     @endif
 
     async logout({ dispatch }) {
-      await HttpService.authPost('/logout');
+      try {
+        await HttpService.authPost("/logout");
+      } catch (e) {
+        /***/
+      }
       dispatch('unsetTokens');
     },
 

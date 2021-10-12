@@ -264,6 +264,76 @@ class BackendProjectService {
   }
 
   /**
+   * Add private fields to auth table
+   */
+  protected prepareAuthTable() {
+    this.input.auth.table.columns.splice(
+      0,
+      0,
+      {
+        name: 'name',
+        type: 'string',
+        meta: {
+          displayName: 'Name',
+          required: true,
+          minLength: 2,
+          maxLength: 127,
+        },
+        input: {
+          type: 'input',
+        },
+      },
+      {
+        name: 'email',
+        type: 'string',
+        meta: {
+          displayName: 'Email',
+          required: true,
+          minLength: 6,
+          maxLength: 127,
+          email: true,
+          unique: true,
+        },
+        input: {
+          type: 'input',
+        },
+      },
+      {
+        name: 'password',
+        type: 'string',
+        meta: {
+          displayName: 'Password',
+          trim: true,
+          secret: true,
+          maxLength: 64,
+          minLength: 8,
+          dbLength: 255,
+          required: true,
+        },
+        input: {
+          type: 'input',
+        },
+      },
+      {
+        name: 'rememberMeToken',
+        type: 'string',
+        meta: {
+          expose: false,
+          required: false,
+        },
+      },
+      {
+        name: 'emailVerifiedAt',
+        type: 'date',
+        meta: {
+          expose: false,
+          required: false,
+        },
+      }
+    )
+  }
+
+  /**
    * Add tokens table if password reset is enabled
    */
   protected addReseTokenTables() {
@@ -387,6 +457,7 @@ class BackendProjectService {
    * Prepare input
    */
   public async init() {
+    this.prepareAuthTable()
     this.prepare() // Clean and preprocess input
     await this.start() // Start generation
   }
