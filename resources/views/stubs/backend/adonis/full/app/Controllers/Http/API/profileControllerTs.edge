@@ -22,7 +22,7 @@ export default class ProfileController {
        * TOOD: Optional Steps to send an email for email validation
        * And mark new email as unverified
        */
-      user.emailVerifiedAt = undefined
+      user.emailVerifiedAt = null
     }
     return user.save()
   }
