@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 
-export default class ResetToken extends BaseModel {
+export default class {{ className }} extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 

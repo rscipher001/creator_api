@@ -15,7 +15,10 @@ export default class PasswordResetGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/backend/${this.input.tech.backend}/full/app/Models/ResetTokenTs`
+        `stubs/backend/${this.input.tech.backend}/full/app/Models/tokenModelTs`,
+        {
+          className: 'ResetToken',
+        }
       )
       await HelperService.writeFile(filePath, content)
     }

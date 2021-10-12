@@ -1,0 +1,14 @@
+Route.group(() => {
+  // Email verification
+  Route.post('/email/verify', 'API/EmailVerificationController.verifyEmail')
+})
+  .prefix('/api')
+
+Route.group(() => {
+  // Profile routes
+  Route.post('/profile', 'API/ProfileController.updateProfile')
+  Route.post('/profile/account', 'API/ProfileController.updateAccount')
+  Route.post('/profile/password', 'API/ProfileController.updatePassword')
+})
+.middleware(['auth', 'ensureEmailIsVerified'])
+.prefix('/api')

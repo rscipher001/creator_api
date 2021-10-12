@@ -21,7 +21,9 @@
               @if(column.meta.minLength !== undefined)
               minlength="{{ column.meta.minLength }}"
               @endif
+              @if(column.meta.required)
               required
+              @endif
             ></b-input>
           </b-field>
           @endif

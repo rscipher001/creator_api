@@ -1,0 +1,88 @@
+<template>
+  <section>
+    <h1 class="is-size-5">Account Setting</h1>
+    <hr class="my-2" />
+    <form method="POST" @submit.prevent="updateAccount">
+      <b-field
+        label="Email *"
+        :type="errors.email ? 'is-danger' : ''"
+        :message="
+          errors.email ||
+          'Updating your email will mark your current email as unverfied'
+        "
+      >
+        <b-input
+          v-model="form.email"
+          ref="accountSettingEmail"
+          maxlength="{{ email.meta.maxLength || 256 }}"
+          minlength="{{ email.meta.minLength || 6 }}"
+          required
+        ></b-input>
+      </b-field>
+      <b-button
+        :loading="loading.updateAccount"
+        type="is-primary is-fullwidth"
+        native-type="submit"
+        >Update Account</b-button
+      >
+    </form>
+  </section>
+</template>
+<script>
+import { mapState, mapActions } from "vuex";
+import ValidationException from "@/exceptions/ValidationException";
+
+export default {
+  name: "AccountSettingPage",
+
+  mounted() {
+    if (this.$refs.accountSettingEmail) this.$refs.accountSettingEmail.focus();
+    this.form.email = this.user.email;
+  },
+
+  data() {
+    return {
+      errors: {},
+      form: {
+        email: "",
+      },
+    };
+  },
+
+  methods: {
+    ...mapActions("auth", {
+      updateAccountAction: "updateAccount",
+    }),
+    async updateAccount() {
+      try {
+        await this.updateAccountAction({
+          email: this.form.email,
+        });
+        this.$buefy.toast.open({
+          message: "Account settings updated successfully!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      } catch (e) {
+        let message = "Unable to update account settings";
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = "Validation Error";
+        }
+        this.$buefy.toast.open({
+          message,
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
+    },
+  },
+
+  computed: {
+    ...mapState("auth", {
+      loading: (state) => state.loading,
+      user: (state) => state.user,
+    }),
+  },
+};
+</script>

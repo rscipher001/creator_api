@@ -151,7 +151,7 @@ export default class MailerGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/backend/${this.input.tech.backend}/full/resources/views/emails/passwordReset.edge`
+        `stubs/backend/${this.input.tech.backend}/full/resources/views/emails/passwordResetEdge`
       )
       await HelperService.writeFile(filePath, content)
     }

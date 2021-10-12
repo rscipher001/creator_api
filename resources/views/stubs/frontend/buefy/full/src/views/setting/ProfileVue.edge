@@ -1,0 +1,118 @@
+<template>
+  <section>
+    <h1 class="is-size-5">Profile Setting</h1>
+    <hr class="my-2" />
+    <form method="POST" @submit.prevent="updateProfile">
+      @each(column in input.auth.table.columns)
+        @if(column.meta.expose !== false)
+        @if(!['Email', 'Password',].includes(column.name))
+        <b-field
+          label="{{
+            column.input?.displayName || column.names.pascalCase
+          }}{{
+            column.meta.required ? '*' : ''
+          }}"
+          :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+          :message="errors.{{ column.names.camelCase }}"
+        >
+          <b-input
+            v-model="form.{{ column.names.camelCase }}"
+            @if(column.meta.maxLength !== undefined)
+            maxlength="{{ column.meta.maxLength }}"
+            @endif
+            @if(column.meta.minLength !== undefined)
+            minlength="{{ column.meta.minLength }}"
+            @endif
+            @if(column.meta.required)
+            required
+            @endif
+          ></b-input>
+        </b-field>
+        @endif
+        @endif
+      @endeach
+      <b-button
+        :loading="loading.updateProfile"
+        type="is-primary is-fullwidth"
+        native-type="submit"
+        >Update Profile</b-button
+      >
+    </form>
+  </section>
+</template>
+<script>
+import { mapState, mapActions } from "vuex";
+import ValidationException from "@/exceptions/ValidationException";
+
+export default {
+  name: "ProfileSettingPage",
+
+  mounted() {
+    // if (this.$refs.profileSettingName) this.$refs.profileSettingName.focus();
+    @each(column in input.auth.table.columns)
+    @if(column.meta.expose !== false)
+    @if(!['Email', 'Password',].includes(column.name))
+    this.form.{{ column.names.camelCase }} = this.user.{{ column.names.camelCase }};
+    @endif
+    @endif
+    @endeach
+  },
+
+  data() {
+    return {
+      errors: {},
+      form: {
+        @each(column in input.auth.table.columns)
+        @if(column.meta.expose !== false)
+        @if(!['Email', 'Password',].includes(column.name))
+        {{ column.names.camelCase }}: "",
+        @endif
+        @endif
+        @endeach
+      },
+    };
+  },
+
+  methods: {
+    ...mapActions("auth", {
+      updateProfileAction: "updateProfile",
+    }),
+    async updateProfile() {
+      try {
+        await this.updateProfileAction({
+          @each(column in input.auth.table.columns)
+          @if(column.meta.expose !== false)
+          @if(!['Email', 'Password',].includes(column.name))
+          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+          @endif
+          @endif
+          @endeach
+        });
+        this.$buefy.toast.open({
+          message: "Profile updated successfully!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      } catch (e) {
+        let message = "Unable to update profile";
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = "Validation Error";
+        }
+        this.$buefy.toast.open({
+          message,
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
+    },
+  },
+
+  computed: {
+    ...mapState("auth", {
+      loading: (state) => state.loading,
+      user: (state) => state.user,
+    }),
+  },
+};
+</script>

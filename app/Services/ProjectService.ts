@@ -10,6 +10,7 @@ import AdonisCRUDGenerator from 'App/Services/Backend/Adonis/CRUDGenerator'
 import AdonisTestGenerator from 'App/Services/Backend/Adonis/TestGenerator'
 import AdonisMailerGenerator from 'App/Services/Backend/Adonis/MailerGenerator'
 import AdonisTenantGenerator from 'App/Services/Backend/Adonis/TenantGenerator'
+import AdonisProfileGenerator from 'App/Services/Backend/Adonis/ProfileGenerator'
 import AdonisDatabaseGenerator from 'App/Services/Backend/Adonis/DatabaseGenerator'
 import AdonisPasswordResetGenerator from 'App/Services/Backend/Adonis/PasswordResetGenerator'
 
@@ -98,7 +99,7 @@ class BackendProjectService {
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
 
     if (this.input.auth.passwordReset) {
-      this.addPasswordResetTable()
+      this.addReseTokenTables()
     }
 
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
@@ -263,9 +264,79 @@ class BackendProjectService {
   }
 
   /**
+   * Add private fields to auth table
+   */
+  protected prepareAuthTable() {
+    this.input.auth.table.columns.splice(
+      0,
+      0,
+      {
+        name: 'name',
+        type: 'string',
+        meta: {
+          displayName: 'Name',
+          required: true,
+          minLength: 2,
+          maxLength: 127,
+        },
+        input: {
+          type: 'input',
+        },
+      },
+      {
+        name: 'email',
+        type: 'string',
+        meta: {
+          displayName: 'Email',
+          required: true,
+          minLength: 6,
+          maxLength: 127,
+          email: true,
+          unique: true,
+        },
+        input: {
+          type: 'input',
+        },
+      },
+      {
+        name: 'password',
+        type: 'string',
+        meta: {
+          displayName: 'Password',
+          trim: true,
+          secret: true,
+          maxLength: 64,
+          minLength: 8,
+          dbLength: 255,
+          required: true,
+        },
+        input: {
+          type: 'input',
+        },
+      },
+      {
+        name: 'rememberMeToken',
+        type: 'string',
+        meta: {
+          expose: false,
+          required: false,
+        },
+      },
+      {
+        name: 'emailVerifiedAt',
+        type: 'date',
+        meta: {
+          expose: false,
+          required: false,
+        },
+      }
+    )
+  }
+
+  /**
    * Add tokens table if password reset is enabled
    */
-  protected addPasswordResetTable() {
+  protected addReseTokenTables() {
     const emailColumn = this.input.auth.table.columns.find((column) => column.name === 'email')
     const passwordResetTable = {
       skipController: true,
@@ -298,7 +369,10 @@ class BackendProjectService {
         },
       ],
     }
+    const verificationTokenTable = JSON.parse(JSON.stringify(passwordResetTable))
+    verificationTokenTable.name = 'VerificationToken'
     this.input.tables.push(passwordResetTable)
+    this.input.tables.push(verificationTokenTable)
   }
 
   /**
@@ -333,6 +407,10 @@ class BackendProjectService {
           const passwordReset = new AdonisPasswordResetGenerator(this.projectInput)
           await passwordReset.init()
         }
+
+        // Add Profile
+        const profile = new AdonisProfileGenerator(this.projectInput)
+        await profile.init()
 
         // Add Tenant
         if (this.projectInput.tenantSettings.tenant !== 0) {
@@ -379,6 +457,7 @@ class BackendProjectService {
    * Prepare input
    */
   public async init() {
+    this.prepareAuthTable()
     this.prepare() // Clean and preprocess input
     await this.start() // Start generation
   }

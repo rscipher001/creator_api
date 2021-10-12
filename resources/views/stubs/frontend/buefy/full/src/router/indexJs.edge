@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import store from '@/store';
-import Home from '../views/Home.vue';
+import Home from '@/views/Home.vue';
 
 Vue.use(VueRouter);
 
@@ -46,14 +46,65 @@ const routes = [
       guest: true,
     },
   },
+  {
+    path: "/email/verify",
+    name: "VerifyEmail",
+    component: () => import("@/views/VerifyEmail.vue"),
+  },
+  {
+    path: "/email/verificationPending",
+    name: "EmailVerificationPending",
+    component: () => import("@/views/EmailVerificationPending.vue"),
+    meta: {
+      auth: true,
+    },
+  },
   @endif
+  {
+    path: "/setting",
+    name: "Setting",
+    component: () => import("@/views/Setting.vue"),
+    meta: {
+      auth: true,
+      ensureEmailIsVerified: true,
+    },
+    children: [
+      {
+        path: "security",
+        name: "SettingSecurity",
+        component: () => import("@/views/setting/Security.vue"),
+        meta: {
+          auth: true,
+          ensureEmailIsVerified: true,
+        },
+      },
+      {
+        path: "account",
+        name: "SettingAccount",
+        component: () => import("@/views/setting/Account.vue"),
+        meta: {
+          auth: true,
+          ensureEmailIsVerified: true,
+        },
+      },
+      {
+        path: "profile",
+        name: "SettingProfile",
+        component: () => import("@/views/setting/Profile.vue"),
+        meta: {
+          auth: true,
+          ensureEmailIsVerified: true,
+        },
+      },
+    ],
+  },
   {
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('../views/Dashboard.vue'),
     meta: {
       auth: true,
-      companyAuth: true,
+      ensureEmailIsVerified: true,
     },
   },
 ];
@@ -79,13 +130,22 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // if (meta.auth) {
-  //   if (!store.state.auth.token) {
-  //     return next({
-  //       name: 'Login',
-  //     });
-  //   }
-  // }
+  if (meta.auth) {
+    if (!store.state.auth.token) {
+      return next({
+        name: 'Login',
+      });
+    }
+  }
+
+  if (meta.ensureEmailIsVerified) {
+    if (!store.state.auth.user.emailVerifiedAt) {
+      return next({
+        name: "EmailVerificationPending",
+      });
+    }
+    return next();
+  }
 
   return next();
 });
