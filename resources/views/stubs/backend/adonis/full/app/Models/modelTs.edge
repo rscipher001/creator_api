@@ -38,7 +38,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
 
     @if(column.type === 'date')
       @column.dateTime()
-      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: DateTime
+      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: DateTime {{ column.meta.required ? '| null' : '' }
     @else
       @if(column.meta.secret)
         @column({
@@ -50,7 +50,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
         @column()
       @endif
       public {{ column.names.camelCase }}{{ column.meta.required ? '': '?' }}: {{
-        ['decimal', 'integer'].includes(column.type) ? 'number' : column.type
+        ['decimal', 'integer'].includes(column.type) ? 'number' : column.type {{ column.meta.required ? '| null' : '' }
       }}
     @endif
   @endeach
@@ -58,7 +58,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @each(relation in table.relations)
     @if(relation.type === 'belongsTo')
     @column()
-    public {{ relation.names.camelCase }}Id{{relation.required ? '' : '?' }}: number
+    public {{ relation.names.camelCase }}Id{{relation.required ? '' : '?' }}: number {{ column.meta.required ? '| null' : '' }
     @endif
   @endeach
 
