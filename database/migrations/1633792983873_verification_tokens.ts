@@ -8,6 +8,9 @@ export default class VerificationTokens extends BaseSchema {
       table.increments('id')
       table.string('email', 128).unique().notNullable()
       table.string('token', 128).index().notNullable()
+      table.string('reason', 128).notNullable()
+      table.integer('userId').unsigned().references('id').inTable('users').nullable()
+      table.timestamp('expiresAt', { useTz: true })
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

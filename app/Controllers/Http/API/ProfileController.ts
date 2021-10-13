@@ -1,10 +1,13 @@
+import Env from '@ioc:Adonis/Core/Env'
 import Hash from '@ioc:Adonis/Core/Hash'
+import Mail from '@ioc:Adonis/Addons/Mail'
 import Database from '@ioc:Adonis/Lucid/Database'
+import Encryption from '@ioc:Adonis/Core/Encryption'
 import ProfileValidator from 'App/Validators/ProfileValidator'
 import AccountValidator from 'App/Validators/AccountValidator'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import VerificationToken, { Reason } from 'App/Models/VerificationToken'
 import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator'
-
 export default class ProfileController {
   public async updateProfile({ auth, request }: HttpContextContract) {
     const user = auth.user!
@@ -12,19 +15,37 @@ export default class ProfileController {
     return user.merge(input).save()
   }
 
+  /**
+   * Sends a verification email,
+   * Account is only updated if email is verified
+   */
   public async updateAccount({ auth, request }: HttpContextContract) {
     const user = auth.user!
-    const input = await request.validate(AccountValidator)
-
-    user.merge(input)
-    if (user.$dirty.email) {
-      /**
-       * TOOD: Optional Steps to send an email for email validation
-       * And mark new email as unverified
-       */
-      user.emailVerifiedAt = undefined
+    const { email: newEmail } = await request.validate(AccountValidator)
+    if (newEmail !== user.email) {
+      const encryptedEmail = Encryption.encrypt(newEmail)
+      const verificationToken = await VerificationToken.firstOrCreate(
+        { email: newEmail },
+        {
+          email: newEmail,
+          token: VerificationToken.generateToken(),
+          reason: Reason.emailUpdate,
+          userId: user.id,
+        }
+      )
+      await Mail.sendLater((message) => {
+        message
+          .to(verificationToken.email)
+          .from(Env.get('MAIL_FROM_ADDRESS'))
+          .subject('Email Update')
+          .htmlView('emails/emailUpdate', {
+            user,
+            url: `${Env.get('UI_URL')}/emailUpdate?token=${
+              verificationToken.token
+            }&email=${encryptedEmail}`,
+          })
+      })
     }
-    return user.save()
   }
 
   /**

@@ -15,6 +15,7 @@ Route.group(() => {
 
   // Email verification
   Route.post('/email/verify', 'API/EmailVerificationController.verifyEmail')
+  Route.post('/email/update', 'API/EmailVerificationController.updateEmail')
 
   // Route forgot password
   Route.post('/password/forget/request', 'API/PasswordResetController.sendResetEmail')
