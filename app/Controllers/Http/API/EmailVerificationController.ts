@@ -66,7 +66,9 @@ export default class EmailVerificationController {
       schema: tokenVerificationScheam,
       data: input,
     })
-    const verificationToken = await VerificationToken.query().where({ token, email, reason: Reason.emailUpdate }).firstOrFail()
+    const verificationToken = await VerificationToken.query()
+      .where({ token, email, reason: Reason.emailUpdate })
+      .firstOrFail()
     const user = await User.query().where({ id: verificationToken.userId! }).firstOrFail()
     user.emailVerifiedAt = DateTime.now()
     user.email = verificationToken.email

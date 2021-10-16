@@ -16,6 +16,25 @@ export default class ProfileController {
   }
 
   /**
+   * Returns existing update account requests
+   */
+  public async getAccount({ auth }: HttpContextContract) {
+    const user = auth.user!
+    return VerificationToken.query()
+      .where({ userId: user.id, reason: Reason.emailUpdate })
+      .firstOrFail()
+  }
+
+  /**
+   * Delete update email request
+   */
+  public async deleteAccount({ auth }: HttpContextContract) {
+    return VerificationToken.query()
+      .where({ userId: auth.user!.id, reason: Reason.emailUpdate })
+      .delete()
+  }
+
+  /**
    * Sends a verification email,
    * Account is only updated if email is verified
    */

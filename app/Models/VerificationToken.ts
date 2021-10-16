@@ -16,7 +16,7 @@ export default class VerificationToken extends BaseModel {
   @column()
   public email: string
 
-  @column()
+  @column({ serializeAs: null })
   public token: string
 
   @column()
