@@ -38,11 +38,18 @@ export default class ProfileController {
    * Sends a verification email,
    * Account is only updated if email is verified
    */
-  public async updateAccount({ auth, request }: HttpContextContract) {
+  public async updateAccount({ auth, request, response }: HttpContextContract) {
     const user = auth.user!
     const { email: newEmail } = await request.validate(AccountValidator)
     if (newEmail !== user.email) {
       const encryptedEmail = Encryption.encrypt(newEmail)
+      const existingVerificationToken = await VerificationToken.query().where({
+        reason: Reason.emailUpdate,
+        userId: user.id,
+      }).firstOrFail()
+      if(existingVerificationToken) {
+        return response.badRequest('Previous email update request is pending')
+      }
       const verificationToken = await VerificationToken.firstOrCreate(
         { email: newEmail },
         {
