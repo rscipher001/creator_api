@@ -43,11 +43,13 @@ export default class ProfileController {
     const { email: newEmail } = await request.validate(AccountValidator)
     if (newEmail !== user.email) {
       const encryptedEmail = Encryption.encrypt(newEmail)
-      const existingVerificationToken = await VerificationToken.query().where({
-        reason: Reason.emailUpdate,
-        userId: user.id,
-      }).firstOrFail()
-      if(existingVerificationToken) {
+      const existingVerificationToken = await VerificationToken.query()
+        .where({
+          reason: Reason.emailUpdate,
+          userId: user.id,
+        })
+        .first()
+      if (existingVerificationToken) {
         return response.badRequest('Previous email update request is pending')
       }
       const verificationToken = await VerificationToken.firstOrCreate(
