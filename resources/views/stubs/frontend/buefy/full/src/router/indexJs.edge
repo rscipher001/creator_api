@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import store from '@/store';
-import Home from '@/views/Home.vue';
+import Home from '../views/Home.vue';
 
 Vue.use(VueRouter);
 
@@ -52,11 +52,18 @@ const routes = [
     component: () => import("@/views/VerifyEmail.vue"),
   },
   {
+    path: "/emailUpdate",
+    name: "UpdateEmail",
+    component: () =>
+      import(/* webpackChunkName: "updateEmail" */ "../views/UpdateEmail.vue"),
+  },
+  {
     path: "/email/verificationPending",
     name: "EmailVerificationPending",
     component: () => import("@/views/EmailVerificationPending.vue"),
     meta: {
       auth: true,
+      emailUnverified: true,
     },
   },
   @endif
@@ -91,6 +98,15 @@ const routes = [
         path: "profile",
         name: "SettingProfile",
         component: () => import("@/views/setting/Profile.vue"),
+        meta: {
+          auth: true,
+          ensureEmailIsVerified: true,
+        },
+      },
+      {
+        path: "/",
+        name: "SettingProfile",
+        component: () => import("../views/setting/Profile.vue"),
         meta: {
           auth: true,
           ensureEmailIsVerified: true,
@@ -138,13 +154,23 @@ router.beforeEach((to, from, next) => {
     }
   }
 
+  /**
+   * Redirect users to dashboard when email verified but tries to access verification page
+   */
+  if (meta.emailUnverified) {
+    if (store.state.auth.user && store.state.auth.user.emailVerifiedAt) {
+      return next({
+        name: "Dashboard",
+      });
+    }
+  }
+
   if (meta.ensureEmailIsVerified) {
     if (!store.state.auth.user.emailVerifiedAt) {
       return next({
         name: "EmailVerificationPending",
       });
     }
-    return next();
   }
 
   return next();

@@ -1,6 +1,5 @@
-import HttpService from '../../services/http.service';
-import LocalStorageService from '../../services/localStorage.service';
-import ValidationException from '../../exceptions/ValidationException';
+import HttpService from "../../services/http.service";
+import ValidationException from "../../exceptions/ValidationException";
 
 export default {
   namespaced: true,
@@ -8,40 +7,27 @@ export default {
   state: () => ({
     loading: {
       login: false,
-      @if(input.auth.register)
-      register: false,
-      @endif
       logout: false,
-      @if(input.auth.passwordReset)
-      forgotPasswordRequest: false,
-      forgotPasswordVerify: false,
-      forgotPasswordUpdate: false,
-      @endif
-      emailVerify: false,
+      register: false,
+      getAccount: false,
+      verifyEmail: false,
+      updateEmail: false,
       updateProfile: false,
       updateAccount: false,
+      forgotPasswordVerify: false,
+      forgotPasswordUpdate: false,
+      forgotPasswordRequest: false,
       resendVerificationEmail: false,
     },
-    token: null, // Authorization token
-    user: null, // Logged in user
+    token: undefined, // Authorization token
+    user: undefined, // Logged in user basic profile
   }),
 
   actions: {
-    // Initialize state from localStorage
-    bootstrap({ commit }) {
-      try {
-        const token = LocalStorageService.getAuthToken();
-        if (token) {
-          const user = LocalStorageService.getJSON('user');
-          commit('setTokens', { token: token, user });
-        }
-      } catch (e) { console.error(e); }
-    },
-
     setUserToken({ commit }, { user, token }) {
-      LocalStorageService.setJSON('user', user);
-      LocalStorageService.setAuthToken(token);
-      commit('setUserToken', { user, token });
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+      commit("setUserToken", { user, token });
     },
 
     /**
@@ -52,18 +38,18 @@ export default {
     },
 
     unsetTokens({ commit }) {
-      LocalStorageService.clear();
-      commit('unsetTokens');
+      localStorage.clear();
+      commit("unsetTokens");
     },
 
     async login({ dispatch, commit }, input) {
       try {
-        commit('setLoading', { key: 'login', value: true });
-        const { user, token } = await HttpService.post('/login', input);
-        dispatch('setUserToken', { token, user });
-        commit('setLoading', { key: 'login', value: false });
+        commit("setLoading", { key: "login", value: true });
+        const { user, token } = await HttpService.post("/login", input);
+        dispatch("setUserToken", { token, user });
+        commit("setLoading", { key: "login", value: false });
       } catch (e) {
-        commit('setLoading', { key: 'login', value: false });
+        commit("setLoading", { key: "login", value: false });
         if (e.response && e.response.status === 422) {
           throw new ValidationException(e.message, e.response.data.errors);
         }
@@ -71,33 +57,21 @@ export default {
       }
     },
 
-    @if(input.auth.register)
     async register({ commit, dispatch }, input) {
-      commit('setLoading', { key: 'register', value: true });
+      commit("setLoading", { key: "register", value: true });
       try {
-        const { user, token } = await HttpService.post('/register', input);
-        dispatch('setUserToken', { token, user });
-        commit('setLoading', { key: 'register', value: false });
+        const { user, token } = await HttpService.post("/register", input);
+        dispatch("setUserToken", { token, user });
+        commit("setLoading", { key: "register", value: false });
       } catch (e) {
-        commit('setLoading', { key: 'register', value: false });
+        commit("setLoading", { key: "register", value: false });
         if (e.response && e.response.status === 422) {
           throw new ValidationException(e.message, e.response.data.errors);
         }
         throw e;
       }
     },
-    @endif
 
-    async logout({ dispatch }) {
-      try {
-        await HttpService.authPost("/logout");
-      } catch (e) {
-        /***/
-      }
-      dispatch('unsetTokens');
-    },
-
-    @if(input.auth.passwordReset)
     async forgotPasswordRequest({ commit }, input) {
       commit("setLoading", { key: "forgotPasswordRequest", value: true });
       try {
@@ -134,25 +108,6 @@ export default {
       }
     },
 
-    async forgotPasswordUpdate({ commit }, input) {
-      commit("setLoading", { key: "forgotPasswordUpdate", value: true });
-      try {
-        const message = await HttpService.post(
-          "/password/forget/update",
-          input
-        );
-        commit("setLoading", { key: "forgotPasswordUpdate", value: false });
-        return message;
-      } catch (e) {
-        commit("setLoading", { key: "forgotPasswordUpdate", value: false });
-        if (e.response && e.response.status === 422) {
-          throw new ValidationException(e.message, e.response.data.errors);
-        }
-        throw e;
-      }
-    },
-    @endif
-
     async resendVerificationEmail({ commit }, input) {
       commit("setLoading", { key: "resendVerificationEmail", value: true });
       try {
@@ -183,6 +138,39 @@ export default {
       }
     },
 
+    async updateEmail({ commit }, input) {
+      commit("setLoading", { key: "updateEmail", value: true });
+      try {
+        const message = await HttpService.post("/email/update", input);
+        commit("setLoading", { key: "updateEmail", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "updateEmail", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async forgotPasswordUpdate({ commit }, input) {
+      commit("setLoading", { key: "forgotPasswordUpdate", value: true });
+      try {
+        const message = await HttpService.post(
+          "/password/forget/update",
+          input
+        );
+        commit("setLoading", { key: "forgotPasswordUpdate", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "forgotPasswordUpdate", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
     async updateProfile({ commit, dispatch }, input) {
       commit("setLoading", { key: "updateProfile", value: true });
       try {
@@ -198,12 +186,41 @@ export default {
       }
     },
 
-    async updateAccount({ commit, dispatch }, input) {
+    /**
+     * Get update email request
+     */
+    async getAccount({ commit }) {
+      commit("setLoading", { key: "getAccount", value: true });
+      try {
+        const emailRequest = await HttpService.authGet("/profile/account");
+        commit("setLoading", { key: "getAccount", value: false });
+        return emailRequest;
+      } catch (e) {
+        commit("setLoading", { key: "getAccount", value: false });
+        throw e;
+      }
+    },
+
+    /**
+     * Delete update email request
+     */
+    async deleteAccount({ commit }) {
+      commit("setLoading", { key: "deleteAccount", value: true });
+      try {
+        await HttpService.authDelete("/profile/account");
+        commit("setLoading", { key: "deleteAccount", value: false });
+      } catch (e) {
+        commit("setLoading", { key: "deleteAccount", value: false });
+        throw e;
+      }
+    },
+
+    async updateAccount({ commit }, input) {
       commit("setLoading", { key: "updateAccount", value: true });
       try {
-        const user = await HttpService.authPost("/profile/account", input);
-        dispatch("updateUser", user);
+        const message = await HttpService.authPost("/profile/account", input);
         commit("setLoading", { key: "updateAccount", value: false });
+        return message;
       } catch (e) {
         commit("setLoading", { key: "updateAccount", value: false });
         if (e.response && e.response.status === 422) {
@@ -230,6 +247,15 @@ export default {
     async refreshUser({ dispatch }, input) {
       const user = await HttpService.authGet("/me", input);
       dispatch("updateUser", user);
+    },
+
+    async logout({ dispatch }) {
+      try {
+        await HttpService.authPost("/logout");
+      } catch (e) {
+        /***/
+      }
+      dispatch("unsetTokens");
     },
   },
 

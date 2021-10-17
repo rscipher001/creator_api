@@ -21,6 +21,7 @@ export default class AuthGenerator {
       await Promise.all([this.copyForgotPasswordRequestView(), this.copyForgotPasswordUpdateView()])
     }
     await this.copyEmailVerificationPendingView()
+    await this.copyUpdateEmailView()
     await this.copyVerifyEmailView()
     await this.copySettingView()
     await this.copySettingProfileView()
@@ -133,6 +134,17 @@ export default class AuthGenerator {
     if (!exists) {
       const content = await View.render(
         `stubs/frontend/${this.input.tech.frontend}/full/src/views/VerifyEmailVue`
+      )
+      await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copyUpdateEmailView() {
+    const path = `${this.input.spaPath}/src/views/UpdateEmail.vue`
+    const exists = await HelperService.fileExists(path)
+    if (!exists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/updateEmailVue`
       )
       await HelperService.writeFile(path, content)
     }
