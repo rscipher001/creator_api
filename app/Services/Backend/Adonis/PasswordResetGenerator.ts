@@ -31,11 +31,13 @@ export default class PasswordResetGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const email = table.columns.find((c) => c.name === 'Email')
+      const password = table.columns.find((c) => c.name === 'Password')
       const content = await View.render(
         `stubs/backend/${this.input.tech.backend}/full/app/Controllers/Http/API/passwordResetControllerTs`,
         {
           input: this.input,
           email,
+          password,
         }
       )
       await HelperService.writeFile(filePath, content)
