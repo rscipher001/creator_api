@@ -382,7 +382,7 @@ class BackendProjectService {
           type: 'belongsTo',
           withModel: '$auth',
           name: '',
-          required: true,
+          required: false,
         },
       ],
     }

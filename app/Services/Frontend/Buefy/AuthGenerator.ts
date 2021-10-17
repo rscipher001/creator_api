@@ -280,6 +280,14 @@ export default class AuthGenerator {
     await HelperService.writeFile(path, content)
   }
 
+  protected async copyAsset() {
+    const path = `${this.input.spaPath}/src/assets/programming.svg`
+    await HelperService.copyFile(
+      `stubs/frontend/${this.input.tech.frontend}/full/src/assets/programmingSvg`,
+      path
+    )
+  }
+
   /**
    * Steps
    * 1. Copy Pages
@@ -292,6 +300,7 @@ export default class AuthGenerator {
     await this.registerState()
     await this.addRoutes()
     await this.copyPages()
+    await this.copyAsset()
     await this.copyEnv()
     await HelperService.execute('npm', ['run', 'lint'], {
       cwd: this.input.spaPath,
