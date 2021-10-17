@@ -3,9 +3,9 @@ import User from 'App/Models/User'
 import Env from '@ioc:Adonis/Core/Env'
 import Mail from '@ioc:Adonis/Addons/Mail'
 import Encryption from '@ioc:Adonis/Core/Encryption'
-import VerificationToken from 'App/Models/VerificationToken'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { validator, schema, rules } from '@ioc:Adonis/Core/Validator'
+import VerificationToken, { Reason } from 'App/Models/VerificationToken'
 
 export default class EmailVerificationController {
   public async resendEmail({ auth, response }: HttpContextContract) {
@@ -51,5 +51,29 @@ export default class EmailVerificationController {
     await user.save()
     await verificationToken.delete()
     return 'Email verified successfully'
+  }
+
+  public async updateEmail({ request }: HttpContextContract) {
+    const tokenVerificationScheam = schema.create({
+      email: schema.string({ trim: true }, [rules.email(), rules.maxLength(128)]),
+      token: schema.string({ trim: true }, [rules.maxLength(128), rules.minLength(128)]),
+    })
+    const input = {
+      email: Encryption.decrypt(request.input('email')),
+      token: request.input('token'),
+    }
+    const { token, email } = await validator.validate({
+      schema: tokenVerificationScheam,
+      data: input,
+    })
+    const verificationToken = await VerificationToken.query()
+      .where({ token, email, reason: Reason.emailUpdate })
+      .firstOrFail()
+    const user = await User.query().where({ id: verificationToken.userId! }).firstOrFail()
+    user.emailVerifiedAt = DateTime.now()
+    user.email = verificationToken.email
+    await user.save()
+    await verificationToken.delete()
+    return 'Email updated successfully'
   }
 }

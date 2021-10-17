@@ -15,6 +15,7 @@ Route.group(() => {
 
   // Email verification
   Route.post('/email/verify', 'API/EmailVerificationController.verifyEmail')
+  Route.post('/email/update', 'API/EmailVerificationController.updateEmail')
 
   // Route forgot password
   Route.post('/password/forget/request', 'API/PasswordResetController.sendResetEmail')
@@ -35,7 +36,9 @@ Route.group(() => {
 Route.group(() => {
   // Profile routes
   Route.post('/profile', 'API/ProfileController.updateProfile')
+  Route.get('/profile/account', 'API/ProfileController.getAccount')
   Route.post('/profile/account', 'API/ProfileController.updateAccount')
+  Route.delete('/profile/account', 'API/ProfileController.deleteAccount')
   Route.post('/profile/password', 'API/ProfileController.updatePassword')
 
   Route.get('/project', 'API/ProjectsController.index')

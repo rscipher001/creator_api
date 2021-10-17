@@ -1,7 +1,11 @@
 import { DateTime } from 'luxon'
-import Hash from '@ioc:Adonis/Core/Hash'
+import Env from '@ioc:Adonis/Core/Env'
 import Project from 'App/Models/Project'
-import { column, beforeSave, BaseModel, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+import Hash from '@ioc:Adonis/Core/Hash'
+import Mail from '@ioc:Adonis/Addons/Mail'
+import Encryption from '@ioc:Adonis/Core/Encryption'
+import VerificationToken, { Reason } from 'App/Models/VerificationToken'
+import { column, beforeSave, BaseModel, hasMany, HasMany, afterCreate } from '@ioc:Adonis/Lucid/Orm'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -17,10 +21,10 @@ export default class User extends BaseModel {
   public password: string
 
   @column()
-  public rememberMeToken?: string
+  public rememberMeToken?: string | null
 
   @column.dateTime()
-  public emailVerifiedAt?: DateTime
+  public emailVerifiedAt?: DateTime | null
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
@@ -33,6 +37,37 @@ export default class User extends BaseModel {
     if (user.$dirty.password) {
       user.password = await Hash.make(user.password)
     }
+  }
+
+  public static async sendEmailVerificationMail(user: User) {
+    const encryptedEmail = Encryption.encrypt(user.email)
+    const verificationToken = await VerificationToken.firstOrCreate(
+      {
+        email: user.email,
+      },
+      {
+        email: user.email,
+        token: VerificationToken.generateToken(),
+        reason: Reason.emailUpdate,
+      }
+    )
+    await Mail.sendLater((message) => {
+      message
+        .to(verificationToken.email)
+        .from(Env.get('MAIL_FROM_ADDRESS'))
+        .subject('Verify your email')
+        .htmlView('emails/emailVerification', {
+          user,
+          url: `${Env.get('UI_URL')}/email/verify?token=${
+            verificationToken.token
+          }&email=${encryptedEmail}`,
+        })
+    })
+  }
+
+  @afterCreate()
+  public static async sendRegistrationEmail(user: User) {
+    return User.sendEmailVerificationMail(user)
   }
 
   @hasMany(() => Project)

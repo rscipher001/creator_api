@@ -1,23 +1,25 @@
 import User from 'App/Models/User'
 import Env from '@ioc:Adonis/Core/Env'
 import Mail from '@ioc:Adonis/Addons/Mail'
-import ResetToken from 'App/Models/ResetToken'
 import Encryption from '@ioc:Adonis/Core/Encryption'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { validator, schema, rules } from '@ioc:Adonis/Core/Validator'
+import VerificationToken, { Reason } from 'App/Models/VerificationToken'
 
 export default class PasswordResetController {
   public async sendResetEmail({ request }: HttpContextContract) {
     const email = await request.input('email')
     const user = await User.findBy('email', email)
     if (user) {
-      const tokenQuery = { email }
-      const payload = {
-        email,
-        token: ResetToken.generateToken(),
-      }
       const encryptedEmail = Encryption.encrypt(email)
-      const resetToken = await ResetToken.firstOrCreate(tokenQuery, payload)
+      const resetToken = await VerificationToken.firstOrCreate(
+        { email },
+        {
+          email,
+          token: VerificationToken.generateToken(),
+          reason: Reason.passwordReset,
+        }
+      )
       await Mail.sendLater((message) => {
         message
           .to(resetToken.email)
@@ -47,7 +49,9 @@ export default class PasswordResetController {
       schema: tokenVerificationScheam,
       data: input,
     })
-    await ResetToken.query().where({ token, email }).firstOrFail()
+    await VerificationToken.query()
+      .where({ token, email, reason: Reason.passwordReset })
+      .firstOrFail()
     return 'Reset token is valid'
   }
 
@@ -70,11 +74,12 @@ export default class PasswordResetController {
       schema: tokenVerificationScheam,
       data: input,
     })
-    const resetToken = await ResetToken.query().where({ token, email }).firstOrFail()
+    const verificationToken = await VerificationToken.query()
+      .where({ token, email, reason: Reason.passwordReset })
+      .firstOrFail()
     const user = await User.findByOrFail('email', email)
     user.password = password
-    await user.save()
-    await resetToken.delete()
+    await Promise.all([user.save(), verificationToken.delete()])
     return 'Password changed successfully'
   }
 }
