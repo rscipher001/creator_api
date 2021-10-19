@@ -338,13 +338,12 @@ class BackendProjectService {
    */
   protected addReseTokenTables() {
     const emailColumn = this.input.auth.table.columns.find((column) => column.name === 'email')
-    const passwordResetTable = {
+    const verificationTokenTable = {
       skipController: true,
       skipModel: true,
       skipUI: true,
       operations: [],
-      relations: [],
-      name: 'ResetToken',
+      name: 'VerificationToken',
       timestamps: true,
       columns: [
         {
@@ -367,11 +366,26 @@ class BackendProjectService {
             required: true,
           },
         },
+        {
+          name: 'reason',
+          type: 'string',
+          meta: {
+            expose: false,
+            index: true,
+            length: 128,
+            required: true,
+          },
+        },
+      ],
+      relations: [
+        {
+          type: 'belongsTo',
+          withModel: '$auth',
+          name: '',
+          required: false,
+        },
       ],
     }
-    const verificationTokenTable = JSON.parse(JSON.stringify(passwordResetTable))
-    verificationTokenTable.name = 'VerificationToken'
-    this.input.tables.push(passwordResetTable)
     this.input.tables.push(verificationTokenTable)
   }
 

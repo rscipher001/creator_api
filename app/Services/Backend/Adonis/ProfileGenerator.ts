@@ -59,6 +59,14 @@ export default class ProfileGenerator {
       const content = await View.render(emailVerificationEmailViewPath)
       await HelperService.writeFile(emailVerificationEmailPath, content)
     }
+
+    const emailUpdateEmailViewPath = `${basePath}/emailUpdateEdge`
+    const emailUpdateEmailPath = `${this.input.path}/resources/views/emails/emailUpdate.edge`
+    const emailUpdateEmailExists = await HelperService.fileExists(emailUpdateEmailPath)
+    if (!emailUpdateEmailExists) {
+      const content = await View.render(emailUpdateEmailViewPath)
+      await HelperService.writeFile(emailUpdateEmailPath, content)
+    }
   }
 
   // Create app/Models/{Auth}.ts
@@ -107,14 +115,18 @@ export default class ProfileGenerator {
 
   // Create app/Controllers/Http/Api/EmailVerificationController.ts
   protected async createApiEmailVerificationController() {
-    // const table = this.input.auth.table
+    const table = this.input.auth.table
     const filePath = `${this.input.path}/app/Controllers/Http/API/EmailVerificationController.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
-      // const email = table.columns.find((c) => c.name === 'Email')
-      // const password = table.columns.find((c) => c.name === 'Password')
+      const email = table.columns.find((c) => c.name === 'Email')
+      const password = table.columns.find((c) => c.name === 'Password')
       const content = await View.render(
-        `stubs/backend/${this.input.tech.backend}/full/app/Controllers/Http/API/emailVerificationControllerTs`
+        `stubs/backend/${this.input.tech.backend}/full/app/Controllers/Http/API/emailVerificationControllerTs`,
+        {
+          email,
+          password,
+        }
       )
       await HelperService.writeFile(filePath, content)
     }

@@ -15,7 +15,7 @@
           v-model="form.oldPassword"
           ref="accountSettingOldPassword"
           maxlength="{{ password.meta.maxLength || 72 }}"
-          minlength="2"
+          minlength="8"
           type="password"
           password-reveal
           required
@@ -29,7 +29,7 @@
         <b-input
           v-model="form.newPassword"
           maxlength="{{ password.meta.maxLength || 72 }}"
-          minlength="2"
+          minlength="8"
           type="password"
           password-reveal
           required
@@ -40,7 +40,7 @@
         <b-input
           v-model="form.newPasswordConfirmation"
           maxlength="{{ password.meta.maxLength || 72 }}"
-          minlength="2"
+          minlength="8"
           type="password"
           password-reveal
           required
