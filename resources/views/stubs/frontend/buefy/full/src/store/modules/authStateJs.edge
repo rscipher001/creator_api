@@ -1,4 +1,5 @@
 import HttpService from "../../services/http.service";
+import LocalStorageService from '../../services/localStorage.service';
 import ValidationException from "../../exceptions/ValidationException";
 
 export default {
@@ -25,8 +26,8 @@ export default {
 
   actions: {
     setUserToken({ commit }, { user, token }) {
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", token);
+      LocalStorageService.setJSON("user", user);
+      LocalStorageService.setAuthToken(token);
       commit("setUserToken", { user, token });
     },
 
