@@ -59,6 +59,14 @@ export default class ProfileGenerator {
       const content = await View.render(emailVerificationEmailViewPath)
       await HelperService.writeFile(emailVerificationEmailPath, content)
     }
+
+    const emailUpdateEmailViewPath = `${basePath}/emailUpdateEdge`
+    const emailUpdateEmailPath = `${this.input.path}/resources/views/emails/emailUpdate.edge`
+    const emailUpdateEmailExists = await HelperService.fileExists(emailUpdateEmailPath)
+    if (!emailUpdateEmailExists) {
+      const content = await View.render(emailUpdateEmailViewPath)
+      await HelperService.writeFile(emailUpdateEmailPath, content)
+    }
   }
 
   // Create app/Models/{Auth}.ts
