@@ -40,6 +40,7 @@ Route.group(() => {
   Route.post('/profile/account', 'API/ProfileController.updateAccount')
   Route.delete('/profile/account', 'API/ProfileController.deleteAccount')
   Route.post('/profile/password', 'API/ProfileController.updatePassword')
+  Route.post('/profile/avatar', 'API/ProfileController.updateAvatar')
 
   Route.get('/project', 'API/ProjectsController.index')
   Route.post('/project', 'API/ProjectsController.store')

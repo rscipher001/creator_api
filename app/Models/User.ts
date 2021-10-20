@@ -21,6 +21,9 @@ export default class User extends BaseModel {
   public password: string
 
   @column()
+  public avatar?: string | null
+
+  @column()
   public rememberMeToken?: string | null
 
   @column.dateTime()
@@ -31,6 +34,9 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @hasMany(() => Project)
+  public projects: HasMany<typeof Project>
 
   @beforeSave()
   public static async hashPassword(user: User) {
@@ -69,7 +75,4 @@ export default class User extends BaseModel {
   public static async sendRegistrationEmail(user: User) {
     return User.sendEmailVerificationMail(user)
   }
-
-  @hasMany(() => Project)
-  public projects: HasMany<typeof Project>
 }

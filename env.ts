@@ -29,4 +29,5 @@ export default Env.rules({
   MAIL_FROM_ADDRESS: Env.schema.string({ format: 'email' }),
   UI_URL: Env.schema.string(),
   CACHE_VIEWS: Env.schema.boolean(),
+  DRIVE_DISK: Env.schema.enum(['local'] as const),
 })

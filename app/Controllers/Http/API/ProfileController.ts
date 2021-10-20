@@ -1,8 +1,10 @@
 import Env from '@ioc:Adonis/Core/Env'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Mail from '@ioc:Adonis/Addons/Mail'
+import Drive from '@ioc:Adonis/Core/Drive'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Encryption from '@ioc:Adonis/Core/Encryption'
+import Application from '@ioc:Adonis/Core/Application'
 import ProfileValidator from 'App/Validators/ProfileValidator'
 import AccountValidator from 'App/Validators/AccountValidator'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
@@ -95,5 +97,20 @@ export default class ProfileController {
     await Database.from('api_tokens').where('user_id', auth.user!.id).whereNot('id', id).delete()
 
     return 'Password updated successfully'
+  }
+
+  public async updateAvatar({ auth, request, response }: HttpContextContract) {
+    const user = auth.user!
+    const avatar = request.file('avatar', {
+      size: '1mb',
+      extnames: ['jpg', 'png', 'jpeg'],
+    })
+    if (!avatar) {
+      return response.badRequest('Image not found')
+    }
+    await avatar.move(Application.publicPath('uploads'))
+    user.avatar = '/uploads/' + avatar.fileName
+    await user.save()
+    return user
   }
 }
