@@ -1,12 +1,12 @@
 import Env from '@ioc:Adonis/Core/Env'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Mail from '@ioc:Adonis/Addons/Mail'
-import Drive from '@ioc:Adonis/Core/Drive'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Encryption from '@ioc:Adonis/Core/Encryption'
 import Application from '@ioc:Adonis/Core/Application'
 import ProfileValidator from 'App/Validators/ProfileValidator'
 import AccountValidator from 'App/Validators/AccountValidator'
+import { Attachment } from '@ioc:Adonis/Addons/AttachmentLite'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import VerificationToken, { Reason } from 'App/Models/VerificationToken'
 import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator'
@@ -108,8 +108,7 @@ export default class ProfileController {
     if (!avatar) {
       return response.badRequest('Image not found')
     }
-    await avatar.move(Application.tmpPath('uploads'))
-    user.avatar = `/uploads/${avatar.fileName}`
+    user.avatar = Attachment.fromFile(avatar)
     await user.save()
     return user
   }
