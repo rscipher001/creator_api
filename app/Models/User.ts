@@ -21,9 +21,7 @@ export default class User extends BaseModel {
   @column({ serializeAs: null })
   public password: string
 
-  @column({
-    serialize: async (value) => await Drive.getUrl(value),
-  })
+  @column()
   public avatar?: string | null
 
   @column()

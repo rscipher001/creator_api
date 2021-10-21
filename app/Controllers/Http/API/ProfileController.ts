@@ -108,8 +108,8 @@ export default class ProfileController {
     if (!avatar) {
       return response.badRequest('Image not found')
     }
-    await avatar.move(Application.publicPath('uploads'))
-    user.avatar = '/uploads/' + avatar.fileName
+    await avatar.move(Application.tmpPath('uploads'))
+    user.avatar = `/uploads/${avatar.fileName}`
     await user.save()
     return user
   }
