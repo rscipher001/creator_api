@@ -3,6 +3,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import Project from 'App/Models/Project'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Mail from '@ioc:Adonis/Addons/Mail'
+import Drive from '@ioc:Adonis/Core/Drive'
 import Encryption from '@ioc:Adonis/Core/Encryption'
 import VerificationToken, { Reason } from 'App/Models/VerificationToken'
 import { column, beforeSave, BaseModel, hasMany, HasMany, afterCreate } from '@ioc:Adonis/Lucid/Orm'
@@ -20,7 +21,9 @@ export default class User extends BaseModel {
   @column({ serializeAs: null })
   public password: string
 
-  @column()
+  @column({
+    serialize: async (value) => await Drive.getUrl(value),
+  })
   public avatar?: string | null
 
   @column()
