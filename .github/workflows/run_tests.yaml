@@ -33,7 +33,7 @@ jobs:
           PROJECT_PATH: ./
           UI_URL: http://localhost:8080
           DB_CONNECTION: mysql
-          MYSQL_HOST: localhost
+          MYSQL_HOST: mysql
           MYSQL_PORT: 3306
           MYSQL_USER: snowball
           MYSQL_PASSWORD: snowball
