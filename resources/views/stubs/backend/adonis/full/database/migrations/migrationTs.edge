@@ -7,7 +7,9 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
       @each(column in table.columns)~
-        @if(column.type === 'string')
+        @if(column.type === 'file')
+          table.json('{{ column.columnName }}')
+        @elseif(column.type === 'string')
           table.{{
             column.meta.multiline ? 'text': 'string'
           }}('{{ column.columnName }}'{{

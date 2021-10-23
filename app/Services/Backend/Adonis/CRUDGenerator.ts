@@ -1,7 +1,7 @@
+import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput, { Table, RelationType } from 'App/Interfaces/ProjectInput'
-import mkdirp from 'mkdirp'
 
 export default class CRUDGenerator {
   private input: ProjectInput

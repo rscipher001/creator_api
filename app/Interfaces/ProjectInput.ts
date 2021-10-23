@@ -27,6 +27,8 @@ export interface Meta {
   max?: number // Number max value, UI and validator
   defaultTo: string | number | boolean // Default value in db
   index: boolean // Database level index
+  maxSize?: string // Max file size allowed
+  extensions?: string[] // Allowed file extensions
 }
 
 /**

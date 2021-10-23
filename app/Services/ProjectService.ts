@@ -43,6 +43,11 @@ class BackendProjectService {
         ? column.names.camelCase
         : column.names.snakeCase
       column.type = column.type.toLowerCase()
+      if (column.type === 'file') {
+        if (Array.isArray(column.meta.extensions)) {
+          column.meta.extensions = column.meta.extensions.split(', ').map((ext) => ext.trim())
+        }
+      }
       return column
     })
     if (Array.isArray(table.routeParents)) {

@@ -13,6 +13,12 @@
     @if(column.meta.email)
       rules.email(),
     @endif
+    @if(column.meta.maxSize)
+      size: '{{ column.meta.maxSize }}',
+    @endif
+    @if(Array.isArray(column.meta.extentions) && column.meta.extentions.length)
+      extnames: [{{ column.meta.extentions.join() }}],
+    @endif
     @if(column.meta.unique)
       rules.unique({
         table: '{{ table.tableName }}',

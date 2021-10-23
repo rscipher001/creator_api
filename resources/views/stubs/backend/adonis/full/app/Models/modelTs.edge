@@ -30,6 +30,9 @@ import {
     ManyToMany,
   @endif
 } from '@ioc:Adonis/Lucid/Orm'
+@if(table.columns.find(column => column.type === 'file'))
+import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite'
+@endif
 @each(relation in table.relations)
 import {{ relation.modelNames.pascalCase }} from 'App/Models/{{ relation.modelNames.pascalCase }}'
 @endeach
@@ -40,8 +43,13 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   public id: number
 
   @each(column in table.columns)
-
-    @if(column.type === 'date')
+    @if (colum.type === 'file')
+      @attachment({
+        preComputeUrl: true,
+        disk: '{{ input.defaultStorageDriver }}',
+      })
+      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: AttachmentContract {{ column.meta.required ? '' : ' | null' }}
+    @elseif(column.type === 'date')
       @column.dateTime()
       public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: DateTime {{ column.meta.required ? '' : ' | null' }}
     @else
