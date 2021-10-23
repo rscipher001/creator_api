@@ -1,0 +1,39 @@
+name: Run tests
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: snowball
+          MYSQL_DATABASE: mysql
+        ports: ['3306:3306']
+    steps:
+    - name: Install Dependencies
+      run: |
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+        nvm install 14
+        npm ci
+    - name: Run Migrations
+      run: node ace migration:run
+      env: 
+        DBNAME: mysql
+        DBUSER: root
+        DBPASSWORD: snowball
+        DBHOST: 127.0.0.1
+        DBPORT: ${{ job.services.mysql.ports[3306] }}
+    - name: Run Tests
+      run: |
+        npm run format
+        npm run build
+      env: 
+        DBNAME: mysql
+        DBUSER: root
+        DBPASSWORD: zergling
+        DBHOST: 127.0.0.1
+        DBPORT: ${{ job.services.mysql.ports[3306] }}
