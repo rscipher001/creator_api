@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mysql:
-        image: mysql:8
-        options: --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+        image: bitnami/mysql:8.0.20
         env:
+          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
           MYSQL_ROOT_PASSWORD: snowball
           MYSQL_DATABASE: creator
         ports: ['3306:3306']
@@ -33,7 +33,7 @@ jobs:
           PROJECT_PATH: ./
           UI_URL: http://localhost:8080
           DB_CONNECTION: mysql
-          MYSQL_HOST: 0.0.0.0
+          MYSQL_HOST: mysql
           MYSQL_PORT: 3306
           MYSQL_USER: snowball
           MYSQL_PASSWORD: snowball
