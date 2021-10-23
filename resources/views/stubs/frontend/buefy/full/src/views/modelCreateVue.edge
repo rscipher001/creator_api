@@ -137,6 +137,29 @@
       >
         <b-datepicker v-model="form.{{ column.names.camelCase }}" />
       </b-field>
+      @elseif(column.type === 'file')
+      <b-field
+        horizontal
+        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+        :message="errors.{{ column.names.camelCase }}"
+      >
+        <b-datepicker v-model="form.{{ column.names.camelCase }}" />
+      </b-field>
+
+      <b-field
+        class="file" horizontal
+        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+        :message="errors.{{ column.names.camelCase }}"
+      >
+        <b-upload @input="onFileAdd(file, '{{ column.names.camelCase }}')" v-model="form.{{ column.names.camelCase }}" expanded>
+          <a class="button is-primary is-fullwidth">
+            <b-icon icon="upload"></b-icon>
+            <span>{{ file.name || "column.input.displayName || column.names.pascalCase" }}</span>
+          </a>
+        </b-upload>
+      </b-field>
       @endif
       @endeach
 
@@ -233,7 +256,16 @@ export default {
 
     async store() {
       try {
-        await this.storeAction({
+        @if(table.columns.find(column => column.type === 'file'))
+          const payload = new FormData();
+          @each(column in table.columns)
+          payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }});
+          @endeach
+          @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+          payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
+          @endif
+        @else
+        const payload = {
           @each(column in table.columns)
           {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
           @endeach
@@ -242,7 +274,8 @@ export default {
           {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
           @endif
           @endeach
-        });
+        }
+        await this.storeAction(payload);
         this.$router.push('/{{ table.names.camelCase }}');
         this.$buefy.toast.open({
           message: '{{ table.names.pascalCase }} created',
@@ -301,6 +334,12 @@ export default {
         });
       }
     },
+
+    @if(table.columns.find(column => column.type === 'file'))
+    onFileAdd(file, field) {
+      this.form[field] = file;
+    }
+    @endif
   },
 
   computed: {

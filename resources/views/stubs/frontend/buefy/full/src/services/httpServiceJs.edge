@@ -36,11 +36,15 @@ class HttpService {
 
   async authPost(url, payload, queryParams) {
     const authToken = localStorageService.getAuthToken();
+    const headers = {
+      authorization: `Bearer ${authToken}`,
+    }
+    if (payload && payload instanceof FormData) {
+      headers["Content-Type"] = "multipart/form-data";
+    }
     const { data } = await this.client.post(url, payload, {
       params: queryParams,
-      headers: {
-        authorization: `Bearer ${authToken}`,
-      },
+      headers,
     });
     return data;
   }
