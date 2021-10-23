@@ -95,7 +95,7 @@ class BackendProjectService {
     projectInput.types = this.input.types.map((t) => t.toLowerCase())
     projectInput.mailers = this.input.mailers
     projectInput.defaultMailer = this.input.defaultMailer
-    projectInput.storageDriver = this.input.storageDriver
+    projectInput.storageDrivers = this.input.storageDrivers
     projectInput.defaultStorageDriver = this.input.defaultStorageDriver
     projectInput.tech = this.input.tech
     projectInput.auth = this.input.auth

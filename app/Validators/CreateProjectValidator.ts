@@ -69,9 +69,7 @@ export default class CreateProjectValidator {
       .array()
       .members(schema.enum.optional(['mailgun', 'smtp', 'ses', 'sparkpost'] as const)),
     defaultMailer: schema.string.optional(),
-    storageDrivers: schema
-      .array()
-      .members(schema.enum.optional(['local', 's3', 'gcs'] as const)),
+    storageDrivers: schema.array().members(schema.enum.optional(['local', 's3', 'gcs'] as const)),
     defaultStorageDriver: schema.string.optional(),
     tech: schema.object().members({
       backend: schema.enum(['adonis'] as const),
