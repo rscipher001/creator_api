@@ -21,7 +21,11 @@ export default class User extends BaseModel {
   @column({ serializeAs: null })
   public password: string
 
-  @attachment()
+  @attachment({
+    preComputeUrl: true,
+    folder: 'avatars',
+    disk: 'local',
+  })
   public avatar?: AttachmentContract | null
 
   @column()

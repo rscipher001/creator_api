@@ -98,16 +98,17 @@ export default class ProfileController {
     return 'Password updated successfully'
   }
 
-  public async updateAvatar({ auth, request, response }: HttpContextContract) {
+  public async updateAvatar({ auth, request }: HttpContextContract) {
     const user = auth.user!
     const avatar = request.file('avatar', {
       size: '1mb',
       extnames: ['jpg', 'png', 'jpeg'],
     })
-    if (!avatar) {
-      return response.badRequest('Image not found')
+    if (avatar) {
+      user.avatar = Attachment.fromFile(avatar)
+    } else {
+      user.avatar = null
     }
-    user.avatar = Attachment.fromFile(avatar)
     await user.save()
     return user
   }
