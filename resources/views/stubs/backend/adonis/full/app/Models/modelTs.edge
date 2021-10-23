@@ -43,7 +43,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   public id: number
 
   @each(column in table.columns)
-    @if (colum.type === 'file')
+    @if (column.type === 'file')
       @attachment({
         preComputeUrl: true,
         disk: '{{ input.defaultStorageDriver }}',

@@ -3,6 +3,16 @@
 }}{{ column.meta.required ? '' : '.optional' }}(
   {{{ column.meta.trim ? '{ trim: true },': column.type === 'string' ? '{},' :
     column.type === 'date' ? "{ format: 'iso' },": '' }}}
+  @if(column.type === 'file')
+  {
+    @if(column.meta.maxSize)
+    size: '{{ column.meta.maxSize }}',
+    @endif
+    @if(Array.isArray(column.meta.extentions) && column.meta.extentions.length)
+      extnames: [{{ column.meta.extentions.join() }}],
+    @endif
+  }
+  @else
   [
     @if(column.meta.maxLength)
       rules.maxLength({{ column.meta.maxLength }}),
@@ -12,12 +22,6 @@
     @endif
     @if(column.meta.email)
       rules.email(),
-    @endif
-    @if(column.meta.maxSize)
-      size: '{{ column.meta.maxSize }}',
-    @endif
-    @if(Array.isArray(column.meta.extentions) && column.meta.extentions.length)
-      extnames: [{{ column.meta.extentions.join() }}],
     @endif
     @if(column.meta.unique)
       rules.unique({
@@ -31,4 +35,5 @@
       }),
     @endif
   ]
+  @endif
 ),
