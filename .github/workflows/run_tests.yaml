@@ -1,7 +1,7 @@
 name: Run tests
 on:
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   test:
@@ -14,26 +14,27 @@ jobs:
           MYSQL_DATABASE: mysql
         ports: ['3306:3306']
     steps:
-    - name: Install Dependencies
-      run: |
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-        nvm install 14
-        npm ci
-    - name: Run Migrations
-      run: node ace migration:run
-      env: 
-        DBNAME: mysql
-        DBUSER: root
-        DBPASSWORD: snowball
-        DBHOST: 127.0.0.1
-        DBPORT: ${{ job.services.mysql.ports[3306] }}
-    - name: Run Tests
-      run: |
-        npm run format
-        npm run build
-      env: 
-        DBNAME: mysql
-        DBUSER: root
-        DBPASSWORD: zergling
-        DBHOST: 127.0.0.1
-        DBPORT: ${{ job.services.mysql.ports[3306] }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm install
+      - run: npm test
+      - name: Run Migrations
+        run: node ace migration:run
+        env:
+          DBNAME: mysql
+          DBUSER: root
+          DBPASSWORD: snowball
+          DBHOST: 127.0.0.1
+          DBPORT: ${{ job.services.mysql.ports[3306] }}
+      - name: Run Tests
+        run: |
+          npm run format
+          npm run build
+        env:
+          DBNAME: mysql
+          DBUSER: root
+          DBPASSWORD: zergling
+          DBHOST: 127.0.0.1
+          DBPORT: ${{ job.services.mysql.ports[3306] }}

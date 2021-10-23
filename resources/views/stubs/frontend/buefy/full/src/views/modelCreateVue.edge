@@ -156,7 +156,9 @@
         <b-upload @input="onFileAdd(file, '{{ column.names.camelCase }}')" v-model="form.{{ column.names.camelCase }}" expanded>
           <a class="button is-primary is-fullwidth">
             <b-icon icon="upload"></b-icon>
-            <span>{{ file.name || "column.input.displayName || column.names.pascalCase" }}</span>
+            <span>
+              {{ `{{ file.name || 'Select ${column.input.displayName || column.names.pascalCase} }}'` }}
+            </span>
           </a>
         </b-upload>
       </b-field>
@@ -261,9 +263,11 @@ export default {
           @each(column in table.columns)
           payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }});
           @endeach
+          @each(relation in table.relations)
           @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
           payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
           @endif
+          @endeach
         @else
         const payload = {
           @each(column in table.columns)
