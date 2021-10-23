@@ -106,6 +106,8 @@ export default interface ProjectInput {
   basePath: string // Project folder name
   defaultMailer: string
   mailers: string[]
+  defaultStorageDriver: string
+  storageDrivers: string[]
   generate: {
     api: {
       generate: boolean

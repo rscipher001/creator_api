@@ -13,6 +13,7 @@ import AdonisTenantGenerator from 'App/Services/Backend/Adonis/TenantGenerator'
 import AdonisProfileGenerator from 'App/Services/Backend/Adonis/ProfileGenerator'
 import AdonisDatabaseGenerator from 'App/Services/Backend/Adonis/DatabaseGenerator'
 import AdonisPasswordResetGenerator from 'App/Services/Backend/Adonis/PasswordResetGenerator'
+import AdonisStorageDriverGenerator from 'App/Services/Backend/Adonis/StorageDriverGenerator'
 
 import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
@@ -94,6 +95,8 @@ class BackendProjectService {
     projectInput.types = this.input.types.map((t) => t.toLowerCase())
     projectInput.mailers = this.input.mailers
     projectInput.defaultMailer = this.input.defaultMailer
+    projectInput.storageDriver = this.input.storageDriver
+    projectInput.defaultStorageDriver = this.input.defaultStorageDriver
     projectInput.tech = this.input.tech
     projectInput.auth = this.input.auth
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
@@ -402,6 +405,10 @@ class BackendProjectService {
         // Add database
         const db = new AdonisDatabaseGenerator(this.projectInput)
         await db.init()
+
+        // Add storage driver
+        const storageDriver = new AdonisStorageDriverGenerator(this.projectInput)
+        await storageDriver.init()
 
         // Add mailer
         if (this.projectInput.mailers.length) {
