@@ -275,6 +275,7 @@ export default {
           @endif
           @endeach
         }
+        @endif
         await this.storeAction(payload);
         this.$router.push('/{{ table.names.camelCase }}');
         this.$buefy.toast.open({
