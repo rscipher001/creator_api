@@ -23,6 +23,25 @@ jobs:
       - name: Run Migrations
         run: node ace migration:run
         env:
+          PORT: 3333
+          HOST: 0.0.0.0
+          NODE_ENV: development
+          APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
+          DRIVE_DISK: local
+          CACHE_VIEWS: false
+          PROJECT_PATH: ./
+          UI_URL: http://localhost:8080
+          DB_CONNECTION: mysql
+          MYSQL_HOST: localhost
+          MYSQL_PORT: 3306
+          MYSQL_USER: snowball
+          MYSQL_PASSWORD: snowball
+          MYSQL_DB_NAME: creator
+          MAIL_FROM_ADDRESS: noreply@pcsudhar.com
+          SMTP_HOST: smtp.sendgrid.net
+          SMTP_PORT: 587
+          SMTP_USERNAME: apikey
+          SMTP_PASSWORD: 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
           DBNAME: mysql
           DBUSER: root
           DBPASSWORD: snowball
