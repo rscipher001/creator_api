@@ -47,7 +47,8 @@ test.group('Auth', (group) => {
    * Temporary until Mail trapping is completed
    */
   test('Verify email', async (_) => {
-    const token = await Database.from('verificationTokens').where({'email': user.email }).first()
+    const token = await Database.from('verificationTokens').where({ email: user.email }).first()
+    console.log(token)
     await supertest(BASE_URL)
       .post('/api/email/verify')
       .send({
