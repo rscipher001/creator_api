@@ -1,0 +1,81 @@
+import test from 'japa'
+import supertest from 'supertest'
+import Database from '@ioc:Adonis/Lucid/Database'
+import faker from 'faker'
+import Env from '@ioc:Adonis/Core/Env'
+
+const BASE_URL = `http://${Env.get('HOST')}:${Env.get('PORT')}`
+
+test.group('Auth', (group) => {
+  group.before(async () => {
+    await Database.beginGlobalTransaction()
+  })
+
+  group.after(async () => {
+    await Database.rollbackGlobalTransaction()
+  })
+
+  const user = {
+    email: faker.internet.email(),
+    password: 'secret@123',
+
+    name: faker.lorem.word(),
+
+    rememberMeToken: faker.lorem.word(),
+
+    emailVerifiedAt: faker.date.past(),
+  }
+
+  let token: string
+
+  test('Ping', async (assert) => {
+    const { body } = await supertest(BASE_URL).get('/').expect(200)
+    assert.equal(body.hello, 'world')
+  })
+
+  test('Register', async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .post('/api/register')
+      .send({
+        ...user,
+        passwordConfirmation: user.password,
+      })
+      .expect(200)
+    assert.isString(body.token)
+    assert.isObject(body.user)
+
+    assert.equal(body.user.email, user.email)
+  })
+
+  test('Login', async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .post('/api/login')
+      .send({
+        email: user.email,
+        password: user.password,
+      })
+      .expect(200)
+    token = body.token
+    assert.isString(body.token)
+    assert.isObject(body.user)
+
+    assert.equal(body.user.email, user.email)
+  })
+
+  test('Login Validation', async () => {
+    await supertest(BASE_URL).post('/api/login').send().expect(422)
+  })
+
+  test('Me', async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .get('/api/me')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200)
+    assert.isObject(body)
+  })
+
+  test('Me Unauthorized', async (assert) => {
+    const { body } = await supertest(BASE_URL).get('/api/me').expect(401)
+    assert.isObject(body)
+  })
+})
