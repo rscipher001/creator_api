@@ -1,8 +1,9 @@
 import test from 'japa'
-import supertest from 'supertest'
-import Database from '@ioc:Adonis/Lucid/Database'
 import faker from 'faker'
+import supertest from 'supertest'
 import Env from '@ioc:Adonis/Core/Env'
+import Mail from '@ioc:Adonis/Addons/Mail'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 const BASE_URL = `http://${Env.get('HOST')}:${Env.get('PORT')}`
 
@@ -18,11 +19,8 @@ test.group('Auth', (group) => {
   const user = {
     email: faker.internet.email(),
     password: 'secret@123',
-
     name: faker.lorem.word(),
-
     rememberMeToken: faker.lorem.word(),
-
     emailVerifiedAt: faker.date.past(),
   }
 
@@ -34,17 +32,23 @@ test.group('Auth', (group) => {
   })
 
   test('Register', async (assert) => {
-    const { body } = await supertest(BASE_URL)
-      .post('/api/register')
-      .send({
-        ...user,
-        passwordConfirmation: user.password,
-      })
-      .expect(200)
-    assert.isString(body.token)
-    assert.isObject(body.user)
-
-    assert.equal(body.user.email, user.email)
+    Mail.trap(async (message) => {
+      const { body } = await supertest(BASE_URL)
+        .post('/api/register')
+        .send({
+          ...user,
+          passwordConfirmation: user.password,
+        })
+        .expect(200)
+      assert.isString(body.token)
+      assert.isObject(body.user)
+      assert.deepEqual(message.to, [
+        {
+          address: user.email,
+        },
+      ])
+      assert.equal(body.user.email, user.email)
+    })
   })
 
   test('Login', async (assert) => {
