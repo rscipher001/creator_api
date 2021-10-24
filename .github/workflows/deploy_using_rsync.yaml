@@ -1,8 +1,7 @@
 name: Deploy using rsync
 on:
-  push:
-    branches:
-      - '*'
+  pull_request:
+    branches: [master]
 
 jobs:
   deploy:
