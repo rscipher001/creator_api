@@ -26,6 +26,10 @@ export default class StorageDriverGenerator {
         content.providers.push(provider)
       }
     }
+    const provider = '@adonisjs/attachment-lite'
+    if (!content.providers.includes(provider)) {
+      content.providers.push(provider)
+    }
     await HelperService.writeJson(path, content)
   }
 
@@ -41,6 +45,8 @@ export default class StorageDriverGenerator {
       const type = '@adonisjs/drive-gcs'
       content.compilerOptions.types.push(type)
     }
+    const type = '@adonisjs/attachment-lite'
+    content.compilerOptions.types.push(type)
     await HelperService.writeJson(path, content)
   }
 
