@@ -15,7 +15,7 @@ jobs:
         run: 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client rsync -y && apt clean )'
       - name: Build source code
         run: |
-          npm run install
+          npm ci
           npm run build
       - name: Copy build
         run: eval $(ssh-agent -s) && echo "$SSH_KEY" | tr -d '\r' | ssh-add - && mkdir -p ~/.ssh && chmod 700 ~/.ssh && ssh-keyscan -p $PORT $HOST >> ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts && rsync -az build $USER@$HOST:$PORT:~/ExProjects/creator_api
