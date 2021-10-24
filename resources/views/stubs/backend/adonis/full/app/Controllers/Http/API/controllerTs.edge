@@ -60,18 +60,18 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @each(column in table.columns.filter(column => column.type === 'file'))
+      @each(fileColumn in table.columns.filter(column => column.type === 'file'))
       if (input.{{
-        input.camelCaseStrategy ? column.names.camelCas : column.names.snakeCase
+        input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
       }}) {
         input.{{
-          input.camelCaseStrategy ? column.names.camelCas : column.names.snakeCase
+          input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
         }} = Attachment.fromFile(input.{{
-          input.camelCaseStrategy ? column.names.camelCas : column.names.snakeCase
+          input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
         }})
       } else {
         delete input.{{
-          input.camelCaseStrategy ? column.names.camelCas : column.names.snakeCase
+          input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
         }}
       }
       @endeach
