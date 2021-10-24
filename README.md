@@ -6,7 +6,7 @@ A Code Generator
 
 - Clone both API and UI repository
 - Create a folder named `Projects` parallel to UI and API folder (Can be configured using .env if you want another location)
-- Install Vue CLI
+- Install Vue CLI `npm install -g @vue/cli`
 
 ## Glossary
 

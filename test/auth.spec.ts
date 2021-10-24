@@ -78,4 +78,621 @@ test.group('Auth', (group) => {
     const { body } = await supertest(BASE_URL).get('/api/me').expect(401)
     assert.isObject(body)
   })
+
+  test('Generate plain API', async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .post('/api/me')
+      .send({
+        name: 'FullAPITest',
+        database: 'mysql',
+        types: ['api'],
+        mailers: ['smtp'],
+        defaultMailer: 'smtp',
+        storageDrivers: ['local'],
+        defaultStorageDriver: 'local',
+        camelCaseStrategy: true,
+        tech: {
+          backend: 'adonis',
+          frontend: 'buefy',
+        },
+        generate: {
+          api: {
+            generate: true,
+            crud: true,
+            test: true,
+          },
+          spa: {
+            generate: false,
+            crud: true,
+          },
+          app: {
+            generate: false,
+          },
+          website: {
+            generate: false,
+          },
+        },
+        auth: {
+          register: true,
+          passwordReset: true,
+          passwordChange: true,
+          table: {
+            operations: [],
+            relations: [],
+            name: 'User',
+            timestamps: true,
+            columns: [
+              {
+                name: 'name',
+                type: 'string',
+                meta: {
+                  displayName: 'Name',
+                  required: true,
+                  minLength: 2,
+                  maxLength: 127,
+                },
+                input: {
+                  type: 'input',
+                },
+              },
+              {
+                name: 'email',
+                type: 'string',
+                meta: {
+                  displayName: 'Email',
+                  required: true,
+                  minLength: 6,
+                  maxLength: 127,
+                  email: true,
+                  unique: true,
+                },
+                input: {
+                  type: 'input',
+                },
+              },
+              {
+                name: 'password',
+                type: 'string',
+                meta: {
+                  displayName: 'Password',
+                  trim: true,
+                  secret: true,
+                  maxLength: 64,
+                  minLength: 8,
+                  dbLength: 255,
+                  required: true,
+                },
+                input: {
+                  type: 'input',
+                },
+              },
+              {
+                name: 'rememberMeToken',
+                type: 'string',
+                meta: {
+                  expose: false,
+                  required: false,
+                },
+              },
+              {
+                name: 'emailVerifiedAt',
+                type: 'date',
+                meta: {
+                  expose: false,
+                  required: false,
+                },
+              },
+            ],
+          },
+        },
+        tenantSettings: {
+          user: 1,
+          tenant: 0,
+          table: null,
+        },
+        tables: [
+          {
+            name: 'Country',
+            timestamps: true,
+            generateRoute: true,
+            singleton: false,
+            parent: null,
+            routeParents: [],
+            operations: ['index', 'store', 'update', 'destroy', 'storeMany', 'destroyMany'],
+            columns: [
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '2',
+                  maxLength: '127',
+                  dbLength: '',
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'name',
+                type: 'string',
+              },
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '3',
+                  maxLength: '3',
+                  dbLength: '',
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'isoCode',
+                type: 'string',
+              },
+            ],
+            relations: [],
+          },
+          {
+            name: 'State',
+            timestamps: true,
+            generateRoute: true,
+            singleton: false,
+            parent: null,
+            routeParents: ['Country'],
+            operations: ['index', 'store', 'update', 'destroy', 'storeMany', 'destroyMany'],
+            columns: [
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '2',
+                  maxLength: '127',
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'name',
+                type: 'string',
+              },
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '3',
+                  maxLength: '3',
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'isoCode',
+                type: 'string',
+              },
+            ],
+            relations: [
+              {
+                type: 'belongsTo',
+                withModel: 'Country',
+                name: '',
+                required: true,
+              },
+            ],
+          },
+          {
+            name: 'Profile',
+            timestamps: true,
+            generateRoute: true,
+            singleton: true,
+            parent: '$auth',
+            routeParents: [],
+            operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+            columns: [
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '25',
+                  maxLength: '512',
+                  multiline: true,
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'address',
+                type: 'string',
+              },
+            ],
+            relations: [
+              {
+                type: 'belongsTo',
+                withModel: '$auth',
+                name: '',
+                required: true,
+              },
+            ],
+          },
+          {
+            name: 'Product',
+            timestamps: true,
+            generateRoute: true,
+            singleton: false,
+            parent: null,
+            routeParents: [],
+            operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+            columns: [
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '2',
+                  maxLength: '127',
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'name',
+                type: 'string',
+              },
+            ],
+            relations: [
+              {
+                type: 'manyToMany',
+                withModel: 'seller',
+                name: '',
+                required: true,
+              },
+            ],
+          },
+          {
+            name: 'seller',
+            timestamps: true,
+            generateRoute: true,
+            singleton: false,
+            parent: null,
+            routeParents: [],
+            operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+            columns: [
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '2',
+                  maxLength: '127',
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'name',
+                type: 'string',
+              },
+            ],
+            relations: [
+              {
+                type: 'manyToMany',
+                withModel: 'Product',
+                name: '',
+                required: true,
+              },
+            ],
+          },
+          {
+            name: 'Minion',
+            timestamps: true,
+            generateRoute: true,
+            parent: '$auth',
+            routeParents: [],
+            operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+            columns: [
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '25',
+                  maxLength: '512',
+                  multiline: true,
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'address',
+                type: 'string',
+              },
+            ],
+            relations: [
+              {
+                type: 'belongsTo',
+                withModel: '$auth',
+                name: '',
+                required: true,
+              },
+            ],
+          },
+          {
+            name: 'Task',
+            timestamps: true,
+            generateRoute: true,
+            parent: 'Minion',
+            routeParents: ['Minion'],
+            operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+            columns: [
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '25',
+                  maxLength: '512',
+                  multiline: true,
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'address',
+                type: 'string',
+              },
+            ],
+            relations: [
+              {
+                type: 'belongsTo',
+                withModel: 'Minion',
+                name: '',
+                required: true,
+              },
+            ],
+          },
+          {
+            name: 'Subtask',
+            timestamps: true,
+            generateRoute: true,
+            parent: 'Task',
+            routeParents: ['Task', 'Minion'],
+            operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+            columns: [
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '25',
+                  maxLength: '512',
+                  multiline: true,
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'address',
+                type: 'string',
+              },
+            ],
+            relations: [
+              {
+                type: 'belongsTo',
+                withModel: 'Task',
+                name: '',
+                required: true,
+              },
+            ],
+          },
+          {
+            name: 'SubtaskVerification',
+            timestamps: true,
+            generateRoute: true,
+            singleton: true,
+            parent: 'Subtask',
+            routeParents: ['Subtask', 'Task', 'Minion'],
+            operations: ['store', 'show', 'destroy'],
+            columns: [
+              {
+                meta: {
+                  required: true,
+                  expose: true,
+                  trim: true,
+                  minLength: '25',
+                  maxLength: '512',
+                  multiline: true,
+                },
+                input: {
+                  type: 'input',
+                  decimal: {
+                    step: 'any',
+                  },
+                  select: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  radio: {
+                    types: ['object', 'string', 'number'],
+                    type: 'string',
+                    options: [],
+                  },
+                  checkbox: {
+                    options: [],
+                  },
+                },
+                name: 'address',
+                type: 'string',
+              },
+            ],
+            relations: [
+              {
+                type: 'belongsTo',
+                withModel: 'Subtask',
+                name: '',
+                required: true,
+              },
+            ],
+          },
+        ],
+      })
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200)
+    assert.isObject(body)
+  })
 })

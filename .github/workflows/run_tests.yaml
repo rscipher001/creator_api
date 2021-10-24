@@ -20,7 +20,8 @@ jobs:
         with:
           node-version: '14'
       - run: npm install
-      - run: npm test
+      
+      - run: npm install -g @vue/cli
       - name: Run Migrations
         run: node ace migration:run
         env:
@@ -47,6 +48,29 @@ jobs:
         run: |
           npm run format
           npm run build
+        env:
+          PORT: 3333
+          HOST: 0.0.0.0
+          NODE_ENV: development
+          APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
+          DRIVE_DISK: local
+          CACHE_VIEWS: false
+          PROJECT_PATH: ./
+          UI_URL: http://localhost:8080
+          DB_CONNECTION: mysql
+          MYSQL_HOST: localhost
+          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+          MYSQL_USER: root
+          MYSQL_PASSWORD: snowball
+          MYSQL_DB_NAME: creator
+          MAIL_FROM_ADDRESS: noreply@pcsudhar.com
+          SMTP_HOST: smtp.sendgrid.net
+          SMTP_PORT: 587
+          SMTP_USERNAME: apikey
+          SMTP_PASSWORD: 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
+      - name: Run project creation test
+        run: |
+          npm test
         env:
           PORT: 3333
           HOST: 0.0.0.0
