@@ -147,10 +147,10 @@ export default class CRUDGenerator {
       // await this.createCreateModal(i)
       await this.registerRoutes(i)
       await HelperService.execute('npm', ['run', 'lint'], { cwd: this.input.spaPath })
-      // await HelperService.commit(
-      //   `CRUD Added for ${this.input.tables[i].names.pascalCase}`,
-      //   this.input.spaPath
-      // )
+      await HelperService.commit(
+        `CRUD Added for ${this.input.tables[i].names.pascalCase}`,
+        this.input.spaPath
+      )
       this.models.push(this.input.tables[i].names.camelCase)
     }
 
@@ -163,7 +163,7 @@ export default class CRUDGenerator {
     await this.registerStates()
     await this.addRoutes()
     await HelperService.execute('npm', ['run', 'lint'], { cwd: this.input.spaPath })
-    // await HelperService.commit('States Added for all resources', this.input.spaPath)
+    await HelperService.commit('States Added for all resources', this.input.spaPath)
   }
 
   public async init() {
