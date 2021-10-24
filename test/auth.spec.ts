@@ -49,7 +49,6 @@ test.group('Auth', (group) => {
    */
   test('Verify email', async (assert) => {
     const token = await Database.from('verificationTokens').where({ email: user.email }).first()
-    console.log(token)
     const { body } = await supertest(BASE_URL)
       .post('/api/email/verify')
       .send({
@@ -92,7 +91,7 @@ test.group('Auth', (group) => {
     assert.isObject(body)
   })
 
-  test('Generate plain API', async (assert) => {
+  test('Generate plain project API Part - 1', async (assert) => {
     const { body } = await supertest(BASE_URL)
       .post('/api/project')
       .send({
@@ -707,5 +706,20 @@ test.group('Auth', (group) => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
     assert.isObject(body)
+  })
+
+  test('Generate plain project API Part - 2', async (assert) => {
+    let shouldCheckAgain = true
+    while (shouldCheckAgain) {
+      const { body } = await supertest(BASE_URL)
+        .get('/api/project/1')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200)
+      if (body.status === 'failed') throw new Error('Project creation failed')
+      if (body.status === 'done') {
+        shouldCheckAgain = false
+        assert.isObject(body)
+      }
+    }
   })
 })

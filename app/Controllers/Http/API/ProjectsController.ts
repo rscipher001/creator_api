@@ -15,6 +15,15 @@ export default class ProjectsController {
     return Project.query().where('userId', auth.user!.id).paginate(page, limit)
   }
 
+  public async show({ request, auth }: HttpContextContract) {
+    return Project.query()
+      .where({
+        userId: auth.user!.id,
+        id: request.param('projectId'),
+      })
+      .first()
+  }
+
   public async store({ request, auth }: HttpContextContract) {
     const input = await request.validate(CreateProjectValidator)
     const project = await Project.create({
