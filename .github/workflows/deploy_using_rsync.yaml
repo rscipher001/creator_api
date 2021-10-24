@@ -1,0 +1,27 @@
+name: Deploy using rsync
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install SSH
+        run: 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client rsync -y && apt clean )'
+      - name: Build source code
+        run: |
+          npm run install
+          npm run build
+      - name: Copy build
+        run: eval $(ssh-agent -s) && echo "$SSH_KEY" | tr -d '\r' | ssh-add - && mkdir -p ~/.ssh && chmod 700 ~/.ssh && ssh-keyscan -p $PORT $HOST >> ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts && rsync -az build $USER@$HOST:$PORT:~/ExProjects/creator_api
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          HOST: ${{ secrets.HOST }}
+          PORT: ${{ secrets.PORT }}
+          USER: ${{ secrets.USER }}
