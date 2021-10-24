@@ -207,17 +207,19 @@ export default {
       const {{ table.names.camelCase }}Id = parseInt(this.$route.params.{{ table.names.camelCase }}Id, 10);
       this.editMode.enabled = true;
       this.editMode.id = {{ table.names.camelCase }}Id;
-      const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
-      @each(column in table.columns)~
-      @if(!column.secret && column.type !== 'file')
-      this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}
+      @if(table.columns.find(column => column.type !== 'file'))
+        const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
+        @each(column in table.columns)~
+        @if(!column.secret && column.type !== 'file')
+        this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}
+        @endif
+        @endeach
+        @each(relation in table.relations)
+        @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+        this.form.{{ relation.names.camelCase }}Id = {{ table.names.camelCase }}.{{ relation.names.camelCase }}Id
+        @endif
+        @endeach
       @endif
-      @endeach
-      @each(relation in table.relations)
-      @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
-      this.form.{{ relation.names.camelCase }}Id = {{ table.names.camelCase }}.{{ relation.names.camelCase }}Id
-      @endif
-      @endeach
     }
   },
 
