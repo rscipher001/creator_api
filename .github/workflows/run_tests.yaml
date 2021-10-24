@@ -34,7 +34,7 @@ jobs:
           UI_URL: http://localhost:8080
           DB_CONNECTION: mysql
           MYSQL_HOST: localhost
-          MYSQL_PORT: 3306
+          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
           MYSQL_USER: snowball
           MYSQL_PASSWORD: snowball
           MYSQL_DB_NAME: creator
@@ -63,7 +63,7 @@ jobs:
           UI_URL: http://localhost:8080
           DB_CONNECTION: mysql
           MYSQL_HOST: localhost
-          MYSQL_PORT: 3306
+          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
           MYSQL_USER: snowball
           MYSQL_PASSWORD: snowball
           MYSQL_DB_NAME: creator
