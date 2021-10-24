@@ -24,7 +24,7 @@ jobs:
           eval $(ssh-agent -s)
           echo "$SSH_KEY" | tr -d '\r' | ssh-add - && mkdir -p ~/.ssh && chmod 700 ~/.ssh && ssh-keyscan -p $PORT $HOST >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
-          rsync -az ./build $USER@$HOST:$PORT:~/
+          rsync -az -e 'ssh -p $PORT' ./build $USER@$HOST:~/ExProjects/creator_api
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           HOST: ${{ secrets.HOST }}
