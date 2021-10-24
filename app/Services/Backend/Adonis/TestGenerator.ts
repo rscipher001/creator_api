@@ -58,7 +58,7 @@ export default class CRUDGenerator {
   protected async start() {
     await HelperService.execute(
       'npm',
-      ['i', '-D', 'japa', 'execa', 'get-port', 'supertest', '@types/supertest'],
+      ['i', '-D', 'japa', 'execa', 'get-port@5.1.1', 'supertest', '@types/supertest'],
       { cwd: this.input.path }
     )
     await this.updatePackageJson()
