@@ -1,8 +1,9 @@
 import test from 'japa'
-import supertest from 'supertest'
-import Database from '@ioc:Adonis/Lucid/Database'
 import faker from 'faker'
+import supertest from 'supertest'
 import Env from '@ioc:Adonis/Core/Env'
+import Database from '@ioc:Adonis/Lucid/Database'
+import Encryption from '@ioc:Adonis/Core/Encryption'
 
 const BASE_URL = `http://${Env.get('HOST')}:${Env.get('PORT')}`
 
@@ -46,16 +47,17 @@ test.group('Auth', (group) => {
   /**
    * Temporary until Mail trapping is completed
    */
-  test('Verify email', async (_) => {
+  test('Verify email', async (assert) => {
     const token = await Database.from('verificationTokens').where({ email: user.email }).first()
     console.log(token)
-    await supertest(BASE_URL)
+    const { body } = await supertest(BASE_URL)
       .post('/api/email/verify')
       .send({
-        email: user.email,
+        email: Encryption.encrypt(user.email),
         token: token.token,
       })
       .expect(200)
+    assert.isObject(body)
   })
 
   test('Login', async (assert) => {
