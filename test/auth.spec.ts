@@ -721,5 +721,5 @@ test.group('Auth', (group) => {
         assert.isObject(body)
       }
     }
-  })
+  }).timeout(600000)
 })
