@@ -1,10 +1,13 @@
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}';
 @if(table.operations.includes('store'))
   import Store{{
     table.names.pascalCase
   }}Validator from 'App/Validators/Store{{ table.names.pascalCase }}Validator';
 @endif
+@if(table.columns.find(column => column.type === 'file'))
+import { Attachment } from '@ioc:Adonis/Addons/AttachmentLite'
+@endif
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 @if(table.operations.includes('update'))~
   @if(!table.singleton)
     import Update{{
@@ -57,6 +60,21 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
+      @each(column in table.columns.filter(column => column.type === 'file'))
+      if (input.{{
+        input.camelCaseStrategy ? column.names.camelCas : column.names.snakeCase
+      }}) {
+        input.{{
+          input.camelCaseStrategy ? column.names.camelCas : column.names.snakeCase
+        }} = Attachment.fromFile(input.{{
+          input.camelCaseStrategy ? column.names.camelCas : column.names.snakeCase
+        }})
+      } else {
+        delete input.{{
+          input.camelCaseStrategy ? column.names.camelCas : column.names.snakeCase
+        }}
+      }
+      @endeach
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
       })
