@@ -11,10 +11,8 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - name: Install SSH
-        run: 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y && apt clean )'
       - name: Install rsync
-        run: apt install rsync
+        run: sudo apt install rsync -y
       - name: Build source code
         run: |
           npm ci
