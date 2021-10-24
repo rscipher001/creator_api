@@ -1,9 +1,8 @@
 import test from 'japa'
-import faker from 'faker'
 import supertest from 'supertest'
-import Env from '@ioc:Adonis/Core/Env'
-import Mail from '@ioc:Adonis/Addons/Mail'
 import Database from '@ioc:Adonis/Lucid/Database'
+import faker from 'faker'
+import Env from '@ioc:Adonis/Core/Env'
 
 const BASE_URL = `http://${Env.get('HOST')}:${Env.get('PORT')}`
 
@@ -32,23 +31,30 @@ test.group('Auth', (group) => {
   })
 
   test('Register', async (assert) => {
-    Mail.trap(async (message) => {
-      const { body } = await supertest(BASE_URL)
-        .post('/api/register')
-        .send({
-          ...user,
-          passwordConfirmation: user.password,
-        })
-        .expect(200)
-      assert.isString(body.token)
-      assert.isObject(body.user)
-      assert.deepEqual(message.to, [
-        {
-          address: user.email,
-        },
-      ])
-      assert.equal(body.user.email, user.email)
-    })
+    const { body } = await supertest(BASE_URL)
+      .post('/api/register')
+      .send({
+        ...user,
+        passwordConfirmation: user.password,
+      })
+      .expect(200)
+    assert.isString(body.token)
+    assert.isObject(body.user)
+    assert.equal(body.user.email, user.email)
+  })
+
+  /**
+   * Temporary until Mail trapping is completed
+   */
+  test('Verify email', async (_) => {
+    const token = await Database.from('verificationTokens').where({'email': user.email }).first()
+    await supertest(BASE_URL)
+      .post('/api/email/verify')
+      .send({
+        email: user.email,
+        token: token.token,
+      })
+      .expect(200)
   })
 
   test('Login', async (assert) => {
