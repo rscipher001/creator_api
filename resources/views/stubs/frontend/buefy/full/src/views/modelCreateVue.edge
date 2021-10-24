@@ -148,7 +148,7 @@
           <a class="button is-primary is-fullwidth">
             <b-icon icon="upload"></b-icon>
             <span>
-              {{{ `{{ form.${column.names.camelCase} || 'Select ${column.input.displayName || column.names.pascalCase}' }}` }}}
+              {{{ `{{ (form.${column.names.camelCase} && form.${column.names.camelCase}.name) || 'Select ${column.input.displayName || column.names.pascalCase}' }}` }}}
             </span>
           </a>
         </b-upload>
@@ -208,7 +208,7 @@ export default {
       this.editMode.enabled = true;
       this.editMode.id = {{ table.names.camelCase }}Id;
       const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
-      @each(column in table.columns)
+      @each(column in table.columns)~
       @if(!column.secret)
       this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}
       @endif
@@ -230,7 +230,7 @@ export default {
       errors: {},
       form: {
         @each(column in table.columns)
-        {{ column.names.camelCase }}: '',
+        {{ column.names.camelCase }}: null,
         @endeach
         @each(relation in table.relations)
         @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
