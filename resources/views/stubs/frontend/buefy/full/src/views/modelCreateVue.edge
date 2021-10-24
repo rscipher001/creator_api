@@ -209,7 +209,7 @@ export default {
       this.editMode.id = {{ table.names.camelCase }}Id;
       const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
       @each(column in table.columns)~
-      @if(!column.secret)
+      @if(!column.secret && column.type !== 'file')
       this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}
       @endif
       @endeach
@@ -296,18 +296,31 @@ export default {
 
     async update() {
       try {
+        @if(table.columns.find(column => column.type === 'file'))
+          const payload = new FormData();
+          @each(column in table.columns)
+          payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }});
+          @endeach
+          @each(relation in table.relations)
+          @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+          payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
+          @endif
+          @endeach
+        @else
+        const payload = {
+          @each(column in table.columns)
+          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+          @endeach
+          @each(relation in table.relations)
+          @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
+          {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
+          @endif
+          @endeach
+        }
+        @endif
         await this.updateAction({
           id: this.editMode.id,
-          input: {
-            @each(column in table.columns)
-            {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
-            @endeach
-            @each(relation in table.relations)
-            @if(relation.type === 'belongsTo' && relation.withModel !== '$auth')
-            {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
-            @endif
-            @endeach
-          },
+          input: payload,
         });
         this.$router.push('/{{ table.names.camelCase }}');
         this.$buefy.toast.open({

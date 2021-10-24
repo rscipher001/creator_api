@@ -1,6 +1,6 @@
 import axios from 'axios';
-import localStorageService from './localStorage.service'
 import { API_URL } from '../constants'
+import localStorageService from './localStorage.service'
 
 class HttpService {
   constructor() {
@@ -51,22 +51,30 @@ class HttpService {
 
   async authPatch(url, payload, queryParams) {
     const authToken = localStorageService.getAuthToken();
+    const headers = {
+      authorization: `Bearer ${authToken}`,
+    }
+    if (payload && payload instanceof FormData) {
+      headers["Content-Type"] = "multipart/form-data";
+    }
     const { data } = await this.client.patch(url, payload, {
       params: queryParams,
-      headers: {
-        authorization: `Bearer ${authToken}`,
-      },
+      headers,
     });
     return data;
   }
 
   async authPut(url, payload, queryParams) {
     const authToken = localStorageService.getAuthToken();
+    const headers = {
+      authorization: `Bearer ${authToken}`,
+    }
+    if (payload && payload instanceof FormData) {
+      headers["Content-Type"] = "multipart/form-data";
+    }
     const { data } = await this.client.put(url, payload, {
       params: queryParams,
-      headers: {
-        authorization: `Bearer ${authToken}`,
-      },
+      headers,
     });
     return data;
   }
