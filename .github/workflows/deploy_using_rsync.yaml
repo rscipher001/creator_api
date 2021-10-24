@@ -12,7 +12,9 @@ jobs:
         with:
           node-version: '14'
       - name: Install SSH
-        run: 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client rsync -y && apt clean )'
+        run: 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y && apt clean )'
+      - name: Install rsync
+        run: apt install rsync
       - name: Build source code
         run: |
           npm ci
