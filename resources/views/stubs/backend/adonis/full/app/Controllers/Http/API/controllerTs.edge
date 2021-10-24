@@ -61,19 +61,22 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         }} = auth.user!.id
       @endif
       @each(fileColumn in table.columns.filter(column => column.type === 'file'))
-      if (input.{{
-        input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
-      }}) {
-        input.{{
+        if (input.{{
           input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
-        }} = Attachment.fromFile(input.{{
-          input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
-        }})
-      } else {
-        delete input.{{
-          input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
-        }}
-      }
+        }}) {
+          input.{{
+            input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
+          }} = Attachment.fromFile(input.{{
+            input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
+          }})
+        }
+      @if(!fileColumn.meta.required)
+        else {
+          delete input.{{
+            input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
+          }}
+        }
+      @endif
       @endeach
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
@@ -165,6 +168,21 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
       @endif
+      @each(fileColumn in table.columns.filter(column => column.type === 'file'))
+        if (input.{{
+          input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
+        }}) {
+          input.{{
+            input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
+          }} = Attachment.fromFile(input.{{
+            input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
+          }})
+        } else {
+          delete input.{{
+            input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
+          }}
+        }
+      @endeach
       const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
       return {{ table.names.camelCase }}
         .merge(input)
