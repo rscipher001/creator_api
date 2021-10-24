@@ -144,7 +144,7 @@
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
-        <b-upload @input="onFileAdd(file, '{{ column.names.camelCase }}')" v-model="form.{{ column.names.camelCase }}" expanded>
+        <b-upload @input="onFileAdd($event, '{{ column.names.camelCase }}')" v-model="form.{{ column.names.camelCase }}" expanded>
           <a class="button is-primary is-fullwidth">
             <b-icon icon="upload"></b-icon>
             <span>
