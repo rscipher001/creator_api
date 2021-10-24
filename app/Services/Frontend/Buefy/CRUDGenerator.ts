@@ -101,7 +101,7 @@ export default class CRUDGenerator {
 
     const filePath = `${this.input.spaPath}/src/router/index.js`
     let content = await HelperService.readFile(filePath)
-    const index = content.indexOf(']') - 1
+    const index = content.indexOf('];') - 1
     content = HelperService.insertLines(content, index, part)
     await HelperService.writeFile(filePath, content)
   }
