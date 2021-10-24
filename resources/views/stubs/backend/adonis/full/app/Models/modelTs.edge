@@ -71,7 +71,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @each(relation in table.relations)
     @if(relation.type === 'belongsTo')
     @column()
-    public {{ relation.names.camelCase }}Id{{relation.required ? '' : '?' }}: number {{ column.meta.required ? '' : '| null' }}
+    public {{ relation.names.camelCase }}Id{{relation.required ? '' : '?' }}: number {{ relation.required ? '' : '| null' }}
     @endif
   @endeach
 
