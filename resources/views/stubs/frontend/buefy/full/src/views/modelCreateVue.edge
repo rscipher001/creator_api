@@ -139,15 +139,6 @@
       </b-field>
       @elseif(column.type === 'file')
       <b-field
-        horizontal
-        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
-        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
-        :message="errors.{{ column.names.camelCase }}"
-      >
-        <b-datepicker v-model="form.{{ column.names.camelCase }}" />
-      </b-field>
-
-      <b-field
         class="file" horizontal
         label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
