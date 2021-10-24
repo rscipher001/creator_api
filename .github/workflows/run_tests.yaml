@@ -35,7 +35,7 @@ jobs:
           DB_CONNECTION: mysql
           MYSQL_HOST: localhost
           MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
-          MYSQL_USER: snowball
+          MYSQL_USER: root
           MYSQL_PASSWORD: snowball
           MYSQL_DB_NAME: creator
           MAIL_FROM_ADDRESS: noreply@pcsudhar.com
@@ -43,11 +43,6 @@ jobs:
           SMTP_PORT: 587
           SMTP_USERNAME: apikey
           SMTP_PASSWORD: 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
-          DBNAME: mysql
-          DBUSER: root
-          DBPASSWORD: snowball
-          DBHOST: 127.0.0.1
-          DBPORT: ${{ job.services.mysql.ports[3306] }}
       - name: Run Tests
         run: |
           npm run format
@@ -64,7 +59,7 @@ jobs:
           DB_CONNECTION: mysql
           MYSQL_HOST: localhost
           MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
-          MYSQL_USER: snowball
+          MYSQL_USER: root
           MYSQL_PASSWORD: snowball
           MYSQL_DB_NAME: creator
           MAIL_FROM_ADDRESS: noreply@pcsudhar.com
