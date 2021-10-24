@@ -43,6 +43,7 @@ export default class CreateProjectValidator {
     singleton: schema.boolean.optional(),
     parent: schema.string.optional({ trim: true }),
     routeParents: schema.array.optional().members(schema.string({ trim: true })),
+    indexColumns: schema.array.optional().members(schema.string({ trim: true })),
     operations: schema
       .array()
       .members(

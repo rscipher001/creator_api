@@ -50,6 +50,9 @@ class BackendProjectService {
       }
       return column
     })
+    if (Array.isArray(table.indexColumns)) {
+      table.indexColumns = table.indexColumns.map((columnName) => string.pascalCase(columnName))
+    }
     if (Array.isArray(table.routeParents)) {
       table.routeParents = table.routeParents
         .reverse()

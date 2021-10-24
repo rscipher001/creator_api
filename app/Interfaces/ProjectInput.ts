@@ -74,6 +74,7 @@ export interface Table {
   tableName: string // In DB
   generateRoute: boolean // Route only generated if true
   routeParents: string[] // Route parents are parent models for routing
+  indexColumns: string[] // Only these items will be used on listing page
   routeParentTables: Table[] // Route parents table for use in controller
   operations: string[] // CRUD operations
   columns: Column[]
