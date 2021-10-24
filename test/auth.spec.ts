@@ -81,7 +81,7 @@ test.group('Auth', (group) => {
 
   test('Generate plain API', async (assert) => {
     const { body } = await supertest(BASE_URL)
-      .post('/api/me')
+      .post('/api/project')
       .send({
         name: 'FullAPITest',
         database: 'mysql',
