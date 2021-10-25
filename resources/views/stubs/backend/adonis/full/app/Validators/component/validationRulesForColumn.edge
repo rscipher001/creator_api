@@ -8,8 +8,12 @@
     @if(column.meta.maxSize)
     size: '{{ column.meta.maxSize }}',
     @endif
-    @if(Array.isArray(column.meta.extentions) && column.meta.extentions.length)
-      extnames: [{{ column.meta.extentions.join() }}],
+    @if(Array.isArray(column.meta.extensions) && column.meta.extensions.length)
+      extnames: [
+        @each(extension in column.meta.extensions)
+          "{{ extension }}",
+        @endeach
+      ],
     @endif
   }
   @else
