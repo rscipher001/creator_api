@@ -25,6 +25,15 @@ export default {
   }),
 
   actions: {
+    bootstrap({ state, dispatch, commit }) {
+      for (const key in state.loading) {
+        commit("setLoading", { key: key, value: false });
+      }
+      if (state.user) {
+        dispatch("refreshUser");
+      }
+    },
+
     setUserToken({ commit }, { user, token }) {
       LocalStorageService.setJSON("user", user);
       LocalStorageService.setAuthToken(token);
@@ -246,8 +255,13 @@ export default {
     },
 
     async refreshUser({ dispatch }, input) {
-      const user = await HttpService.authGet("/me", input);
-      dispatch("updateUser", user);
+      try {
+        const user = await HttpService.authGet("/me", input);
+        dispatch("updateUser", user);
+      } catch (e) {
+        console.error(e);
+        dispatch("unsetTokens");
+      }
     },
 
     async logout({ dispatch }) {

@@ -247,7 +247,12 @@ export default class SPAGenerator {
   public async updateSrcAppVue() {
     const filePath = `${this.input.spaPath}/src/App.vue`
 
-    const content = await View.render(`stubs/frontend/${this.input.tech.frontend}/full/src/appVue`)
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/src/appVue`,
+      {
+        input: this.input,
+      }
+    )
     await HelperService.writeFile(filePath, content)
   }
 

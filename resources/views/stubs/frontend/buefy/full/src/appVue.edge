@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
+import { mapState } from "vuex";
 import NavBar from '@/components/NavBar.vue';
 
 export default {
@@ -26,14 +26,11 @@ export default {
   },
 
   methods: {
-    ...mapActions("auth", {
-      refreshUserAction: "refreshUser",
-    }),
-
-    refreshUser() {
-      if (this.user) {
-        this.refreshUserAction();
-      }
+    bootstrap() {
+      this.$store.dispatch("auth/bootstrap");
+      @each(table in input.tables)
+        this.$store.dispatch("{{ table.names.camelCase }}/bootstrap");
+      @endeach
     },
   },
 };

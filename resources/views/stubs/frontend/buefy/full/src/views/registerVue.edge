@@ -5,9 +5,8 @@
         <form method="POST" @submit.prevent="register">
           <h1 class="is-size-3 has-text-centered pb-5">Register</h1>
 
-          @each(column in input.auth.table.columns)
-          @if(column.meta.expose !== false)
-          @if(!['Email', 'Password', 'RememberMeToken'].includes(column.name))
+          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false))
+          @if(!['Password'].includes(column.name))
           <b-field label="{{
             column.input?.displayName || column.names.pascalCase
           }}{{
@@ -27,12 +26,7 @@
             ></b-input>
           </b-field>
           @endif
-          @endif
           @endeach
-
-          <b-field label="Email *" :type="errors.email ? 'is-danger' : ''" :message="errors.email">
-            <b-input v-model="form.email" maxlength="{{ email.meta.maxLength || 256 }}" required></b-input>
-          </b-field>
 
           <b-field label="Password *" :type="errors.password ? 'is-danger' : ''" :message="errors.password">
             <b-input
@@ -77,14 +71,13 @@ export default {
     return {
       errors: {},
       form: {
-        email: '',
+        @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false))~
+          @if(!['Password'].includes(column.name))
+            {{ column.names.camelCase }}: '',
+          @endif
+        @endeach
         password: '',
         passwordConfirmation: '',
-        @each(column in input.auth.table.columns)
-        @if(!['Email', 'Password', 'RememberMeToken'].includes(column.name))
-        {{ column.names.camelCase }}: '',
-        @endif
-        @endeach
       },
     };
   },
@@ -96,12 +89,11 @@ export default {
     async register() {
       try {
         await this.registerAction({
-          @each(column in input.auth.table.columns)
-          @if(!['Email', 'Password', 'RememberMeToken'].includes(column.name))
-          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
-          @endif
+          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false))~
+            @if(!['Password'].includes(column.name))
+              {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+            @endif
           @endeach
-          email: this.form.email,
           password: this.form.password,
           passwordConfirmation: this.form.passwordConfirmation,
         });

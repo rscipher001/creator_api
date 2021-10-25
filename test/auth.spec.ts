@@ -133,68 +133,7 @@ test.group('Auth', (group) => {
             relations: [],
             name: 'User',
             timestamps: true,
-            columns: [
-              {
-                name: 'name',
-                type: 'string',
-                meta: {
-                  displayName: 'Name',
-                  required: true,
-                  minLength: 2,
-                  maxLength: 127,
-                },
-                input: {
-                  type: 'input',
-                },
-              },
-              {
-                name: 'email',
-                type: 'string',
-                meta: {
-                  displayName: 'Email',
-                  required: true,
-                  minLength: 6,
-                  maxLength: 127,
-                  email: true,
-                  unique: true,
-                },
-                input: {
-                  type: 'input',
-                },
-              },
-              {
-                name: 'password',
-                type: 'string',
-                meta: {
-                  displayName: 'Password',
-                  trim: true,
-                  secret: true,
-                  maxLength: 64,
-                  minLength: 8,
-                  dbLength: 255,
-                  required: true,
-                },
-                input: {
-                  type: 'input',
-                },
-              },
-              {
-                name: 'rememberMeToken',
-                type: 'string',
-                meta: {
-                  expose: false,
-                  required: false,
-                },
-              },
-              {
-                name: 'emailVerifiedAt',
-                type: 'date',
-                meta: {
-                  expose: false,
-                  required: false,
-                },
-              },
-            ],
+            columns: [],
           },
         },
         tenantSettings: {

@@ -20,6 +20,12 @@ export default {
   getters: {},
 
   actions: {
+    bootstrap({ state, commit }) {
+      for (const key in state.loading) {
+        commit("setLoading", { key: key, value: false });
+      }
+    },
+
     async index({ commit }, filter) {
       commit('setLoading', { key: 'index', value: true });
       try {
