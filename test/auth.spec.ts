@@ -210,6 +210,7 @@ test.group('Auth', (group) => {
             singleton: false,
             parent: null,
             routeParents: [],
+            indexColumns: ['name', 'isoCode'],
             operations: ['index', 'store', 'update', 'destroy', 'storeMany', 'destroyMany'],
             columns: [
               {
@@ -245,6 +246,7 @@ test.group('Auth', (group) => {
               },
               {
                 meta: {
+                  displayName: 'ISO Code',
                   required: true,
                   expose: true,
                   trim: true,
@@ -284,6 +286,7 @@ test.group('Auth', (group) => {
             singleton: false,
             parent: null,
             routeParents: ['Country'],
+            indexColumns: ['name'],
             operations: ['index', 'store', 'update', 'destroy', 'storeMany', 'destroyMany'],
             columns: [
               {
@@ -363,6 +366,7 @@ test.group('Auth', (group) => {
             singleton: true,
             parent: '$auth',
             routeParents: [],
+            indexColumns: ['address'],
             operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
             columns: [
               {
@@ -413,6 +417,7 @@ test.group('Auth', (group) => {
             singleton: false,
             parent: null,
             routeParents: [],
+            indexColumns: ['name'],
             operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
             columns: [
               {
@@ -461,6 +466,7 @@ test.group('Auth', (group) => {
             generateRoute: true,
             singleton: false,
             parent: null,
+            indexColumns: ['name'],
             routeParents: [],
             operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
             columns: [
@@ -510,6 +516,7 @@ test.group('Auth', (group) => {
             generateRoute: true,
             parent: '$auth',
             routeParents: [],
+            indexColumns: ['address'],
             operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
             columns: [
               {
@@ -559,6 +566,7 @@ test.group('Auth', (group) => {
             generateRoute: true,
             parent: 'Minion',
             routeParents: ['Minion'],
+            indexColumns: ['address'],
             operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
             columns: [
               {
@@ -607,6 +615,7 @@ test.group('Auth', (group) => {
             timestamps: true,
             generateRoute: true,
             parent: 'Task',
+            indexColumns: ['address'],
             routeParents: ['Task', 'Minion'],
             operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
             columns: [
@@ -656,6 +665,7 @@ test.group('Auth', (group) => {
             timestamps: true,
             generateRoute: true,
             singleton: true,
+            indexColumns: ['address'],
             parent: 'Subtask',
             routeParents: ['Subtask', 'Task', 'Minion'],
             operations: ['store', 'show', 'destroy'],
