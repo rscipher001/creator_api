@@ -114,7 +114,7 @@ test.group('Auth', (group) => {
             test: true,
           },
           spa: {
-            generate: false,
+            generate: true,
             crud: true,
           },
           app: {

@@ -5,7 +5,7 @@
       <div class="level-right"><b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-light">Back</b-button></div>
     </div>
     <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
-      @each(column in table.columns)
+      @each(column in table.columns.filter(c => c.meta.expose !== false))~
       @if(column.type === 'string')
       <b-field
         horizontal
@@ -209,7 +209,7 @@ export default {
       this.editMode.id = {{ table.names.camelCase }}Id;
       @if(table.columns.find(column => column.type !== 'file'))
         const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
-        @each(column in table.columns)~
+        @each(column in table.columns.filter(c => c.meta.expose !== false))~
         @if(!column.secret && column.type !== 'file')
         this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}
         @endif
@@ -231,7 +231,7 @@ export default {
       },
       errors: {},
       form: {
-        @each(column in table.columns)
+        @each(column in table.columns.filter(c => c.meta.expose !== false))~
         {{ column.names.camelCase }}: null,
         @endeach
         @each(relation in table.relations)
@@ -253,7 +253,7 @@ export default {
       try {
         @if(table.columns.find(column => column.type === 'file'))
           const payload = new FormData();
-          @each(column in table.columns)
+          @each(column in table.columns.filter(c => c.meta.expose !== false))~
           payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }});
           @endeach
           @each(relation in table.relations)
@@ -263,7 +263,7 @@ export default {
           @endeach
         @else
         const payload = {
-          @each(column in table.columns)
+          @each(column in table.columns.filter(c => c.meta.expose !== false))~
           {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
           @endeach
           @each(relation in table.relations)
@@ -300,7 +300,7 @@ export default {
       try {
         @if(table.columns.find(column => column.type === 'file'))
           const payload = new FormData();
-          @each(column in table.columns)
+          @each(column in table.columns.filter(c => c.meta.expose !== false))~
           payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }});
           @endeach
           @each(relation in table.relations)
@@ -310,7 +310,7 @@ export default {
           @endeach
         @else
         const payload = {
-          @each(column in table.columns)
+          @each(column in table.columns.filter(c => c.meta.expose !== false))~
           {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
           @endeach
           @each(relation in table.relations)
