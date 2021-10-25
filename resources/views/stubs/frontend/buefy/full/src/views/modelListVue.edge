@@ -28,7 +28,7 @@
         <b-table-column field="{{
           input.camelCaseStrategy ? camelCase(column) : snakeCase(snakeCase)
         }}" label="{{
-          input.camelCaseStrategy ? camelCase(column) : snakeCase(snakeCase)
+          table.columns.find((c) => c.names.pascalCase === pascalCase(column)).meta.displayName || capitalCase(column)
         }}" v-slot="props">
           {{{ 
             `{{ props.row.${input.camelCaseStrategy ? camelCase(column) : snakeCase(snakeCase)} }}`
