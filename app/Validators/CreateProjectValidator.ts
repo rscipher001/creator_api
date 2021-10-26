@@ -68,10 +68,12 @@ export default class CreateProjectValidator {
     database: schema.enum(['mysql'] as const),
     types: schema.array().members(schema.enum(['api'] as const)),
     camelCaseStrategy: schema.boolean(),
+    mailEnabled: schema.boolean(),
     mailers: schema
       .array()
       .members(schema.enum.optional(['mailgun', 'smtp', 'ses', 'sparkpost'] as const)),
     defaultMailer: schema.string.optional(),
+    storageEnabled: schema.boolean(),
     storageDrivers: schema.array().members(schema.enum.optional(['local', 's3', 'gcs'] as const)),
     defaultStorageDriver: schema.string.optional(),
     tech: schema.object().members({

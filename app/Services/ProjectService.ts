@@ -96,8 +96,10 @@ class BackendProjectService {
     projectInput.spaPath = `${projectInput.projectsPath}/${projectInput.basePath}-spa`
     projectInput.database = this.input.database.toLocaleLowerCase()
     projectInput.types = this.input.types.map((t) => t.toLowerCase())
+    projectInput.mailEnabled = this.input.mailEnabled
     projectInput.mailers = this.input.mailers
     projectInput.defaultMailer = this.input.defaultMailer
+    projectInput.storageEnabled = this.input.storageEnabled
     projectInput.storageDrivers = this.input.storageDrivers
     projectInput.defaultStorageDriver = this.input.defaultStorageDriver
     projectInput.tech = this.input.tech

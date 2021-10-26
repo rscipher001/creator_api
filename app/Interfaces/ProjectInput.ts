@@ -107,10 +107,12 @@ export default interface ProjectInput {
   path: string // project folder full path
   spaPath: string // project folder full path
   basePath: string // Project folder name
-  defaultMailer: string
+  mailEnabled: boolean
   mailers: string[]
-  defaultStorageDriver: string
+  defaultMailer: string
+  storageEnabled: boolean
   storageDrivers: string[]
+  defaultStorageDriver: string
   generate: {
     api: {
       generate: boolean

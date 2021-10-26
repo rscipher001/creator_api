@@ -2,9 +2,12 @@
   <section>
     <h1 class="is-size-5">Profile Setting</h1>
     <hr class="my-2" />
+    @if(input.storageEnabled)
+    <div class="columns">
+    <div class="column is-three-quarters">
+    @endif
     <form method="POST" @submit.prevent="updateProfile">
-      @each(column in input.auth.table.columns)
-        @if(column.meta.expose !== false)
+      @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false))
         @if(!['Email', 'Password',].includes(column.name))
         <b-field
           label="{{
@@ -29,7 +32,6 @@
           ></b-input>
         </b-field>
         @endif
-        @endif
       @endeach
       <b-button
         :loading="loading.updateProfile"
@@ -38,6 +40,34 @@
         >Update Profile</b-button
       >
     </form>
+    @if(input.storageEnabled)
+    </div>
+    <div class="column">
+      <b-image
+        v-if="user.avatar"
+        :src="getAssetUrl(user.avatar.url)"
+        :alt="{{ user.name }} Avatar"
+        ratio="1by1"
+        rounded
+      ></b-image>
+      <b-field class="file my-2">
+        <b-upload @input="updateAvatar" v-model="file" expanded>
+          <a class="button is-primary is-fullwidth">
+            <b-icon icon="upload"></b-icon>
+            <span>{{ file.name || "Select File" }}</span>
+          </a>
+        </b-upload>
+      </b-field>
+      <b-button
+        v-if="user.avatar"
+        @click="deleteAvatar"
+        type="is-ghost is-fullwidth"
+      >
+        Delete Avatar
+      </b-button>
+    </div>
+  </div>
+    @endif
   </section>
 </template>
 <script>

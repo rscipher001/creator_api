@@ -27,7 +27,7 @@ const fulProjectInput = {
       test: true,
     },
     spa: {
-      generate: true,
+      generate: false,
       crud: true,
     },
     app: {
