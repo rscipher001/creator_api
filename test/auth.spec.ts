@@ -42,6 +42,10 @@ const fulProjectInput = {
     passwordReset: true,
     passwordChange: true,
     table: {
+      generateController: false,
+      generateUI: false,
+      generateModel: true,
+      generateMigration: true,
       operations: [],
       relations: [],
       name: 'User',
