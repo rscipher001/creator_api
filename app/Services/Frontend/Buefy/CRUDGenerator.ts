@@ -141,7 +141,7 @@ export default class CRUDGenerator {
    */
   protected async start() {
     for (let i = 0; i < this.input.tables.length; i += 1) {
-      if (this.input.tables[i].skipUI) continue
+      if (!this.input.tables[i].generateUI) continue
       await this.createCreateView(i)
       await this.createListView(i)
       // await this.createCreateModal(i)
@@ -156,7 +156,7 @@ export default class CRUDGenerator {
 
     // Run loop for states separately to avoid unused import warning which results in commit failure
     for (let i = 0; i < this.input.tables.length; i += 1) {
-      if (this.input.tables[i].skipUI) continue
+      if (!this.input.tables[i].generateUI) continue
       await this.createState(i)
       await this.importState(i)
     }

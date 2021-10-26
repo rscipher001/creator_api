@@ -28,7 +28,7 @@ export default {
   methods: {
     bootstrap() {
       this.$store.dispatch("auth/bootstrap");
-      @each(table in input.tables)
+      @each(table in input.tables.filter(t => t.generateUI))
         this.$store.dispatch("{{ table.names.camelCase }}/bootstrap");
       @endeach
     },

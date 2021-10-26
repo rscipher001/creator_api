@@ -65,10 +65,10 @@ export interface Column {
 
 export interface Table {
   name: string
-  skipController: boolean // Don't generate controller if true
-  skipModel: boolean // Don't generate model if true
-  skipMigration: boolean // Don't generate migration if true
-  skipUI: boolean //Don't generate CRUD if true
+  generateController: boolean // Generate controller if true
+  generateModel: boolean // Generate model if true
+  generateMigration: boolean // Generate migration if true
+  generateUI: boolean //Generate CRUD if true
   names: Names
   singleton: boolean // Singleton means only one instace per parent.
   tableName: string // In DB

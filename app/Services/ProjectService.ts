@@ -345,9 +345,9 @@ class BackendProjectService {
   protected addReseTokenTables() {
     const emailColumn = this.input.auth.table.columns.find((column) => column.name === 'email')
     const verificationTokenTable = {
-      skipController: true,
-      skipModel: true,
-      skipUI: true,
+      generateController: false,
+      generateModel: false,
+      generateUI: false,
       operations: [],
       name: 'VerificationToken',
       timestamps: true,
