@@ -337,6 +337,17 @@ class BackendProjectService {
           expose: false,
           required: false,
         },
+      },
+      {
+        name: 'avatar',
+        type: 'file',
+        meta: {
+          required: false,
+          expose: true,
+          trim: false,
+          maxSize: '1mb',
+          extensions: ['jpg', 'png', 'jpeg'],
+        },
       }
     )
   }
@@ -350,6 +361,7 @@ class BackendProjectService {
       generateController: false,
       generateModel: false,
       generateUI: false,
+      generateMigration: true,
       operations: [],
       name: 'VerificationToken',
       timestamps: true,

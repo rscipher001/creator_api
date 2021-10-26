@@ -5,7 +5,7 @@
         <form method="POST" @submit.prevent="register">
           <h1 class="is-size-3 has-text-centered pb-5">Register</h1>
 
-          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false))
+          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'file'))
           @if(!['Password'].includes(column.name))
           <b-field label="{{
             column.input?.displayName || column.names.pascalCase
@@ -71,7 +71,7 @@ export default {
     return {
       errors: {},
       form: {
-        @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false))~
+        @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'file'))~
           @if(!['Password'].includes(column.name))
             {{ column.names.camelCase }}: '',
           @endif
@@ -89,7 +89,7 @@ export default {
     async register() {
       try {
         await this.registerAction({
-          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false))~
+          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'file'))~
             @if(!['Password'].includes(column.name))
               {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
             @endif

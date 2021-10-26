@@ -187,7 +187,7 @@ export default {
     async updateProfile({ commit, dispatch }, input) {
       commit("setLoading", { key: "updateProfile", value: true });
       try {
-        const user = await HttpService.authPost("/profile", input);
+        const user = await HttpService.authPost("/me/profile", input);
         dispatch("updateUser", user);
         commit("setLoading", { key: "updateProfile", value: false });
       } catch (e) {
@@ -205,7 +205,7 @@ export default {
     async getAccount({ commit }) {
       commit("setLoading", { key: "getAccount", value: true });
       try {
-        const emailRequest = await HttpService.authGet("/profile/account");
+        const emailRequest = await HttpService.authGet("/me/profile/account");
         commit("setLoading", { key: "getAccount", value: false });
         return emailRequest;
       } catch (e) {
@@ -220,7 +220,7 @@ export default {
     async deleteAccount({ commit }) {
       commit("setLoading", { key: "deleteAccount", value: true });
       try {
-        await HttpService.authDelete("/profile/account");
+        await HttpService.authDelete("/me/profile/account");
         commit("setLoading", { key: "deleteAccount", value: false });
       } catch (e) {
         commit("setLoading", { key: "deleteAccount", value: false });
@@ -231,7 +231,7 @@ export default {
     async updateAccount({ commit }, input) {
       commit("setLoading", { key: "updateAccount", value: true });
       try {
-        const message = await HttpService.authPost("/profile/account", input);
+        const message = await HttpService.authPost("/me/profile/account", input);
         commit("setLoading", { key: "updateAccount", value: false });
         return message;
       } catch (e) {
@@ -246,7 +246,7 @@ export default {
     async updateAvatar({ commit, dispatch }, input) {
       commit("setLoading", { key: "updateAvatar", value: true });
       try {
-        const user = await HttpService.authPost("/profile/avatar", input);
+        const user = await HttpService.authPost("/me/profile/avatar", input);
         dispatch("updateUser", user);
         commit("setLoading", { key: "updateAvatar", value: false });
       } catch (e) {
@@ -261,7 +261,7 @@ export default {
     async deleteAvatar({ commit, dispatch }, input) {
       commit("setLoading", { key: "deleteAvatar", value: true });
       try {
-        const user = await HttpService.authPost("/profile/avatar", input);
+        const user = await HttpService.authPost("/me/profile/avatar", input);
         dispatch("updateUser", user);
         commit("setLoading", { key: "deleteAvatar", value: false });
       } catch (e) {
@@ -276,7 +276,7 @@ export default {
     async updatePassword({ commit }, input) {
       commit("setLoading", { key: "updatePassword", value: true });
       try {
-        await HttpService.authPost("/profile/password", input);
+        await HttpService.authPost("/me/profile/password", input);
         commit("setLoading", { key: "updatePassword", value: false });
       } catch (e) {
         commit("setLoading", { key: "updatePassword", value: false });

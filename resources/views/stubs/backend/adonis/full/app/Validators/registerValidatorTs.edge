@@ -19,7 +19,7 @@ export default class RegisterValidator {
       rules.maxLength({{ password.meta.maxLength || 72 }}),
       rules.confirmed('passwordConfirmation'),
     ]),
-    @each(column in input.auth.table.columns)
+    @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'file'))
       @if(!['Email', 'Password', 'RememberMeToken'].includes(column.name))
       @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRulesForColumn`, {
         table,

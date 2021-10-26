@@ -9,11 +9,13 @@ import { Attachment } from '@ioc:Adonis/Addons/AttachmentLite'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import VerificationToken, { Reason } from 'App/Models/VerificationToken'
 import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator'
+
 export default class ProfileController {
   public async updateProfile({ auth, request }: HttpContextContract) {
     const user = auth.user!
     const input = await request.validate(ProfileValidator)
-    return user.merge(input).save()
+    await user.merge(input).save()
+    return user
   }
 
   /**

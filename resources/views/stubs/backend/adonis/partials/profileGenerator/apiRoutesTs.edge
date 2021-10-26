@@ -7,11 +7,14 @@ Route.group(() => {
 
 Route.group(() => {
   // Profile routes
-  Route.post('/profile', 'API/ProfileController.updateProfile')
-  Route.get('/profile/account', 'API/ProfileController.getAccount')
-  Route.post('/profile/account', 'API/ProfileController.updateAccount')
-  Route.delete('/profile/account', 'API/ProfileController.deleteAccount')
-  Route.post('/profile/password', 'API/ProfileController.updatePassword')
+  Route.post('/me/profile', 'API/ProfileController.updateProfile')
+  Route.get('/me/profile/account', 'API/ProfileController.getAccount')
+  Route.post('/me/profile/account', 'API/ProfileController.updateAccount')
+  Route.delete('/me/profile/account', 'API/ProfileController.deleteAccount')
+  Route.post('/me/profile/password', 'API/ProfileController.updatePassword')
+  @if(input.storageEnabled)
+  Route.post('/me/profile/avatar', 'API/ProfileController.updateAvatar')
+  @endif
 })
 .middleware(['auth', 'ensureEmailIsVerified'])
 .prefix('/api')
