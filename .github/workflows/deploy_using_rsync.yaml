@@ -17,15 +17,14 @@ jobs:
         run: |
           npm ci
           npm run build
-      - name: List items
-        run: ls
       - name: Copy build
         run: |
           eval $(ssh-agent -s)
           echo "$SSH_KEY" | tr -d '\r' | ssh-add - && mkdir -p ~/.ssh && chmod 700 ~/.ssh && ssh-keyscan -p $PORT $HOST >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           rsync -az ./build/ $USER@$HOST:~/ExProjects/creator_api
-          ssh $USER@$HOST 'cd ~/ExProjects/creator_api && npm ci'
+      - name: Install dependencies
+        run: ssh $USER@$HOST 'cd ~/ExProjects/creator_api && npm ci --production --ignore-scripts'
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           HOST: ${{ secrets.HOST }}
