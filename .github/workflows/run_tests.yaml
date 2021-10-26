@@ -19,8 +19,8 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - run: npm install
-
+      - run: mkdir -p ../Projects
+      - run: npm ci
       - run: npm install -g @vue/cli
       - name: Run Migrations
         run: node ace migration:run
@@ -31,7 +31,7 @@ jobs:
           APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
           DRIVE_DISK: local
           CACHE_VIEWS: false
-          PROJECT_PATH: ./
+          PROJECT_PATH: ../Projects
           UI_URL: http://localhost:8080
           DB_CONNECTION: mysql
           MYSQL_HOST: localhost
@@ -55,7 +55,7 @@ jobs:
           APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
           DRIVE_DISK: local
           CACHE_VIEWS: false
-          PROJECT_PATH: ./
+          PROJECT_PATH: ../Projects
           UI_URL: http://localhost:8080
           DB_CONNECTION: mysql
           MYSQL_HOST: localhost
@@ -78,7 +78,7 @@ jobs:
           APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
           DRIVE_DISK: local
           CACHE_VIEWS: false
-          PROJECT_PATH: ./
+          PROJECT_PATH: ../Projects
           UI_URL: http://localhost:8080
           DB_CONNECTION: mysql
           MYSQL_HOST: localhost

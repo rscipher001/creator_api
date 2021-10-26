@@ -25,7 +25,7 @@ jobs:
           echo "$SSH_KEY" | tr -d '\r' | ssh-add - && mkdir -p ~/.ssh && chmod 700 ~/.ssh && ssh-keyscan -p $PORT $HOST >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           rsync -az ./build/ $USER@$HOST:~/ExProjects/creator_api
-          ssh $USER@$HOST 'npm ci ~/ExProjects/creator_api'
+          ssh $USER@$HOST 'cd ~/ExProjects/creator_api && npm ci'
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           HOST: ${{ secrets.HOST }}
