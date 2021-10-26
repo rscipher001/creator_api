@@ -12,6 +12,8 @@ const fulProjectInput = {
   database: 'mysql',
   types: ['api'],
   mailers: ['smtp'],
+  mailEnabled: true,
+  storageEnabled: true,
   defaultMailer: 'smtp',
   storageDrivers: ['local'],
   defaultStorageDriver: 'local',
