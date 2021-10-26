@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import store from '@/store';
+import store from '../store';
 import Home from '../views/Home.vue';
 
 Vue.use(VueRouter);
@@ -49,7 +49,7 @@ const routes = [
   {
     path: "/email/verify",
     name: "VerifyEmail",
-    component: () => import("@/views/VerifyEmail.vue"),
+    component: () => import("../views/VerifyEmail.vue"),
   },
   {
     path: "/emailUpdate",
@@ -60,7 +60,7 @@ const routes = [
   {
     path: "/email/verificationPending",
     name: "EmailVerificationPending",
-    component: () => import("@/views/EmailVerificationPending.vue"),
+    component: () => import("../views/EmailVerificationPending.vue"),
     meta: {
       auth: true,
       emailUnverified: true,
@@ -70,7 +70,7 @@ const routes = [
   {
     path: "/setting",
     name: "Setting",
-    component: () => import("@/views/Setting.vue"),
+    component: () => import("../views/Setting.vue"),
     meta: {
       auth: true,
       ensureEmailIsVerified: true,
@@ -79,7 +79,7 @@ const routes = [
       {
         path: "security",
         name: "SettingSecurity",
-        component: () => import("@/views/setting/Security.vue"),
+        component: () => import("../views/setting/Security.vue"),
         meta: {
           auth: true,
           ensureEmailIsVerified: true,
@@ -88,7 +88,7 @@ const routes = [
       {
         path: "account",
         name: "SettingAccount",
-        component: () => import("@/views/setting/Account.vue"),
+        component: () => import("../views/setting/Account.vue"),
         meta: {
           auth: true,
           ensureEmailIsVerified: true,
@@ -97,7 +97,7 @@ const routes = [
       {
         path: "profile",
         name: "SettingProfile",
-        component: () => import("@/views/setting/Profile.vue"),
+        component: () => import("../views/setting/Profile.vue"),
         meta: {
           auth: true,
           ensureEmailIsVerified: true,

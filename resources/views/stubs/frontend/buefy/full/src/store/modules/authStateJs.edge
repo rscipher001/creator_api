@@ -13,7 +13,7 @@ export default {
       getAccount: false,
       verifyEmail: false,
       updateEmail: false,
-      @if(input.storateEnabled)
+      @if(input.storageEnabled)
       updateAvatar: false,
       @endif
       updateProfile: false,
@@ -23,8 +23,8 @@ export default {
       forgotPasswordRequest: false,
       resendVerificationEmail: false,
     },
-    token: undefined, // Authorization token
-    user: undefined, // Logged in user basic profile
+    token: null, // Authorization token
+    user: null, // Logged in user basic profile
   }),
 
   actions: {
@@ -242,7 +242,7 @@ export default {
         throw e;
       }
     },
-    @if(input.storateEnabled)
+    @if(input.storageEnabled)
     async updateAvatar({ commit, dispatch }, input) {
       commit("setLoading", { key: "updateAvatar", value: true });
       try {

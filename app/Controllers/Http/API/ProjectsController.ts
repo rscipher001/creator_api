@@ -36,6 +36,19 @@ export default class ProjectsController {
     return project
   }
 
+  public async destroy({ request, auth, response }: HttpContextContract) {
+    const projectId: number = request.param('id')
+    const project = await Project.query()
+      .where({
+        id: projectId,
+        userId: auth.user!.id,
+      })
+      .firstOrFail()
+    await project.deleteFiles()
+    await project.delete()
+    return response.noContent()
+  }
+
   public async generateSignedUrl({ request, auth }) {
     const projectId = request.param('projectId')
     const type = request.param('type')

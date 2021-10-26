@@ -412,11 +412,13 @@ class BackendProjectService {
         await db.init()
 
         // Add storage driver
-        const storageDriver = new AdonisStorageDriverGenerator(this.projectInput)
-        await storageDriver.init()
+        if (this.projectInput.storageEnabled) {
+          const storageDriver = new AdonisStorageDriverGenerator(this.projectInput)
+          await storageDriver.init()
+        }
 
         // Add mailer
-        if (this.projectInput.mailers.length) {
+        if (this.projectInput.mailEnabled) {
           const mailer = new AdonisMailerGenerator(this.projectInput)
           await mailer.init()
         }

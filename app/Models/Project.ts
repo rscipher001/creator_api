@@ -1,5 +1,8 @@
-import User from 'App/Models/User'
 import { DateTime } from 'luxon'
+import User from 'App/Models/User'
+import Env from '@ioc:Adonis/Core/Env'
+import Application from '@ioc:Adonis/Core/Application'
+import HelperService from 'App/Services/HelperService'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 
 export default class Project extends BaseModel {
@@ -26,4 +29,16 @@ export default class Project extends BaseModel {
 
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>
+
+  public async deleteFiles() {
+    const basePath = Application.makePath(Env.get('PROJECT_PATH'))
+    const names = HelperService.generateExtendedNames(JSON.parse(this.rawInput).name)
+    const apiPath = `${basePath}/${names.dashCase}`
+    const uiPath = `${basePath}/${names.dashCase}-spa`
+    try {
+      await HelperService.execute('rm', ['-rf', apiPath, uiPath], {
+        cwd: basePath,
+      })
+    } catch (e) {}
+  }
 }

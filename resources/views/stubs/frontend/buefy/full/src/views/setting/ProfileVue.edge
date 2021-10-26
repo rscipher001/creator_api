@@ -46,7 +46,7 @@
       <b-image
         v-if="user.avatar"
         :src="getAssetUrl(user.avatar.url)"
-        :alt="{{ user.name }} Avatar"
+        :alt="@{{ user.name }} Avatar"
         ratio="1by1"
         rounded
       ></b-image>
@@ -54,7 +54,10 @@
         <b-upload @input="updateAvatar" v-model="file" expanded>
           <a class="button is-primary is-fullwidth">
             <b-icon icon="upload"></b-icon>
-            <span>{{ file.name || "Select File" }}</span>
+            <span>
+              {{ file.name || "Select File" }}
+              {{{ `{{ (form.${column.names.camelCase} && form.${column.names.camelCase}.name) || 'Select ${column.input.displayName || column.names.pascalCase}' }}` }}}
+            </span>
           </a>
         </b-upload>
       </b-field>
@@ -72,7 +75,7 @@
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
-import ValidationException from "@/exceptions/ValidationException";
+import ValidationException from "../exceptions/ValidationException";
 
 export default {
   name: "ProfileSettingPage",
@@ -90,6 +93,7 @@ export default {
 
   data() {
     return {
+      file: {},
       errors: {},
       form: {
         @each(column in input.auth.table.columns)
@@ -106,7 +110,10 @@ export default {
   methods: {
     ...mapActions("auth", {
       updateProfileAction: "updateProfile",
+      updateAvatarAction: "updateAvatar",
+      deleteAvatarAction: "deleteAvatar",
     }),
+
     async updateProfile() {
       try {
         await this.updateProfileAction({
@@ -136,6 +143,57 @@ export default {
         });
       }
     },
+
+    @if(input.storageEnabled)
+    getAssetUrl(url) {
+      return `${process.env.VUE_APP_API_URL}${url}`;
+    },
+
+    async updateAvatar(avatar) {
+      try {
+        const formData = new FormData();
+        formData.append("avatar", avatar);
+        await this.updateAvatarAction(formData);
+        this.$buefy.toast.open({
+          message: "Avatar updated successfully!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      } catch (e) {
+        let message = "Unable to update Avatar";
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = "Validation Error";
+        }
+        this.$buefy.toast.open({
+          message,
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
+    },
+    async deleteAvatar() {
+      try {
+        await this.deleteAvatarAction({ avatar: null });
+        this.$buefy.toast.open({
+          message: "Avatar delete successfully!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      } catch (e) {
+        let message = "Unable to delete Avatar";
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = "Validation Error";
+        }
+        this.$buefy.toast.open({
+          message,
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
+    },
+    @endif
   },
 
   computed: {
@@ -143,6 +201,11 @@ export default {
       loading: (state) => state.loading,
       user: (state) => state.user,
     }),
+    @if(input.storageEnabled)
+    isLoading: function () {
+      return this.loading.deleteAvatar || this.loading.updateAvatar;
+    },
+    @endif
   },
 };
 </script>
