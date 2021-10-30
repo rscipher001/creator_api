@@ -1,0 +1,18 @@
+import { AuthenticationException } from '@adonisjs/auth/build/src/Exceptions/AuthenticationException'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Encryption from '@ioc:Adonis/Core/Encryption'
+
+export default class AuthenticateCompany {
+  public async handle({ request }: HttpContextContract, next: () => Promise<void>) {
+    try {
+      request.{{
+        input.tenantSettings.names.camelCase
+      }} = Encryption.decrypt(request.headers()['x-{{
+        input.tenantSettings.names.dashCase
+      }}-id'])
+    } catch (e) {
+      throw new AuthenticationException('Unauthorized access', 'E_UNAUTHORIZED_ACCESS')
+    }
+    await next()
+  }
+}

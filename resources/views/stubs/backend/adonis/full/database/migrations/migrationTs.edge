@@ -1,0 +1,58 @@
+import BaseSchema from '@ioc:Adonis/Lucid/Schema'
+
+export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema {
+  protected tableName = '{{ table.tableName }}'
+
+  public async up () {
+    this.schema.createTable(this.tableName, (table) => {
+      table.increments('id').primary()
+      @each(column in table.columns)~
+        @if(column.type === 'file')
+          table.json('{{ column.columnName }}')
+        @elseif(column.type === 'string')
+          table.{{
+            column.meta.multiline ? 'text': 'string'
+          }}('{{ column.columnName }}'{{
+            column.meta.dbLength ? `, ${column.meta.dbLength}`:
+            column.meta.maxLength && !column.meta.multiline ? `, ${column.meta.maxLength}`: ''
+          }})
+        @elseif(column.type === 'integer')
+          table.integer('{{ column.columnName }}')
+        @elseif(column.type === 'decimal')
+          table.double('{{ column.columnName }}')
+        @elseif(column.type === 'date')
+          table.date('{{ column.columnName }}')
+        @elseif(column.type === 'boolean')
+          table.boolean('{{ column.columnName }}')
+        @endif
+        {{
+          column.meta.unique ? '.unique()': ''
+        }}{{
+          column.meta.required ? '.notNullable()': '.nullable()'
+        }}{{{
+          column.meta.defaultTo ? `.defaultTo('${column.meta.defaultTo}')`: ''
+        }}}
+      @endeach
+      @each(relation in table.relations)~
+        @if(relation.type === 'belongsTo' && relation.lazy !== true)
+        table.integer('{{
+          input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+        }}').unsigned().references('id').inTable('{{
+          input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakCasePlural
+        }}').{{ relation.required ? 'notNullable()' : 'nullable()' }}
+        @endif
+      @endeach
+      @if(table.timestamps)
+        /**
+        * Uses timestampz for PostgreSQL and DATETIME2 for MSSQL
+        */
+        table.timestamp('{{ input.camelCaseStrategy ? 'createdAt' : 'created_at' }}', { useTz: true }).notNullable()
+        table.timestamp('{{ input.camelCaseStrategy ? 'updatedAt' : 'updated_at' }}', { useTz: true }).notNullable()
+      @endif
+    })
+  }
+
+  public async down () {
+    this.schema.dropTable(this.tableName)
+  }
+}

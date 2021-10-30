@@ -1,0 +1,34 @@
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import User from 'App/Models/User'
+
+export default class RegisterValidator {
+  constructor (protected ctx: HttpContextContract) {}
+
+  public schema = schema.create({
+    email: schema.string({ trim: true }, [
+      rules.email(),
+      rules.maxLength({{ email.meta.maxLength || 256 }}),
+      rules.unique({
+        table: {{ table.names.pascalCase }}.table,
+        column: 'email'
+      }),
+    ]),
+    password: schema.string({ trim: true },
+    [
+      rules.maxLength({{ password.meta.maxLength || 72 }}),
+      rules.confirmed('passwordConfirmation'),
+    ]),
+    @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'file'))
+      @if(!['Email', 'Password', 'RememberMeToken'].includes(column.name))
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRulesForColumn`, {
+        table,
+        column,
+        input
+      })
+      @endif
+    @endeach
+  })
+
+  public messages = {}
+}

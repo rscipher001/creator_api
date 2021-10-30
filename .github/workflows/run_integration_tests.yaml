@@ -1,0 +1,93 @@
+name: Run integration tests
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: bitnami/mysql:8.0.20
+        env:
+          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+          MYSQL_ROOT_PASSWORD: snowball
+          MYSQL_DATABASE: creator
+        ports: ['3306:3306']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: mkdir -p ../Projects
+      - run: npm ci
+      - run: npm install -g @vue/cli
+      - name: Run Migrations
+        run: node ace migration:run
+        env:
+          PORT: 3333
+          HOST: 0.0.0.0
+          NODE_ENV: development
+          APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
+          DRIVE_DISK: local
+          CACHE_VIEWS: false
+          PROJECT_PATH: ../Projects
+          UI_URL: http://localhost:8080
+          DB_CONNECTION: mysql
+          MYSQL_HOST: localhost
+          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+          MYSQL_USER: root
+          MYSQL_PASSWORD: snowball
+          MYSQL_DB_NAME: creator
+          MAIL_FROM_ADDRESS: noreply@pcsudhar.com
+          SMTP_HOST: smtp.sendgrid.net
+          SMTP_PORT: 587
+          SMTP_USERNAME: apikey
+          SMTP_PASSWORD: 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
+      - name: Run Tests
+        run: |
+          npm run format
+          npm run build
+        env:
+          PORT: 3333
+          HOST: 0.0.0.0
+          NODE_ENV: development
+          APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
+          DRIVE_DISK: local
+          CACHE_VIEWS: false
+          PROJECT_PATH: ../Projects
+          UI_URL: http://localhost:8080
+          DB_CONNECTION: mysql
+          MYSQL_HOST: localhost
+          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+          MYSQL_USER: root
+          MYSQL_PASSWORD: snowball
+          MYSQL_DB_NAME: creator
+          MAIL_FROM_ADDRESS: noreply@pcsudhar.com
+          SMTP_HOST: smtp.sendgrid.net
+          SMTP_PORT: 587
+          SMTP_USERNAME: apikey
+          SMTP_PASSWORD: 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
+      - name: Run project creation test
+        run: |
+          npm test
+        env:
+          PORT: 3333
+          HOST: 0.0.0.0
+          NODE_ENV: development
+          APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
+          DRIVE_DISK: local
+          CACHE_VIEWS: false
+          PROJECT_PATH: ../Projects
+          UI_URL: http://localhost:8080
+          DB_CONNECTION: mysql
+          MYSQL_HOST: localhost
+          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+          MYSQL_USER: root
+          MYSQL_PASSWORD: snowball
+          MYSQL_DB_NAME: creator
+          MAIL_FROM_ADDRESS: noreply@pcsudhar.com
+          SMTP_HOST: smtp.sendgrid.net
+          SMTP_PORT: 587
+          SMTP_USERNAME: apikey
+          SMTP_PASSWORD: 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

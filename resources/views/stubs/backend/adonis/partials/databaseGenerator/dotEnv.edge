@@ -1,0 +1,17 @@
+DB_CONNECTION=mysql
+DB_DEBUG=false
+
+@if(database === 'mysql')
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=lucid
+MYSQL_PASSWORD=lucid
+MYSQL_DB_NAME=lucid
+@endif
+@if(database === 'pg')
+PG_HOST=localhost
+PG_PORT=5432
+PG_USER=lucid
+PG_PASSWORD=lucid
+PG_DB_NAME=lucid
+@endif

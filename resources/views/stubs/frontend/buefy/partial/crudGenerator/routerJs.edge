@@ -1,0 +1,40 @@
+@if(table.operations.includes('index'))
+{
+  path: '/{{ table.names.camelCase }}',
+  name: '{{ table.names.pascalCase }}List',
+  component: () => import('../views/{{ table.names.pascalCase }}List.vue'),
+  meta: {
+    auth: true,
+  },
+},
+@endif
+@if(table.operations.includes('store'))
+{
+  path: '/{{ table.names.camelCase }}/create',
+  name: '{{ table.names.pascalCase }}Create',
+  component: () => import('../views/{{ table.names.pascalCase }}Create.vue'),
+  meta: {
+    auth: true,
+  },
+},
+@endif
+@if(table.operations.includes('update'))
+{
+  path: '/{{ table.names.camelCase }}/:{{ table.names.camelCase }}Id/edit',
+  name: '{{ table.names.pascalCase }}Edit',
+  component: () => import('../views/{{ table.names.pascalCase }}Create.vue'),
+  meta: {
+    auth: true,
+  },
+},
+@endif
+@if(table.operations.includes('storeMany'))
+{
+  path: '/{{ table.names.camelCase }}/import/csv',
+  name: '{{ table.names.pascalCase }}ImportCSV',
+  component: () => import('../views/{{ table.names.pascalCase }}ImportCSV.vue'),
+  meta: {
+    auth: true,
+  },
+},
+@endif

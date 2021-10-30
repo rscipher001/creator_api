@@ -1,0 +1,139 @@
+<template>
+  <section>
+    <b-loading is-full-page v-model="isLoading"></b-loading>
+    <h1 class="is-size-5">Account Setting</h1>
+    <hr class="my-2" />
+    <form method="POST" @submit.prevent="updateAccount">
+      <div class="section" v-if="existingRequest">
+        <p class="is-size-5 has-text-centered">
+          Your request to change email to
+          <span class="has-text-weight-bold">@{{ existingRequest.email }}</span>
+          is pending, check your email to confirm that request or
+          <a
+            class="has-text-weight-bold"
+            @click.prevent="deleteAccount"
+            href="#"
+            >Click here</a
+          >
+          to cancel that request
+        </p>
+      </div>
+      <b-field
+        v-else
+        label="Email *"
+        :type="errors.email ? 'is-danger' : ''"
+        :message="errors.email"
+      >
+        <b-input
+          v-model="form.email"
+          ref="accountSettingEmail"
+          maxlength="{{ email.meta.maxLength || 256 }}"
+          minlength="{{ email.meta.minLength || 6 }}"
+          required
+        ></b-input>
+      </b-field>
+      <b-button
+        :loading="loading.updateAccount"
+        type="is-primary is-fullwidth"
+        native-type="submit"
+        >Update Account</b-button
+      >
+    </form>
+  </section>
+</template>
+<script>
+import { mapState, mapActions } from "vuex";
+import ValidationException from "../../exceptions/ValidationException";
+
+export default {
+  name: "AccountSettingPage",
+
+  mounted() {
+    if (this.$refs.accountSettingEmail) this.$refs.accountSettingEmail.focus();
+    this.form.email = this.user.email;
+    this.getAccount();
+  },
+
+  data() {
+    return {
+      errors: {},
+      existingRequest: null,
+      form: {
+        email: "",
+      },
+    };
+  },
+
+  methods: {
+    ...mapActions("auth", {
+      getAccountAction: "getAccount",
+      updateAccountAction: "updateAccount",
+      deleteAccountAction: "deleteAccount",
+    }),
+
+    async getAccount() {
+      try {
+        const existingEmailUpdateRequest = await this.getAccountAction();
+        this.existingRequest = existingEmailUpdateRequest;
+      } catch (_) {
+        this.existingRequest = null;
+      }
+    },
+
+    async deleteAccount() {
+      try {
+        await this.deleteAccountAction();
+        this.$buefy.toast.open({
+          message: "Reset request cancelled successfully!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+        this.getAccount();
+      } catch (_) {
+        console.error(_);
+        this.$buefy.toast.open({
+          message: "Unable to cancle reset request!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      }
+    },
+
+    async updateAccount() {
+      try {
+        await this.updateAccountAction({
+          email: this.form.email,
+        });
+        this.$buefy.toast.open({
+          message: "Account settings updated successfully!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+        this.getAccount();
+      } catch (e) {
+        let message = "Unable to update account settings";
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = "Validation Error";
+        }
+        this.$buefy.toast.open({
+          message,
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
+    },
+  },
+
+  computed: {
+    ...mapState("auth", {
+      loading: (state) => state.loading,
+      user: (state) => state.user,
+    }),
+
+    isLoading: function () {
+      return this.loading.getAccount || this.loading.deleteAccount;
+    },
+  },
+};
+</script>
