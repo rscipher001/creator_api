@@ -1,6 +1,6 @@
 name: Deploy using rsync
 on:
-  pull_request:
+  push:
     branches: [master]
 
 jobs:
@@ -25,8 +25,8 @@ jobs:
           chmod 700 ~/.ssh
           ssh-keyscan -p $PORT $HOST >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
-          rsync -az ./build/ $USER@$HOST:~/ExProjects/creator_api
-          ssh $USER@$HOST 'cd ~/ExProjects/creator_api && npm ci --production --ignore-scripts'
+          rsync -az -e "ssh -p $PORT" ./build/ $USER@$HOST:~/Projects/creator_api
+          ssh $USER@$HOST -p $PORT 'cd ~/Projects/creator_api && npm ci --production --ignore-scripts'
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           HOST: ${{ secrets.HOST }}
