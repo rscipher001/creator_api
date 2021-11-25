@@ -63,6 +63,15 @@ export interface Column {
   input?: Input
 }
 
+export interface Operations {
+  index: boolean
+  store: boolean
+  update: boolean
+  destroy: boolean
+  storeMany: boolean
+  destroyMany: boolean
+}
+
 export interface Table {
   name: string
   generateController: boolean // Generate controller if true
@@ -76,7 +85,7 @@ export interface Table {
   routeParents: string[] // Route parents are parent models for routing
   indexColumns: string[] // Only these items will be used on listing page
   routeParentTables: Table[] // Route parents table for use in controller
-  operations: string[] // CRUD operations
+  operationsMap: Operations // CRUD operations
   columns: Column[]
   timestamps: boolean
   role: string

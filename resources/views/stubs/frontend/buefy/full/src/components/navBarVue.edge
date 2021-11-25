@@ -23,12 +23,12 @@
       <b-navbar-dropdown label="Pages">
         @if(!auth)
         @each(table in input.tables)
-        @if(table.operations.includes('index'))
+        @if(table.operationsMap.index))
         <b-navbar-item tag="router-link" :to="{ path: '/{{ table.names.camelCase }}' }">
           {{ table.names.pascalCase }} List
         </b-navbar-item>
         @endif
-        @if(table.operations.includes('store'))
+        @if(table.operationsMap.store))
         <b-navbar-item tag="router-link" :to="{ path: '/{{ table.names.camelCase }}/create' }">
           {{ table.names.pascalCase }} Create
         </b-navbar-item>

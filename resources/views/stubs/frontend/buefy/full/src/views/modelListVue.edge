@@ -3,9 +3,9 @@
     <b-loading is-full-page v-model="isLoading"></b-loading>
     <div class="level">
       <div class="level-left is-size-3">@{{ items.length }} {{ table.names.pascalCasePlural }}</div>
-      @if(table.operations.includes('storeMany') || table.operations.includes('store'))
+      @if(table.operationsMap.storeMany || table.operationsMap.store)
       <div class="level-right">
-        @if(table.operations.includes('storeMany'))
+        @if(table.operationsMap.storeMany)
         <b-dropdown aria-role="list" class="mx-1">
           <template #trigger="{ active }">
             <b-button
@@ -17,7 +17,7 @@
           <b-dropdown-item @click="$router.push('/{{ table.names.camelCase }}/import/csv')" aria-role="listitem">CSV</b-dropdown-item>
         </b-dropdown>
         @endif
-        @if(table.operations.includes('store'))
+        @if(table.operationsMap.store)
         <b-button tag="router-link" to="/{{ table.names.camelCase }}/create" type="is-light">New</b-button>
         @endif
       </div>

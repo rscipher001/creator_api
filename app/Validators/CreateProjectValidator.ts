@@ -44,21 +44,14 @@ export default class CreateProjectValidator {
     parent: schema.string.optional({ trim: true }),
     routeParents: schema.array.optional().members(schema.string({ trim: true })),
     indexColumns: schema.array.optional().members(schema.string({ trim: true })),
-    operations: schema
-      .array()
-      .members(
-        schema.enum([
-          'index',
-          'create',
-          'store',
-          'show',
-          'edit',
-          'update',
-          'destroy',
-          'storeMany',
-          'destroyMany',
-        ] as const)
-      ),
+    operationsMap: schema.object().members({
+      index: schema.boolean(),
+      store: schema.boolean(),
+      update: schema.boolean(),
+      destroy: schema.boolean(),
+      storeMany: schema.boolean(),
+      destroyMany: schema.boolean(),
+    }),
     relations: schema.array().members(this.relationSchema),
     columns: schema.array().members(this.columnSchema),
   })

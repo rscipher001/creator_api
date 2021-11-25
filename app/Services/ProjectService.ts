@@ -35,7 +35,7 @@ class BackendProjectService {
     table.tableName = this.input.camelCaseStrategy
       ? table.names.camelCasePlural
       : table.names.snakeCasePlural
-    table.operations = table.operations.map((operation) => operation.toLocaleLowerCase())
+    table.operationsMap = this.input.operationsMap
     table.columns = table.columns.map((column) => {
       column.name = string.pascalCase(column.name)
       column.names = HelperService.generateNames(column.name)
@@ -114,7 +114,7 @@ class BackendProjectService {
     projectInput.tenantSettings = this.input.tenantSettings
     if (!this.input.git) {
       projectInput.git = {
-        email: '22148496+RSCipher001@users.noreply.github.com',
+        email: '22148496+SecureSnowball@users.noreply.github.com',
         name: 'Ravindra Sisodia',
       }
     } else {

@@ -1,7 +1,7 @@
 @if(table.generateRoute)
 
 Route.group(() => {
-  @if(table.operations.includes('index'))~
+  @if(table.operationsMap.index))~
     @if (!table.singleton)
       Route.get('{{
         table.routeParentTables.length ? table.routeParentTables.map(
@@ -12,7 +12,7 @@ Route.group(() => {
       }}', 'API/{{ table.names.pascalCasePlural }}Controller.index')
     @endif
   @endif
-  @if(table.operations.includes('store'))
+  @if(table.operationsMap.store))
     Route.post('{{
       table.routeParentTables.length ? table.routeParentTables.map(
         parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
@@ -21,7 +21,7 @@ Route.group(() => {
       table.names.camelCase
     }}', 'API/{{ table.names.pascalCasePlural }}Controller.store')
   @endif
-  @if(table.operations.includes('show'))~
+  @if(table.operationsMap.show))~
     @if (table.singleton)
       Route.get('{{
         table.routeParentTables.length ? table.routeParentTables.map(
@@ -40,7 +40,7 @@ Route.group(() => {
       }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.show')
     @endif
   @endif
-  @if(table.operations.includes('update'))~
+  @if(table.operationsMap.update))~
     @if(!table.singleton)
       Route.put('{{
         table.routeParentTables.length ? table.routeParentTables.map(
@@ -51,7 +51,7 @@ Route.group(() => {
       }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update')
     @endif
   @endif
-  @if(table.operations.includes('destroy'))~
+  @if(table.operationsMap.destroy))~
     @if(table.singleton)
       Route.delete('{{
         table.routeParentTables.length ? table.routeParentTables.map(
@@ -70,7 +70,7 @@ Route.group(() => {
       }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.destroy')
     @endif
   @endif
-  @if(table.operations.includes('storeMany'))
+  @if(table.operationsMap.storeMany))
     Route.post('{{
       table.routeParentTables.length ? table.routeParentTables.map(
         parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
@@ -79,7 +79,7 @@ Route.group(() => {
       table.names.camelCase
     }}/store/many', 'API/{{ table.names.pascalCasePlural }}Controller.storeMany')
   @endif
-  @if(table.operations.includes('destroyMany'))
+  @if(table.operationsMap.destroyMany))
     Route.post('{{
       table.routeParentTables.length ? table.routeParentTables.map(
         parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`

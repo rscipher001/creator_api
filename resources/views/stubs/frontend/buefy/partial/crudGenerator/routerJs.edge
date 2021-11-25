@@ -1,4 +1,4 @@
-@if(table.operations.includes('index'))
+@if(table.operationsMap.index)
 {
   path: '/{{ table.names.camelCase }}',
   name: '{{ table.names.pascalCase }}List',
@@ -8,7 +8,7 @@
   },
 },
 @endif
-@if(table.operations.includes('store'))
+@if(table.operationsMap.store)
 {
   path: '/{{ table.names.camelCase }}/create',
   name: '{{ table.names.pascalCase }}Create',
@@ -18,7 +18,7 @@
   },
 },
 @endif
-@if(table.operations.includes('update'))
+@if(table.operationsMap.update)
 {
   path: '/{{ table.names.camelCase }}/:{{ table.names.camelCase }}Id/edit',
   name: '{{ table.names.pascalCase }}Edit',
@@ -28,7 +28,7 @@
   },
 },
 @endif
-@if(table.operations.includes('storeMany'))
+@if(table.operationsMap.storeMany)
 {
   path: '/{{ table.names.camelCase }}/import/csv',
   name: '{{ table.names.pascalCase }}ImportCSV',

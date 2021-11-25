@@ -81,7 +81,7 @@ export default class CRUDGenerator {
   protected async createValidators(i: number) {
     const table = this.input.tables[i]
     // Store and storeMany
-    if (table.operations.includes('store')) {
+    if (table.operationsMap.store) {
       const filePath = `${this.input.path}/app/Validators/Store${table.names.pascalCase}Validator.ts`
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {
@@ -97,7 +97,7 @@ export default class CRUDGenerator {
       }
     }
 
-    if (table.operations.includes('update')) {
+    if (table.operationsMap.update) {
       const filePath = `${this.input.path}/app/Validators/Update${table.names.pascalCase}Validator.ts`
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {
