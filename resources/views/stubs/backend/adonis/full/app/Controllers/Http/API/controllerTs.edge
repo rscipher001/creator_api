@@ -239,7 +239,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     @each(operation in table.customOperations)
       public async {{ operation.name }}({ request, auth }: HttpContextContract) {
         const condition: { [key: string]: any } = {}
-        @if(operation.singleton)
+        @if(operation.singular)
           const id = request.param('id')
           condition.id = id
         @endif
