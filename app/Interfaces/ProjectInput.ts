@@ -63,6 +63,11 @@ export interface Column {
   input?: Input
 }
 
+export interface CustomOperations {
+  name: string
+  method: string
+  singular: boolean
+}
 export interface Operations {
   index: boolean
   store: boolean
@@ -86,6 +91,7 @@ export interface Table {
   indexColumns: string[] // Only these items will be used on listing page
   routeParentTables: Table[] // Route parents table for use in controller
   operations: Operations // Basic CRUD operations
+  customOperations: CustomOperations[] // Basic CRUD operations
   columns: Column[]
   timestamps: boolean
   role: string

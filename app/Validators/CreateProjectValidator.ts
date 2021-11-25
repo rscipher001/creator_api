@@ -52,6 +52,13 @@ export default class CreateProjectValidator {
       storeMany: schema.boolean(),
       destroyMany: schema.boolean(),
     }),
+    customOperations: schema.array().members(
+      schema.object().members({
+        name: schema.string({ trim: true }),
+        method: schema.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const),
+        singular: schema.boolean(),
+      })
+    ),
     relations: schema.array().members(this.relationSchema),
     columns: schema.array().members(this.columnSchema),
   })
