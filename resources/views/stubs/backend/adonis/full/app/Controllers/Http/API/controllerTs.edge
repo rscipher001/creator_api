@@ -1,5 +1,5 @@
 import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}';
-@if(table.operationsMap.store))
+@if(table.operations.store))
   import Store{{
     table.names.pascalCase
   }}Validator from 'App/Validators/Store{{ table.names.pascalCase }}Validator';
@@ -8,7 +8,7 @@ import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }
 import { Attachment } from '@ioc:Adonis/Addons/AttachmentLite'
 @endif
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-@if(table.operationsMap.update))~
+@if(table.operations.update))~
   @if(!table.singleton)
     import Update{{
       table.names.pascalCase
@@ -22,7 +22,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 @endif
 
 export default class {{ table.names.pascalCasePlural }}Controller {
-  @if(table.operationsMap.index) && !table.singleton)
+  @if(table.operations.index) && !table.singleton)
     public async index({ auth, request }: HttpContextContract) {
       const page = request.input('page', 1)
       const size = request.input('size', 10)
@@ -48,7 +48,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     }
   @endif
 
-  @if(table.operationsMap.store))
+  @if(table.operations.store))
     public async store({ auth, request }: HttpContextContract) {
       const input: { [key: string]: any } = await request.validate(Store{{
         table.names.pascalCase
@@ -117,7 +117,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     }
   @endif
 
-  @if(table.operationsMap.show))
+  @if(table.operations.show))
     public async show({ auth, request }: HttpContextContract) {
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
@@ -144,7 +144,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     }
   @endif
 
-  @if(table.operationsMap.update) && !table.singleton)
+  @if(table.operations.update) && !table.singleton)
     public async update({ auth, request }: HttpContextContract) {
       const input: { [key: string]: any } = await request.validate(Update{{ table.names.pascalCase }}Validator)
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
@@ -190,7 +190,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     }
   @endif
 
-  @if(table.operationsMap.destroy))
+  @if(table.operations.destroy))
     public async destroy({ auth, request, response }: HttpContextContract) {
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
@@ -219,7 +219,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     }
   @endif
 
-  @if(table.operationsMap.destroyMany))
+  @if(table.operations.destroyMany))
     public async destroyMany({ request }: HttpContextContract) {
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table

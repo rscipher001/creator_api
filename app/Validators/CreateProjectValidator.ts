@@ -44,7 +44,7 @@ export default class CreateProjectValidator {
     parent: schema.string.optional({ trim: true }),
     routeParents: schema.array.optional().members(schema.string({ trim: true })),
     indexColumns: schema.array.optional().members(schema.string({ trim: true })),
-    operationsMap: schema.object().members({
+    operations: schema.object().members({
       index: schema.boolean(),
       store: schema.boolean(),
       update: schema.boolean(),

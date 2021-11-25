@@ -35,7 +35,7 @@ class BackendProjectService {
     table.tableName = this.input.camelCaseStrategy
       ? table.names.camelCasePlural
       : table.names.snakeCasePlural
-    table.operationsMap = this.input.operationsMap
+    table.operations = this.input.operations
     table.columns = table.columns.map((column) => {
       column.name = string.pascalCase(column.name)
       column.names = HelperService.generateNames(column.name)

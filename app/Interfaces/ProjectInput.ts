@@ -85,7 +85,7 @@ export interface Table {
   routeParents: string[] // Route parents are parent models for routing
   indexColumns: string[] // Only these items will be used on listing page
   routeParentTables: Table[] // Route parents table for use in controller
-  operationsMap: Operations // CRUD operations
+  operations: Operations // Basic CRUD operations
   columns: Column[]
   timestamps: boolean
   role: string
