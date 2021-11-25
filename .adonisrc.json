@@ -14,7 +14,10 @@
     "Database": "database",
     "Contracts": "contracts"
   },
-  "preloads": ["./start/routes", "./start/kernel"],
+  "preloads": [
+    "./start/routes",
+    "./start/kernel"
+  ],
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
@@ -22,9 +25,12 @@
     "@adonisjs/auth",
     "@adonisjs/view",
     "@adonisjs/mail",
-    "@adonisjs/attachment-lite"
+    "@adonisjs/attachment-lite",
+    "@adonisjs/redis"
   ],
-  "aceProviders": ["@adonisjs/repl"],
+  "aceProviders": [
+    "@adonisjs/repl"
+  ],
   "metaFiles": [
     {
       "pattern": "resources/views/**/*.edge",
