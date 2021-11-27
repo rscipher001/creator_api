@@ -1,0 +1,34 @@
+import BaseSchema from '@ioc:Adonis/Lucid/Schema'
+
+export default class Users extends BaseSchema {
+  protected tableName = '{{ table.tableName }}'
+
+  public async up () {
+    this.schema.table(this.tableName, (table) => {
+      @each(relation in table.relations)~
+        @if(relation.type === 'BelongsTo' && relation.lazy)
+        table.integer('{{
+          input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+        }}').unsigned().references('id').inTable('{{
+          input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakCasePlural
+        }}').{{ relation.required ? 'notNullable()' : 'nullable()' }}
+        @endif
+      @endeach
+    })
+  }
+
+  public async down () {
+    this.schema.table(this.tableName, (table) => {
+      @each(relation in table.relations)~
+        @if(relation.type === 'BelongsTo' && relation.lazy)
+          table.dropForeign('{{
+            input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+          }}')
+          table.dropColumn('{{
+            input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+          }}')
+        @endif
+      @endeach
+    })
+  }
+}

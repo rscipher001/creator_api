@@ -2,6 +2,7 @@ import os from 'os'
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
+import { Storage } from 'App/Interfaces/Enums'
 
 export default class StorageDriverGenerator {
   private input: ProjectInput
@@ -14,13 +15,13 @@ export default class StorageDriverGenerator {
   protected async updateDotAdonisrcJson() {
     const path = `${this.input.path}/.adonisrc.json`
     const content = await HelperService.readJson(path)
-    if (this.input.storageDrivers.includes('s3')) {
+    if (this.input.storageDrivers.includes(Storage.S3)) {
       const provider = '@adonisjs/drive-s3'
       if (!content.providers.includes(provider)) {
         content.providers.push(provider)
       }
     }
-    if (this.input.storageDrivers.includes('gcs')) {
+    if (this.input.storageDrivers.includes(Storage.GCS)) {
       const provider = '@adonisjs/drive-gcs'
       if (!content.providers.includes(provider)) {
         content.providers.push(provider)
@@ -37,11 +38,11 @@ export default class StorageDriverGenerator {
   protected async updateTsconfigJson() {
     const path = `${this.input.path}/tsconfig.json`
     const content = await HelperService.readJson(path)
-    if (this.input.storageDrivers.includes('s3')) {
+    if (this.input.storageDrivers.includes(Storage.S3)) {
       const type = '@adonisjs/drive-s3'
       content.compilerOptions.types.push(type)
     }
-    if (this.input.storageDrivers.includes('gcs')) {
+    if (this.input.storageDrivers.includes(Storage.GCS)) {
       const type = '@adonisjs/drive-gcs'
       content.compilerOptions.types.push(type)
     }
@@ -133,10 +134,10 @@ export default class StorageDriverGenerator {
   protected async start() {
     // Install dependencies
     const npmArguments = ['install', '@adonisjs/attachment-lite']
-    if (this.input.storageDrivers.includes('s3')) {
+    if (this.input.storageDrivers.includes(Storage.S3)) {
       npmArguments.push('@adonisjs/drive-s3')
     }
-    if (this.input.storageDrivers.includes('gcs')) {
+    if (this.input.storageDrivers.includes(Storage.GCS)) {
       npmArguments.push('@adonisjs/drive-gcs')
     }
     await HelperService.execute('npm', npmArguments, {

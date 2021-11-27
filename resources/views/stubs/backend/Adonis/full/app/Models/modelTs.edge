@@ -1,0 +1,151 @@
+import { DateTime } from 'luxon'
+@if(isAuth)
+  import Env from '@ioc:Adonis/Core/Env'
+  import Hash from '@ioc:Adonis/Core/Hash'
+  import Mail from '@ioc:Adonis/Addons/Mail'
+  import Encryption from '@ioc:Adonis/Core/Encryption'
+  import VerificationToken, { Reason } from 'App/Models/VerificationToken'
+@endif
+import {
+  column,
+  @if(isAuth)
+    beforeSave,
+    afterCreate,
+  @endif
+  BaseModel,
+  @if(table.relations.find(relation => relation.type === 'HasOne'))
+    hasOne,
+    HasOne,
+  @endif
+  @if(table.relations.find(relation => relation.type === 'HasMany'))
+    hasMany,
+    HasMany,
+  @endif
+  @if(table.relations.find(relation => relation.type === 'BelongsTo'))
+    belongsTo,
+    BelongsTo,
+  @endif
+  @if(table.relations.find(relation => relation.type === 'ManyToMany'))
+    manyToMany,
+    ManyToMany,
+  @endif
+} from '@ioc:Adonis/Lucid/Orm'
+@if(table.columns.find(column => column.type === 'File'))
+import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite'
+@endif
+@each(relation in table.relations)
+import {{ relation.modelNames.pascalCase }} from 'App/Models/{{ relation.modelNames.pascalCase }}'
+@endeach
+
+export default class {{ table.names.pascalCase }} extends BaseModel {
+
+  @column({ isPrimary: true })
+  public id: number
+
+  @each(column in table.columns)
+    @if (column.type === 'File')
+      @attachment({
+        preComputeUrl: true,
+        disk: '{{ input.defaultStorageDriver.toLowerCase() }}',
+      })
+      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: AttachmentContract {{ column.meta.required ? '' : ' | null' }}
+    @elseif(column.type === 'Date')
+      @column.dateTime()
+      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: DateTime {{ column.meta.required ? '' : ' | null' }}
+    @else
+      @if(column.meta.secret)
+        @column({
+          serializeAs: null
+        })
+      @elseif(column.type === 'Boolean' && input.database === 'MySQL')
+        @column({ serialize: (value) => !!value })
+      @else
+        @column()
+      @endif
+      public {{ column.names.camelCase }}{{ column.meta.required ? '': '?' }}: {{
+        ['Decimal', 'Integer'].includes(column.type) ? 'number' :
+        column.type === 'String' ? 'string' :
+        column.type === 'Boolean' ? 'boolean' : column.type.toLowerCase()
+      }}{{ column.meta.required ? '' : '| null' }}
+    @endif
+  @endeach
+
+  @each(relation in table.relations)
+    @if(relation.type === 'BelongsTo')
+    @column()
+    public {{ relation.names.camelCase }}Id{{relation.required ? '' : '?' }}: number {{ relation.required ? '' : '| null' }}
+    @endif
+  @endeach
+
+  @if(table.timestamps)
+      @column.dateTime({ autoCreate: true })
+      public createdAt: DateTime
+
+      @column.dateTime({ autoCreate: true, autoUpdate: true })
+      public updatedAt: DateTime
+  @endif
+
+  @each(relation in table.relations)
+    @if(relation.type === 'HasOne')
+      @hasOne(() => {{ relation.modelNames.pascalCase }})
+      public {{
+        relation.names.camelCase
+      }}{{relation.required ? '': '?' }}: HasOne<typeof {{ relation.modelNames.pascalCase }}>
+    @elseif(relation.type === 'HasMany')
+      @hasMany(() => {{ relation.modelNames.pascalCase }})
+      public {{
+        relation.names.camelCasePlural
+      }}{{relation.required ? '': '?' }}: HasMany<typeof {{ relation.modelNames.pascalCase }}>
+    @elseif(relation.type === 'BelongsTo')
+      @belongsTo(() => {{ relation.modelNames.pascalCase }})
+      public {{
+        relation.names.camelCase
+      }}: BelongsTo<typeof {{ relation.modelNames.pascalCase }}>
+    @elseif(relation.type === 'ManyToMany')
+      @manyToMany(() => {{ relation.modelNames.pascalCase }})
+      public {{
+        relation.modelNames.camelCasePlural
+      }}: ManyToMany<typeof {{ relation.modelNames.pascalCase }}>
+    @endif
+  @endeach
+
+  @if(isAuth)
+    @beforeSave()
+    public static async hashPassword (user: User) {
+      if (user.$dirty.password) {
+        user.password = await Hash.make(user.password)
+      }
+    }
+
+    @afterCreate()
+    public static async sendRegistrationEmail(user: User) {
+      return User.sendEmailVerificationMail(user)
+    }
+
+    public static async sendEmailVerificationMail(user: User) {
+      const encryptedEmail = Encryption.encrypt(user.email)
+      const verificationToken = await VerificationToken.firstOrCreate(
+        {
+          email: user.email,
+        },
+        {
+          email: user.email,
+          token: VerificationToken.generateToken(),
+          reason: Reason.emailUpdate,
+        }
+      )
+      await Mail.sendLater((message) => {
+        message
+          .to(verificationToken.email)
+          .from(Env.get('MAIL_FROM_ADDRESS'))
+          .subject('Verify your email')
+          .htmlView('emails/emailVerification', {
+            user,
+            url: `${Env.get('UI_URL')}/email/verify?token=${
+              verificationToken.token
+            }&email=${encryptedEmail}`,
+          })
+      })
+    }
+  @endif
+}

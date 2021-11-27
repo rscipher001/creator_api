@@ -62,7 +62,7 @@ export default class CRUDGenerator {
     const namePart = `add_foreign_keys_to_${table.names.snakeCasePlural}.ts`
     await HelperService.sleep(1000) // Ensure migrations get unique timestamps
     if (
-      table.relations.find((relation) => relation.type === RelationType.belongsTo && relation.lazy)
+      table.relations.find((relation) => relation.type === RelationType.BelongsTo && relation.lazy)
     ) {
       const content = await View.render(
         `stubs/backend/${this.input.tech.backend}/full/database/migrations/lazyMigrationTs`,

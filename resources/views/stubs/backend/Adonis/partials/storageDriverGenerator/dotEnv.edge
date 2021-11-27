@@ -1,0 +1,11 @@
+@if(storageDrivers.includes('S3'))
+S3_KEY=dummyKey
+S3_SECRET=dummySecret
+S3_BUCKET=dummyBucket
+S3_REGION=dummyRegion
+S3_ENDPOINT=dummyEndpoint
+@endif
+@if(storageDrivers.includes('GCS'))
+GCS_KEY_FILENAME=./google-cloud-key.json
+GCS_BUCKET=bucketName
+@endif

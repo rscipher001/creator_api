@@ -142,6 +142,7 @@ export default class CRUDGenerator {
   protected async start() {
     for (let i = 0; i < this.input.tables.length; i += 1) {
       if (!this.input.tables[i].generateUI) continue
+      debugger
       await this.createCreateView(i)
       await this.createListView(i)
       // await this.createCreateModal(i)

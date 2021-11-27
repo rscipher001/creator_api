@@ -42,7 +42,6 @@ class BackendProjectService {
       column.columnName = this.input.camelCaseStrategy
         ? column.names.camelCase
         : column.names.snakeCase
-      column.type = column.type.toLowerCase()
       return column
     })
     if (Array.isArray(table.indexColumns)) {
@@ -86,25 +85,35 @@ class BackendProjectService {
   public prepare(): ProjectInput {
     this.input.name = HelperService.toSingularPascalCase(this.input.name)
     const projectInput: any = {}
-    projectInput.id = this.projectId
-    projectInput.camelCaseStrategy = !!this.input.camelCaseStrategy
+
+    // Fields that don't need processing
+    projectInput.camelCaseStrategy = this.input.camelCaseStrategy
     projectInput.generate = this.input.generate
+
+    projectInput.database = this.input.database
+    projectInput.types = this.input.types
+
+    projectInput.mailers = this.input.mailers
+    projectInput.mailEnabled = this.input.mailEnabled
+
+    projectInput.storageEnabled = this.input.storageEnabled
+    projectInput.storageDrivers = this.input.storageDrivers
+    projectInput.defaultStorageDriver = this.input.defaultStorageDriver
+
+    projectInput.tech = this.input.tech
+    projectInput.auth = this.input.auth
+    projectInput.tenantSettings = this.input.tenantSettings
+
+    // Fields that needs processign
+    projectInput.id = this.projectId
     projectInput.names = HelperService.generateExtendedNames(this.input.name)
     projectInput.name = projectInput.names.pascalCase
+
     projectInput.projectsPath = Application.makePath(Env.get('PROJECT_PATH'))
     projectInput.basePath = `${this.projectId}-${projectInput.names.dashCase}`
     projectInput.path = `${projectInput.projectsPath}/${projectInput.basePath}`
     projectInput.spaPath = `${projectInput.projectsPath}/${projectInput.basePath}-spa`
-    projectInput.database = HelperService.toSingularCameCase(this.input.database)
-    projectInput.types = this.input.types
-    projectInput.mailEnabled = this.input.mailEnabled
-    projectInput.mailers = this.input.mailers.map((m) => m.toLowerCase())
-    projectInput.defaultMailer = this.input.defaultMailer
-    projectInput.storageEnabled = this.input.storageEnabled
-    projectInput.storageDrivers = this.input.storageDrivers.map((s) => s.toLowerCase())
-    projectInput.defaultStorageDriver = this.input.defaultStorageDriver.toLowerCase()
-    projectInput.tech = this.input.tech
-    projectInput.auth = this.input.auth
+    projectInput.defaultMailer = this.input.defaultMailer.toLowerCase()
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
 
     if (this.input.auth.passwordReset) {
@@ -112,7 +121,6 @@ class BackendProjectService {
     }
 
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
-    projectInput.tenantSettings = this.input.tenantSettings
     if (!this.input.git) {
       projectInput.git = {
         email: '22148496+SecureSnowball@users.noreply.github.com',
@@ -153,7 +161,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         authTable.relations.push({
-          type: RelationType.belongsTo,
+          type: RelationType.BelongsTo,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -162,7 +170,7 @@ class BackendProjectService {
           lazy: true,
         })
         tenantTable.relations.push({
-          type: RelationType.hasOne,
+          type: RelationType.HasOne,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -180,7 +188,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         tenantTable.relations.push({
-          type: RelationType['belongsTo'],
+          type: RelationType.BelongsTo,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -189,7 +197,7 @@ class BackendProjectService {
           lazy: false,
         })
         authTable.relations.push({
-          type: RelationType.hasMany,
+          type: RelationType.HasMany,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -207,7 +215,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         authTable.relations.push({
-          type: RelationType['belongsTo'],
+          type: RelationType.BelongsTo,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -216,7 +224,7 @@ class BackendProjectService {
           lazy: true,
         })
         tenantTable.relations.push({
-          type: RelationType.hasMany,
+          type: RelationType.HasMany,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -233,7 +241,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         authTable.relations.push({
-          type: RelationType.hasMany,
+          type: RelationType.HasMany,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -242,7 +250,7 @@ class BackendProjectService {
           lazy: false,
         })
         tenantTable.relations.push({
-          type: RelationType.hasMany,
+          type: RelationType.HasMany,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -281,7 +289,7 @@ class BackendProjectService {
       0,
       {
         name: 'name',
-        type: 'string',
+        type: 'String',
         meta: {
           displayName: 'Name',
           required: true,
@@ -289,12 +297,12 @@ class BackendProjectService {
           maxLength: 127,
         },
         input: {
-          type: 'input',
+          type: 'Input',
         },
       },
       {
         name: 'email',
-        type: 'string',
+        type: 'String',
         meta: {
           displayName: 'Email',
           required: true,
@@ -304,12 +312,12 @@ class BackendProjectService {
           unique: true,
         },
         input: {
-          type: 'input',
+          type: 'Input',
         },
       },
       {
         name: 'password',
-        type: 'string',
+        type: 'String',
         meta: {
           displayName: 'Password',
           trim: true,
@@ -320,12 +328,12 @@ class BackendProjectService {
           required: true,
         },
         input: {
-          type: 'input',
+          type: 'Input',
         },
       },
       {
         name: 'rememberMeToken',
-        type: 'string',
+        type: 'String',
         meta: {
           expose: false,
           required: false,
@@ -333,7 +341,7 @@ class BackendProjectService {
       },
       {
         name: 'emailVerifiedAt',
-        type: 'date',
+        type: 'Date',
         meta: {
           expose: false,
           required: false,
@@ -341,7 +349,7 @@ class BackendProjectService {
       },
       {
         name: 'avatar',
-        type: 'file',
+        type: 'File',
         meta: {
           required: false,
           expose: true,

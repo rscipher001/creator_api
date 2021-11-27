@@ -1,0 +1,208 @@
+<template>
+  <section>
+    <h1 class="is-size-5">Profile Setting</h1>
+    <hr class="my-2" />
+    @if(input.storageEnabled)
+    <div class="columns">
+    <div class="column is-three-quarters">
+    @endif
+    <form method="POST" @submit.prevent="updateProfile">
+      @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))
+        @if(!['Email', 'Password',].includes(column.name))
+        <b-field
+          label="{{
+            column.input?.displayName || column.names.pascalCase
+          }}{{
+            column.meta.required ? '*' : ''
+          }}"
+          :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+          :message="errors.{{ column.names.camelCase }}"
+        >
+          <b-input
+            v-model="form.{{ column.names.camelCase }}"
+            @if(column.meta.maxLength !== undefined)
+            maxlength="{{ column.meta.maxLength }}"
+            @endif
+            @if(column.meta.minLength !== undefined)
+            minlength="{{ column.meta.minLength }}"
+            @endif
+            @if(column.meta.required)
+            required
+            @endif
+          ></b-input>
+        </b-field>
+        @endif
+      @endeach
+      <b-button
+        :loading="loading.updateProfile"
+        type="is-primary is-fullwidth"
+        native-type="submit"
+        >Update Profile</b-button
+      >
+    </form>
+    @if(input.storageEnabled)
+    </div>
+    <div class="column">
+      <b-image
+        v-if="user.avatar"
+        :src="getAssetUrl(user.avatar.url)"
+        :alt="user.name + 'Avatar'"
+        ratio="1by1"
+        rounded
+      ></b-image>
+      <b-field class="file my-2">
+        <b-upload @input="updateAvatar" v-model="file" expanded>
+          <a class="button is-primary is-fullwidth">
+            <b-icon icon="upload"></b-icon>
+            <span>
+              @{{ file.name || "Select File" }}
+            </span>
+          </a>
+        </b-upload>
+      </b-field>
+      <b-button
+        v-if="user.avatar"
+        @click="deleteAvatar"
+        type="is-ghost is-fullwidth"
+      >
+        Delete Avatar
+      </b-button>
+    </div>
+  </div>
+    @endif
+  </section>
+</template>
+<script>
+import { mapState, mapActions } from "vuex";
+import ValidationException from "../../exceptions/ValidationException";
+
+export default {
+  name: "ProfileSettingPage",
+
+  mounted() {
+    // if (this.$refs.profileSettingName) this.$refs.profileSettingName.focus();
+    @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))
+    @if(column.meta.expose !== false)
+    @if(!['Email', 'Password',].includes(column.name))
+    this.form.{{ column.names.camelCase }} = this.user.{{ column.names.camelCase }};
+    @endif
+    @endif
+    @endeach
+  },
+
+  data() {
+    return {
+      file: {},
+      errors: {},
+      form: {
+        @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))
+        @if(column.meta.expose !== false)
+        @if(!['Email', 'Password',].includes(column.name))
+        {{ column.names.camelCase }}: "",
+        @endif
+        @endif
+        @endeach
+      },
+    };
+  },
+
+  methods: {
+    ...mapActions("auth", {
+      updateProfileAction: "updateProfile",
+      updateAvatarAction: "updateAvatar",
+      deleteAvatarAction: "deleteAvatar",
+    }),
+
+    async updateProfile() {
+      try {
+        await this.updateProfileAction({
+          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))
+          @if(!['Email', 'Password',].includes(column.name))
+          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+          @endif
+          @endeach
+        });
+        this.$buefy.toast.open({
+          message: "Profile updated successfully!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      } catch (e) {
+        let message = "Unable to update profile";
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = "Validation Error";
+        }
+        this.$buefy.toast.open({
+          message,
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
+    },
+
+    @if(input.storageEnabled)
+    getAssetUrl(url) {
+      return `${process.env.VUE_APP_API_URL}${url}`;
+    },
+
+    async updateAvatar(avatar) {
+      try {
+        const formData = new FormData();
+        formData.append("avatar", avatar);
+        await this.updateAvatarAction(formData);
+        this.$buefy.toast.open({
+          message: "Avatar updated successfully!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      } catch (e) {
+        let message = "Unable to update Avatar";
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = "Validation Error";
+        }
+        this.$buefy.toast.open({
+          message,
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
+    },
+    async deleteAvatar() {
+      try {
+        await this.deleteAvatarAction({ avatar: null });
+        this.$buefy.toast.open({
+          message: "Avatar delete successfully!",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      } catch (e) {
+        let message = "Unable to delete Avatar";
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = "Validation Error";
+        }
+        this.$buefy.toast.open({
+          message,
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
+    },
+    @endif
+  },
+
+  computed: {
+    ...mapState("auth", {
+      loading: (state) => state.loading,
+      user: (state) => state.user,
+    }),
+    @if(input.storageEnabled)
+    isLoading: function () {
+      return this.loading.deleteAvatar || this.loading.updateAvatar;
+    },
+    @endif
+  },
+};
+</script>

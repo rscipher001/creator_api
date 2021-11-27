@@ -69,7 +69,7 @@ export default class Init {
         'init',
         'adonis-ts-app@latest',
         this.input.basePath, // ProjectPath
-        `--boilerplate=${type}`, // API or web type project
+        `--boilerplate=${type.toLocaleLowerCase()}`, // api/web
         `--name=${this.input.name}`, // Project name
         '--eslint', // Enable ESLint
         '--prettier', // Enable prettiter
@@ -78,7 +78,6 @@ export default class Init {
         cwd: this.input.projectsPath,
       }
     )
-
     // 2. Add .vscode folder
     await this.createVscodeExtenstionsJson()
     await this.createDotNvmrc()

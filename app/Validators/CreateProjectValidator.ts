@@ -1,5 +1,14 @@
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import {
+  Backend,
+  Database,
+  Frontend,
+  Mailer,
+  ProjectType,
+  RequestMethod,
+  Storage,
+} from 'App/Interfaces/Enums'
 
 export default class CreateProjectValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -29,6 +38,10 @@ export default class CreateProjectValidator {
     }),
     input: schema.object.optional().members({
       type: schema.string({ trim: true }),
+      decimal: schema.object.optional().anyMembers(),
+      select: schema.object.optional().anyMembers(),
+      radio: schema.object.optional().anyMembers(),
+      checkbox: schema.object.optional().anyMembers(),
     }),
   })
 
@@ -55,7 +68,13 @@ export default class CreateProjectValidator {
     customOperations: schema.array().members(
       schema.object().members({
         name: schema.string({ trim: true }),
-        method: schema.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const),
+        method: schema.enum([
+          RequestMethod.GET,
+          RequestMethod.POST,
+          RequestMethod.PATCH,
+          RequestMethod.PUT,
+          RequestMethod.DELETE,
+        ] as const),
         singular: schema.boolean(),
       })
     ),
@@ -65,20 +84,24 @@ export default class CreateProjectValidator {
 
   public schema = schema.create({
     name: schema.string({ trim: true }, [rules.minLength(2), rules.maxLength(256)]),
-    database: schema.enum(['MySQL'] as const),
-    types: schema.array().members(schema.enum(['API'] as const)),
+    database: schema.enum([Database.MySQL, Database.PostgreSQL] as const),
+    types: schema.array().members(schema.enum([ProjectType.API, ProjectType.SSR] as const)),
     camelCaseStrategy: schema.boolean(),
     mailEnabled: schema.boolean(),
     mailers: schema
       .array()
-      .members(schema.enum.optional(['mailgun', 'smtp', 'ses', 'sparkpost'] as const)),
+      .members(
+        schema.enum.optional([Mailer.SMTP, Mailer.SES, Mailer.Mailgun, Mailer.SparkPost] as const)
+      ),
     defaultMailer: schema.string.optional(),
     storageEnabled: schema.boolean(),
-    storageDrivers: schema.array().members(schema.enum.optional(['local', 's3', 'gcs'] as const)),
+    storageDrivers: schema
+      .array()
+      .members(schema.enum.optional([Storage.GCS, Storage.Local, Storage.S3] as const)),
     defaultStorageDriver: schema.string.optional(),
     tech: schema.object().members({
-      backend: schema.enum(['adonis'] as const),
-      frontend: schema.enum(['buefy'] as const),
+      backend: schema.enum([Backend.Adonis] as const),
+      frontend: schema.enum([Frontend.Buefy] as const),
     }),
     generate: schema.object().members({
       api: schema.object().members({

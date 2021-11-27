@@ -6,7 +6,7 @@ export enum Database {
 export enum Mailer {
   SMTP = 'SMTP',
   SES = 'SES',
-  MailGun = 'MailGun',
+  Mailgun = 'Mailgun',
   SparkPost = 'SparkPost',
 }
 
@@ -25,9 +25,37 @@ export enum Backend {
   Adonis = 'Adonis',
 }
 
+export enum Frontend {
+  Buefy = 'Buefy',
+}
+
 export enum RelationType {
-  hasOne = 'hasOne',
-  hasMany = 'hasMany',
-  belongsTo = 'belongsTo',
-  manyToMany = 'manyToMany',
+  HasOne = 'HasOne',
+  HasMany = 'HasMany',
+  BelongsTo = 'BelongsTo',
+  ManyToMany = 'ManyToMany',
+}
+
+export enum RequestMethod {
+  GET = 'GET',
+  POST = 'POST',
+  PUT = 'PUT',
+  PATCH = 'PATCH',
+  DELETE = 'DELETE',
+}
+
+export enum APIInput {
+  STRING = 'String',
+  DECIMAL = 'Decimal',
+  INTEGER = 'Integer',
+  DATE = 'Date',
+  BOOLEAN = 'Boolean',
+  FILE = 'File',
+}
+
+export enum UIInput {
+  INPUT = 'Input',
+  SELECT = 'Select',
+  RADIO = 'Radio',
+  CHECKBOX = 'Checkbox',
 }
