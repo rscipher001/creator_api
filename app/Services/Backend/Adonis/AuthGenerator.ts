@@ -1,6 +1,7 @@
 import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
 import Logger from '@ioc:Adonis/Core/Logger'
+import { ProjectType } from 'App/Interfaces/Enums'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 
@@ -310,7 +311,7 @@ export default class AuthGenerator {
     await this.createAuthMigration()
 
     // Create database/migrations/api_tokens.ts
-    if (this.input.types.includes('api')) {
+    if (this.input.types.includes(ProjectType.API)) {
       await this.createApiTokenMigration()
       await this.createApiAuthController()
       await this.addApiAuthRoutes()

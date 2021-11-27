@@ -1,7 +1,8 @@
 import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
+import { ProjectType, RelationType } from 'App/Interfaces/Enums'
 import HelperService from 'App/Services/HelperService'
-import ProjectInput, { Table, RelationType } from 'App/Interfaces/ProjectInput'
+import ProjectInput, { Table } from 'App/Interfaces/ProjectInput'
 
 export default class CRUDGenerator {
   private input: ProjectInput
@@ -118,7 +119,7 @@ export default class CRUDGenerator {
   protected async createController(i: number) {
     const table = this.input.tables[i]
     if (!table.generateController) return
-    if (this.input.types.includes('api')) {
+    if (this.input.types.includes(ProjectType.API)) {
       const filePath = `${this.input.path}/app/Controllers/Http/API/${table.names.pascalCasePlural}Controller.ts`
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {
@@ -138,14 +139,14 @@ export default class CRUDGenerator {
   protected async addRoutes(i: number) {
     const table = this.input.tables[i]
     if (!table.generateController) return
-    if (this.input.types.includes('api')) {
+    if (this.input.types.includes(ProjectType.API)) {
       const filePath = `${this.input.path}/start/routes.ts`
       let content = await HelperService.readFile(filePath)
       const part = await View.render(
         `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/routesTs`,
         {
           table,
-          type: 'api',
+          type: ProjectType.API,
         }
       )
       content += part

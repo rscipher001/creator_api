@@ -3,6 +3,7 @@ import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import mkdirp from 'mkdirp'
+import { Database } from 'App/Interfaces/Enums'
 
 export default class DatabaseGenerator {
   private input: ProjectInput
@@ -297,14 +298,14 @@ export default class DatabaseGenerator {
       { database }
     )
     switch (database) {
-      case 'mysql':
+      case Database.MySQL:
         if (content.indexOf('MYSQL_HOST') === -1) {
           content += part
           content += '\n'
           await HelperService.writeFile(filePath, content)
         }
         break
-      case 'pg':
+      case Database.PostgreSQL:
         if (content.indexOf('PG_HOST') === -1) {
           content += part
           content += '\n'
@@ -325,7 +326,7 @@ export default class DatabaseGenerator {
       { database }
     )
     switch (database) {
-      case 'mysql':
+      case Database.MySQL:
         if (content.indexOf('MYSQL_HOST') === -1) {
           const envTsLines = content.split(os.EOL) // File to array by newLines
           // If last line ie empty and second last line is closing Env.rules with })
@@ -338,7 +339,7 @@ export default class DatabaseGenerator {
           }
         }
         break
-      case 'pg':
+      case Database.PostgreSQL:
         if (content.indexOf('PG_HOST') === -1) {
           const envTsLines = content.split(os.EOL) // File to array by newLines
           // If last line ie empty and second last line is closing Env.rules with })
@@ -431,7 +432,7 @@ export default class DatabaseGenerator {
     await this.updateTsconfigJson()
 
     switch (this.input.database) {
-      case 'mysql':
+      case Database.MySQL:
         await this.initMysql()
     }
 

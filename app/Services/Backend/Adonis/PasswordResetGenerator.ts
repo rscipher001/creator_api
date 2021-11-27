@@ -1,4 +1,5 @@
 import View from '@ioc:Adonis/Core/View'
+import { ProjectType } from 'App/Interfaces/Enums'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 
@@ -66,7 +67,7 @@ export default class PasswordResetGenerator {
    * 4. Migration [Will be handled by CRUD generator]
    */
   protected async start() {
-    if (this.input.types.includes('api')) {
+    if (this.input.types.includes(ProjectType.API)) {
       await this.createModel()
       await this.createController()
       await this.addRoutes()

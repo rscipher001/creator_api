@@ -2,7 +2,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
-import ProjectInput, { Table, Relation, RelationType } from 'App/Interfaces/ProjectInput'
+import ProjectInput, { Table, Relation } from 'App/Interfaces/ProjectInput'
 
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
 import AdonisAuthGenerator from 'App/Services/Backend/Adonis/AuthGenerator'
@@ -18,6 +18,7 @@ import AdonisStorageDriverGenerator from 'App/Services/Backend/Adonis/StorageDri
 import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
 import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
+import { RelationType } from 'App/Interfaces/Enums'
 
 class BackendProjectService {
   private input: any
@@ -64,7 +65,7 @@ class BackendProjectService {
         }
 
         if (relation.name) {
-          relation.names = HelperService.generateNames(relation.names)
+          relation.names = HelperService.generateNames(relation.name)
           relation.name = relation.names.pascalCase
         } else {
           relation.names = relation.modelNames
@@ -83,6 +84,7 @@ class BackendProjectService {
    * Prepares input by cleaning and standardize it
    */
   public prepare(): ProjectInput {
+    this.input.name = HelperService.toSingularPascalCase(this.input.name)
     const projectInput: any = {}
     projectInput.id = this.projectId
     projectInput.camelCaseStrategy = !!this.input.camelCaseStrategy
@@ -93,14 +95,14 @@ class BackendProjectService {
     projectInput.basePath = `${this.projectId}-${projectInput.names.dashCase}`
     projectInput.path = `${projectInput.projectsPath}/${projectInput.basePath}`
     projectInput.spaPath = `${projectInput.projectsPath}/${projectInput.basePath}-spa`
-    projectInput.database = this.input.database.toLocaleLowerCase()
-    projectInput.types = this.input.types.map((t) => t.toLowerCase())
+    projectInput.database = HelperService.toSingularCameCase(this.input.database)
+    projectInput.types = this.input.types
     projectInput.mailEnabled = this.input.mailEnabled
-    projectInput.mailers = this.input.mailers
+    projectInput.mailers = this.input.mailers.map((m) => m.toLowerCase())
     projectInput.defaultMailer = this.input.defaultMailer
     projectInput.storageEnabled = this.input.storageEnabled
-    projectInput.storageDrivers = this.input.storageDrivers
-    projectInput.defaultStorageDriver = this.input.defaultStorageDriver
+    projectInput.storageDrivers = this.input.storageDrivers.map((s) => s.toLowerCase())
+    projectInput.defaultStorageDriver = this.input.defaultStorageDriver.toLowerCase()
     projectInput.tech = this.input.tech
     projectInput.auth = this.input.auth
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
@@ -151,7 +153,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         authTable.relations.push({
-          type: RelationType['belongsTo'],
+          type: RelationType.belongsTo,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -160,7 +162,7 @@ class BackendProjectService {
           lazy: true,
         })
         tenantTable.relations.push({
-          type: RelationType['hasOne'],
+          type: RelationType.hasOne,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -187,7 +189,7 @@ class BackendProjectService {
           lazy: false,
         })
         authTable.relations.push({
-          type: RelationType['hasMany'],
+          type: RelationType.hasMany,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -214,7 +216,7 @@ class BackendProjectService {
           lazy: true,
         })
         tenantTable.relations.push({
-          type: RelationType['hasMany'],
+          type: RelationType.hasMany,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -231,7 +233,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         authTable.relations.push({
-          type: RelationType['hasMany'],
+          type: RelationType.hasMany,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -240,7 +242,7 @@ class BackendProjectService {
           lazy: false,
         })
         tenantTable.relations.push({
-          type: RelationType['hasMany'],
+          type: RelationType.hasMany,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,

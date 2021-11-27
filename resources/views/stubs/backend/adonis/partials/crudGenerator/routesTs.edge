@@ -113,5 +113,5 @@ Route.group(() => {
   @endif
 })
 .middleware(['auth'])
-{{{ type === 'api' ? ".prefix('/api')" : '' }}}
+{{{ type === 'API' ? ".prefix('/api')" : '' }}}
 @endif

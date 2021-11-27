@@ -1,6 +1,7 @@
 import os from 'os'
 import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
+import { Mailer } from 'App/Interfaces/Enums'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 
@@ -182,7 +183,7 @@ export default class MailerGenerator {
 
     // Install mail and view module
     const npmArguments = ['install', '@adonisjs/mail', '@adonisjs/view']
-    if (this.input.mailers.includes('ses')) {
+    if (this.input.mailers.includes(Mailer.SES)) {
       npmArguments.push('aws-sdk')
     }
     await HelperService.execute('npm', npmArguments, {

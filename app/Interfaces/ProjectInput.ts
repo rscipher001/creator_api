@@ -1,3 +1,5 @@
+import { Database, Mailer, ProjectType, RelationType } from './Enums'
+
 export interface Names {
   camelCase: string
   pascalCase: string
@@ -98,12 +100,6 @@ export interface Table {
   relations: Relation[]
 }
 
-export enum RelationType {
-  hasOne = 'hasOne',
-  hasMany = 'hasMany',
-  belongsTo = 'belongsTo',
-  manyToMany = 'manyToMany',
-}
 export interface Relation {
   type: RelationType
   withModel: string
@@ -112,6 +108,21 @@ export interface Relation {
   name: string // Relation name, by default table name is used
   required: boolean
   lazy?: boolean // Migration will be created separately for foreign key
+}
+
+export interface RBAC {
+  enabled: boolean
+  multipleRoles: boolean
+  canAdminCreateRoles: boolean
+  canAdminCreatePermissions: boolean
+  roles: String[]
+  permissions: String[]
+  matrix: RBACMatrix[]
+}
+
+export interface RBACMatrix {
+  role: string
+  permissions: string[]
 }
 
 export default interface ProjectInput {
@@ -123,7 +134,7 @@ export default interface ProjectInput {
   spaPath: string // project folder full path
   basePath: string // Project folder name
   mailEnabled: boolean
-  mailers: string[]
+  mailers: Mailer[]
   defaultMailer: string
   storageEnabled: boolean
   storageDrivers: string[]
@@ -161,8 +172,8 @@ export default interface ProjectInput {
     name: string
     email: string
   }
-  database: string // should be smallcase
-  types: string[] // should be smallcaps, can be api or web
+  database: Database // should be smallcase
+  types: ProjectType[] // should be smallcaps, can be api or web
   camelCaseStrategy: boolean
   tables: Table[]
   tech: {

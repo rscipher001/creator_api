@@ -65,8 +65,8 @@ export default class CreateProjectValidator {
 
   public schema = schema.create({
     name: schema.string({ trim: true }, [rules.minLength(2), rules.maxLength(256)]),
-    database: schema.enum(['mysql'] as const),
-    types: schema.array().members(schema.enum(['api'] as const)),
+    database: schema.enum(['MySQL'] as const),
+    types: schema.array().members(schema.enum(['API'] as const)),
     camelCaseStrategy: schema.boolean(),
     mailEnabled: schema.boolean(),
     mailers: schema
@@ -107,6 +107,20 @@ export default class CreateProjectValidator {
       user: schema.enum([1, 0, 'n'] as const),
       tenant: schema.enum([1, 0, 'n'] as const),
       table: schema.string.optional({ trim: true }),
+    }),
+    rbac: schema.object().members({
+      enabled: schema.boolean(),
+      multipleRoles: schema.boolean(),
+      canAdminCreateRoles: schema.boolean(),
+      canAdminCreatePermissions: schema.boolean(),
+      roles: schema.array().members(schema.string({ trim: true })),
+      permissions: schema.array().members(schema.string({ trim: true })),
+      matrix: schema.array().members(
+        schema.object().members({
+          role: schema.string({ trim: true }),
+          permissions: schema.array().members(schema.string({ trim: true })),
+        })
+      ),
     }),
     tables: schema.array().members(this.tableSchema),
   })
