@@ -252,29 +252,7 @@ export default {
     async store() {
       try {
         @if(table.columns.find(column => column.type === 'File'))
-          let payload;
-          if (
-            @each((column, index) in fileColumns)
-              this.form.{{ column.names.camelCase }} !== null{{{ lastIndex && fileColumnsLastIndex !== lastIndex ? ' &&': '' }}}
-            @endeach
-          ) {
-            payload = new FormData();
-            @each(column in exposedColumns)
-              payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}});
-            @endeach
-            @each(relation in nonAuthBelongsToRelations)
-              payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
-            @endeach
-          } else {
-            payload = {
-              @each(column in exposedColumns)
-                {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
-              @endeach
-              @each(relation in nonAuthBelongsToRelations)
-                {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
-              @endeach
-            }
-          }
+          const payload = this.prepareRequestBody();
         @else
         const payload = {
           @each(column in exposedColumns)
@@ -311,29 +289,7 @@ export default {
     async update() {
       try {
         @if(table.columns.find(column => column.type === 'File'))
-        let payload;
-          if (
-            @each((column, index) in fileColumns)
-              this.form.{{ column.names.camelCase }} !== null{{{ lastIndex && fileColumnsLastIndex !== lastIndex ? ' &&': '' }}}
-            @endeach
-          ) {
-            payload = new FormData();
-            @each(column in exposedColumns)
-              payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}});
-            @endeach
-            @each(relation in nonAuthBelongsToRelations)
-              payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
-            @endeach
-          } else {
-            payload = {
-              @each(column in exposedColumns)
-                {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
-              @endeach
-              @each(relation in nonAuthBelongsToRelations)
-                {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
-              @endeach
-            }
-          }
+          const payload = this.prepareRequestBody();
         @else
         const payload = {
           @each(column in exposedColumns)
@@ -371,6 +327,33 @@ export default {
     },
 
     @if(table.columns.find(column => column.type === 'File'))
+      prepareRequestBody (){
+        let payload;
+        if (
+          @each((column, index) in fileColumns)
+            this.form.{{ column.names.camelCase }} !== null{{{ lastIndex && fileColumnsLastIndex !== lastIndex ? ' &&': '' }}}
+          @endeach
+        ) {
+          payload = new FormData();
+          @each(column in exposedColumns)
+            if (this.form.{{ column.names.camelCase }} !== null) payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}});
+          @endeach
+          @each(relation in nonAuthBelongsToRelations)
+            payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
+          @endeach
+        } else {
+          payload = {
+            @each(column in exposedColumns)
+              {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
+            @endeach
+            @each(relation in nonAuthBelongsToRelations)
+              {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
+            @endeach
+          }
+        }
+        return payload;
+      },
+
       onFileAdd(file, field) {
         this.form[field] = file;
       },
