@@ -41,7 +41,10 @@ export default class Init {
     const fileExists = await HelperService.fileExists(filePath)
     if (fileExists) {
       let content = await HelperService.readFile(filePath)
-      await HelperService.writeFile(filePath, content.replace('npm test', 'npm run format'))
+      await HelperService.writeFile(
+        filePath,
+        content.replace('npm test', 'npm run format\nnpm run build\ngit add -A')
+      )
     }
   }
 

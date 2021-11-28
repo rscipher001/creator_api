@@ -210,14 +210,18 @@ export default {
       @if(table.columns.find(column => column.type !== 'File'))
         const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
         @each(column in table.columns.filter(c => c.meta.expose !== false))~
-        @if(!column.secret && column.type !== 'File')
-        this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}
-        @endif
+          @if(!column.secret && column.type !== 'File')
+            @if(column.type === 'Date')
+              this.form.{{ column.names.camelCase }} = new Date({{ table.names.camelCase }}.{{ column.names.camelCase }});
+            @else
+              this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }};
+            @endif
+          @endif
         @endeach
         @each(relation in table.relations)
-        @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-        this.form.{{ relation.names.camelCase }}Id = {{ table.names.camelCase }}.{{ relation.names.camelCase }}Id
-        @endif
+          @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
+            this.form.{{ relation.names.camelCase }}Id = {{ table.names.camelCase }}.{{ relation.names.camelCase }}Id;
+          @endif
         @endeach
       @endif
     }
@@ -254,22 +258,22 @@ export default {
         @if(table.columns.find(column => column.type === 'File'))
           const payload = new FormData();
           @each(column in table.columns.filter(c => c.meta.expose !== false))~
-          payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }});
+            payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}});
           @endeach
           @each(relation in table.relations)
-          @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-          payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
-          @endif
+            @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
+              payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
+            @endif
           @endeach
         @else
         const payload = {
           @each(column in table.columns.filter(c => c.meta.expose !== false))~
-          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+            {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
           @endeach
           @each(relation in table.relations)
-          @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-          {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
-          @endif
+            @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
+              {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
+            @endif
           @endeach
         }
         @endif
@@ -301,22 +305,22 @@ export default {
         @if(table.columns.find(column => column.type === 'File'))
           const payload = new FormData();
           @each(column in table.columns.filter(c => c.meta.expose !== false))~
-          payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }});
+            payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}});
           @endeach
           @each(relation in table.relations)
-          @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-          payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
-          @endif
+            @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
+            payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
+            @endif
           @endeach
         @else
         const payload = {
           @each(column in table.columns.filter(c => c.meta.expose !== false))~
-          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+            {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
           @endeach
           @each(relation in table.relations)
-          @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-          {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
-          @endif
+            @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
+              {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
+            @endif
           @endeach
         }
         @endif

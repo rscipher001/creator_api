@@ -50,6 +50,25 @@ export default class CRUDGenerator {
   }
 
   /**
+   * Create view for importing CSV page
+   */
+  protected async createStoreManyView(i: number) {
+    const table = this.input.tables[i]
+    const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}ImportCSV.vue`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/modelImportCSVVue`,
+        {
+          input: this.input,
+          table,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  /**
    * Create state for resource
    */
   protected async createState(i: number) {
@@ -142,9 +161,9 @@ export default class CRUDGenerator {
   protected async start() {
     for (let i = 0; i < this.input.tables.length; i += 1) {
       if (!this.input.tables[i].generateUI) continue
-      debugger
       await this.createCreateView(i)
       await this.createListView(i)
+      await this.createStoreManyView(i)
       // await this.createCreateModal(i)
       await this.registerRoutes(i)
       await HelperService.execute('npm', ['run', 'lint'], { cwd: this.input.spaPath })

@@ -377,7 +377,7 @@ class BackendProjectService {
       columns: [
         {
           name: 'email',
-          type: 'string',
+          type: 'String',
           meta: {
             ...emailColumn,
             ...{
@@ -387,7 +387,7 @@ class BackendProjectService {
         },
         {
           name: 'token',
-          type: 'string',
+          type: 'String',
           meta: {
             expose: false,
             index: true,
@@ -397,7 +397,7 @@ class BackendProjectService {
         },
         {
           name: 'reason',
-          type: 'string',
+          type: 'String',
           meta: {
             expose: false,
             index: true,
@@ -408,7 +408,7 @@ class BackendProjectService {
       ],
       relations: [
         {
-          type: 'belongsTo',
+          type: 'BelongsTo',
           withModel: '$auth',
           name: '',
           required: false,

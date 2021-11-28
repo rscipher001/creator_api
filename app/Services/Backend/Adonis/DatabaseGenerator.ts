@@ -12,6 +12,18 @@ export default class DatabaseGenerator {
     this.input = input
   }
 
+  // Create start/events.ts
+  protected async createStartEventsTs() {
+    const filePath = `${this.input.path}/start/events.ts`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/start/eventsTs`
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
   // Create app/NamingStrategy/CamelCaseStrategy.ts
   protected async createAppNamingStrategyCamelCaseStrategyTs() {
     await mkdirp(`${this.input.path}/app/NamingStrategy`)
@@ -40,8 +52,10 @@ export default class DatabaseGenerator {
     const content = await HelperService.readJson(filePath)
     const command = '@adonisjs/lucid/build/commands'
     const provider = '@adonisjs/lucid'
+    const preload = './start/events'
     if (!content.commands.includes(command)) content.commands.push(command)
     if (!content.providers.includes(provider)) content.providers.push(provider)
+    if (!content.preloads.includes(preload)) content.preloads.push(preload)
     await HelperService.writeJson(filePath, content)
   }
 
@@ -430,6 +444,7 @@ export default class DatabaseGenerator {
     await this.updateAdonisrcJson()
     await this.updateAceManifestJson()
     await this.updateTsconfigJson()
+    await this.createStartEventsTs()
 
     switch (this.input.database) {
       case Database.MySQL:
