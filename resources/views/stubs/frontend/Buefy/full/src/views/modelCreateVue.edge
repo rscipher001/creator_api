@@ -77,7 +77,7 @@
       @elseif(column.type === 'Integer')
       <b-field
         horizontal
-        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -99,7 +99,7 @@
       @elseif(column.type === 'Decimal')
       <b-field
         horizontal
-        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -126,7 +126,7 @@
       @elseif(column.type === 'Boolean')
       <b-field
         horizontal
-        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -135,7 +135,7 @@
       @elseif(column.type === 'Date')
       <b-field
         horizontal
-        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -144,7 +144,7 @@
       @elseif(column.type === 'File')
       <b-field
         class="file" horizontal
-        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -152,7 +152,7 @@
           <a class="button is-primary is-fullwidth">
             <b-icon icon="upload"></b-icon>
             <span>
-              {{{ `{{ (form.${column.names.camelCase} && form.${column.names.camelCase}.name) || 'Select ${column.input.displayName || column.names.pascalCase}' }}` }}}
+              {{{ `{{ (form.${column.names.camelCase} && form.${column.names.camelCase}.name) || 'Select ${column.input.displayName || capitalCase(column.names.pascalCase)}' }}` }}}
             </span>
           </a>
         </b-upload>
