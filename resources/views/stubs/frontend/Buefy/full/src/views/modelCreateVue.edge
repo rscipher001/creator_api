@@ -35,7 +35,7 @@
           required
           @endif
         ></b-input>
-        @elseif(column.input.type === 'select')
+        @elseif(column.input.type === 'Select')
         <b-select
           v-model="form.{{ column.names.camelCase }}"
           expanded
@@ -51,7 +51,7 @@
           @endif
           @endeach
         </b-select>
-        @elseif(column.input.type === 'radio')
+        @elseif(column.input.type === 'Radio')
         @each(option in column.input.radio.options)
         @if(option.value)
         <b-radio-button
