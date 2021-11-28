@@ -26,12 +26,12 @@
     <b-table v-if="items.length" :data="items">
       @each(column in table.indexColumns)
         <b-table-column field="{{
-          input.camelCaseStrategy ? camelCase(column) : snakeCase(snakeCase)
+          input.camelCaseStrategy ? camelCase(column) : snakeCase(column)
         }}" label="{{
           table.columns.find((c) => c.names.pascalCase === pascalCase(column)).meta.displayName || capitalCase(column)
         }}" v-slot="props">
           {{{ 
-            `{{ props.row.${input.camelCaseStrategy ? camelCase(column) : snakeCase(snakeCase)} }}`
+            `{{ props.row.${input.camelCaseStrategy ? camelCase(column) : snakeCase(column)} }}`
           }}}
         </b-table-column>
       @endeach

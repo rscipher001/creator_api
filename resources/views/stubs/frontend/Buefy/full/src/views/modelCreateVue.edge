@@ -1,3 +1,7 @@
+@set('fileColumns', table.columns.filter(c => c.type === 'File'))
+@set('fileColumnsLastIndex', fileColumns.length - 1)
+@set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
+@set('nonAuthBelongsToRelations', table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth'))
 <template>
   <section class="container mt-5">
     <div class="level">
@@ -5,11 +9,11 @@
       <div class="level-right"><b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-light">Back</b-button></div>
     </div>
     <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
-      @each(column in table.columns.filter(c => c.meta.expose !== false))~
+      @each(column in exposedColumns)
       @if(column.type === 'String')
       <b-field
         horizontal
-        label="{{ column.input.displayName || column.names.pascalCase }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -40,7 +44,7 @@
           @endif
         >
           @each(option in column.input.select.options)
-          @if (option.value)
+          @if(option.value)
           <option value="{{ option.value }}">{{ option.label }}</option>
           @else
           <option value="{{ option }}">{{ option }}</option>
@@ -49,7 +53,7 @@
         </b-select>
         @elseif(column.input.type === 'radio')
         @each(option in column.input.radio.options)
-        @if (option.value)
+        @if(option.value)
         <b-radio-button
           v-model="form.{{ column.names.camelCase }}"
           native-value="{{ option.value }}"
@@ -156,35 +160,33 @@
       @endif
       @endeach
 
-      @each(relation in table.relations)
-      @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-      <b-field
-        label="{{ relation.names.pascalCase }}"
-        :type="errors.{{ relation.names.camelCase }} ? 'is-danger' : ''"
-        :message="errors.{{ relation.names.camelCase }}"
-        horizontal
-      >
-        <b-select
-          v-model="form.{{ relation.names.camelCase }}Id"
-          expanded
-          @if(relation.required)
-          required
-          @endif
+      @each(relation in nonAuthBelongsToRelations)
+        <b-field
+          label="{{ relation.names.pascalCase }}"
+          :type="errors.{{ relation.names.camelCase }} ? 'is-danger' : ''"
+          :message="errors.{{ relation.names.camelCase }}"
+          horizontal
         >
-          <option v-for="({{
-            relation.names.camelCase
-          }}, {{
-            relation.names.camelCase
-          }}Index) in {{ relation.names.camelCasePlural }}" :key="{{
-            relation.names.camelCase
-          }}Index" :value="{{
-            relation.names.camelCase
-          }}.id">
-            {{ safe(`{{ ${relation.names.camelCase}.name }}`) }}
-          </option>
-        </b-select>
-      </b-field>
-      @endif
+          <b-select
+            v-model="form.{{ relation.names.camelCase }}Id"
+            expanded
+            @if(relation.required)
+            required
+            @endif
+          >
+            <option v-for="({{
+              relation.names.camelCase
+            }}, {{
+              relation.names.camelCase
+            }}Index) in {{ relation.names.camelCasePlural }}" :key="{{
+              relation.names.camelCase
+            }}Index" :value="{{
+              relation.names.camelCase
+            }}.id">
+              {{ safe(`{{ ${relation.names.camelCase}.name }}`) }}
+            </option>
+          </b-select>
+        </b-field>
       @endeach
 
       <div class="is-flex is-justify-content-flex-end">
@@ -209,19 +211,15 @@ export default {
       this.editMode.id = {{ table.names.camelCase }}Id;
       @if(table.columns.find(column => column.type !== 'File'))
         const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
-        @each(column in table.columns.filter(c => c.meta.expose !== false))~
-          @if(!column.secret && column.type !== 'File')
-            @if(column.type === 'Date')
-              this.form.{{ column.names.camelCase }} = new Date({{ table.names.camelCase }}.{{ column.names.camelCase }});
-            @else
-              this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }};
-            @endif
+        @each(column in exposedColumns.filter(c =>!c.secret && c.type !== 'File'))~
+          @if(column.type === 'Date')
+            this.form.{{ column.names.camelCase }} = new Date({{ table.names.camelCase }}.{{ column.names.camelCase }});
+          @else
+            this.form.{{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }};
           @endif
         @endeach
-        @each(relation in table.relations)
-          @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-            this.form.{{ relation.names.camelCase }}Id = {{ table.names.camelCase }}.{{ relation.names.camelCase }}Id;
-          @endif
+        @each(relation in nonAuthBelongsToRelations)
+          this.form.{{ relation.names.camelCase }}Id = {{ table.names.camelCase }}.{{ relation.names.camelCase }}Id;
         @endeach
       @endif
     }
@@ -235,13 +233,11 @@ export default {
       },
       errors: {},
       form: {
-        @each(column in table.columns.filter(c => c.meta.expose !== false))~
-        {{ column.names.camelCase }}: null,
+        @each(column in exposedColumns)
+          {{ column.names.camelCase }}: {{ column.type === 'Boolean' ? false : null }},
         @endeach
-        @each(relation in table.relations)
-        @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-        {{ relation.names.camelCase }}Id: null,
-        @endif
+        @each(relation in nonAuthBelongsToRelations)
+          {{ relation.names.camelCase }}Id: null,
         @endeach
       },
     };
@@ -256,24 +252,36 @@ export default {
     async store() {
       try {
         @if(table.columns.find(column => column.type === 'File'))
-          const payload = new FormData();
-          @each(column in table.columns.filter(c => c.meta.expose !== false))~
-            payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}});
-          @endeach
-          @each(relation in table.relations)
-            @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
+          let payload;
+          if (
+            @each((column, index) in fileColumns)
+              this.form.{{ column.names.camelCase }} !== null{{{ lastIndex && fileColumnsLastIndex !== lastIndex ? ' &&': '' }}}
+            @endeach
+          ) {
+            payload = new FormData();
+            @each(column in exposedColumns)
+              payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}});
+            @endeach
+            @each(relation in nonAuthBelongsToRelations)
               payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
-            @endif
-          @endeach
+            @endeach
+          } else {
+            payload = {
+              @each(column in exposedColumns)
+                {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
+              @endeach
+              @each(relation in nonAuthBelongsToRelations)
+                {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
+              @endeach
+            }
+          }
         @else
         const payload = {
-          @each(column in table.columns.filter(c => c.meta.expose !== false))~
+          @each(column in exposedColumns)
             {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
           @endeach
-          @each(relation in table.relations)
-            @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-              {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
-            @endif
+          @each(relation in nonAuthBelongsToRelations)
+            {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
           @endeach
         }
         @endif
@@ -303,24 +311,36 @@ export default {
     async update() {
       try {
         @if(table.columns.find(column => column.type === 'File'))
-          const payload = new FormData();
-          @each(column in table.columns.filter(c => c.meta.expose !== false))~
-            payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}});
-          @endeach
-          @each(relation in table.relations)
-            @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-            payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
-            @endif
-          @endeach
+        let payload;
+          if (
+            @each((column, index) in fileColumns)
+              this.form.{{ column.names.camelCase }} !== null{{{ lastIndex && fileColumnsLastIndex !== lastIndex ? ' &&': '' }}}
+            @endeach
+          ) {
+            payload = new FormData();
+            @each(column in exposedColumns)
+              payload.append("{{ column.names.camelCase }}", this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}});
+            @endeach
+            @each(relation in nonAuthBelongsToRelations)
+              payload.append("{{ relation.names.camelCase }}"Id, this.form.{{ relation.names.camelCase }}Id);
+            @endeach
+          } else {
+            payload = {
+              @each(column in exposedColumns)
+                {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
+              @endeach
+              @each(relation in nonAuthBelongsToRelations)
+                {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
+              @endeach
+            }
+          }
         @else
         const payload = {
-          @each(column in table.columns.filter(c => c.meta.expose !== false))~
+          @each(column in exposedColumns)
             {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
           @endeach
-          @each(relation in table.relations)
-            @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-              {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
-            @endif
+          @each(relation in nonAuthBelongsToRelations)
+            {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
           @endeach
         }
         @endif
@@ -351,9 +371,9 @@ export default {
     },
 
     @if(table.columns.find(column => column.type === 'File'))
-    onFileAdd(file, field) {
-      this.form[field] = file;
-    }
+      onFileAdd(file, field) {
+        this.form[field] = file;
+      },
     @endif
   },
 
@@ -365,12 +385,10 @@ export default {
       {{ table.names.camelCasePlural }}: (state) => state.items,
       loading: (state) => state.loading,
     }),
-    @each(relation in table.relations)~
-      @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-        ...mapState('{{ relation.names.camelCase }}', {
-          {{ relation.names.camelCasePlural }}: (state) => state.items,
-        }),
-      @endif
+    @each(relation in nonAuthBelongsToRelations)
+      ...mapState('{{ relation.names.camelCase }}', {
+        {{ relation.names.camelCasePlural }}: (state) => state.items,
+      }),
     @endeach
     isLoading() {
       return this.loading.store || this.loading.update;
