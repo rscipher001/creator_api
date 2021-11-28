@@ -38,7 +38,7 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
         table.integer('{{
           input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
         }}').unsigned().references('id').inTable('{{
-          input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakCasePlural
+          input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural
         }}').{{ relation.required ? 'notNullable()' : 'nullable()' }}
         @endif
       @endeach

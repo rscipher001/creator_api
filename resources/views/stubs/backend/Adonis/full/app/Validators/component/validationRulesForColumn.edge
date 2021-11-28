@@ -1,4 +1,4 @@
-{{ column.columnName }}: schema.
+{{ column.names.camelCase }}: schema.
 @if(['Integer', 'Decimal'].includes(column.type))
   number
 @elseif(column.type === 'String')

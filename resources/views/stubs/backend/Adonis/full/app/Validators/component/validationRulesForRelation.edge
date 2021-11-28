@@ -4,7 +4,7 @@
   relation.required ? '' : '.optional'
 }}([
   rules.exists({
-    table: '{{ input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakCasePlural }}',
+    table: '{{ input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural }}',
     column: 'id'
   })
 ]),
