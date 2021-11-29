@@ -114,9 +114,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           table.names.pascalCase
         }}.query().where(condition).first()
         if ({{ table.names.camelCase }}) {
+          {{ table.names.camelCase }}.merge(input)
+          await {{ table.names.camelCase }}.save()
           return {{ table.names.camelCase }}
-            .merge(input)
-            .save()
         }
         return {{ table.names.pascalCase }}.create(input)
       @else
@@ -200,9 +200,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         }
       @endeach
       const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
+      {{ table.names.camelCase }}.merge(input)
+      await {{ table.names.camelCase }}.save()
       return {{ table.names.camelCase }}
-        .merge(input)
-        .save()
     }
   @endif
 
