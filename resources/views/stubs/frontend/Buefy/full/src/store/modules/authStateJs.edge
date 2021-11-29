@@ -1,6 +1,17 @@
+@set('containsUnderscoreColumn', input.auth.table.columns.find(c => c.columnName.indexOf('_') >= 0))
 import HttpService from "../../services/http.service";
 import LocalStorageService from '../../services/localStorage.service';
 import ValidationException from "../../exceptions/ValidationException";
+
+@if(!input.camelCaseStrategy && containsUnderscoreColumn)
+  const processUser = (user) => {
+    @each(column in input.auth.table.columns.filter(c => c.columnName.indexOf('_') >= 0))
+      user.{{ column.names.camelCase }} = user.{{ column.names.snakeCase }};
+      delete user.{{ column.names.snakeCase }};
+    @endeach
+    return user;
+  };
+@endif
 
 export default {
   namespaced: true,
@@ -59,7 +70,14 @@ export default {
       try {
         commit("setLoading", { key: "login", value: true });
         const { user, token } = await HttpService.post("/login", input);
-        dispatch("setUserToken", { token, user });
+        dispatch("setUserToken", {
+          token,
+          @if(containsUnderscoreColumn)
+            user: processUser(user),
+          @else
+            user,
+          @endif
+        });
         commit("setLoading", { key: "login", value: false });
       } catch (e) {
         commit("setLoading", { key: "login", value: false });
@@ -74,7 +92,14 @@ export default {
       commit("setLoading", { key: "register", value: true });
       try {
         const { user, token } = await HttpService.post("/register", input);
-        dispatch("setUserToken", { token, user });
+        dispatch("setUserToken", {
+          token,
+          @if(containsUnderscoreColumn)
+            user: processUser(user),
+          @else
+            user,
+          @endif
+        });
         commit("setLoading", { key: "register", value: false });
       } catch (e) {
         commit("setLoading", { key: "register", value: false });
@@ -188,7 +213,14 @@ export default {
       commit("setLoading", { key: "updateProfile", value: true });
       try {
         const user = await HttpService.authPost("/me/profile", input);
-        dispatch("updateUser", user);
+        dispatch(
+          "updateUser",
+          @if(containsUnderscoreColumn)
+            processUser(user)
+          @else
+            user
+          @endif
+        );
         commit("setLoading", { key: "updateProfile", value: false });
       } catch (e) {
         commit("setLoading", { key: "updateProfile", value: false });
@@ -247,7 +279,14 @@ export default {
       commit("setLoading", { key: "updateAvatar", value: true });
       try {
         const user = await HttpService.authPost("/me/profile/avatar", input);
-        dispatch("updateUser", user);
+        dispatch(
+          "updateUser",
+          @if(containsUnderscoreColumn)
+            processUser(user)
+          @else
+            user
+          @endif
+        );
         commit("setLoading", { key: "updateAvatar", value: false });
       } catch (e) {
         commit("setLoading", { key: "updateAvatar", value: false });
@@ -262,7 +301,14 @@ export default {
       commit("setLoading", { key: "deleteAvatar", value: true });
       try {
         const user = await HttpService.authPost("/me/profile/avatar", input);
-        dispatch("updateUser", user);
+        dispatch(
+          "updateUser",
+          @if(containsUnderscoreColumn)
+            processUser(user)
+          @else
+            user
+          @endif
+        );
         commit("setLoading", { key: "deleteAvatar", value: false });
       } catch (e) {
         commit("setLoading", { key: "deleteAvatar", value: false });
@@ -290,7 +336,14 @@ export default {
     async refreshUser({ dispatch }, input) {
       try {
         const user = await HttpService.authGet("/me", input);
-        dispatch("updateUser", user);
+        dispatch(
+          "updateUser",
+          @if(containsUnderscoreColumn)
+            processUser(user)
+          @else
+            user
+          @endif
+        );
       } catch (e) {
         console.error(e);
         dispatch("unsetTokens");
