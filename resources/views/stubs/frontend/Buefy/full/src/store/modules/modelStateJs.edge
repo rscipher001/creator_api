@@ -4,13 +4,23 @@ import ValidationException from '../../exceptions/ValidationException';
 
 const resource = '{{ table.names.camelCase }}';
 @if(!input.camelCaseStrategy && containsUnderscoreColumn)
-  const processItem = (item) => {
+
+  const toCamelCaseAttributes = (item) => {
     @each(column in table.columns.filter(c => c.columnName.indexOf('_') >= 0))
       item.{{ column.names.camelCase }} = item.{{ column.names.snakeCase }};
       delete item.{{ column.names.snakeCase }};
     @endeach
     return item;
   };
+
+  const fromCamelCaseAttributes = (item) => {
+    @each(column in table.columns.filter(c => c.columnName.indexOf('_') >= 0))
+      item.{{ column.names.snakeCase }} = item.{{ column.names.camelCase }};
+      delete item.{{ column.names.camelCase }};
+    @endeach
+    return item;
+  };
+
 @endif
 export default {
   namespaced: true,
@@ -42,7 +52,7 @@ export default {
         const { data: items, meta } = await HttpService.authGet(`/${resource}`, filter);
         commit('load', {
           @if(containsUnderscoreColumn)
-            items: items.map((item) => processItem(item)),
+            items: items.map((item) => toCamelCaseAttributes(item)),
           @else
             items,
           @endif
@@ -58,12 +68,19 @@ export default {
     async store({ commit }, input) {
       commit('setLoading', { key: 'store', value: true });
       try {
-        const item = await HttpService.authPost(`/${resource}`, input);
+        const item = await HttpService.authPost(
+          `/${resource}`,
+          @if(containsUnderscoreColumn)
+            fromCamelCaseAttributes(input)
+          @else
+            input
+          @endif
+        );
         commit('setLoading', { key: 'store', value: false });
         commit(
-          'add', 
+          'add',
           @if(containsUnderscoreColumn)
-            processItem(item)
+            toCamelCaseAttributes(item)
           @else
             item
           @endif
@@ -80,12 +97,19 @@ export default {
     async storeMany({ commit }, input) {
       commit('setLoading', { key: 'storeMany', value: true });
       try {
-        const items = await HttpService.authPost(`/${resource}/many`, input);
+        const items = await HttpService.authPost(
+          `/${resource}/many`,
+          @if(containsUnderscoreColumn)
+            input.map(i => fromCamelCaseAttributes(i))
+          @else
+            input
+          @endif
+        );
         commit('setLoading', { key: 'storeMany', value: false });
         commit(
           'addMany',
           @if(containsUnderscoreColumn)
-            items.map((item) => processItem(item))
+            items.map((item) => toCamelCaseAttributes(item))
           @else
             items
           @endif
@@ -102,12 +126,19 @@ export default {
     async update({ commit }, { id, input }) {
       commit('setLoading', { key: 'update', value: true });
       try {
-        const item = await HttpService.authPut(`/${resource}/${id}`, input);
+        const item = await HttpService.authPut(
+          `/${resource}/${id}`,
+          @if(containsUnderscoreColumn)
+            fromCamelCaseAttributes(input)
+          @else
+            input
+          @endif
+        );
         commit(
           'replace', {
             id,
             @if(containsUnderscoreColumn)
-              item: processItem(item)
+              item: toCamelCaseAttributes(item)
             @else
               item
             @endif
