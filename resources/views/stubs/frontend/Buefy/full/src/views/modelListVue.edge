@@ -25,12 +25,22 @@
     </div>
     <b-table v-if="items.length" :data="items">
       @each(column in table.indexColumns)
+        @set('currentColumn', table.columns.find((c) => c.names.pascalCase === pascalCase(column)))
         <b-table-column field="{{ camelCase(column) }}" label="{{
-          table.columns.find((c) => c.names.pascalCase === pascalCase(column)).meta.displayName || capitalCase(column)
-        }}" v-slot="props">
-          {{{ 
-            `{{ props.row.${camelCase(column)} }}`
-          }}}
+          currentColumn.input.displayName || capitalCase(column)
+        }}" v-slot="props" {{
+          ['Decimal', 'Integer'].includes(currentColumn.type) ? 'numeric' : ''
+        }}>
+          @if('Decimal' === currentColumn.type && currentColumn.input.decimal.step !== 'any')
+            @set('decimalCount', `${currentColumn.input.decimal.step}`.split('.')[1].length)
+            {{{
+              `{{ props.row.${camelCase(column)}.toFixed(${decimalCount}) }}`
+            }}}
+          @else
+            {{{
+              `{{ props.row.${camelCase(column)} }}`
+            }}}
+          @endif
         </b-table-column>
       @endeach
       <b-table-column label="Action" v-slot="props">
