@@ -20,7 +20,7 @@ test.group('Auth', (group) => {
     password: 'secret@123',
     @each(column in input.auth.table.columns)
       @if(!['Email', 'Password'].includes(column.name))
-      {{ column.columnName }}: {{{
+      {{ column.names.camelCase }}: {{{
         column.type === 'String' ? 'faker.lorem.word()' : 
         column.type === 'Number' ? 'faker.random.number()': 
         column.type === 'Boolean' ? 'faker.random.boolean()' : 'faker.date.past()'

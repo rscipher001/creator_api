@@ -1,7 +1,17 @@
+@set('containsUnderscoreColumn', table.columns.find(c => c.columnName.contains('_')))
 import HttpService from '../../services/http.service';
 import ValidationException from '../../exceptions/ValidationException';
 
 const resource = '{{ table.names.camelCase }}';
+@if(!input.camelCaseStrategy && containsUnderscoreColumn)
+  const processItem = (item) => {
+    @each(column in table.columns.filter(c => c.columnName.contains('_')))
+      item.{{ column.names.camelCase }} = item.{{ column.names.snakeCase }};
+      delete item.{{ column.names.snakeCase }};
+    @endeach
+    return item;
+  };
+@endif
 export default {
   namespaced: true,
 
@@ -30,7 +40,14 @@ export default {
       commit('setLoading', { key: 'index', value: true });
       try {
         const { data: items, meta } = await HttpService.authGet(`/${resource}`, filter);
-        commit('load', { items, meta });
+        commit('load', {
+          @if(containsUnderscoreColumn)
+            items: items.map((item) => processItem(item)),
+          @else
+            items,
+          @endif
+          meta
+        });
         commit('setLoading', { key: 'index', value: false });
       } catch (e) {
         commit('setLoading', { key: 'index', value: false });
@@ -43,7 +60,14 @@ export default {
       try {
         const item = await HttpService.authPost(`/${resource}`, input);
         commit('setLoading', { key: 'store', value: false });
-        commit('add', item);
+        commit(
+          'add', 
+          @if(containsUnderscoreColumn)
+            processItem(item)
+          @else
+            item
+          @endif
+        );
       } catch (e) {
         commit('setLoading', { key: 'store', value: false });
         if (e.response && e.response.status === 422) {
@@ -58,7 +82,14 @@ export default {
       try {
         const items = await HttpService.authPost(`/${resource}/many`, input);
         commit('setLoading', { key: 'storeMany', value: false });
-        commit('addMany', items);
+        commit(
+          'addMany',
+          @if(containsUnderscoreColumn)
+            items.map((item) => processItem(item))
+          @else
+            items
+          @endif
+        );
       } catch (e) {
         commit('setLoading', { key: 'storeMany', value: false });
         if (e.response && e.response.status === 422) {
@@ -72,7 +103,16 @@ export default {
       commit('setLoading', { key: 'update', value: true });
       try {
         const item = await HttpService.authPut(`/${resource}/${id}`, input);
-        commit('replace', { id, item });
+        commit(
+          'replace', {
+            id,
+            @if(containsUnderscoreColumn)
+              item: processItem(item)
+            @else
+              item
+            @endif
+          }
+        );
         commit('setLoading', { key: 'update', value: false });
       } catch (e) {
         commit('setLoading', { key: 'update', value: false });
