@@ -25,7 +25,7 @@
                 <b-icon class="file-icon" icon="upload"></b-icon>
                 <span class="file-label">Click to upload</span>
               </span>
-              <span class="file-name" v-if="file">{{ file.name }}</span>
+              <span class="file-name" v-if="file">@{{ file.name }}</span>
             </b-upload>
           </b-field>
         </section>
@@ -142,12 +142,12 @@ export default {
         await this.storeManyAction(this.form.items);
         this.$router.push("/{{ table.names.camelCase }}");
         this.$buefy.toast.open({
-          message: "{{ capitalCase(colum.names.pascalCasePlural) }} Imported Successfully",
+          message: "{{ capitalCase(table.names.pascalCasePlural) }} Imported Successfully",
           type: "is-success",
           position: "is-bottom-right",
         });
       } catch (e) {
-        let message = "Unable to import {{ noCase(colum.names.snakeCasePlural) }}";
+        let message = "Unable to import {{ noCase(table.names.snakeCasePlural) }}";
         if (e instanceof ValidationException) {
           this.errors = e.errors;
           message = "Validation failed";
@@ -164,7 +164,7 @@ export default {
   ...mapState("auth", {
     user: (state) => state.user,
   }),
-  ...mapState("{{ colum.names.camelCase }}", {
+  ...mapState("{{ table.names.camelCase }}", {
     items: (state) => state.items,
     meta: (state) => state.meta,
     loading: (state) => state.loading,

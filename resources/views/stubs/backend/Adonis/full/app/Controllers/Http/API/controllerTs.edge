@@ -132,14 +132,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
   @endif
 
   @if(table.operations.storeMany)
-    public async storeMany({ request, {{ belongsToAuth) ? 'auth,' : ''}} }: HttpContextContract) {
+    public async storeMany({ request, {{ belongsToAuth ? 'auth,' : '' }} }: HttpContextContract) {
       const inputs: { [key: string]: any } = await request.validate(StoreMany{{ table.names.pascalCase }}Validator)
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
       })
-      return {{ table.names.PascalCase }}.createMany(
+      return {{ table.names.pascalCase }}.createMany(
         inputs.items.map((input) => {
-          {{--  Set user id if item belongs to auth  --}}
           @if(belongsToAuth)
             input.{{
               input.camelCaseStrategy ?
@@ -147,20 +146,18 @@ export default class {{ table.names.pascalCasePlural }}Controller {
                 `${input.auth.table.names.snakeCase}_id`
             }} = auth.user!.id
           @endif
-          {{--  Set all file columns to null  --}}
           @each(fileColumn in table.columns.filter(column => column.type === 'File'))
             delete input.{{
               input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
             }}
           @endeach
-          {{--  Set last router parent id  --}}
           @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
             @set('lastIndex', table.routeParentTables.length - 1)
             input.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
               table.routeParentTables[lastIndex].names.camelCase
             }}Id
           @endif
-          return item
+          return input
         })
       )
     }
