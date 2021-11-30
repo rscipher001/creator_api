@@ -137,7 +137,20 @@ export default class SPAGenerator {
     await HelperService.execute('git', ['config', '--local', 'user.email', this.input.git.email], {
       cwd: this.input.spaPath,
     })
+    await this.replacePublicIndexHtml()
     await this.installBuefy()
+  }
+
+  // Replace public/index.html with file that contains material design icons
+  protected async replacePublicIndexHtml() {
+    const filePath = `${this.input.spaPath}/public/index.html`
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/public/indexHtml`,
+      {
+        input: this.input,
+      }
+    )
+    await HelperService.writeFile(filePath, content)
   }
 
   public async addNavbar() {
