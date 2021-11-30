@@ -74,9 +74,12 @@
       </div>
     </div>
     <b-pagination
+      v-if="meta.lastPage > 1"
       v-model="current"
       :total="meta.total"
-      :per-page="meta.per_page"
+      :per-page="meta.perPage"
+      icon-prev="arrow-left"
+      icon-next="arrow-right"
       order="is-centered"
       aria-next-label="Next page"
       aria-previous-label="Previous page"
