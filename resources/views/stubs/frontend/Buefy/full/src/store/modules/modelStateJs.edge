@@ -1,5 +1,8 @@
 @set('containsUnderscoreColumn', table.columns.find(c => c.columnName.indexOf('_') >= 0))
 import HttpService from '../../services/http.service';
+@if(!input.camelCaseStrategy)
+  import HelperService from "../../services/helper.service";
+@endif
 import ValidationException from '../../exceptions/ValidationException';
 
 const resource = '{{ table.names.camelCase }}';
@@ -56,7 +59,11 @@ export default {
           @else
             items,
           @endif
-          meta
+          @if(!input.camelCaseStrategy)
+            meta: HelperService.camelizeKeys(meta),
+          @else
+            meta,
+          @endif
         });
         commit('setLoading', { key: 'index', value: false });
       } catch (e) {

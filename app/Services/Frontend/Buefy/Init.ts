@@ -64,6 +64,7 @@ export default class SPAGenerator {
 
     await this.createJsConfigJson()
     await this.createSrcConstantsIndexJs()
+    await this.createSrcServicesHelperServiceJs()
     await this.createSrcServicesHttpServiceJs()
     await this.createSrcServicesLocalStorageServiceJs()
     await this.createSrcExceptionsValidationExceptionJs()
@@ -163,6 +164,20 @@ export default class SPAGenerator {
       }
     )
     await HelperService.writeFile(filePath, content)
+  }
+
+  public async createSrcServicesHelperServiceJs() {
+    const filePath = `${this.input.spaPath}/src/services/helper.service.js`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/services/helperServiceJs`,
+        {
+          input: this.input,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
   }
 
   public async createSrcServicesHttpServiceJs() {
