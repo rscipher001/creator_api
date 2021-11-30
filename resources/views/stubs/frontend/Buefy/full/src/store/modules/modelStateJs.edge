@@ -101,15 +101,15 @@ export default {
       }
     },
 
-    async storeMany({ commit }, input) {
+    async storeMany({ commit }, inputs) {
       commit('setLoading', { key: 'storeMany', value: true });
       try {
         const items = await HttpService.authPost(
           `/${resource}/store/many`,
           @if(containsUnderscoreColumn)
-            input.map(i => fromCamelCaseAttributes(i))
+            items: inputs.map(i => fromCamelCaseAttributes(i))
           @else
-            input
+            items: inputs
           @endif
         );
         commit('setLoading', { key: 'storeMany', value: false });
