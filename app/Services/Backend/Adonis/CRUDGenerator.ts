@@ -98,6 +98,21 @@ export default class CRUDGenerator {
       }
     }
 
+    if (table.operations.storeMany) {
+      const filePath = `${this.input.path}/app/Validators/StoreMany${table.names.pascalCase}Validator.ts`
+      const fileExists = await HelperService.fileExists(filePath)
+      if (!fileExists) {
+        const content = await View.render(
+          `stubs/backend/${this.input.tech.backend}/full/app/Validators/manyValidatorTs`,
+          {
+            input: this.input,
+            table,
+          }
+        )
+        await HelperService.writeFile(filePath, content)
+      }
+    }
+
     if (table.operations.update) {
       const filePath = `${this.input.path}/app/Validators/Update${table.names.pascalCase}Validator.ts`
       const fileExists = await HelperService.fileExists(filePath)
