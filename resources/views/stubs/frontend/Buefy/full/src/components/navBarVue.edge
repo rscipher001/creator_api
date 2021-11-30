@@ -51,7 +51,7 @@
           @endif
         </div>
         <b-navbar-dropdown v-else :label="user.email || user.name">
-          <b-navbar-item tag="router-link" to="/setting" type="is-link">
+          <b-navbar-item tag="router-link" to="/setting/profile" type="is-link">
             Setting
           </b-navbar-item>
           <b-navbar-item @click.prevent="logout">Logout</b-navbar-item>

@@ -103,15 +103,6 @@ const routes = [
           ensureEmailIsVerified: true,
         },
       },
-      {
-        path: "/",
-        name: "SettingProfile",
-        component: () => import("../views/setting/Profile.vue"),
-        meta: {
-          auth: true,
-          ensureEmailIsVerified: true,
-        },
-      },
     ],
   },
   {

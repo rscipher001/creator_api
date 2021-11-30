@@ -105,7 +105,7 @@ export default {
       commit('setLoading', { key: 'storeMany', value: true });
       try {
         const items = await HttpService.authPost(
-          `/${resource}/many`,
+          `/${resource}/store/many`,
           @if(containsUnderscoreColumn)
             input.map(i => fromCamelCaseAttributes(i))
           @else

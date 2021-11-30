@@ -1,167 +1,181 @@
 <template>
-    <section class="container mt-5">
-      <b-loading is-full-page v-model="isLoading"></b-loading>
-      <div class="level">
-        <div class="level-left is-size-3">@{{ items.length }} {{ table.names.pascalCasePlural }}</div>
-        @if(table.operations.storeMany || table.operations.store)
-        <div class="level-right">
-          @if(table.operations.storeMany)
-          <b-dropdown aria-role="list" class="mx-1">
-            <template #trigger="{ active }">
-              <b-button
-                label="Import From"
-                type="is-primary"
-                :icon-right="active ? 'menu-up' : 'menu-down'"
-              />
-            </template>
-            <b-dropdown-item @click="$router.push('/{{ table.names.camelCase }}/import/csv')" aria-role="listitem">CSV</b-dropdown-item>
-          </b-dropdown>
-          @endif
-          @if(table.operations.store)
-          <b-button tag="router-link" to="/{{ table.names.camelCase }}/create" type="is-light">New</b-button>
-          @endif
-        </div>
-        @endif
+  <section class="container mt-5">
+    <b-loading is-full-page v-model="parseLoading"></b-loading>
+    <div class="level">
+      <div class="level-left is-size-3">Import {{ capitalCase(table.names.pascalCase) }}</div>
+      <div class="level-right">
+        <b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-light">
+          Back
+        </b-button>
       </div>
-      <b-table v-if="items.length" :data="items">
-        @each(column in table.indexColumns)
+    </div>
+    <div v-if="activeScreen === 'upload'">
+      <p class="mb-5 has-text-centered">
+        <a :href="''" target="_blank">Download sample CSV file</a>
+        and create all {{ pluralize(noCase(table.names.camelCase)) }} list in Excel or any other spreadsheet software and upload it
+      </p>
+
+      <form method="POST" @submit.prevent="preview">
+        <section
+          class="is-flex is-justify-content-center is-align-items-center"
+        >
+          <b-field class="file is-primary" :class="{ 'has-name': !!file }">
+            <b-upload @input="preview" v-model="file" class="file-label">
+              <span class="file-cta">
+                <b-icon class="file-icon" icon="upload"></b-icon>
+                <span class="file-label">Click to upload</span>
+              </span>
+              <span class="file-name" v-if="file">{{ file.name }}</span>
+            </b-upload>
+          </b-field>
+        </section>
+      </form>
+    </div>
+    <div v-else>
+      <h1>
+        Review the following @{{ form.items.length }} items carefully and
+        click upload button to start importing.
+      </h1>
+      <b-table v-if="form.{{ table.names.camelCase }}.length" :data="form.{{ table.names.camelCase }}">
+        @each(column in table.columns)
           <b-table-column field="{{
-            input.camelCaseStrategy ? camelCase(column) : snakeCase(column)
+            column.names.camelCase
           }}" label="{{
-            table.columns.find((c) => c.names.pascalCase === pascalCase(column)).input.displayName || capitalCase(column)
-          }}" v-slot="props">
-            {{{ 
-              `{{ props.row.${input.camelCaseStrategy ? camelCase(column) : snakeCase(column)} }}`
-            }}}
+            column.input.displayName || capitalCase(column.names.camelCase)
+          }}" v-slot="props" {{
+            ['Decimal', 'Integer'].includes(column.type) ? 'numeric' : ''
+          }}>
+            @if('Decimal' === column.type && column.input.decimal.step !== 'any')
+              @set('decimalCount', `${column.input.decimal.step}`.split('.')[1].length)
+              {{{
+                `{{ props.row.${column.names.camelCase}.toFixed(${decimalCount}) }}`
+              }}}
+            @else
+              {{{
+                `{{ props.row.${column.names.camelCase} }}`
+              }}}
+            @endif
           </b-table-column>
         @endeach
-        <b-table-column label="Action" v-slot="props">
-           <b-dropdown aria-role="list">
-              <template #trigger="{ active }">
-                <b-button
-                  label="More"
-                  type="is-primary"
-                  outlined
-                  :icon-right="active ? 'menu-up' : 'menu-down'"
-                />
-              </template>
-              <b-dropdown-item @click="edit(props.row.id)" aria-role="edititem">Edit</b-dropdown-item>
-              <b-dropdown-item @click="destroy(props.row.id)" aria-role="listitem">Delete</b-dropdown-item>
-          </b-dropdown>
-        </b-table-column>
       </b-table>
-      <div class="hero is-medium" v-else>
-        <div class="hero-body container is-flex has-text-centered">
-          <div class="is-flex-direction-colomn">
-            <h1 class="is-size-2">Create a {{ table.names.pascalCase }}</h1>
-            <p class="is-size-4">Click new to create your first {{ table.names.camelCase }}</p>
-            <b-button
-              type="is-primary block mt-5"
-              tag="router-link"
-              to="/{{ table.names.camelCase }}/create"
-            >
-              New
-            </b-button>
-          </div>
-        </div>
+      <div class="buttons mt-5">
+        <b-button
+          @click="storeMany"
+          :loading="isLoading"
+          type="is-primary"
+          expanded
+        >
+          Start Importing
+        </b-button>
       </div>
-      <b-pagination
-        v-model="current"
-        :total="meta.total"
-        :per-page="meta.per_page"
-        order="is-centered"
-        aria-next-label="Next page"
-        aria-previous-label="Previous page"
-        aria-page-label="Page"
-        aria-current-label="Current page">
-      </b-pagination>
-    </section>
-  </template>
-  
-  <script>
-  import { mapActions, mapState } from 'vuex';
-  
-  export default {
-    name: '{{ table.names.pascalCase }}List',
-  
-    data() {
-      return {
-        current: 1,
-        editMode: {
-          {{ table.names.camelCase }}Id: null,
-        },
-      };
-    },
-  
-    created() {
-      this.index();
-    },
-  
-    methods: {
-      ...mapActions('{{ table.names.camelCase }}', {
-        indexAction: 'index',
-        storeAction: 'store',
-        destroyAction: 'destroy',
-      }),
-  
-      index() {
-        this.indexAction({
-          size: 1000,
-          page: this.current,
+    </div>
+  </section>
+</template>
+
+<script>
+import { mapState, mapActions } from "vuex";
+import ValidationException from "../exceptions/ValidationException";
+
+const { parse } = require("csv-parse/lib/sync");
+
+export default {
+  name: "{{ table.names.pascalCase }}ImportCSV",
+
+  data() {
+    return {
+      activeScreen: "upload",
+      parseLoading: false,
+      file: null,
+      form: {
+        {{ table.names.camelCasePlural }}: [],
+      },
+    };
+  },
+
+  methods: {
+    ...mapActions("{{ table.names.camelCase }}", {
+      storeManyAction: "storeMany",
+    }),
+
+    async preview() {
+      try {
+        if (!this.file) {
+          return this.$buefy.toast.open({
+            message: "Select a file",
+            type: "is-success",
+            position: "is-bottom-right",
+          });
+        }
+        this.parseLoading = true;
+        const text = await this.file.text();
+        const newItems = parse(text, {
+          columns: true,
+          skip_empty_lines: true,
         });
-      },
-  
-      edit({{ table.names.camelCase }}Id) {
-        this.$router.push(`/{{ table.names.camelCase }}/${ {{ table.names.camelCase }}Id}/edit`);
-      },
-  
-      destroy(id) {
-        this.$buefy.dialog.confirm({
-          title: 'Deleting {{ table.names.pascalCase }}',
-          message: 'Are you sure you want to <b>delete</b> this {{ table.names.camelCase }}? Only unused {{ table.names.camelCase }} can be deleted',
-          confirmText: 'Delete {{ table.names.pascalCase }}',
-          type: 'is-danger',
-          hasIcon: true,
-          onConfirm: async () => {
-            try {
-              await this.destroyAction(id);
-              this.$buefy.toast.open({
-                message: 'Deleted',
-                type: 'is-success',
-                position: 'is-bottom-right',
-              });
-            } catch(e) {
-              console.error(e);
-              this.$buefy.toast.open({
-                message: 'Unable to delete',
-                type: 'is-danger',
-                position: 'is-bottom-right',
-              });
-            }
-          },
+        newItems.forEach((item) => {
+          this.form.items.push({
+            @each(column in table.columns)
+              {{ column.names.pascalCase }}: item.{{ column.names.pascalCase }},
+            @endeach
+          });
         });
-      },
+        this.activeScreen = "preview";
+        this.parseLoading = false;
+        return this.$buefy.toast.open({
+          message: "File Selected",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      } catch (e) {
+        this.parseLoading = false;
+        console.error(e);
+        this.$buefy.toast.open({
+          message: "Unable to import",
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
     },
-  
-    watch: {
-      async current() {
-        return this.index();
-      },
+
+    async storeMany() {
+      try {
+        await this.storeManyAction(this.form.items);
+        this.$router.push("/{{ table.names.camelCase }}");
+        this.$buefy.toast.open({
+          message: "{{ capitalCase(colum.names.pascalCasePlural) }} Imported Successfully",
+          type: "is-success",
+          position: "is-bottom-right",
+        });
+      } catch (e) {
+        let message = "Unable to import {{ noCase(colum.names.snakeCasePlural) }}";
+        if (e instanceof ValidationException) {
+          this.errors = e.errors;
+          message = "Validation failed";
+        }
+        this.$buefy.toast.open({
+          message,
+          type: "is-danger",
+          position: "is-bottom-right",
+        });
+      }
     },
-  
-    computed: {
-      ...mapState('auth', {
-        user: (state) => state.user,
-      }),
-      ...mapState('{{ table.names.camelCase }}', {
-        items: (state) => state.items,
-        meta: (state) => state.meta,
-        loading: (state) => state.loading,
-      }),
-      isLoading() {
-        return this.loading.index || this.loading.store || this.loading.update;
-      },
-    },
-  };
-  </script>
-  
+  },
+
+  ...mapState("auth", {
+    user: (state) => state.user,
+  }),
+  ...mapState("{{ colum.names.camelCase }}", {
+    items: (state) => state.items,
+    meta: (state) => state.meta,
+    loading: (state) => state.loading,
+  }),
+  isLoading() {
+    return (
+      this.loading.index ||
+      this.loading.store ||
+      this.loading.update ||
+      this.loading.storeMany
+    );
+  },
+};
+</script>

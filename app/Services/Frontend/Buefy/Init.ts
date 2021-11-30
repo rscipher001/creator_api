@@ -78,6 +78,14 @@ export default class SPAGenerator {
     })
   }
 
+  protected async installCsvParse() {
+    if (this.input.tables.find((table) => table.operations.storeMany)) {
+      await HelperService.execute('npm', ['install', 'csv-parse'], {
+        cwd: this.input.spaPath,
+      })
+    }
+  }
+
   /**
    * Adds buefy imports
    */
@@ -140,6 +148,7 @@ export default class SPAGenerator {
     })
     await this.replacePublicIndexHtml()
     await this.installBuefy()
+    await this.installCsvParse()
   }
 
   // Replace public/index.html with file that contains material design icons
