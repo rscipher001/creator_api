@@ -30,11 +30,24 @@ export default {
 
   state: () => ({
     loading: {
-      index: false,
-      store: false,
-      update: false,
-      destroy: false,
-      storeMany: false,
+      @if(table.operations.index)
+        index: false,
+      @endif
+      @if(table.operations.store)
+        store: false,
+      @endif
+      @if(table.operations.storeMany)
+        storeMany: false,
+      @endif
+      @if(table.operations.update)
+        update: false,
+      @endif
+      @if(table.operations.destroy)
+        destroy: false,
+      @endif
+      @if(table.operations.destroyMany)
+        destroyMany: false,
+      @endif
     },
     meta: {},
     items: [],
@@ -48,155 +61,197 @@ export default {
         commit("setLoading", { key: key, value: false });
       }
     },
-
-    async index({ commit }, filter) {
-      commit('setLoading', { key: 'index', value: true });
-      try {
-        const { data: items, meta } = await HttpService.authGet(`/${resource}`, filter);
-        commit('load', {
-          @if(containsUnderscoreColumn)
-            items: items.map((item) => toCamelCaseAttributes(item)),
-          @else
-            items,
-          @endif
-          @if(!input.camelCaseStrategy)
-            meta: HelperService.camelizeKeys(meta),
-          @else
-            meta,
-          @endif
-        });
-        commit('setLoading', { key: 'index', value: false });
-      } catch (e) {
-        commit('setLoading', { key: 'index', value: false });
-        console.error(e);
-      }
-    },
-
-    async store({ commit }, input) {
-      commit('setLoading', { key: 'store', value: true });
-      try {
-        const item = await HttpService.authPost(
-          `/${resource}`,
-          @if(containsUnderscoreColumn)
-            fromCamelCaseAttributes(input)
-          @else
-            input
-          @endif
-        );
-        commit('setLoading', { key: 'store', value: false });
-        commit(
-          'add',
-          @if(containsUnderscoreColumn)
-            toCamelCaseAttributes(item)
-          @else
-            item
-          @endif
-        );
-      } catch (e) {
-        commit('setLoading', { key: 'store', value: false });
-        if (e.response && e.response.status === 422) {
-          throw new ValidationException(e.message, e.response.data.errors);
-        }
-        throw e;
-      }
-    },
-
-    async storeMany({ commit }, inputs) {
-      commit('setLoading', { key: 'storeMany', value: true });
-      try {
-        const items = await HttpService.authPost(
-          `/${resource}/store/many`, {
-          @if(containsUnderscoreColumn)
-            items: inputs.map(i => fromCamelCaseAttributes(i))
-          @else
-            items: inputs
-          @endif
-        });
-        commit('setLoading', { key: 'storeMany', value: false });
-        commit(
-          'addMany',
-          @if(containsUnderscoreColumn)
-            items.map((item) => toCamelCaseAttributes(item))
-          @else
-            items
-          @endif
-        );
-      } catch (e) {
-        commit('setLoading', { key: 'storeMany', value: false });
-        if (e.response && e.response.status === 422) {
-          throw new ValidationException(e.message, e.response.data.errors);
-        }
-        throw e;
-      }
-    },
-
-    async update({ commit }, { id, input }) {
-      commit('setLoading', { key: 'update', value: true });
-      try {
-        const item = await HttpService.authPut(
-          `/${resource}/${id}`,
-          @if(containsUnderscoreColumn)
-            fromCamelCaseAttributes(input)
-          @else
-            input
-          @endif
-        );
-        commit(
-          'replace', {
-            id,
+    @if(table.operations.index)
+      async index({ commit }, filter) {
+        commit('setLoading', { key: 'index', value: true });
+        try {
+          const { data: items, meta } = await HttpService.authGet(`/${resource}`, filter);
+          commit('load', {
             @if(containsUnderscoreColumn)
-              item: toCamelCaseAttributes(item)
+              items: items.map((item) => toCamelCaseAttributes(item)),
+            @else
+              items,
+            @endif
+            @if(!input.camelCaseStrategy)
+              meta: HelperService.camelizeKeys(meta),
+            @else
+              meta,
+            @endif
+          });
+          commit('setLoading', { key: 'index', value: false });
+        } catch (e) {
+          commit('setLoading', { key: 'index', value: false });
+          console.error(e);
+        }
+      },
+    @endif
+
+    @if(table.operations.store)
+      async store({ commit }, input) {
+        commit('setLoading', { key: 'store', value: true });
+        try {
+          const item = await HttpService.authPost(
+            `/${resource}`,
+            @if(containsUnderscoreColumn)
+              fromCamelCaseAttributes(input)
+            @else
+              input
+            @endif
+          );
+          commit('setLoading', { key: 'store', value: false });
+          commit(
+            'add',
+            @if(containsUnderscoreColumn)
+              toCamelCaseAttributes(item)
             @else
               item
             @endif
+          );
+        } catch (e) {
+          commit('setLoading', { key: 'store', value: false });
+          if (e.response && e.response.status === 422) {
+            throw new ValidationException(e.message, e.response.data.errors);
           }
-        );
-        commit('setLoading', { key: 'update', value: false });
-      } catch (e) {
-        commit('setLoading', { key: 'update', value: false });
-        if (e.response && e.response.status === 422) {
-          throw new ValidationException(e.message, e.response.data.errors);
+          throw e;
         }
-        throw e;
-      }
-    },
+      },
+    @endif
 
-    async destroy({ commit }, id) {
-      commit('setLoading', { key: 'destroy', value: true });
-      try {
-        await HttpService.authDelete(`/${resource}/${id}`);
-        commit('remove', id);
-        commit('setLoading', { key: 'destroy', value: false });
-      } catch (e) {
-        commit('setLoading', { key: 'destroy', value: false });
-        throw e;
-      }
-    },
+    @if(table.operations.storeMany)
+      async storeMany({ commit }, inputs) {
+        commit('setLoading', { key: 'storeMany', value: true });
+        try {
+          const items = await HttpService.authPost(
+            `/${resource}/store/many`, {
+            @if(containsUnderscoreColumn)
+              items: inputs.map(i => fromCamelCaseAttributes(i))
+            @else
+              items: inputs
+            @endif
+          });
+          commit('setLoading', { key: 'storeMany', value: false });
+          commit(
+            'addMany',
+            @if(containsUnderscoreColumn)
+              items.map((item) => toCamelCaseAttributes(item))
+            @else
+              items
+            @endif
+          );
+        } catch (e) {
+          commit('setLoading', { key: 'storeMany', value: false });
+          if (e.response && e.response.status === 422) {
+            throw new ValidationException(e.message, e.response.data.errors);
+          }
+          throw e;
+        }
+      },
+    @endif
+
+    @if(table.operations.update)
+      async update({ commit }, { id, input }) {
+        commit('setLoading', { key: 'update', value: true });
+        try {
+          const item = await HttpService.authPut(
+            `/${resource}/${id}`,
+            @if(containsUnderscoreColumn)
+              fromCamelCaseAttributes(input)
+            @else
+              input
+            @endif
+          );
+          commit(
+            'replace', {
+              id,
+              @if(containsUnderscoreColumn)
+                item: toCamelCaseAttributes(item)
+              @else
+                item
+              @endif
+            }
+          );
+          commit('setLoading', { key: 'update', value: false });
+        } catch (e) {
+          commit('setLoading', { key: 'update', value: false });
+          if (e.response && e.response.status === 422) {
+            throw new ValidationException(e.message, e.response.data.errors);
+          }
+          throw e;
+        }
+      },
+    @endif
+
+    @if(table.operations.destroy)
+      async destroy({ commit }, id) {
+        commit('setLoading', { key: 'destroy', value: true });
+        try {
+          await HttpService.authDelete(`/${resource}/${id}`);
+          commit('remove', id);
+          commit('setLoading', { key: 'destroy', value: false });
+        } catch (e) {
+          commit('setLoading', { key: 'destroy', value: false });
+          throw e;
+        }
+      },
+    @endif
+
+    @if(table.operations.destroyMany)
+      async destroyMany({ commit }, ids) {
+        commit("setLoading", { key: "destroyMany", value: true });
+        try {
+          await HttpService.authPost(`/${resource}/destroy/many`, { ids });
+          commit("removeMany", ids);
+          commit("setLoading", { key: "destroyMany", value: false });
+        } catch (e) {
+          commit("setLoading", { key: "destroyMany", value: false });
+          throw e;
+        }
+      },
+    @endif
   },
 
   mutations: {
-    load(state, { items, meta }) {
-      state.meta = meta;
-      state.items = items;
-    },
+    @if(table.operations.index)
+      load(state, { items, meta }) {
+        state.meta = meta;
+        state.items = items;
+      },
+    @endsif
 
-    add(state, item) {
-      state.items.push(item);
-    },
+    @if(table.operations.store)
+      add(state, item) {
+        state.items.push(item);
+      },
+    @endif
 
-    addMany(state, items) {
-      state.items.push(...items);
-    },
+    @if(table.operations.storeMany)
+      addMany(state, items) {
+        state.items.push(...items);
+      },
+    @endif
 
-    remove(state, id) {
-      const index = state.items.findIndex((t) => t.id === id);
-      if (index !== -1) state.items.splice(index, 1);
-    },
+    @if(table.operations.destroy)
+      remove(state, id) {
+        const index = state.items.findIndex((t) => t.id === id);
+        if (index !== -1) state.items.splice(index, 1);
+      },
+    @endif
 
-    replace(state, { id, item }) {
-      const index = state.items.findIndex((t) => t.id === id);
-      if (index !== -1) state.items.splice(index, 1, item);
-    },
+    @if(table.operations.destroyMany)
+      removeMany(state, ids) {
+        ids.map((id) => {
+          const index = state.items.findIndex((t) => t.id === id);
+          if (index !== -1) state.items.splice(index, 1);
+        });
+      },
+    @endif
+
+    @if(table.operations.update)
+      replace(state, { id, item }) {
+        const index = state.items.findIndex((t) => t.id === id);
+        if (index !== -1) state.items.splice(index, 1, item);
+      },
+    @endif
 
     setLoading(state, { key, value }) {
       state.loading[key] = value;

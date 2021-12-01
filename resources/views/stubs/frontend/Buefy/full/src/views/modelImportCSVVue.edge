@@ -37,7 +37,7 @@
         click upload button to start importing.
       </h1>
       <b-table v-if="form.items.length" :data="form.items">
-        @each(column in table.columns)
+        @each(column in table.columns.filter(column => column.type !== 'File'))
           <b-table-column field="{{
             column.names.camelCase
           }}" label="{{
@@ -114,7 +114,7 @@ export default {
         });
         newItems.forEach((item) => {
           const itemInput = {};
-          @each(column in table.columns)
+          @each(column in table.columns.filter(c => c.type !== 'File'))~
             @if(column.type === 'Integer')
               @if(column.meta.required)
                 if(item.{{ column.names.camelCase }})
