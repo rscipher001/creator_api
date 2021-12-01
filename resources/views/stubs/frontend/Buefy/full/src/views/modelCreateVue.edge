@@ -5,7 +5,7 @@
 <template>
   <section class="container mt-5">
     <div class="level">
-      <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{ table.names.pascalCase }}</div>
+      <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{ capitalCase(table.names.pascalCase) }}</div>
       <div class="level-right"><b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-light">Back</b-button></div>
     </div>
     <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
@@ -191,7 +191,7 @@
 
       <div class="is-flex is-justify-content-flex-end">
         <b-button type="is-primary" native-type="submit" :loading="isLoading">
-          @{{ editMode.enabled ? 'Update' : 'Create' }} {{ table.names.pascalCase }}
+          @{{ editMode.enabled ? 'Update' : 'Create' }} {{ capitalCase(table.names.pascalCase) }}
         </b-button>
       </div>
     </form>
@@ -205,12 +205,12 @@ import ValidationException from '../exceptions/ValidationException';
 export default {
   name: '{{ table.names.pascalCase }}Create',
   created() {
-    if (this.$route.params.{{ table.names.camelCase }}Id) {
-      const {{ table.names.camelCase }}Id = parseInt(this.$route.params.{{ table.names.camelCase }}Id, 10);
+    if (this.$route.params.itemId) {
+      const itemId = parseInt(this.$route.params.itemId, 10);
       this.editMode.enabled = true;
-      this.editMode.id = {{ table.names.camelCase }}Id;
+      this.editMode.id = itemId;
       @if(table.columns.find(column => column.type !== 'File'))
-        const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === {{ table.names.camelCase }}Id);
+        const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === itemId);
         @each(column in exposedColumns.filter(c =>!c.secret && c.type !== 'File'))~
           @if(column.type === 'Date')
             this.form.{{ column.names.camelCase }} = new Date({{ table.names.camelCase }}.{{ column.names.camelCase }});
@@ -229,7 +229,7 @@ export default {
     return {
       editMode: {
         enabled: false,
-        {{ table.names.camelCase }}Id: null,
+        itemId: null,
       },
       errors: {},
       form: {
@@ -266,12 +266,12 @@ export default {
         await this.storeAction(payload);
         this.$router.push('/{{ table.names.camelCase }}');
         this.$buefy.toast.open({
-          message: '{{ table.names.pascalCase }} created',
+          message: '{{ capitalCase(table.names.pascalCase) }} created',
           position: 'is-bottom-right',
           type: 'is-success',
         });
       } catch (e) {
-        let message = 'Unable to create {{ table.names.pascalCase }}';
+        let message = 'Unable to create {{ noCase(table.names.pascalCase) }}';
         if (e instanceof ValidationException) {
           this.errors = e.errors;
           message = 'Validation failed';
@@ -306,12 +306,12 @@ export default {
         });
         this.$router.push('/{{ table.names.camelCase }}');
         this.$buefy.toast.open({
-          message: '{{ table.names.pascalCase }} updated',
+          message: '{{ sentenceCase(table.names.pascalCase) }} updated',
           position: 'is-bottom-right',
           type: 'is-success'
         });
       } catch (e) {
-        let message = 'Unable to update {{ table.names.pascalCase }}';
+        let message = 'Unable to update {{ noCase(table.names.pascalCase) }}';
         if (e instanceof ValidationException) {
           this.errors = e.errors;
           message = 'Validation failed';

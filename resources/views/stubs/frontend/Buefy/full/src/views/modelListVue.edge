@@ -2,7 +2,7 @@
   <section class="container mt-5">
     <b-loading is-full-page v-model="isLoading"></b-loading>
     <div class="level">
-      <div class="level-left is-size-3">@{{ items.length }} {{ table.names.pascalCasePlural }}</div>
+      <div class="level-left is-size-3">@{{ items.length }} {{ capitalCase(table.names.pascalCasePlural) }}</div>
       @if(table.operations.storeMany || table.operations.store)
       <div class="level-right">
         @if(table.operations.storeMany)
@@ -61,8 +61,8 @@
     <div class="hero is-medium" v-else>
       <div class="hero-body container is-flex has-text-centered">
         <div class="is-flex-direction-colomn">
-          <h1 class="is-size-2">Create a {{ table.names.pascalCase }}</h1>
-          <p class="is-size-4">Click new to create your first {{ table.names.camelCase }}</p>
+          <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
+          <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
           <b-button
             type="is-primary block mt-5"
             tag="router-link"
@@ -99,7 +99,7 @@ export default {
     return {
       current: 1,
       editMode: {
-        {{ table.names.camelCase }}Id: null,
+        itemId: null,
       },
     };
   },
@@ -122,15 +122,15 @@ export default {
       });
     },
 
-    edit({{ table.names.camelCase }}Id) {
-      this.$router.push(`/{{ table.names.camelCase }}/${ {{ table.names.camelCase }}Id}/edit`);
+    edit(itemId) {
+      this.$router.push(`/{{ table.names.camelCase }}/${ itemId}/edit`);
     },
 
     destroy(id) {
       this.$buefy.dialog.confirm({
-        title: 'Deleting {{ table.names.pascalCase }}',
+        title: 'Deleting {{ capitalCase(table.names.pascalCasePlural) }}',
         message: 'Are you sure you want to <b>delete</b> this {{ table.names.camelCase }}? Only unused {{ table.names.camelCase }} can be deleted',
-        confirmText: 'Delete {{ table.names.pascalCase }}',
+        confirmText: 'Delete {{ capitalCase(table.names.pascalCasePlural) }}',
         type: 'is-danger',
         hasIcon: true,
         onConfirm: async () => {

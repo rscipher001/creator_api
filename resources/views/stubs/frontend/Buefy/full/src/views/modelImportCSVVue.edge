@@ -113,11 +113,23 @@ export default {
           skip_empty_lines: true,
         });
         newItems.forEach((item) => {
-          this.form.items.push({
-            @each(column in table.columns)
-              {{ column.names.camelCase }}: item.{{ column.names.camelCase }},
-            @endeach
-          });
+          const itemInput = {};
+          @each(column in table.columns)
+            @if(column.type === 'Integer')
+              @if(column.meta.required)
+                if(item.{{ column.names.camelCase }})
+              @endif
+              itemInput.{{ column.names.camelCase }} = parseInt(item.{{ column.names.camelCase }});
+            @elseif(column.type === 'Decimal')
+              @if(column.meta.required)
+                if(item.{{ column.names.camelCase }})
+              @endif
+              itemInput.{{ column.names.camelCase }} = parseFloat(item.{{ column.names.camelCase }});
+            @else
+              itemInput.{{ column.names.camelCase }} = item.{{ column.names.camelCase }};
+            @endif
+          @endeach
+          this.form.items.push(itemInput);
         });
         this.activeScreen = "preview";
         this.parseLoading = false;
@@ -139,7 +151,7 @@ export default {
 
     async storeMany() {
       try {
-        await this.storeManyAction(this.form.items);
+        await this.storeManyAction(JSON.parse(JSON.stringify(this.form.items)));
         this.$router.push("/{{ table.names.camelCase }}");
         this.$buefy.toast.open({
           message: "{{ capitalCase(table.names.pascalCasePlural) }} Imported Successfully",
@@ -161,7 +173,7 @@ export default {
     },
   },
 
-  watch: {
+  computed: {
     ...mapState("auth", {
       user: (state) => state.user,
     }),
