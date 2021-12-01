@@ -185,37 +185,36 @@ export default {
 
     @if(table.operations.destroyMany)
       destroyMany() {
-          this.$buefy.dialog.confirm({
-            title: 'Deleting {{ capitalCase(table.names.pascalCasePlural) }}',
-            message:
-              "Are you sure you want to <b>delete</b> these {{ noCase(table.names.pascalCasePlural) }}? Only unused {{ noCase(table.names.pascalCase) }} can be deleted",
-            confirmText: 'Delete {{ capitalCase(table.names.pascalCasePlural) }}',
-            type: "is-danger",
-            hasIcon: true,
-            onConfirm: async () => {
-              try {
-                await this.destroyManyAction(this.selectItems.map((i) => i.id));
-                this.$buefy.toast.open({
-                  message: "Deleted",
-                  type: "is-success",
-                  position: "is-bottom-right",
-                });
-                this.currentPageNo = 1;
-                this.selectItems = [];
-                await this.index();
-              } catch (e) {
-                console.error(e);
-                this.$buefy.toast.open({
-                  message: "Unable to delete",
-                  type: "is-danger",
-                  position: "is-bottom-right",
-                });
-              }
-            },
-          });
-        },
-      @endif
-    },
+        this.$buefy.dialog.confirm({
+          title: 'Deleting {{ capitalCase(table.names.pascalCasePlural) }}',
+          message:
+            "Are you sure you want to <b>delete</b> these {{ noCase(table.names.pascalCasePlural) }}? Only unused {{ noCase(table.names.pascalCase) }} can be deleted",
+          confirmText: 'Delete {{ capitalCase(table.names.pascalCasePlural) }}',
+          type: "is-danger",
+          hasIcon: true,
+          onConfirm: async () => {
+            try {
+              await this.destroyManyAction(this.selectItems.map((i) => i.id));
+              this.$buefy.toast.open({
+                message: "Deleted",
+                type: "is-success",
+                position: "is-bottom-right",
+              });
+              this.currentPageNo = 1;
+              this.selectItems = [];
+              await this.index();
+            } catch (e) {
+              console.error(e);
+              this.$buefy.toast.open({
+                message: "Unable to delete",
+                type: "is-danger",
+                position: "is-bottom-right",
+              });
+            }
+          },
+        });
+      },
+    @endif
   },
 
   watch: {
