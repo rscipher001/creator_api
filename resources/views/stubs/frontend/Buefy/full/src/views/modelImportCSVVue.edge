@@ -36,7 +36,7 @@
         Review the following @{{ form.items.length }} items carefully and
         click upload button to start importing.
       </h1>
-      <b-table v-if="form.{{ table.names.camelCase }}.length" :data="form.{{ table.names.camelCase }}">
+      <b-table v-if="form.items.length" :data="form.items">
         @each(column in table.columns)
           <b-table-column field="{{
             column.names.camelCase
@@ -61,7 +61,7 @@
       <div class="buttons mt-5">
         <b-button
           @click="storeMany"
-          :loading="isLoading"
+          :loading="loading.storeMany"
           type="is-primary"
           expanded
         >
@@ -87,7 +87,7 @@ export default {
       parseLoading: false,
       file: null,
       form: {
-        {{ table.names.camelCasePlural }}: [],
+        items: [],
       },
     };
   },
@@ -115,7 +115,7 @@ export default {
         newItems.forEach((item) => {
           this.form.items.push({
             @each(column in table.columns)
-              {{ column.names.pascalCase }}: item.{{ column.names.pascalCase }},
+              {{ column.names.camelCase }}: item.{{ column.names.camelCase }},
             @endeach
           });
         });
@@ -161,21 +161,15 @@ export default {
     },
   },
 
-  ...mapState("auth", {
-    user: (state) => state.user,
-  }),
-  ...mapState("{{ table.names.camelCase }}", {
-    items: (state) => state.items,
-    meta: (state) => state.meta,
-    loading: (state) => state.loading,
-  }),
-  isLoading() {
-    return (
-      this.loading.index ||
-      this.loading.store ||
-      this.loading.update ||
-      this.loading.storeMany
-    );
+  watch: {
+    ...mapState("auth", {
+      user: (state) => state.user,
+    }),
+    ...mapState("{{ table.names.camelCase }}", {
+      items: (state) => state.items,
+      meta: (state) => state.meta,
+      loading: (state) => state.loading,
+    }),
   },
 };
 </script>

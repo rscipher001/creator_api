@@ -415,7 +415,7 @@ class BackendProjectService {
         },
       ],
     }
-    this.input.tables.push(verificationTokenTable)
+    this.input.tables.unshift(verificationTokenTable)
   }
 
   /**
