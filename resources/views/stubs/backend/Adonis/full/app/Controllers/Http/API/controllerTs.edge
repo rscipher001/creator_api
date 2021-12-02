@@ -132,6 +132,16 @@ export default class {{ table.names.pascalCasePlural }}Controller {
   @endif
 
   @if(table.operations.storeMany)
+    public async csvTemplate({ response }: HttpContextContract) {
+      const content = [
+      @each (table.columns.filter((c) => c.type !== 'File'))
+        {{ c.names.camelCase }},
+      @endeach
+      ].join()
+      response.header("Content-Disposition", 'attachment; filename="{{ table.names.pascalCase }}Template.csv"')
+      return response.send(content)
+    }
+
     public async storeMany({ request, {{ belongsToAuth ? 'auth,' : '' }} }: HttpContextContract) {
       const inputs: { [key: string]: any } = await request.validate(StoreMany{{ table.names.pascalCase }}Validator)
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {

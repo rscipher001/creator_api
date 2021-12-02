@@ -151,22 +151,41 @@ export default class CRUDGenerator {
   }
 
   // Add routes
-  protected async addRoutes(i: number) {
-    const table = this.input.tables[i]
-    if (!table.generateController) return
-    if (this.input.types.includes(ProjectType.API)) {
-      const filePath = `${this.input.path}/start/routes.ts`
-      let content = await HelperService.readFile(filePath)
-      const part = await View.render(
-        `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/routesTs`,
-        {
-          table,
-          type: ProjectType.API,
-        }
-      )
-      content += part
-      await HelperService.writeFile(filePath, content)
+  protected async addRoutes() {
+    const filePath = `${this.input.path}/start/routes.ts`
+    let content = await HelperService.readFile(filePath)
+    let apiAuthContent = ''
+    let apiPublicContent = ''
+    for (let i = 0; i < this.input.tables.length; i += 1) {
+      const table = this.input.tables[i]
+      if (!table.generateRoute) continue
+      if (this.input.types.includes(ProjectType.API)) {
+        apiAuthContent += await View.render(
+          `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/crudRoutesTs`,
+          {
+            table,
+            type: ProjectType.API,
+          }
+        )
+      }
+      if (table.operations.storeMany) {
+        apiPublicContent += await View.render(
+          `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/csvRoutesTs`,
+          {
+            table,
+            type: ProjectType.API,
+          }
+        )
+      }
     }
+    content += await View.render(
+      `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/routesTs`,
+      {
+        apiAuthContent,
+        apiPublicContent,
+      }
+    )
+    await HelperService.writeFile(filePath, content)
   }
 
   /**
@@ -189,17 +208,19 @@ export default class CRUDGenerator {
       await this.createModel(i)
       await this.createValidators(i)
       await this.createController(i)
-      await this.addRoutes(i)
+      // await this.addRoutes(i)
       await HelperService.commit(
         `CRUD Added for ${this.input.tables[i].names.pascalCase}`,
         this.input.path
       )
     }
-
+    await this.addRoutes()
+    await HelperService.commit(`Routes Added for tables`, this.input.path)
     await this.createLazyMigration(this.input.auth.table)
     for (let i = 0; i < this.input.tables.length; i += 1) {
       await this.createLazyMigration(this.input.tables[i])
     }
+    await HelperService.commit(`Circular migrations added`, this.input.path)
   }
 
   public async init() {
