@@ -11,7 +11,7 @@
     </div>
     <div v-if="activeScreen === 'upload'">
       <p class="mb-5 has-text-centered">
-        <a :href="''" target="_blank">Download sample CSV file</a>
+        <a :href="csvUrl">Download sample CSV file</a>
         and create all {{ pluralize(noCase(table.names.camelCase)) }} list in Excel or any other spreadsheet software and upload it
       </p>
 
@@ -75,6 +75,7 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import ValidationException from "../exceptions/ValidationException";
+import { API_URL } from "../constants";
 
 const { parse } = require("csv-parse/lib/sync");
 
@@ -83,6 +84,7 @@ export default {
 
   data() {
     return {
+      csvUrl: `${API_URL}/{{ table.names.camelCase }}/csvTemplate.csv`
       activeScreen: "upload",
       parseLoading: false,
       file: null,
