@@ -24,8 +24,19 @@ export default class ProjectsController {
       .first()
   }
 
-  public async store({ request, auth }: HttpContextContract) {
+  public async store({ request, response, auth }: HttpContextContract) {
     const input = await request.validate(CreateProjectValidator)
+    // Pre checks to ensure there is no contracitory settings
+    if (input.auth.passwordReset && !input.mailEnabled) {
+      return response.badRequest({
+        error: 'Password reset requires mailing feature',
+      })
+    }
+    if (input.tenantSettings.tenant && !input.tenantSettings.table) {
+      return response.badRequest({
+        error: 'Tenant table should be selected when tenant option is enabled',
+      })
+    }
     const project = await Project.create({
       status: 'queued',
       name: input.name,

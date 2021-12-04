@@ -1,4 +1,4 @@
-@set('fileColumns', table.columns.filter(c => c.type === 'File'))
+@set('b-uploadColumns', table.columns.filter(c => c.type === 'File'))
 @set('fileColumnsLastIndex', fileColumns.length - 1)
 @set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
 @set('nonAuthBelongsToRelations', table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth'))
@@ -156,6 +156,14 @@
             </span>
           </a>
         </b-upload>
+        <b-button
+          class="is-fullwidth"
+          v-if="form.{{ column.names.camelCase }}"
+          type="is-light"
+          @click="form.{{ column.names.camelCase }} = null"
+        >
+          Clear file
+        </b-button>
       </b-field>
       @endif
       @endeach

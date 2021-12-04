@@ -88,17 +88,21 @@ export default class CreateProjectValidator {
     types: schema.array().members(schema.enum([ProjectType.API, ProjectType.SSR] as const)),
     camelCaseStrategy: schema.boolean(),
     mailEnabled: schema.boolean(),
-    mailers: schema
-      .array()
+    mailers: schema.array
+      .optional([rules.requiredWhen('mailEnabled', '=', true)])
       .members(
         schema.enum.optional([Mailer.SMTP, Mailer.SES, Mailer.Mailgun, Mailer.SparkPost] as const)
       ),
-    defaultMailer: schema.string.optional(),
+    defaultMailer: schema.string.optional({ trim: true }, [
+      rules.requiredWhen('mailEnabled', '=', true),
+    ]),
     storageEnabled: schema.boolean(),
-    storageDrivers: schema
-      .array()
+    storageDrivers: schema.array
+      .optional([rules.requiredWhen('storageEnabled', '=', true)])
       .members(schema.enum.optional([Storage.GCS, Storage.Local, Storage.S3] as const)),
-    defaultStorageDriver: schema.string.optional(),
+    defaultStorageDriver: schema.string.optional({ trim: true }, [
+      rules.requiredWhen('storageEnabled', '=', true),
+    ]),
     tech: schema.object().members({
       backend: schema.enum([Backend.Adonis] as const),
       frontend: schema.enum([Frontend.Buefy] as const),
@@ -133,11 +137,18 @@ export default class CreateProjectValidator {
     }),
     rbac: schema.object().members({
       enabled: schema.boolean(),
-      multipleRoles: schema.boolean(),
-      canAdminCreateRoles: schema.boolean(),
-      roles: schema.array().members(schema.string({ trim: true })),
-      permissions: schema.array().members(schema.string({ trim: true })),
-      matrix: schema.array().members(
+      multipleRoles: schema.boolean.optional([rules.requiredWhen('rbac.enabled', '=', true)]),
+      canAdminCreateRoles: schema.boolean.optional([rules.requiredWhen('rbac.enabled', '=', true)]),
+      defaultRole: schema.string.optional({ trim: true }, [
+        rules.requiredWhen('rbac.enabled', '=', true),
+      ]),
+      roles: schema.array
+        .optional([rules.requiredWhen('rbac.enabled', '=', true)])
+        .members(schema.string({ trim: true })),
+      permissions: schema.array
+        .optional([rules.requiredWhen('rbac.enabled', '=', true)])
+        .members(schema.string({ trim: true })),
+      matrix: schema.array.optional([rules.requiredWhen('rbac.enabled', '=', true)]).members(
         schema.object().members({
           role: schema.string({ trim: true }),
           permissions: schema.array().members(schema.string({ trim: true })),

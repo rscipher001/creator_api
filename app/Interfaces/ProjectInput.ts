@@ -113,6 +113,7 @@ export interface RBAC {
   enabled: boolean
   multipleRoles: boolean
   canAdminCreateRoles: boolean
+  defaultRole: string
   roles: String[]
   permissions: String[]
   matrix: RBACMatrix[]
