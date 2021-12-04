@@ -18,19 +18,21 @@
             >
               Profile
             </b-button>
-            <b-button
-              tag="router-link"
-              to="/setting/account"
-              :active="currentRouteName === 'SettingAccount'"
-              :type="
-                currentRouteName === 'SettingAccount'
-                  ? 'is-primary'
-                  : 'is-light'
-              "
-              icon-left="email"
-            >
-              Account
-            </b-button>
+            @if(input.mailEnabled)
+              <b-button
+                tag="router-link"
+                to="/setting/account"
+                :active="currentRouteName === 'SettingAccount'"
+                :type="
+                  currentRouteName === 'SettingAccount'
+                    ? 'is-primary'
+                    : 'is-light'
+                "
+                icon-left="email"
+              >
+                Account
+              </b-button>
+            @endif
             <b-button
               tag="router-link"
               to="/setting/security"

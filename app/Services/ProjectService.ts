@@ -18,7 +18,7 @@ import AdonisStorageDriverGenerator from 'App/Services/Backend/Adonis/StorageDri
 import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
 import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
-import { RelationType } from 'App/Interfaces/Enums'
+import { RelationType, RequestMethod } from 'App/Interfaces/Enums'
 
 class BackendProjectService {
   private input: any
@@ -37,7 +37,7 @@ class BackendProjectService {
       ? table.names.camelCasePlural
       : table.names.snakeCasePlural
     table.columns = table.columns.map((column) => {
-      column.name = string.pascalCase(column.name)
+      column.name = HelperService.toSingularPascalCase(column.name)
       column.names = HelperService.generateNames(column.name)
       column.columnName = this.input.camelCaseStrategy
         ? column.names.camelCase
@@ -75,6 +75,15 @@ class BackendProjectService {
       })
     } else {
       table.relations = []
+    }
+    if (Array.isArray(table.customOperations) && table.customOperations.length) {
+      table.customOperations.map((op) => {
+        return {
+          name: string.camelCase(op.name),
+          method: RequestMethod[op.method],
+          singular: op.singular,
+        }
+      })
     }
     return table
   }
@@ -425,9 +434,7 @@ class BackendProjectService {
    * Add private fields to auth table
    */
   protected prepareAuthTable() {
-    this.input.auth.table.columns.splice(
-      0,
-      0,
+    const columns: any = [
       {
         name: 'name',
         type: 'String',
@@ -480,16 +487,20 @@ class BackendProjectService {
           required: false,
         },
       },
-      {
+    ]
+    if (this.input.mailEnabled) {
+      columns.push({
         name: 'emailVerifiedAt',
         type: 'Date',
         meta: {
           expose: false,
           required: false,
         },
-      },
-      {
-        name: 'avatar',
+      })
+    }
+    if (this.input.storageEnabled) {
+      columns.push({
+        name: 'Avatar',
         type: 'File',
         meta: {
           required: false,
@@ -498,8 +509,9 @@ class BackendProjectService {
           maxSize: '1mb',
           extensions: ['jpg', 'png', 'jpeg'],
         },
-      }
-    )
+      })
+    }
+    this.input.auth.table.columns.splice(0, 0, ...columns)
   }
 
   /**
@@ -590,6 +602,7 @@ class BackendProjectService {
         await auth.init()
 
         if (
+          this.projectInput.mailEnabled &&
           this.projectInput.mailers.length &&
           (this.projectInput.auth.passwordChange || this.projectInput.auth.passwordReset)
         ) {
@@ -619,6 +632,11 @@ class BackendProjectService {
           const test = new AdonisTestGenerator(this.projectInput)
           await test.init()
         }
+
+        // Add build step in pre commit hooks
+        // Removed during generation to avoid slow down and
+        // Non fatal build failures
+        await init.ehancePreCommitHook()
       }
 
       // Prepare frontend

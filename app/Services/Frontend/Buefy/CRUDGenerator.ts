@@ -19,6 +19,7 @@ export default class CRUDGenerator {
     const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}Create.vue`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
+      debugger
       const content = await View.render(
         `stubs/frontend/${this.input.tech.frontend}/full/src/views/modelCreateVue`,
         {

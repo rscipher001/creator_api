@@ -297,6 +297,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         input, table
       })
       const condition: { [key: string]: any } = {}
+      @if(belongsToAuth)
+        condition.{{
+          input.camelCaseStrategy ?
+            `${input.auth.table.names.camelCase}Id` :
+            `${input.auth.table.names.snakeCase}_id`
+        }} = auth.user!.id
+      @endif
       @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
         @set('lastIndex', table.routeParentTables.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
@@ -315,6 +322,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @endif
         request }: HttpContextContract) {
         const condition: { [key: string]: any } = {}
+        @if(belongsToAuth)
+          condition.{{
+            input.camelCaseStrategy ?
+              `${input.auth.table.names.camelCase}Id` :
+              `${input.auth.table.names.snakeCase}_id`
+          }} = auth.user!.id
+        @endif
         @if(operation.singular)
           const id = request.param('id')
           condition.id = id

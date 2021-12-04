@@ -67,6 +67,7 @@ export default class PasswordResetGenerator {
    * 4. Migration [Will be handled by CRUD generator]
    */
   protected async start() {
+    if (!this.input.mailEnabled) return
     if (this.input.types.includes(ProjectType.API)) {
       await this.createModel()
       await this.createController()

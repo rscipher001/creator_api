@@ -25,10 +25,12 @@ export default {
       verifyEmail: false,
       updateEmail: false,
       @if(input.storageEnabled)
-      updateAvatar: false,
+        updateAvatar: false,
       @endif
       updateProfile: false,
-      updateAccount: false,
+      @if(input.mailEnabled)
+        updateAccount: false,
+      @endif
       forgotPasswordVerify: false,
       forgotPasswordUpdate: false,
       forgotPasswordRequest: false,
@@ -231,6 +233,7 @@ export default {
       }
     },
 
+    @if(input.mailEnabled)
     /**
      * Get update email request
      */
@@ -274,50 +277,52 @@ export default {
         throw e;
       }
     },
-    @if(input.storageEnabled)
-    async updateAvatar({ commit, dispatch }, input) {
-      commit("setLoading", { key: "updateAvatar", value: true });
-      try {
-        const user = await HttpService.authPost("/me/profile/avatar", input);
-        dispatch(
-          "updateUser",
-          @if(containsUnderscoreColumn)
-            processUser(user)
-          @else
-            user
-          @endif
-        );
-        commit("setLoading", { key: "updateAvatar", value: false });
-      } catch (e) {
-        commit("setLoading", { key: "updateAvatar", value: false });
-        if (e.response && e.response.status === 422) {
-          throw new ValidationException(e.message, e.response.data.errors);
-        }
-        throw e;
-      }
-    },
+    @endif
 
-    async deleteAvatar({ commit, dispatch }, input) {
-      commit("setLoading", { key: "deleteAvatar", value: true });
-      try {
-        const user = await HttpService.authPost("/me/profile/avatar", input);
-        dispatch(
-          "updateUser",
-          @if(containsUnderscoreColumn)
-            processUser(user)
-          @else
-            user
-          @endif
-        );
-        commit("setLoading", { key: "deleteAvatar", value: false });
-      } catch (e) {
-        commit("setLoading", { key: "deleteAvatar", value: false });
-        if (e.response && e.response.status === 422) {
-          throw new ValidationException(e.message, e.response.data.errors);
+    @if(input.storageEnabled)
+      async updateAvatar({ commit, dispatch }, input) {
+        commit("setLoading", { key: "updateAvatar", value: true });
+        try {
+          const user = await HttpService.authPost("/me/profile/avatar", input);
+          dispatch(
+            "updateUser",
+            @if(containsUnderscoreColumn)
+              processUser(user)
+            @else
+              user
+            @endif
+          );
+          commit("setLoading", { key: "updateAvatar", value: false });
+        } catch (e) {
+          commit("setLoading", { key: "updateAvatar", value: false });
+          if (e.response && e.response.status === 422) {
+            throw new ValidationException(e.message, e.response.data.errors);
+          }
+          throw e;
         }
-        throw e;
-      }
-    },
+      },
+
+      async deleteAvatar({ commit, dispatch }, input) {
+        commit("setLoading", { key: "deleteAvatar", value: true });
+        try {
+          const user = await HttpService.authPost("/me/profile/avatar", input);
+          dispatch(
+            "updateUser",
+            @if(containsUnderscoreColumn)
+              processUser(user)
+            @else
+              user
+            @endif
+          );
+          commit("setLoading", { key: "deleteAvatar", value: false });
+        } catch (e) {
+          commit("setLoading", { key: "deleteAvatar", value: false });
+          if (e.response && e.response.status === 422) {
+            throw new ValidationException(e.message, e.response.data.errors);
+          }
+          throw e;
+        }
+      },
     @endif
     async updatePassword({ commit }, input) {
       commit("setLoading", { key: "updatePassword", value: true });

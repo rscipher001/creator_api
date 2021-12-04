@@ -122,7 +122,10 @@ export default class AuthGenerator {
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/src/views/SettingVue`
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/SettingVue`,
+        {
+          input: this.input,
+        }
       )
       await HelperService.writeFile(path, content)
     }
@@ -160,6 +163,7 @@ export default class AuthGenerator {
         `stubs/frontend/${this.input.tech.frontend}/full/src/views/setting/AccountVue`,
         {
           email,
+          input: this.input,
         }
       )
       await HelperService.writeFile(path, content)
@@ -192,6 +196,7 @@ export default class AuthGenerator {
         `stubs/frontend/${this.input.tech.frontend}/full/src/views/setting/SecurityVue`,
         {
           password,
+          input: this.input,
         }
       )
       await HelperService.writeFile(path, content)

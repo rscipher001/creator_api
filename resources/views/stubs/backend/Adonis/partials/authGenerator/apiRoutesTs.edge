@@ -8,5 +8,7 @@ Route.group(() => {
 Route.group(() => {
   Route.get('/me', 'API/AuthController.me')
   Route.post('/logout', 'API/AuthController.logout')
-  Route.post('/email/resend', 'API/EmailVerificationController.resendEmail')
+  @if(input.mailEnabled)
+    Route.post('/email/resend', 'API/EmailVerificationController.resendEmail')
+  @endif
 }).middleware(['auth']).prefix('/api')

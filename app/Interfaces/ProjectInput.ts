@@ -1,4 +1,4 @@
-import { Database, Mailer, ProjectType, RelationType } from './Enums'
+import { Database, Mailer, ProjectType, RelationType, RequestMethod } from './Enums'
 
 export interface Names {
   camelCase: string
@@ -65,10 +65,10 @@ export interface Column {
   input?: Input
 }
 
-export interface CustomOperations {
+export interface CustomOperation {
   name: string
-  method: string
-  singular: boolean
+  method: RequestMethod // GET, POST, PATCH, etc
+  singular: boolean // Item id is required for operation
 }
 export interface Operations {
   index: boolean
@@ -93,7 +93,7 @@ export interface Table {
   indexColumns: string[] // Only these items will be used on listing page
   routeParentTables: Table[] // Route parents table for use in controller
   operations: Operations // Basic CRUD operations
-  customOperations: CustomOperations[] // Basic CRUD operations
+  customOperations: CustomOperation[] // Basic CRUD operations
   columns: Column[]
   timestamps: boolean
   relations: Relation[]

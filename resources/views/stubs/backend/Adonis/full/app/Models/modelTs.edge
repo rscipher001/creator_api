@@ -2,17 +2,21 @@
   import { DateTime } from 'luxon'
 @endif
 @if(isAuth)
-  import Env from '@ioc:Adonis/Core/Env'
-  import Hash from '@ioc:Adonis/Core/Hash'
-  import Mail from '@ioc:Adonis/Addons/Mail'
-  import Encryption from '@ioc:Adonis/Core/Encryption'
-  import VerificationToken, { Reason } from 'App/Models/VerificationToken'
+import Hash from '@ioc:Adonis/Core/Hash'
+  @if(input.mailEnabled)
+    import Env from '@ioc:Adonis/Core/Env'
+    import Mail from '@ioc:Adonis/Addons/Mail'
+    import Encryption from '@ioc:Adonis/Core/Encryption'
+    import VerificationToken, { Reason } from 'App/Models/VerificationToken'
+  @endif
 @endif
 import {
   column,
   @if(isAuth)
     beforeSave,
-    afterCreate,
+    @if(input.mailEnabled)
+      afterCreate,
+    @endif
   @endif
   BaseModel,
   @if(table.relations.find(relation => relation.type === 'HasOne'))
@@ -33,10 +37,10 @@ import {
   @endif
 } from '@ioc:Adonis/Lucid/Orm'
 @if(table.columns.find(column => column.type === 'File'))
-import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite'
+  import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite'
 @endif
 @each(relation in table.relations)
-import {{ relation.modelNames.pascalCase }} from 'App/Models/{{ relation.modelNames.pascalCase }}'
+  import {{ relation.modelNames.pascalCase }} from 'App/Models/{{ relation.modelNames.pascalCase }}'
 @endeach
 
 export default class {{ table.names.pascalCase }} extends BaseModel {
@@ -119,35 +123,37 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
       }
     }
 
-    @afterCreate()
-    public static async sendRegistrationEmail(user: User) {
-      return User.sendEmailVerificationMail(user)
-    }
+    @if(input.mailEnabled)
+      @afterCreate()
+      public static async sendRegistrationEmail(user: User) {
+        return User.sendEmailVerificationMail(user)
+      }
 
-    public static async sendEmailVerificationMail(user: User) {
-      const encryptedEmail = Encryption.encrypt(user.email)
-      const verificationToken = await VerificationToken.firstOrCreate(
-        {
-          email: user.email,
-        },
-        {
-          email: user.email,
-          token: VerificationToken.generateToken(),
-          reason: Reason.emailUpdate,
-        }
-      )
-      await Mail.sendLater((message) => {
-        message
-          .to(verificationToken.email)
-          .from(Env.get('MAIL_FROM_ADDRESS'))
-          .subject('Verify your email')
-          .htmlView('emails/emailVerification', {
-            user,
-            url: `${Env.get('UI_URL')}/email/verify?token=${
-              verificationToken.token
-            }&email=${encryptedEmail}`,
-          })
-      })
-    }
+      public static async sendEmailVerificationMail(user: User) {
+        const encryptedEmail = Encryption.encrypt(user.email)
+        const verificationToken = await VerificationToken.firstOrCreate(
+          {
+            email: user.email,
+          },
+          {
+            email: user.email,
+            token: VerificationToken.generateToken(),
+            reason: Reason.emailUpdate,
+          }
+        )
+        await Mail.sendLater((message) => {
+          message
+            .to(verificationToken.email)
+            .from(Env.get('MAIL_FROM_ADDRESS'))
+            .subject('Verify your email')
+            .htmlView('emails/emailVerification', {
+              user,
+              url: `${Env.get('UI_URL')}/email/verify?token=${
+                verificationToken.token
+              }&email=${encryptedEmail}`,
+            })
+        })
+      }
+    @endif
   @endif
 }

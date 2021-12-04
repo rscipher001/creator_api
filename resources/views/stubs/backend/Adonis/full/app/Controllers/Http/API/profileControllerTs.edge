@@ -1,13 +1,17 @@
-import Env from '@ioc:Adonis/Core/Env'
 import Hash from '@ioc:Adonis/Core/Hash'
-import Mail from '@ioc:Adonis/Addons/Mail'
 import Database from '@ioc:Adonis/Lucid/Database'
-import Encryption from '@ioc:Adonis/Core/Encryption'
 import ProfileValidator from 'App/Validators/ProfileValidator'
-import AccountValidator from 'App/Validators/AccountValidator'
-import { Attachment } from '@ioc:Adonis/Addons/AttachmentLite'
+@if(input.mailEnabled)
+  import Mail from '@ioc:Adonis/Addons/Mail'
+  import Env from '@ioc:Adonis/Core/Env'
+  import Encryption from '@ioc:Adonis/Core/Encryption'
+  import AccountValidator from 'App/Validators/AccountValidator'
+  import VerificationToken, { Reason } from 'App/Models/VerificationToken'
+@endif
+@if (input.storageEnabled)
+  import { Attachment } from '@ioc:Adonis/Addons/AttachmentLite'
+@endif
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import VerificationToken, { Reason } from 'App/Models/VerificationToken'
 import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator'
 
 export default class ProfileController {
@@ -19,6 +23,7 @@ export default class ProfileController {
     return user
   }
 
+  @if(input.mailEnabled)
   /**
    * Returns existing update account requests
    */
@@ -79,7 +84,7 @@ export default class ProfileController {
       })
     }
   }
-
+  @endif
   /**
    * Update password and logout from all other devices
    */
@@ -101,18 +106,20 @@ export default class ProfileController {
     return 'Password updated successfully'
   }
 
-  public async updateAvatar({ auth, request }: HttpContextContract) {
-    const user = auth.user!
-    const avatar = request.file('avatar', {
-      size: '1mb',
-      extnames: ['jpg', 'png', 'jpeg'],
-    })
-    if (avatar) {
-      user.avatar = Attachment.fromFile(avatar)
-    } else {
-      user.avatar = null
+  @if (input.storageEnabled)
+    public async updateAvatar({ auth, request }: HttpContextContract) {
+      const user = auth.user!
+      const avatar = request.file('avatar', {
+        size: '1mb',
+        extnames: ['jpg', 'png', 'jpeg'],
+      })
+      if (avatar) {
+        user.avatar = Attachment.fromFile(avatar)
+      } else {
+        user.avatar = null
+      }
+      await user.save()
+      return user
     }
-    await user.save()
-    return user
-  }
+  @endif
 }

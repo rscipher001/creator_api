@@ -73,7 +73,9 @@ const routes = [
     component: () => import("../views/Setting.vue"),
     meta: {
       auth: true,
-      ensureEmailIsVerified: true,
+      @if(input.mailEnabled)
+        ensureEmailIsVerified: true,
+      @endif
     },
     children: [
       {
@@ -145,6 +147,7 @@ router.beforeEach((to, from, next) => {
     }
   }
 
+  @if(input.mailEnabled)
   /**
    * Redirect users to dashboard when email verified but tries to access verification page
    */
@@ -163,6 +166,7 @@ router.beforeEach((to, from, next) => {
       });
     }
   }
+  @endif
 
   return next();
 });
