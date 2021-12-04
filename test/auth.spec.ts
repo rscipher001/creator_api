@@ -57,7 +57,15 @@ const fulProjectInput = {
       generateUI: false,
       generateModel: true,
       generateMigration: true,
-      operations: [],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       relations: [],
       name: 'User',
       timestamps: true,
@@ -81,7 +89,15 @@ const fulProjectInput = {
       parent: null,
       routeParents: [],
       indexColumns: ['Name', 'ISOCode'],
-      operations: ['index', 'store', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
@@ -158,7 +174,15 @@ const fulProjectInput = {
       parent: null,
       routeParents: ['Country'],
       indexColumns: ['name'],
-      operations: ['index', 'store', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
@@ -241,7 +265,15 @@ const fulProjectInput = {
       parent: '$auth',
       routeParents: [],
       indexColumns: ['address'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
@@ -295,7 +327,15 @@ const fulProjectInput = {
       parent: null,
       routeParents: [],
       indexColumns: ['name'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
@@ -348,7 +388,15 @@ const fulProjectInput = {
       parent: null,
       indexColumns: ['name'],
       routeParents: [],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
@@ -400,7 +448,15 @@ const fulProjectInput = {
       parent: '$auth',
       routeParents: [],
       indexColumns: ['address'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
@@ -453,7 +509,15 @@ const fulProjectInput = {
       parent: 'Minion',
       routeParents: ['Minion'],
       indexColumns: ['address'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
@@ -506,7 +570,15 @@ const fulProjectInput = {
       parent: 'Task',
       indexColumns: ['address'],
       routeParents: ['Task', 'Minion'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
@@ -560,7 +632,15 @@ const fulProjectInput = {
       indexColumns: ['address'],
       parent: 'Subtask',
       routeParents: ['Subtask', 'Task', 'Minion'],
-      operations: ['store', 'show', 'destroy'],
+      operations: {
+        index: false,
+        store: true,
+        update: false,
+        destroy: true,
+        storeMany: false,
+        destroyMany: false,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
@@ -604,6 +684,19 @@ const fulProjectInput = {
       ],
     },
   ],
+  rbac: {
+    enabled: true,
+    multipleRoles: true,
+    canAdminCreateRoles: true,
+    roles: ['Admin', 'User', 'Engineer'],
+    permissions: [],
+    matrix: [
+      {
+        role: 'Admin',
+        permissions: [],
+      },
+    ],
+  },
 }
 
 test.group('Auth', (group) => {

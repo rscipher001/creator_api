@@ -28,6 +28,8 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
         {{
           column.meta.unique ? '.unique()': ''
         }}{{
+          column.meta.index ? '.index()': ''
+        }}{{
           column.meta.required ? '.notNullable()': '.nullable()'
         }}{{{
           column.meta.defaultTo ? `.defaultTo('${column.meta.defaultTo}')`: ''

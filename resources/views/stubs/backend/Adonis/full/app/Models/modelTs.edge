@@ -1,4 +1,6 @@
-import { DateTime } from 'luxon'
+@if (table.columns.find(c => c.type === 'Date') || table.timestamps)
+  import { DateTime } from 'luxon'
+@endif
 @if(isAuth)
   import Env from '@ioc:Adonis/Core/Env'
   import Hash from '@ioc:Adonis/Core/Hash'

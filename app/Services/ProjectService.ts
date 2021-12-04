@@ -79,10 +79,151 @@ class BackendProjectService {
     return table
   }
 
+  protected prepareRBAC() {
+    const rbac = this.input.rbac
+    if (!rbac.enabled) return
+
+    if (rbac.canAdminCreateRoles) {
+      // If admin can create new roles then we need to store this information in the database
+      // Create roles table and add relation with user table
+      const roleTable = {
+        generateRoute: false,
+        generateController: false,
+        generateModel: true,
+        generateMigration: true,
+        generateUI: true,
+        relations: [
+          {
+            type: 'HasMany',
+            withModel: '$auth',
+            name: '',
+            required: true,
+          },
+        ],
+        operations: {
+          index: false,
+          store: false,
+          update: false,
+          destroy: false,
+          storeMany: true,
+          destroyMany: false,
+        },
+        customOperations: [],
+        name: 'Role',
+        timestamps: false,
+        columns: [
+          {
+            name: 'Name',
+            type: 'String',
+            meta: {
+              trim: true,
+              displayName: 'Name',
+              required: true,
+              minLength: 2,
+              maxLength: 127,
+            },
+            input: {
+              type: 'Input',
+            },
+          },
+          {
+            name: 'Description',
+            type: 'String',
+            meta: {
+              displayName: '',
+              required: false,
+              trim: true,
+              maxLength: 256,
+              multiline: true,
+            },
+            input: {
+              type: 'Input',
+            },
+          },
+        ],
+      }
+      const permissionTable = {
+        generateRoute: false,
+        generateController: false,
+        generateModel: true,
+        generateMigration: true,
+        generateUI: true,
+        relations: [
+          {
+            type: 'BelongsTo',
+            withModel: 'Role',
+            name: '',
+            required: true,
+          },
+        ],
+        operations: {
+          index: false,
+          store: false,
+          update: false,
+          destroy: false,
+          storeMany: true,
+          destroyMany: false,
+        },
+        customOperations: [],
+        name: 'Permission',
+        timestamps: false,
+        columns: [
+          {
+            name: 'Name',
+            type: 'String',
+            meta: {
+              trim: true,
+              displayName: 'Name',
+              required: true,
+              minLength: 2,
+              maxLength: 127,
+            },
+            input: {
+              type: 'Input',
+            },
+          },
+          {
+            name: 'Description',
+            type: 'String',
+            meta: {
+              displayName: '',
+              required: false,
+              trim: true,
+              maxLength: 256,
+              multiline: true,
+            },
+            input: {
+              type: 'Input',
+            },
+          },
+        ],
+      }
+      this.input.auth.table.relations.push({
+        type: 'BelongsTo',
+        withModel: 'Role',
+        name: '',
+        required: true,
+        lazy: true,
+      })
+      this.input.tables.unshift(permissionTable)
+      this.input.tables.unshift(roleTable)
+    } else {
+      // If admin can't create new roles then we can use a json file to store roles
+    }
+
+    if (rbac.multipleRoles) {
+      // User can have multiple roles, we can save roles in user table as json array type or csv
+    } else {
+      // User can have one role, we can save role name in user table
+    }
+  }
+
   /**
    * Prepares input by cleaning and standardize it
    */
   public prepare(): ProjectInput {
+    this.prepareAuthTable()
+    this.prepareRBAC()
     this.input.name = HelperService.toSingularPascalCase(this.input.name)
     const projectInput: any = {}
 
@@ -506,7 +647,6 @@ class BackendProjectService {
    * Prepare input
    */
   public async init() {
-    this.prepareAuthTable()
     this.prepare() // Clean and preprocess input
     await this.start() // Start generation
   }

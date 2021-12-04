@@ -27,8 +27,8 @@ export interface Meta {
   url?: boolean // String is url or not, UI and validator
   min?: number // Number min value, UI and validator
   max?: number // Number max value, UI and validator
-  defaultTo: string | number | boolean // Default value in db
-  index: boolean // Database level index
+  defaultTo?: string | number | boolean // Default value in db
+  index?: boolean // Database level index
   maxSize?: string // Max file size allowed
   extensions?: string[] // Allowed file extensions
 }
@@ -80,15 +80,15 @@ export interface Operations {
 }
 
 export interface Table {
-  name: string
+  name: string // Name of the Model
+  names: Names // CamelCase, PascalCase, SnakeCase, etc of name
+  tableName: string // In DB
   generateController: boolean // Generate controller if true
   generateModel: boolean // Generate model if true
   generateMigration: boolean // Generate migration if true
   generateUI: boolean //Generate CRUD if true
-  names: Names
-  singleton: boolean // Singleton means only one instace per parent.
-  tableName: string // In DB
   generateRoute: boolean // Route only generated if true
+  singleton: boolean // Singleton means only one instace per parent.
   routeParents: string[] // Route parents are parent models for routing
   indexColumns: string[] // Only these items will be used on listing page
   routeParentTables: Table[] // Route parents table for use in controller
@@ -96,7 +96,6 @@ export interface Table {
   customOperations: CustomOperations[] // Basic CRUD operations
   columns: Column[]
   timestamps: boolean
-  role: string
   relations: Relation[]
 }
 
@@ -104,8 +103,8 @@ export interface Relation {
   type: RelationType
   withModel: string
   modelNames: Names // Model name in all forms
-  names: Names // Relation name in all forms
-  name: string // Relation name, by default table name is used
+  names?: Names // Relation name in all forms
+  name?: string // Relation name, by default table name is used
   required: boolean
   lazy?: boolean // Migration will be created separately for foreign key
 }
@@ -114,7 +113,6 @@ export interface RBAC {
   enabled: boolean
   multipleRoles: boolean
   canAdminCreateRoles: boolean
-  canAdminCreatePermissions: boolean
   roles: String[]
   permissions: String[]
   matrix: RBACMatrix[]
@@ -187,4 +185,5 @@ export default interface ProjectInput {
     table?: string // Table name
     names?: ExtendedNames // Table names in all cases
   }
+  rbac: RBAC
 }

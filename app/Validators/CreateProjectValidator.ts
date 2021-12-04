@@ -135,7 +135,6 @@ export default class CreateProjectValidator {
       enabled: schema.boolean(),
       multipleRoles: schema.boolean(),
       canAdminCreateRoles: schema.boolean(),
-      canAdminCreatePermissions: schema.boolean(),
       roles: schema.array().members(schema.string({ trim: true })),
       permissions: schema.array().members(schema.string({ trim: true })),
       matrix: schema.array().members(
