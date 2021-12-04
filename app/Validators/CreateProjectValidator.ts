@@ -59,7 +59,10 @@ export default class CreateProjectValidator {
     indexColumns: schema.array.optional().members(schema.string({ trim: true })),
     operations: schema.object().members({
       index: schema.boolean(),
+      create: schema.boolean(),
       store: schema.boolean(),
+      edit: schema.boolean(),
+      show: schema.boolean(),
       update: schema.boolean(),
       destroy: schema.boolean(),
       storeMany: schema.boolean(),

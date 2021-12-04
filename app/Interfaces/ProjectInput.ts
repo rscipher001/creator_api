@@ -72,7 +72,10 @@ export interface CustomOperation {
 }
 export interface Operations {
   index: boolean
+  create: boolean
   store: boolean
+  show: boolean
+  edit: boolean
   update: boolean
   destroy: boolean
   storeMany: boolean

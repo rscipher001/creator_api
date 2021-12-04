@@ -71,8 +71,12 @@
                 :icon-right="active ? 'menu-up' : 'menu-down'"
               />
             </template>
+            @if(table.operations.edit)
             <b-dropdown-item @click="edit(props.row.id)" aria-role="edititem">Edit</b-dropdown-item>
+            @endif
+            @if(table.operations.destroy)
             <b-dropdown-item @click="destroy(props.row.id)" aria-role="listitem">Delete</b-dropdown-item>
+            @endif
         </b-dropdown>
       </b-table-column>
     </b-table>

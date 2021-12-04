@@ -321,6 +321,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         auth,
         @endif
         request }: HttpContextContract) {
+        // TODO: CRITICAL: Implementation pending
         const condition: { [key: string]: any } = {}
         @if(belongsToAuth)
           condition.{{
