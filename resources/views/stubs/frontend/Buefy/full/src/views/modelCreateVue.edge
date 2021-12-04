@@ -138,6 +138,7 @@
         label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
+        open-on-focus
       >
         <b-datepicker v-model="form.{{ column.names.camelCase }}" />
       </b-field>

@@ -50,6 +50,10 @@
               {{{
                 `{{ props.row.${column.names.camelCase}.toFixed(${decimalCount}) }}`
               }}}
+            @elseif(column.type === 'Date')
+              {{{
+                `new Date({{ props.row.${column.names.camelCase} }}).toLocaleString()`
+              }}}
             @else
               {{{
                 `{{ props.row.${column.names.camelCase} }}`

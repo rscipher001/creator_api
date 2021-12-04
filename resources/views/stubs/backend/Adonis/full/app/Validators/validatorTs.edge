@@ -1,4 +1,9 @@
-import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import {
+  schema,
+  @if((table.columns.filter(c => c.meta.expose !== false)).length)
+    rules,
+  @endif
+} from '@ioc:Adonis/Core/Validator'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 export default class {{ action === 'store' ? 'Store' : 'Update' }}{{ table.names.pascalCase }}Validator {
