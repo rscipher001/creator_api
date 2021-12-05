@@ -13,7 +13,7 @@
       @if(column.type === 'String')
       <b-field
         horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -77,7 +77,7 @@
       @elseif(column.type === 'Integer')
       <b-field
         horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -99,7 +99,7 @@
       @elseif(column.type === 'Decimal')
       <b-field
         horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -126,7 +126,7 @@
       @elseif(column.type === 'Boolean')
       <b-field
         horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -135,7 +135,7 @@
       @elseif(column.type === 'Date')
       <b-field
         horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
         open-on-focus
@@ -145,7 +145,7 @@
       @elseif(column.type === 'File')
       <b-field
         class="file" horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }} {{ column.meta.required ? '*' : '' }}"
+        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
         :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
         :message="errors.{{ column.names.camelCase }}"
       >
@@ -214,12 +214,12 @@ import ValidationException from '../exceptions/ValidationException';
 export default {
   name: '{{ table.names.pascalCase }}Create',
   created() {
-    if (this.$route.params.itemId) {
-      const itemId = parseInt(this.$route.params.itemId, 10);
+    if (this.$route.params.id) {
+      const id = parseInt(this.$route.params.id, 10);
       this.editMode.enabled = true;
-      this.editMode.id = itemId;
+      this.editMode.id = id;
       @if(table.columns.find(column => column.type !== 'File'))
-        const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === itemId);
+        const {{ table.names.camelCase }} = this.{{ table.names.camelCasePlural }}.find((t) => t.id === id);
         @each(column in exposedColumns.filter(c =>!c.secret && c.type !== 'File'))~
           @if(column.type === 'Date')
             this.form.{{ column.names.camelCase }} = new Date({{ table.names.camelCase }}.{{ column.names.camelCase }});
@@ -238,7 +238,7 @@ export default {
     return {
       editMode: {
         enabled: false,
-        itemId: null,
+        id: null,
       },
       errors: {},
       form: {

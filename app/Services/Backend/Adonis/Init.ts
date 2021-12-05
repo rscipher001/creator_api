@@ -30,6 +30,15 @@ export default class Init {
     await HelperService.writeFile(filePath, content)
   }
 
+  // Create README.md
+  protected async createReadmeMd() {
+    const filePath = `${this.input.path}/README.md`
+    const content = await View.render(`stubs/backend/${this.input.tech.backend}/full/readmeMd`, {
+      input: this.input,
+    })
+    await HelperService.writeFile(filePath, content)
+  }
+
   protected async addPreCommitHook() {
     await HelperService.execute('npx', ['husky-init'], {
       cwd: this.input.path,
@@ -94,9 +103,11 @@ export default class Init {
         cwd: this.input.projectsPath,
       }
     )
+
     // 2. Add .vscode folder
     await this.createVscodeExtenstionsJson()
     await this.createDotNvmrc()
+    await this.createReadmeMd()
 
     // 3. Initiate git repo
     await HelperService.execute('git', ['init'], {

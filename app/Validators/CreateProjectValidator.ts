@@ -51,22 +51,22 @@ export default class CreateProjectValidator {
     generateController: schema.boolean(),
     generateModel: schema.boolean(),
     generateMigration: schema.boolean(),
-    timestamp: schema.boolean.optional(),
+    timestamps: schema.boolean.optional(),
     generateRoute: schema.boolean.optional(),
     singleton: schema.boolean.optional(),
     parent: schema.string.optional({ trim: true }),
     routeParents: schema.array.optional().members(schema.string({ trim: true })),
     indexColumns: schema.array.optional().members(schema.string({ trim: true })),
     operations: schema.object().members({
-      index: schema.boolean(),
-      create: schema.boolean(),
-      store: schema.boolean(),
-      edit: schema.boolean(),
-      show: schema.boolean(),
-      update: schema.boolean(),
-      destroy: schema.boolean(),
-      storeMany: schema.boolean(),
-      destroyMany: schema.boolean(),
+      index: schema.boolean.optional(),
+      create: schema.boolean.optional(),
+      store: schema.boolean.optional(),
+      edit: schema.boolean.optional(),
+      show: schema.boolean.optional(),
+      update: schema.boolean.optional(),
+      destroy: schema.boolean.optional(),
+      storeMany: schema.boolean.optional(),
+      destroyMany: schema.boolean.optional(),
     }),
     customOperations: schema.array().members(
       schema.object().members({
@@ -123,7 +123,7 @@ export default class CreateProjectValidator {
       app: schema.object.optional().members({
         generate: schema.boolean(),
       }),
-      web: schema.object.optional().members({
+      website: schema.object.optional().members({
         generate: schema.boolean(),
       }),
     }),
@@ -142,15 +142,19 @@ export default class CreateProjectValidator {
       enabled: schema.boolean(),
       multipleRoles: schema.boolean.optional([rules.requiredWhen('rbac.enabled', '=', true)]),
       canAdminCreateRoles: schema.boolean.optional([rules.requiredWhen('rbac.enabled', '=', true)]),
-      defaultRole: schema.string.optional({ trim: true }, [
-        rules.requiredWhen('rbac.enabled', '=', true),
-      ]),
-      roles: schema.array
-        .optional([rules.requiredWhen('rbac.enabled', '=', true)])
-        .members(schema.string({ trim: true })),
-      permissions: schema.array
-        .optional([rules.requiredWhen('rbac.enabled', '=', true)])
-        .members(schema.string({ trim: true })),
+      roles: schema.array.optional([rules.requiredWhen('rbac.enabled', '=', true)]).members(
+        schema.object().members({
+          name: schema.string({ trim: true }),
+          description: schema.string.optional({ trim: true }),
+          default: schema.boolean.optional(),
+        })
+      ),
+      permissions: schema.array.optional([rules.requiredWhen('rbac.enabled', '=', true)]).members(
+        schema.object().members({
+          name: schema.string({ trim: true }),
+          description: schema.string.optional({ trim: true }),
+        })
+      ),
       matrix: schema.array.optional([rules.requiredWhen('rbac.enabled', '=', true)]).members(
         schema.object().members({
           role: schema.string({ trim: true }),

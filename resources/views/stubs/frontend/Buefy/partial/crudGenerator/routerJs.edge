@@ -20,7 +20,7 @@
 @endif
 @if(table.operations.update)
 {
-  path: '/{{ table.names.camelCase }}/:itemId/edit',
+  path: '/{{ table.names.camelCase }}/:id/edit',
   name: '{{ table.names.pascalCase }}Edit',
   component: () => import('../views/{{ table.names.pascalCase }}Create.vue'),
   meta: {

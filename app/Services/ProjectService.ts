@@ -2,11 +2,13 @@ import Env from '@ioc:Adonis/Core/Env'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
+import { RelationType, RequestMethod } from 'App/Interfaces/Enums'
 import ProjectInput, { Table, Relation } from 'App/Interfaces/ProjectInput'
 
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
 import AdonisAuthGenerator from 'App/Services/Backend/Adonis/AuthGenerator'
 import AdonisCRUDGenerator from 'App/Services/Backend/Adonis/CRUDGenerator'
+import AdonisRBACGenerator from 'App/Services/Backend/Adonis/RBACGenerator'
 import AdonisTestGenerator from 'App/Services/Backend/Adonis/TestGenerator'
 import AdonisMailerGenerator from 'App/Services/Backend/Adonis/MailerGenerator'
 import AdonisTenantGenerator from 'App/Services/Backend/Adonis/TenantGenerator'
@@ -18,7 +20,6 @@ import AdonisStorageDriverGenerator from 'App/Services/Backend/Adonis/StorageDri
 import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
 import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
-import { RelationType, RequestMethod } from 'App/Interfaces/Enums'
 
 class BackendProjectService {
   private input: any
@@ -44,6 +45,17 @@ class BackendProjectService {
         : column.names.snakeCase
       return column
     })
+    table.operations = {
+      index: Boolean(table.operations.index),
+      create: Boolean(table.operations.create),
+      store: Boolean(table.operations.store),
+      show: Boolean(table.operations.show),
+      edit: Boolean(table.operations.edit),
+      update: Boolean(table.operations.update),
+      destroy: Boolean(table.operations.destroy),
+      storeMany: Boolean(table.operations.storeMany),
+      destroyMany: Boolean(table.operations.destroyMany),
+    }
     if (Array.isArray(table.indexColumns)) {
       table.indexColumns = table.indexColumns.map((columnName) => string.pascalCase(columnName))
     }
@@ -250,6 +262,7 @@ class BackendProjectService {
     projectInput.storageDrivers = this.input.storageDrivers
     projectInput.defaultStorageDriver = this.input.defaultStorageDriver
 
+    projectInput.rbac = this.input.rbac
     projectInput.tech = this.input.tech
     projectInput.auth = this.input.auth
     projectInput.tenantSettings = this.input.tenantSettings
@@ -600,6 +613,10 @@ class BackendProjectService {
         // Add Auth
         const auth = new AdonisAuthGenerator(this.projectInput)
         await auth.init()
+
+        // Add RBAC
+        const rbac = new AdonisRBACGenerator(this.projectInput)
+        await rbac.init()
 
         if (
           this.projectInput.mailEnabled &&

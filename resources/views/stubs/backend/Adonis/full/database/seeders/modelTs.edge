@@ -1,0 +1,22 @@
+import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
+import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}'
+
+export default class {{ table.names.pascalCase }}Seeder extends BaseSeeder {
+  public async run() {
+    await {{ table.names.pascalCase }}.createMany([
+      @each(item in items)
+      {
+        @each(column in table.columns.filter(column => column.type !== 'File'))
+          @if (column.type === 'String')
+            {{ column.names.camelCase }}: '{{ item[column.names.camelCase] }}',
+          @elseif (column.type === 'Date')
+            {{ column.names.camelCase }}: new Date({{ item[column.names.camelCase] }}),
+          @else
+            {{ column.names.camelCase }}: {{ item[column.names.camelCase] }},
+          @endif
+        @endeach
+      },
+      @endeach
+    ])
+  }
+}

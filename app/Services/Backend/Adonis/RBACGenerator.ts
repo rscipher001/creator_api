@@ -1,3 +1,6 @@
+import mkdirp from 'mkdirp'
+import View from '@ioc:Adonis/Core/View'
+import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 
 export default class RBACGenerator {
@@ -7,39 +10,53 @@ export default class RBACGenerator {
     this.input = input
   }
 
+  protected async createSeeders() {
+    await mkdirp(`${this.input.path}/database/seeders`)
+    await this.createRoleSeeder()
+    await this.createPermissionSeeder()
+  }
+
+  protected async createRoleSeeder() {
+    const filePath = `${this.input.path}/database/seeders/Role.ts`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/database/seeders/modelTs`,
+        {
+          input: this.input,
+          table: this.input.tables.find((t) => t.name === 'Role'),
+          items: this.input.rbac.roles,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  protected async createPermissionSeeder() {
+    const filePath = `${this.input.path}/database/seeders/Permission.ts`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/database/seeders/modelTs`,
+        {
+          input: this.input,
+          table: this.input.tables.find((t) => t.name === 'Permission'),
+          items: this.input.rbac.permissions.map((r) => ({ name: r })),
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
   /**
    * Steps
-   * 1. Add RBAC relations to user table
-   * 2. Create RBAC migrations/enums
-   * 2. Update common files
-   * 3. Copy & update auth module related files
-   * 3. Update migration, model, controller and routes
+   * 1. Add seeder data
    */
   protected async start() {
     const rbac = this.input.rbac
     if (!rbac.enabled) return
 
-    if (rbac.multipleRoles) {
-      // Create relation with role and user
-    } else {
-      // User has one role => column for role needed
-    }
-
-    if (rbac.canAdminCreateRoles) {
-      // Need a database because more roles will be added later
-    } else {
-      // Roles can be stored in either a file or database
-    }
-
-    if (Array.isArray(rbac.roles) && rbac.roles.length) {
-      // Seed these roles
-    }
-
-    if (Array.isArray(rbac.roles) && rbac.roles.length) {
-      // Seed these permissions
-    }
-
-    // Handle role & permission matrix
+    await this.createSeeders()
   }
 
   public async init() {

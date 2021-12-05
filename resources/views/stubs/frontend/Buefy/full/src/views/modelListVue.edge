@@ -65,7 +65,12 @@
           @endif
         </b-table-column>
       @endeach
-      <b-table-column label="Action" v-slot="props">
+      <b-table-column
+        label="Action"
+        @if(table.operations.edit && table.operations.destroy)
+          v-slot="props"
+        @endif
+      >
          <b-dropdown aria-role="list">
             <template #trigger="{ active }">
               <b-button
@@ -128,9 +133,6 @@ export default {
       @if(table.operations.storeMany)
         selectItems: [],
       @endif
-      editMode: {
-        itemId: null,
-      },
     };
   },
 
@@ -157,8 +159,8 @@ export default {
     },
 
     @if(table.operations.edit)
-      edit(itemId) {
-        this.$router.push(`/{{ table.names.camelCase }}/${ itemId}/edit`);
+      edit(id) {
+        this.$router.push(`/{{ table.names.camelCase }}/${id}/edit`);
       },
     @endif
 

@@ -13,7 +13,7 @@
           label="{{
             column.input?.displayName || column.names.pascalCase
           }}{{
-            column.meta.required ? '*' : ''
+            column.meta.required ? ' *' : ''
           }}"
           :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
           :message="errors.{{ column.names.camelCase }}"

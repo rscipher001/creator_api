@@ -9,6 +9,17 @@ export interface Names {
   snakeCasePlural: string
 }
 
+export interface Role {
+  name: string
+  description?: string
+  default?: boolean
+}
+
+export interface Permission {
+  name: string
+  description?: string
+}
+
 export interface ExtendedNames extends Names {
   dashCase: string
   dashCasePlural: string
@@ -116,9 +127,8 @@ export interface RBAC {
   enabled: boolean
   multipleRoles: boolean
   canAdminCreateRoles: boolean
-  defaultRole: string
-  roles: String[]
-  permissions: String[]
+  roles: Role[]
+  permissions: Permission[]
   matrix: RBACMatrix[]
 }
 
@@ -174,7 +184,7 @@ export default interface ProjectInput {
     name: string
     email: string
   }
-  database: Database // should be smallcase
+  database: Database
   types: ProjectType[] // should be smallcaps, can be api or web
   camelCaseStrategy: boolean
   tables: Table[]
