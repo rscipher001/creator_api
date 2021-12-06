@@ -273,7 +273,7 @@ class BackendProjectService {
 
     this.input.rbac.matrix = this.input.rbac.matrix.map((matrixItem: RBACMatrix) => {
       matrixItem.role = HelperService.toSingularCameCase(matrixItem.role)
-      matrixItem.permissions.map((permission) => {
+      matrixItem.permissions = matrixItem.permissions.map((permission) => {
         const [r, p] = permission.split(':')
         const resourceName = HelperService.toSingularCameCase(r)
         const permissionName = HelperService.toSingularCameCase(p)
