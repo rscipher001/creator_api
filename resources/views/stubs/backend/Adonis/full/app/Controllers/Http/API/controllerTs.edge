@@ -1,19 +1,19 @@
 @set('belongsToAuth', table.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
 import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}';
+@if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)~
+  @each(parentTable in table.routeParentTables)
+    import {{ parentTable.names.pascalCase }} from 'App/Models/{{ parentTable.names.pascalCase }}';
+  @endeach
+@endif
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 @if(table.operations.store)
   import Store{{
     table.names.pascalCase
   }}Validator from 'App/Validators/Store{{ table.names.pascalCase }}Validator';
 @endif
-@if(table.operations.storeMany)
-  import StoreMany{{
-    table.names.pascalCase
-  }}Validator from 'App/Validators/StoreMany{{ table.names.pascalCase }}Validator';
-@endif
 @if(table.columns.find(column => column.type === 'File'))
   import { Attachment } from '@ioc:Adonis/Addons/AttachmentLite'
 @endif
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 @if(table.operations.update)~
   @if(!table.singleton)
     import Update{{
@@ -21,11 +21,12 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
     }}Validator from 'App/Validators/Update{{ table.names.pascalCase }}Validator';
   @endif
 @endif
-@if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)~
-  @each(parentTable in table.routeParentTables)
-    import {{ parentTable.names.pascalCase }} from 'App/Models/{{ parentTable.names.pascalCase }}';
-  @endeach
+@if(table.operations.storeMany)
+  import StoreMany{{
+    table.names.pascalCase
+  }}Validator from 'App/Validators/StoreMany{{ table.names.pascalCase }}Validator';
 @endif
+
 
 export default class {{ table.names.pascalCasePlural }}Controller {
   @if(table.operations.index && !table.singleton)
@@ -33,7 +34,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     @if(belongsToAuth)
       auth,
     @endif
+    @if(permissions.includes(`${table.names.camelCase}:index`))
+      bouncer,
+    @endif
     request }: HttpContextContract) {
+      @if(permissions.includes(`${table.names.camelCase}:index`))
+        await bouncer.authorize('{{ table.names.camelCase }}:index')
+      @endif
       const page = request.input('page', 1)
       const size = request.input('size', 10)
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
@@ -63,7 +70,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     @if(belongsToAuth)
       auth,
     @endif
+    @if(permissions.includes(`${table.names.camelCase}:storeMany`))
+      bouncer,
+    @endif
     request }: HttpContextContract) {
+      @if(permissions.includes(`${table.names.camelCase}:store`))
+        await bouncer.authorize('{{ table.names.camelCase }}:store')
+      @endif
       const input: { [key: string]: any } = await request.validate(Store{{
         table.names.pascalCase
       }}Validator)
@@ -142,7 +155,18 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       return response.send(content)
     }
 
-    public async storeMany({ request, {{ belongsToAuth ? 'auth,' : '' }} }: HttpContextContract) {
+    public async storeMany({
+      @if(belongsToAuth)
+        auth,
+      @endif
+      @if(permissions.includes(`${table.names.camelCase}:storeMany`))
+        bouncer,
+      @endif
+      request,
+    }: HttpContextContract) {
+      @if(permissions.includes(`${table.names.camelCase}:storeMany`))
+        await bouncer.authorize('{{ table.names.camelCase }}:storeMany')
+      @endif
       const inputs: { [key: string]: any } = await request.validate(StoreMany{{ table.names.pascalCase }}Validator)
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
@@ -178,7 +202,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     @if(belongsToAuth)
       auth,
     @endif
+    @if(permissions.includes(`${table.names.camelCase}:show`))
+      bouncer,
+    @endif
     request }: HttpContextContract) {
+      @if(permissions.includes(`${table.names.camelCase}:show`))
+        await bouncer.authorize('{{ table.names.camelCase }}:show')
+      @endif
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
       })
@@ -209,7 +239,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     @if(belongsToAuth)
       auth,
     @endif
+    @if(permissions.includes(`${table.names.camelCase}:update`))
+      bouncer,
+    @endif
     request }: HttpContextContract) {
+      @if(permissions.includes(`${table.names.camelCase}:update`))
+        await bouncer.authorize('{{ table.names.camelCase }}:update')
+      @endif
       const input: { [key: string]: any } = await request.validate(Update{{ table.names.pascalCase }}Validator)
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
@@ -257,9 +293,15 @@ export default class {{ table.names.pascalCasePlural }}Controller {
   @if(table.operations.destroy)
     public async destroy({
     @if(belongsToAuth)
-    auth,
+      auth,
+    @endif
+    @if(permissions.includes(`${table.names.camelCase}:destroy`))
+      bouncer,
     @endif
     request, response }: HttpContextContract) {
+      @if(permissions.includes(`${table.names.camelCase}:destroy`))
+        await bouncer.authorize('{{ table.names.camelCase }}:destroy')
+      @endif
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
       })
@@ -292,7 +334,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @if(belongsToAuth)
       auth,
       @endif
+      @if(permissions.includes(`${table.names.camelCase}:destroyMany`))
+        bouncer,
+      @endif
       request }: HttpContextContract) {
+      @if(permissions.includes(`${table.names.camelCase}:destroyMany`))
+        await bouncer.authorize('{{ table.names.camelCase }}:destroyMany')
+      @endif
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
       })
@@ -318,9 +366,15 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     @each(operation in table.customOperations)
       public async {{ operation.name }}({ {
         @if(belongsToAuth)
-        auth,
+          auth,
+        @endif
+        @if(permissions.includes(`${table.names.camelCase}:${operation.name}`))
+          bouncer,
         @endif
         request }: HttpContextContract) {
+        @if(permissions.includes(`${table.names.camelCase}:${operation.name}`))
+          await bouncer.authorize('{{ table.names.camelCase }}:{{ operation.name }}')
+        @endif
         // TODO: CRITICAL: Implementation pending
         const condition: { [key: string]: any } = {}
         @if(belongsToAuth)

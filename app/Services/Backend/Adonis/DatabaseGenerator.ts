@@ -154,7 +154,7 @@ export default class DatabaseGenerator {
           name: 'connection',
           propertyName: 'connection',
           type: 'string',
-          description: 'Define a custom database connection for the migration',
+          description: 'The connection flag is used to lookup the directory for the migration file',
         },
         {
           name: 'folder',

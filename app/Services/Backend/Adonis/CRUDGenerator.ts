@@ -134,6 +134,16 @@ export default class CRUDGenerator {
   protected async createController(i: number) {
     const table = this.input.tables[i]
     if (!table.generateController) return
+
+    // Get all roles from controller
+    const permissions: string[] = []
+    if (this.input.rbac.enabled) {
+      this.input.rbac.permissions.forEach((p) => {
+        if (p.name.startsWith(`${table.names.camelCase}`)) {
+          permissions.push(p.name)
+        }
+      })
+    }
     if (this.input.types.includes(ProjectType.API)) {
       const filePath = `${this.input.path}/app/Controllers/Http/API/${table.names.pascalCasePlural}Controller.ts`
       const fileExists = await HelperService.fileExists(filePath)
@@ -143,6 +153,7 @@ export default class CRUDGenerator {
           {
             input: this.input,
             table,
+            permissions,
           }
         )
         await HelperService.writeFile(filePath, content)
