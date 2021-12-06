@@ -14,6 +14,7 @@ export default class RBACGenerator {
     await mkdirp(`${this.input.path}/database/seeders`)
     await this.createRoleSeeder()
     await this.createPermissionSeeder()
+    await this.matrixSeeder()
   }
 
   protected async createRoleSeeder() {
@@ -41,7 +42,22 @@ export default class RBACGenerator {
         {
           input: this.input,
           table: this.input.tables.find((t) => t.name === 'Permission'),
-          items: this.input.rbac.permissions.map((r) => ({ name: r })),
+          items: this.input.rbac.permissions,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  protected async matrixSeeder() {
+    const filePath = `${this.input.path}/database/seeders/PermissionRoleSeeder.ts`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/database/seeders/permissionRoleSeederTs`,
+        {
+          input: this.input,
+          matrix: this.input.rbac.matrix,
         }
       )
       await HelperService.writeFile(filePath, content)

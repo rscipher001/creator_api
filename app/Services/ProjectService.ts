@@ -3,7 +3,13 @@ import { string } from '@ioc:Adonis/Core/Helpers'
 import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
 import { RelationType, RequestMethod } from 'App/Interfaces/Enums'
-import ProjectInput, { Table, Relation } from 'App/Interfaces/ProjectInput'
+import ProjectInput, {
+  Table,
+  Relation,
+  Permission,
+  Role,
+  RBACMatrix,
+} from 'App/Interfaces/ProjectInput'
 
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
 import AdonisAuthGenerator from 'App/Services/Backend/Adonis/AuthGenerator'
@@ -113,6 +119,7 @@ class BackendProjectService {
         generateModel: true,
         generateMigration: true,
         generateUI: true,
+        seederUniqueKey: 'name',
         relations: [
           {
             type: 'HasMany',
@@ -175,6 +182,7 @@ class BackendProjectService {
         generateModel: true,
         generateMigration: true,
         generateUI: true,
+        seederUniqueKey: 'name',
         relations: [
           {
             type: 'ManyToMany',
@@ -243,6 +251,36 @@ class BackendProjectService {
     } else {
       // User can have one role, we can save role name in user table
     }
+
+    this.input.rbac.roles = this.input.rbac.roles.map((r: Role) => {
+      r.name = HelperService.toSingularCameCase(r.name)
+      if (r.description === undefined) {
+        r.description = ''
+      }
+      return r
+    })
+
+    this.input.rbac.permissions = this.input.rbac.permissions.map((permission: Permission) => {
+      const [r, p] = permission.name.split(':')
+      const resourceName = HelperService.toSingularCameCase(r)
+      const permissionName = HelperService.toSingularCameCase(p)
+      if (permission.description === undefined) {
+        permission.description = ''
+      }
+      permission.name = `${resourceName}:${permissionName}`
+      return permission
+    })
+
+    this.input.rbac.matrix = this.input.rbac.matrix.map((matrixItem: RBACMatrix) => {
+      matrixItem.role = HelperService.toSingularCameCase(matrixItem.role)
+      matrixItem.permissions.map((permission) => {
+        const [r, p] = permission.split(':')
+        const resourceName = HelperService.toSingularCameCase(r)
+        const permissionName = HelperService.toSingularCameCase(p)
+        return `${resourceName}:${permissionName}`
+      })
+      return matrixItem
+    })
   }
 
   /**

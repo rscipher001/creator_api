@@ -68,7 +68,6 @@ export default class Init {
         content.replace('npm run format\ngit add -A', 'npm run format\nnpm run build\ngit add -A')
       )
     }
-    // 4. Initial commit
     await HelperService.commit('Pre commit hook updated', this.input.path)
   }
 

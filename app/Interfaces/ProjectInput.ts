@@ -111,6 +111,7 @@ export interface Table {
   columns: Column[]
   timestamps: boolean
   relations: Relation[]
+  seederUniqueKey?: string // To ensure seeder data is not duplicate
 }
 
 export interface Relation {

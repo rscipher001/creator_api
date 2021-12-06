@@ -3,10 +3,19 @@ import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }
 
 export default class {{ table.names.pascalCase }}Seeder extends BaseSeeder {
   public async run() {
-    await {{ table.names.pascalCase }}.createMany([
+    @if(table.seederUniqueKey)
+      const uniqueKey = '{{ table.seederUniqueKey }}'
+    @endif
+    await {{ table.names.pascalCase }}
+    @if(table.seederUniqueKey)
+      .updateOrCreateMany(uniqueKey,
+    @else
+      .createMany(
+    @endif
+    [
       @each(item in items)
       {
-        @each(column in table.columns.filter(column => column.type !== 'File'))
+        @each(column in table.columns.filter(column => column.type !== 'File'))~
           @if (column.type === 'String')
             {{ column.names.camelCase }}: '{{ item[column.names.camelCase] }}',
           @elseif (column.type === 'Date')
