@@ -694,6 +694,7 @@ const fulProjectInput = {
       {
         role: 'Admin',
         permissions: [],
+        default: false,
       },
     ],
   },

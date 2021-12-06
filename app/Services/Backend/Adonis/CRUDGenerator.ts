@@ -188,6 +188,93 @@ export default class CRUDGenerator {
     await HelperService.writeFile(filePath, content)
   }
 
+  protected async createManyToManyMigrations() {
+    // Store m2m tables as table1:table alphabetcally sorted
+    // Unique them to remove duplicates and generate migrations
+    const combos: string[] = []
+    this.input.tables.forEach((table) => {
+      table.relations
+        .filter((r) => r.type === RelationType.ManyToMany)
+        .forEach((relation) => {
+          combos.push([table.name, relation.modelNames.pascalCase].sort().join(':'))
+        })
+    })
+    await Promise.all([
+      // Remove duplicates and process combos
+      Array.from(new Set(combos)).map(async (combo) => {
+        const [tableOne, tableTwo] = combo.split(':')
+        const tableOneNames = HelperService.generateExtendedNames(tableOne)
+        const tableTwoNames = HelperService.generateExtendedNames(tableTwo)
+        const name = `${tableOneNames.pascalCase}${tableTwoNames.pascalCase}`
+        const table: Table = {
+          name,
+          names: HelperService.generateExtendedNames(name),
+          tableName: this.input.camelCaseStrategy
+            ? `${tableOneNames.camelCase}${tableTwoNames.pascalCase}`
+            : `${tableOneNames.snakeCase}_${tableTwoNames.snakeCase}`,
+          generateController: false,
+          generateModel: false,
+          generateMigration: true,
+          generateUI: false,
+          generateRoute: false,
+          singleton: false,
+          routeParents: [],
+          indexColumns: [],
+          routeParentTables: [],
+          operations: {
+            index: false,
+            create: false,
+            store: false,
+            show: true,
+            edit: false,
+            update: false,
+            destroy: false,
+            destroyMany: false,
+            storeMany: false,
+          },
+          customOperations: [],
+          columns: [],
+          timestamps: false,
+          relations: [
+            {
+              type: RelationType.BelongsTo,
+              required: true,
+              withModel: 'Role',
+              modelNames: HelperService.generateNames('Role'),
+            },
+            {
+              type: RelationType.BelongsTo,
+              required: true,
+              withModel: 'Permission',
+              modelNames: HelperService.generateNames('Permission'),
+            },
+          ],
+        }
+        const namePart = `${table.names.snakeCasePlural}.ts`
+        const migrationsPath = `${this.input.path}/database/migrations`
+        const migrationFileNames = await HelperService.readdir(migrationsPath)
+        let fileExists = false
+        if (migrationFileNames.length) {
+          fileExists = !!migrationFileNames.find((fileName) => fileName.indexOf(namePart) !== -1)
+        }
+        if (!fileExists) {
+          await HelperService.sleep(1000) // Ensure migrations get unique timestamps
+          const content = await View.render(
+            `stubs/backend/${this.input.tech.backend}/full/database/migrations/migrationTs`,
+            {
+              isAuth: false,
+              input: this.input,
+              table,
+            }
+          )
+          const timestamp = new Date().getTime()
+          const filePath = `${this.input.path}/database/migrations/${timestamp}_${namePart}`
+          await HelperService.writeFile(filePath, content)
+        }
+      }),
+    ])
+  }
+
   /**
    * Steps
    * 1. Create Migration
@@ -208,7 +295,6 @@ export default class CRUDGenerator {
       await this.createModel(i)
       await this.createValidators(i)
       await this.createController(i)
-      // await this.addRoutes(i)
       await HelperService.commit(
         `CRUD Added for ${this.input.tables[i].names.pascalCase}`,
         this.input.path
@@ -220,6 +306,7 @@ export default class CRUDGenerator {
     for (let i = 0; i < this.input.tables.length; i += 1) {
       await this.createLazyMigration(this.input.tables[i])
     }
+    await this.createManyToManyMigrations()
     await HelperService.commit(`Circular migrations added`, this.input.path)
   }
 

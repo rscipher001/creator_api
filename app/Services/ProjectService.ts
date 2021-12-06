@@ -32,7 +32,7 @@ class BackendProjectService {
   }
 
   public prepareTable(table): Table {
-    table.name = string.pascalCase(table.name)
+    table.name = HelperService.toSingularPascalCase(table.name)
     table.names = HelperService.generateNames(table.name)
     table.tableName = this.input.camelCaseStrategy
       ? table.names.camelCasePlural
@@ -108,8 +108,8 @@ class BackendProjectService {
       // If admin can create new roles then we need to store this information in the database
       // Create roles table and add relation with user table
       const roleTable = {
-        generateRoute: false,
-        generateController: false,
+        generateRoute: true,
+        generateController: true,
         generateModel: true,
         generateMigration: true,
         generateUI: true,
@@ -120,14 +120,20 @@ class BackendProjectService {
             name: '',
             required: true,
           },
+          {
+            type: 'ManyToMany',
+            withModel: 'Permission',
+            name: '',
+            required: true,
+          },
         ],
         operations: {
-          index: false,
-          store: false,
-          update: false,
-          destroy: false,
+          index: true,
+          store: true,
+          update: true,
+          destroy: true,
           storeMany: true,
-          destroyMany: false,
+          destroyMany: true,
         },
         customOperations: [],
         name: 'Role',
@@ -164,26 +170,26 @@ class BackendProjectService {
         ],
       }
       const permissionTable = {
-        generateRoute: false,
-        generateController: false,
+        generateRoute: true,
+        generateController: true,
         generateModel: true,
         generateMigration: true,
         generateUI: true,
         relations: [
           {
-            type: 'BelongsTo',
+            type: 'ManyToMany',
             withModel: 'Role',
             name: '',
             required: true,
           },
         ],
         operations: {
-          index: false,
-          store: false,
-          update: false,
-          destroy: false,
+          index: true,
+          store: true,
+          update: true,
+          destroy: true,
           storeMany: true,
-          destroyMany: false,
+          destroyMany: true,
         },
         customOperations: [],
         name: 'Permission',
