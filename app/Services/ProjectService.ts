@@ -174,6 +174,17 @@ class BackendProjectService {
               type: 'Input',
             },
           },
+          {
+            name: 'Default',
+            type: 'Boolean',
+            meta: {
+              displayName: '',
+              required: false,
+            },
+            input: {
+              type: 'Input',
+            },
+          },
         ],
       }
       const permissionTable = {
