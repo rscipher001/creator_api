@@ -4,7 +4,7 @@
  * Feel free to let us know via PR, if you find something broken in this config
  * file.
  */
-
+import User from 'App/Models/User'
 import Bouncer from '@ioc:Adonis/Addons/Bouncer'
 
 /*
@@ -29,7 +29,21 @@ import Bouncer from '@ioc:Adonis/Addons/Bouncer'
 | NOTE: Always export the "actions" const from this file
 |****************************************************************
 */
+const checkPermission = async (user: User, permission: string) => {
+  await user.load((loader) => {
+    loader.load('role', (role) => {
+      role.preload('permissions')
+    })
+  })
+  return !!user.role.permissions.find((p) => p.name === permission)
+}
+
 export const { actions } = Bouncer
+@each(permission in input.rbac.permissions)
+.define('{{ permission.name }}', async (user: User) =>
+  checkPermission(user, '{{ permission.name }}')
+)
+@endeach
 
 /*
 |--------------------------------------------------------------------------

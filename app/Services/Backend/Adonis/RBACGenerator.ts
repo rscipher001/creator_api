@@ -100,7 +100,10 @@ export default class RBACGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/backend/${this.input.tech.backend}/full/start/bouncerTs`
+        `stubs/backend/${this.input.tech.backend}/full/start/bouncerTs`,
+        {
+          input: this.input,
+        }
       )
       await HelperService.writeFile(filePath, content)
     }
