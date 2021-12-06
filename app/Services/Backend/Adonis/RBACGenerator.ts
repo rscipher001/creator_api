@@ -177,7 +177,7 @@ export default class RBACGenerator {
     if (!rbac.enabled) return
 
     // Install auth module
-    await HelperService.execute('npm', ['install', '@adonisjs/bounder'], {
+    await HelperService.execute('npm', ['install', '@adonisjs/bouncer'], {
       cwd: this.input.path,
     })
 
