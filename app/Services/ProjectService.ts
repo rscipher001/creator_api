@@ -309,6 +309,9 @@ class BackendProjectService {
 
     projectInput.database = this.input.database
     projectInput.types = this.input.types
+    projectInput.logging = {
+      enabled: true,
+    }
 
     projectInput.mailers = this.input.mailers
     projectInput.mailEnabled = this.input.mailEnabled

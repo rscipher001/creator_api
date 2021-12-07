@@ -25,6 +25,10 @@ export interface ExtendedNames extends Names {
   dashCasePlural: string
 }
 
+export interface Logging {
+  enabled: boolean
+}
+
 export interface Meta {
   expose: boolean // If this field is false then it won't show in create/update form
   dbLength?: number // Override length in db, useful for fields like password

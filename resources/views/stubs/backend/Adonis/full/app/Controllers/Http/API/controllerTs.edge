@@ -31,13 +31,20 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 export default class {{ table.names.pascalCasePlural }}Controller {
   @if(table.operations.index && !table.singleton)
     public async index({
-    @if(belongsToAuth)
-      auth,
-    @endif
-    @if(permissions.includes(`${table.names.camelCase}:index`))
-      bouncer,
-    @endif
-    request }: HttpContextContract) {
+      request,
+      @if(belongsToAuth)
+        auth,
+      @endif
+      @if(permissions.includes(`${table.names.camelCase}:index`))
+        bouncer,
+      @endif
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.index')
+      @endif
       @if(permissions.includes(`${table.names.camelCase}:index`))
         await bouncer.authorize('{{ table.names.camelCase }}:index')
       @endif
@@ -67,13 +74,20 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.store)
     public async store({
-    @if(belongsToAuth)
-      auth,
-    @endif
-    @if(permissions.includes(`${table.names.camelCase}:storeMany`))
-      bouncer,
-    @endif
-    request }: HttpContextContract) {
+      request,
+      @if(belongsToAuth)
+        auth,
+      @endif
+      @if(permissions.includes(`${table.names.camelCase}:storeMany`))
+        bouncer,
+      @endif
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.store')
+      @endif
       @if(permissions.includes(`${table.names.camelCase}:store`))
         await bouncer.authorize('{{ table.names.camelCase }}:store')
       @endif
@@ -156,14 +170,20 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     }
 
     public async storeMany({
+      request,
       @if(belongsToAuth)
         auth,
       @endif
       @if(permissions.includes(`${table.names.camelCase}:storeMany`))
         bouncer,
       @endif
-      request,
+      @if(input.logging.enabled)
+        logger,
+      @endif
     }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.storeMany')
+      @endif
       @if(permissions.includes(`${table.names.camelCase}:storeMany`))
         await bouncer.authorize('{{ table.names.camelCase }}:storeMany')
       @endif
@@ -199,13 +219,20 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.show)
     public async show({
-    @if(belongsToAuth)
-      auth,
-    @endif
-    @if(permissions.includes(`${table.names.camelCase}:show`))
-      bouncer,
-    @endif
-    request }: HttpContextContract) {
+      request,
+      @if(belongsToAuth)
+        auth,
+      @endif
+      @if(permissions.includes(`${table.names.camelCase}:show`))
+        bouncer,
+      @endif
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.show')
+      @endif
       @if(permissions.includes(`${table.names.camelCase}:show`))
         await bouncer.authorize('{{ table.names.camelCase }}:show')
       @endif
@@ -236,13 +263,20 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.update && !table.singleton)
     public async update({
-    @if(belongsToAuth)
-      auth,
-    @endif
-    @if(permissions.includes(`${table.names.camelCase}:update`))
-      bouncer,
-    @endif
-    request }: HttpContextContract) {
+      request,
+      @if(belongsToAuth)
+        auth,
+      @endif
+      @if(permissions.includes(`${table.names.camelCase}:update`))
+        bouncer,
+      @endif
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.update')
+      @endif
       @if(permissions.includes(`${table.names.camelCase}:update`))
         await bouncer.authorize('{{ table.names.camelCase }}:update')
       @endif
@@ -292,13 +326,21 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.destroy)
     public async destroy({
-    @if(belongsToAuth)
-      auth,
-    @endif
-    @if(permissions.includes(`${table.names.camelCase}:destroy`))
-      bouncer,
-    @endif
-    request, response }: HttpContextContract) {
+      request,
+      response,
+      @if(belongsToAuth)
+        auth,
+      @endif
+      @if(permissions.includes(`${table.names.camelCase}:destroy`))
+        bouncer,
+      @endif
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.destroy')
+      @endif
       @if(permissions.includes(`${table.names.camelCase}:destroy`))
         await bouncer.authorize('{{ table.names.camelCase }}:destroy')
       @endif
@@ -331,13 +373,20 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.destroyMany)
     public async destroyMany({
+      request,
       @if(belongsToAuth)
-      auth,
+        auth,
       @endif
       @if(permissions.includes(`${table.names.camelCase}:destroyMany`))
         bouncer,
       @endif
-      request }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.destroyMany')
+      @endif
       @if(permissions.includes(`${table.names.camelCase}:destroyMany`))
         await bouncer.authorize('{{ table.names.camelCase }}:destroyMany')
       @endif
@@ -365,13 +414,20 @@ export default class {{ table.names.pascalCasePlural }}Controller {
   @if(Array.isArray(table.customOperations) && table.customOperations.length)~
     @each(operation in table.customOperations)
       public async {{ operation.name }}({ {
+        request,
         @if(belongsToAuth)
           auth,
         @endif
         @if(permissions.includes(`${table.names.camelCase}:${operation.name}`))
           bouncer,
         @endif
-        request }: HttpContextContract) {
+        @if(input.logging.enabled)
+          logger,
+        @endif
+      }: HttpContextContract) {
+        @if(input.logging.enabled)
+          logger.info('{{ table.names.pascalCasePlural }}Controller.{{ operation.name }}')
+        @endif
         @if(permissions.includes(`${table.names.camelCase}:${operation.name}`))
           await bouncer.authorize('{{ table.names.camelCase }}:{{ operation.name }}')
         @endif
