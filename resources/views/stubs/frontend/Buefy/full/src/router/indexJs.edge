@@ -107,7 +107,7 @@ const routes = [
         },
       },
       @each(table in input.tables.filter(t => t.inSetting))~
-        @!component(`stubs/backend/${input.tech.frontend}/partial/crudGenerator/routerJs`, {
+        @!component(`stubs/frontend/${input.tech.frontend}/partial/crudGenerator/routerJs`, {
           table,
           input,
           inSetting: true,
@@ -125,7 +125,7 @@ const routes = [
     },
   },
   @each(table in input.tables.filter(t => !t.inSetting))~
-    @!component(`stubs/backend/${input.tech.frontend}/partial/crudGenerator/routerJs`, {
+    @!component(`stubs/frontend/${input.tech.frontend}/partial/crudGenerator/routerJs`, {
       table,
       input,
       inSetting: false,

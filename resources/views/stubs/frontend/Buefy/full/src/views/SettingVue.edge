@@ -50,7 +50,7 @@
           @if(input.tables.find(t => t.inSetting))
             @each(table in input.tables.filter(t => t.inSetting))
               <p class="menu-label">{{ capitalCase(table.names.pascalCase) }}</p>
-              @if (table.operation.index)
+              @if(table.operations.index)
                 <b-button
                   tag="router-link"
                   to="/{{ table.names.camelCase }}"
@@ -64,7 +64,7 @@
                   {{ capitalCase(table.names.pascalCase) }} List
                 </b-button>
               @endif
-              @if (table.operation.create)
+              @if (table.operations.create)
                 <b-button
                   tag="router-link"
                   to="/{{ table.names.camelCase }}/create"

@@ -25,10 +25,10 @@ export default class AuthController {
 
   @if(input.auth.register)
   public async register({ request, auth }: HttpContextContract) {
-    const input = await request.validate(RegisterValidator)
+    const input: { [key: string]: any } = await request.validate(RegisterValidator)
     @if (input.rbac.enabled)
       const defaultRole = await Role.findBy('default', true)
-      input.roleId = defaultRole.id
+      input.roleId = defaultRole!.id
     @endif
 
     /**
