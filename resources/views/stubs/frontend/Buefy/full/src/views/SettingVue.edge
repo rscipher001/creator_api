@@ -47,6 +47,39 @@
               Security
             </b-button>
           </ul>
+          @if(input.tables.find(t => t.inSetting))
+            @each(table in input.tables.filter(t => t.inSetting))
+              <p class="menu-label">{{ capitalCase(table.names.pascalCase) }}</p>
+              @if (table.operation.index)
+                <b-button
+                  tag="router-link"
+                  to="/{{ table.names.camelCase }}"
+                  :active="currentRouteName === '{{ table.names.pascalCase }}Index'"
+                  :type="
+                    currentRouteName === '{{ table.names.pascalCase }}Index'
+                      ? 'is-primary'
+                      : 'is-light'
+                  "
+                >
+                  {{ capitalCase(table.names.pascalCase) }} List
+                </b-button>
+              @endif
+              @if (table.operation.create)
+                <b-button
+                  tag="router-link"
+                  to="/{{ table.names.camelCase }}/create"
+                  :active="currentRouteName === '{{ table.names.pascalCase }}Create'"
+                  :type="
+                    currentRouteName === '{{ table.names.pascalCase }}Create'
+                      ? 'is-primary'
+                      : 'is-light'
+                  "
+                >
+                  New {{ capitalCase(table.names.pascalCase) }}
+                </b-button>
+              @endif
+            @endeach
+          @endif
         </aside>
         <div class="column box ml-2 is-9 has-background-white">
           <router-view />
