@@ -146,6 +146,7 @@ class BackendProjectService {
         customOperations: [],
         name: 'Role',
         timestamps: false,
+        indexColumns: ['Name', 'Description', 'Default'],
         columns: [
           {
             name: 'Name',
@@ -218,6 +219,7 @@ class BackendProjectService {
         customOperations: [],
         name: 'Permission',
         timestamps: false,
+        indexColumns: ['Name', 'Description'],
         columns: [
           {
             name: 'Name',
