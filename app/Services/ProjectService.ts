@@ -114,6 +114,7 @@ class BackendProjectService {
       // If admin can create new roles then we need to store this information in the database
       // Create roles table and add relation with user table
       const roleTable = {
+        inSetting: true,
         generateRoute: true,
         generateController: true,
         generateModel: true,
@@ -191,6 +192,7 @@ class BackendProjectService {
         ],
       }
       const permissionTable = {
+        inSetting: true,
         generateRoute: true,
         generateController: true,
         generateModel: true,

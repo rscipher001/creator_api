@@ -108,20 +108,14 @@ export default class CRUDGenerator {
   /**
    * Add routes for resouce in router/index.js
    */
-  protected async registerRoutes(i: number) {
-    const table = this.input.tables[i]
-    const part = await View.render(
-      `stubs/frontend/${this.input.tech.frontend}/partial/crudGenerator/routerJs`,
+  protected async registerRoutes() {
+    const filePath = `${this.input.spaPath}/src/router/index.js`
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/src/router/indexJs`,
       {
         input: this.input,
-        table,
       }
     )
-
-    const filePath = `${this.input.spaPath}/src/router/index.js`
-    let content = await HelperService.readFile(filePath)
-    const index = content.indexOf('];') - 1
-    content = HelperService.insertLines(content, index, part)
     await HelperService.writeFile(filePath, content)
   }
 
@@ -164,8 +158,6 @@ export default class CRUDGenerator {
       await this.createCreateView(i)
       await this.createListView(i)
       await this.createStoreManyView(i)
-      // await this.createCreateModal(i)
-      await this.registerRoutes(i)
       await HelperService.execute('npm', ['run', 'lint'], { cwd: this.input.spaPath })
       await HelperService.commit(
         `CRUD Added for ${this.input.tables[i].names.pascalCase}`,
@@ -173,6 +165,7 @@ export default class CRUDGenerator {
       )
       this.models.push(this.input.tables[i].names.camelCase)
     }
+    await this.registerRoutes()
 
     // Run loop for states separately to avoid unused import warning which results in commit failure
     for (let i = 0; i < this.input.tables.length; i += 1) {
