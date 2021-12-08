@@ -10,7 +10,16 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 
 export default class AuthController {
-  public async login({ request, auth }: HttpContextContract) {
+  public async login({
+    request,
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('AuthController.login')
+    @endif
     const input = await request.validate(LoginValidator)
     const { email, password } = input
     const token = await auth.use('api').attempt(email, password)
@@ -24,34 +33,59 @@ export default class AuthController {
   }
 
   @if(input.auth.register)
-  public async register({ request, auth }: HttpContextContract) {
-    const input: { [key: string]: any } = await request.validate(RegisterValidator)
-    @if (input.rbac.enabled)
-      const defaultRole = await Role.findBy('default', true)
-      input.roleId = defaultRole!.id
-    @endif
+    public async register({
+      request,
+      auth,
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('AuthController.register')
+      @endif
+      const input: { [key: string]: any } = await request.validate(RegisterValidator)
+      @if (input.rbac.enabled)
+        const defaultRole = await Role.findBy('default', true)
+        input.roleId = defaultRole!.id
+      @endif
 
-    /**
-     * Create a new user
-     */
-    const user = await {{ table.names.pascalCase }}.create(input)
-    await user.save()
-    const token = await auth.use('api').login(user)
-    const { token: tokenString } = token.toJSON()
+      /**
+      * Create a new user
+      */
+      const user = await {{ table.names.pascalCase }}.create(input)
+      await user.save()
+      const token = await auth.use('api').login(user)
+      const { token: tokenString } = token.toJSON()
 
-    return {
-      token: tokenString,
-      user,
+      return {
+        token: tokenString,
+        user,
+      }
     }
-  }
   @endif
 
-  public async logout({ auth }: HttpContextContract) {
+  public async logout({
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('AuthController.logout')
+    @endif
     await auth.use('api').revoke()
     return 'You have been logged out'
   }
 
-  public async me({ auth }: HttpContextContract) {
+  public async me({
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('AuthController.me')
+    @endif
     return auth.user
   }
 }

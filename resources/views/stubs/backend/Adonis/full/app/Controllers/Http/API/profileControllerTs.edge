@@ -15,7 +15,16 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator'
 
 export default class ProfileController {
-  public async updateProfile({ auth, request }: HttpContextContract) {
+  public async updateProfile({
+    request,
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('ProfileController.updateProfile')
+    @endif
     const user = auth.user!
     const input = await request.validate(ProfileValidator)
     user.merge(input)
@@ -27,7 +36,15 @@ export default class ProfileController {
   /**
    * Returns existing update account requests
    */
-  public async getAccount({ auth }: HttpContextContract) {
+  public async getAccount({
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('ProfileController.getAccount')
+    @endif
     const user = auth.user!
     return VerificationToken.query()
       .where({ userId: user.id, reason: Reason.emailUpdate })
@@ -37,7 +54,15 @@ export default class ProfileController {
   /**
    * Delete update email request
    */
-  public async deleteAccount({ auth }: HttpContextContract) {
+  public async deleteAccount({
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('ProfileController.deleteAccount')
+    @endif
     return VerificationToken.query()
       .where({ userId: auth.user!.id, reason: Reason.emailUpdate })
       .delete()
@@ -47,7 +72,17 @@ export default class ProfileController {
    * Sends a verification email,
    * Account is only updated if email is verified
    */
-  public async updateAccount({ auth, request, response }: HttpContextContract) {
+  public async updateAccount({
+    request,
+    response,
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('ProfileController.updateAccount')
+    @endif
     const user = auth.user!
     const { email: newEmail } = await request.validate(AccountValidator)
     if (newEmail !== user.email) {
@@ -88,7 +123,17 @@ export default class ProfileController {
   /**
    * Update password and logout from all other devices
    */
-  public async updatePassword({ auth, request, response }: HttpContextContract) {
+  public async updatePassword({
+    request,
+    response,
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('ProfileController.updatePassword')
+    @endif
     const user = auth.user!
     const { oldPassword, newPassword } = await request.validate(ChangePasswordValidator)
     const matched = await Hash.verify(user.password, oldPassword)
@@ -107,7 +152,16 @@ export default class ProfileController {
   }
 
   @if (input.storageEnabled)
-    public async updateAvatar({ auth, request }: HttpContextContract) {
+    public async updateAvatar({
+      request,
+      auth,
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('ProfileController.updateAvatar')
+      @endif
       const user = auth.user!
       const avatar = request.file('avatar', {
         size: '1mb',
