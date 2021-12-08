@@ -151,6 +151,7 @@ class BackendProjectService {
             type: 'String',
             meta: {
               trim: true,
+              expose: true,
               displayName: 'Name',
               required: true,
               minLength: 2,
@@ -166,6 +167,7 @@ class BackendProjectService {
             meta: {
               displayName: '',
               required: false,
+              expose: true,
               trim: true,
               maxLength: 256,
               multiline: true,
@@ -180,6 +182,7 @@ class BackendProjectService {
             meta: {
               displayName: '',
               required: false,
+              expose: true,
             },
             input: {
               type: 'Input',
@@ -219,6 +222,7 @@ class BackendProjectService {
             type: 'String',
             meta: {
               trim: true,
+              expose: true,
               displayName: 'Name',
               required: true,
               minLength: 2,
@@ -232,7 +236,7 @@ class BackendProjectService {
             name: 'Description',
             type: 'String',
             meta: {
-              displayName: '',
+              expose: true,
               required: false,
               trim: true,
               maxLength: 256,
