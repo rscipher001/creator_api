@@ -137,7 +137,10 @@ class BackendProjectService {
         ],
         operations: {
           index: true,
+          create: true,
           store: true,
+          edit: true,
+          show: true,
           update: true,
           destroy: true,
           storeMany: true,
@@ -210,7 +213,10 @@ class BackendProjectService {
         ],
         operations: {
           index: true,
+          create: true,
           store: true,
+          edit: true,
+          show: true,
           update: true,
           destroy: true,
           storeMany: true,

@@ -53,7 +53,7 @@
               @if(table.operations.index)
                 <b-button
                   tag="router-link"
-                  to="/{{ table.names.camelCase }}"
+                  to="/setting/{{ table.names.camelCase }}"
                   :active="currentRouteName === '{{ table.names.pascalCase }}Index'"
                   :type="
                     currentRouteName === '{{ table.names.pascalCase }}Index'
@@ -67,7 +67,7 @@
               @if (table.operations.create)
                 <b-button
                   tag="router-link"
-                  to="/{{ table.names.camelCase }}/create"
+                  to="/setting/{{ table.names.camelCase }}/create"
                   :active="currentRouteName === '{{ table.names.pascalCase }}Create'"
                   :type="
                     currentRouteName === '{{ table.names.pascalCase }}Create'

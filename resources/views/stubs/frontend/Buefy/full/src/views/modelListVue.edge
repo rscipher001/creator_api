@@ -26,8 +26,8 @@
               <b-dropdown-item @click="$router.push('/{{ table.names.camelCase }}/import/csv')" aria-role="listitem">CSV</b-dropdown-item>
             </b-dropdown>
           @endif
-          @if(table.operations.store)
-            <b-button tag="router-link" to="/{{ table.names.camelCase }}/create" type="is-light">New</b-button>
+          @if(table.operations.create)
+            <b-button tag="router-link" to="{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/create" type="is-light">New</b-button>
           @endif
         </div>
       @endif
@@ -92,15 +92,19 @@
     <div class="hero is-medium" v-else>
       <div class="hero-body container is-flex has-text-centered">
         <div class="is-flex-direction-colomn">
-          <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
-          <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
-          <b-button
-            type="is-primary block mt-5"
-            tag="router-link"
-            to="/{{ table.names.camelCase }}/create"
-          >
-            New
-          </b-button>
+          @if(table.operations.create)
+            <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
+            <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
+            <b-button
+              type="is-primary block mt-5"
+              tag="router-link"
+              to="/{{ table.names.camelCase }}/create"
+            >
+              New
+            </b-button>
+          @else
+            <h1 class="is-size-2">There are no {{ capitalCase(table.names.pascalCase) }}</h1>
+          @endif
         </div>
       </div>
     </div>
@@ -160,7 +164,7 @@ export default {
 
     @if(table.operations.edit)
       edit(id) {
-        this.$router.push(`/{{ table.names.camelCase }}/${id}/edit`);
+        this.$router.push(`{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/${id}/edit`);
       },
     @endif
 
