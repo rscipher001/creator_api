@@ -376,10 +376,9 @@ export default {
       prepareRoles({ state }) {
         const user = state.user;
         if (!user) return false;
-        const permissions = [];
         if(Array.isArray(user.roles)) {
           user.roles.forEach((role) =>{
-            role.forEach((p) => permissions.push(p.name))
+            role.forEach((p) => state.permissions.push(p.name))
           })
         } else if(user.role) {
           user.role.permissions.forEach((p) => state.permissions.push(p.name))
