@@ -26,7 +26,9 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
     table.names.pascalCase
   }}Validator from 'App/Validators/StoreMany{{ table.names.pascalCase }}Validator';
 @endif
-
+@each(relation in table.relations.filter((r) => r.type === 'ManyToMany'))
+  import {{ relation.modelNames.pascalCase }} from 'App/Models/{{ relation.modelNames.pascalCase }}';
+@endeach
 
 export default class {{ table.names.pascalCasePlural }}Controller {
   @if(table.operations.index && !table.singleton)
@@ -448,4 +450,144 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       }
     @endeach
   @endif
+
+  @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
+    @set('relationModel', input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
+    @set('relationModelBelongsToAuth', relationModel.relations.filter(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
+    public async attach{{ relation.modelNames.pascalCase }}({
+      request,
+      @if(belongsToAuth || relationModelBelongsToAuth)
+        auth,
+      @endif
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.sync{{ relation.modelNames.pascalCasePlural }}')
+      @endif
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        input, table
+      })
+      const condition: { [key: string]: any } = {};
+      @if(belongsToAuth)
+        condition.{{
+          input.camelCaseStrategy ?
+            `${input.auth.table.names.camelCase}Id` :
+            `${input.auth.table.names.snakeCase}_id`
+        }} = auth.user!.id
+      @endif
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+        @set('lastIndex', table.routeParentTables.length - 1)
+        condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
+          table.routeParentTables[lastIndex].names.camelCase
+        }}Id
+      @endif
+      const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail();
+      const {{ relation.modelNames.camelCase }} = await {{ relation.modelNames.pascalCase }}.query().where({
+        id: request.param('{{ relation.modelNames.camelCase }}Id'),
+        @if(relationModelBelongsToAuth)
+          {{
+            input.camelCaseStrategy ?
+              `${input.auth.table.names.camelCase}Id` :
+              `${input.auth.table.names.snakeCase}_id`
+          }}: auth.user!.id,
+        @endif
+      }).firstOrFail()
+
+      return {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').attach([{{ relation.modelNames.camelCase }}.id])
+    }
+
+    public async detach{{ relation.modelNames.pascalCase }}({
+      request,
+      @if(belongsToAuth || relationModelBelongsToAuth)
+        auth,
+      @endif
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.sync{{ relation.modelNames.pascalCasePlural }}')
+      @endif
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        input, table
+      })
+      const condition: { [key: string]: any } = {};
+      @if(belongsToAuth)
+        condition.{{
+          input.camelCaseStrategy ?
+            `${input.auth.table.names.camelCase}Id` :
+            `${input.auth.table.names.snakeCase}_id`
+        }} = auth.user!.id
+      @endif
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+        @set('lastIndex', table.routeParentTables.length - 1)
+        condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
+          table.routeParentTables[lastIndex].names.camelCase
+        }}Id
+      @endif
+      const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail();
+      const {{ relation.modelNames.camelCase }} = await {{ relation.modelNames.pascalCase }}.query().where({
+        id: request.param('{{ relation.modelNames.camelCase }}Id'),
+        @if(relationModelBelongsToAuth)
+          {{
+            input.camelCaseStrategy ?
+              `${input.auth.table.names.camelCase}Id` :
+              `${input.auth.table.names.snakeCase}_id`
+          }}: auth.user!.id,
+        @endif
+      }).firstOrFail()
+
+      return {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').detach([{{ relation.modelNames.camelCase }}.id])
+    }
+
+    public async sync{{ relation.modelNames.pascalCasePlural }}({
+      request,
+      response,
+      @if(belongsToAuth || relationModelBelongsToAuth)
+        auth,
+      @endif
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }) {
+      @if(input.logging.enabled)
+        logger.info('{{ table.names.pascalCasePlural }}Controller.sync{{ relation.modelNames.pascalCasePlural }}')
+      @endif
+      const ids: number[] = request.input('ids');
+      @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        input, table
+      })
+      const condition: { [key: string]: any } = {};
+      @if(belongsToAuth)
+        condition.{{
+          input.camelCaseStrategy ?
+            `${input.auth.table.names.camelCase}Id` :
+            `${input.auth.table.names.snakeCase}_id`
+        }} = auth.user!.id
+      @endif
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+        @set('lastIndex', table.routeParentTables.length - 1)
+        condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
+          table.routeParentTables[lastIndex].names.camelCase
+        }}Id
+      @endif
+      const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail();
+      const {{ relation.modelNames.camelCasePlural }} = await {{ relation.modelNames.pascalCase }}.query().where({
+        id: request.param('{{ relation.modelNames.camelCase }}Id'),
+        @if(relationModelBelongsToAuth)
+          {{
+            input.camelCaseStrategy ?
+              `${input.auth.table.names.camelCase}Id` :
+              `${input.auth.table.names.snakeCase}_id`
+          }}: auth.user!.id,
+        @endif
+      }).whereIn('id', ids)
+      if ({{ relation.modelNames.camelCasePlural }}.length) {
+        return {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').sync({{ relation.modelNames.camelCasePlural }}.map(i => i.id))
+      }
+      return response.noContent()
+    }
+  @endeach
 }

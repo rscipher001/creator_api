@@ -1,3 +1,4 @@
+
 @if(table.operations.index)~
   @if (!table.singleton)
     Route.get('{{
@@ -85,8 +86,7 @@
     table.names.camelCase
   }}/destroy/many', 'API/{{ table.names.pascalCasePlural }}Controller.destroyMany');
 @endif
-
-@if(Array.isArray(table.customOperations) && table.customOperations.length)
+@if(Array.isArray(table.customOperations) && table.customOperations.length)~
   @each(operation in table.customOperations)
     Route.{{ operation.method.toLowerCase() }}('{{
       table.routeParentTables.length ? table.routeParentTables.map(
@@ -97,28 +97,34 @@
     }}{{ operation.singular ? '/:id' : '' }}/{{ operation.name }}', 'API/{{ table.names.pascalCasePlural }}Controller.{{ operation.name }}');
   @endeach
 @endif
-@if(Array.isArray(table.relations) && table.relations.length)
+@if(Array.isArray(table.relations) && table.relations.length)~
   @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
     Route.post('{{
       table.routeParentTables.length ? table.routeParentTables.map(
         parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
       ).join('') : ''
-    }}/:id/{{ table.names.camelCase }}/{{
-      relation.modelNames.camelCase
+    }}/{{
+      table.names.camelCase
+    }}/:id/{{
+      relation.modelNames.camelCasePlural
     }}/:{{ relation.modelNames.camelCase }}Id/attach', 'API/{{ table.names.pascalCasePlural }}Controller.attach{{ relation.modelNames.pascalCase }}');
     Route.post('{{
       table.routeParentTables.length ? table.routeParentTables.map(
         parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
       ).join('') : ''
-    }}/:id/{{ table.names.camelCase }}/{{
-      relation.modelNames.camelCase
+    }}/{{
+      table.names.camelCase
+    }}/:id/{{
+      relation.modelNames.camelCasePlural
     }}/:{{ relation.modelNames.camelCase }}Id/detach', 'API/{{ table.names.pascalCasePlural }}Controller.detach{{ relation.modelNames.pascalCase }}');
     Route.post('{{
       table.routeParentTables.length ? table.routeParentTables.map(
         parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
       ).join('') : ''
-    }}/:id/{{ table.names.camelCase }}/{{
-      relation.modelNames.camelCase
-    }}', 'API/{{ table.names.pascalCasePlural }}Controller.sync{{ relation.modelNames.pascalCase }}');
+    }}/{{
+      table.names.camelCase
+    }}/:id/{{
+      relation.modelNames.camelCasePlural
+    }}/sync', 'API/{{ table.names.pascalCasePlural }}Controller.sync{{ relation.modelNames.pascalCasePlural }}');
   @endeach
 @endif
