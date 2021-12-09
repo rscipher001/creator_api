@@ -240,6 +240,9 @@ export default {
   computed: {
     ...mapState('auth', {
       user: (state) => state.user,
+      @if(input.rbac.enabled)
+        permissions: (state) => state.permissions,
+      @endif
     }),
     ...mapState('{{ table.names.camelCase }}', {
       items: (state) => state.items,

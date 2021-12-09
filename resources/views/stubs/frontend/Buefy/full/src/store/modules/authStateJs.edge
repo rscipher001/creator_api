@@ -38,6 +38,7 @@ export default {
     },
     token: null, // Authorization token
     user: null, // Logged in user basic profile
+    permissions: []
   }),
 
   actions: {
@@ -46,7 +47,14 @@ export default {
         commit("setLoading", { key: key, value: false });
       }
       if (state.user) {
-        dispatch("refreshUser");
+        dispatch(
+          "refreshUser"
+          @if(input.rbac.enabled)
+          ,{
+            with: ['roles.permissions']
+          }
+          @endif
+        );
       }
     },
 
@@ -363,6 +371,25 @@ export default {
       }
       dispatch("unsetTokens");
     },
+
+    @if(input.rbac.enabled)
+      prepareRoles({ state }) {
+        const user = state.user;
+        if (!user) return false;
+        const permissions = [];
+        if(Array.isArray(user.roles)) {
+          user.roles.forEach((role) =>{
+            state.permissions.forEach((p) => permissions.push(p.name))
+          })
+        } else if(user.role) {
+          user.role.permissions.forEach((p) => state.permissions.push(p.name))
+        }
+      },
+
+      authorize({ state }, permission) {
+        return state.permissions.include(permission);
+      },
+    @endif
   },
 
   mutations: {

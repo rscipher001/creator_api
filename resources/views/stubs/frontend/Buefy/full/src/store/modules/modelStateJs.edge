@@ -5,6 +5,8 @@ import HttpService from '../../services/http.service';
 @endif
 import ValidationException from '../../exceptions/ValidationException';
 
+
+
 const resource = '{{ table.names.camelCase }}';
 @if(!input.camelCaseStrategy && containsUnderscoreColumn)
 
@@ -27,8 +29,14 @@ const resource = '{{ table.names.camelCase }}';
 @endif
 export default {
   namespaced: true,
-
   state: () => ({
+    @if(table.relations.find((relation) => relation.type === 'ManyToMany'))
+      relations: {
+        @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
+          {{ relation.names.camelCase }}: {{{ JSON.stringify(relation.names) }}},
+        @endeach
+      },
+    @endif
     loading: {
       @if(table.operations.index)
         index: false,
@@ -48,6 +56,11 @@ export default {
       @if(table.operations.destroyMany)
         destroyMany: false,
       @endif
+      @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
+        attach: false,
+        detach: false,
+        sync: false,
+      @endeach
     },
     meta: {},
     items: [],
@@ -208,6 +221,35 @@ export default {
         }
       },
     @endif
+
+    @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
+      @each(operation in ['attach', 'detach', 'sync'])
+        async {{ operation }}({ commit }, {
+          id,
+          relation, // Should be camelCase
+          relationId{{ operation === 'sync' ? 's':'' }},
+        }) {
+          commit('setLoading', { key: '{{ operation }}', value: true });
+          try {
+            await HttpService.authPost(
+              `/${resource}/${id}/${this.relations[relation].names.camelCasePlural}{{{
+                operation !== 'sync' ? '/${relationId}' : ''
+              }}}/{{ operation }}${relation}`,
+              @if(operation === 'sync')
+                relationIds
+              @endif
+            );
+            commit('setLoading', { key: '{{ operation }}', value: false });
+          } catch (e) {
+            commit('setLoading', { key: '{{ operation }}', value: false });
+            if (e.response && e.response.status === 422) {
+              throw new ValidationException(e.message, e.response.data.errors);
+            }
+            throw e;
+          }
+        },
+      @endeach
+    @endeach
   },
 
   mutations: {

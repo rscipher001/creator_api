@@ -129,6 +129,7 @@ export default class ProfileGenerator {
         {
           email,
           password,
+          input: this.input,
         }
       )
       await HelperService.writeFile(filePath, content)
