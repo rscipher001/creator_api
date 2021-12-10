@@ -6,11 +6,11 @@
       @if(table.operations.storeMany || table.operations.store || table.operations.destroyMany)
         <div
           class="level-right"
-          v-if="authorize({{ table.names.camelCase }}:storeMany) || authorize({{ table.names.camelCase }}:destroyMany) || authorize({{ table.names.camelCase }}:store)"
+          v-if="authorize('{{ table.names.camelCase }}:storeMany') || authorize('{{ table.names.camelCase }}:destroyMany') || authorize('{{ table.names.camelCase }}:store')"
         >
           @if(table.operations.destroyMany)
             <b-button
-              v-if="selectItems.length && authorize({{ table.names.camelCase }}:destroyMany)"
+              v-if="selectItems.length && authorize('{{ table.names.camelCase }}:destroyMany')"
               @click="destroyMany"
               type="is-danger"
             >
@@ -19,7 +19,7 @@
           @endif
           @if(table.operations.storeMany)
             <b-dropdown
-              v-if="authorize({{ table.names.camelCase }}:storeMany)"
+              v-if="authorize('{{ table.names.camelCase }}:storeMany')"
               aria-role="list"
               class="mx-1"
             >
@@ -47,7 +47,7 @@
       :data="items"
       @if(table.operations.storeMany)
         :checked-rows.sync="selectItems"
-        checkable="authorize({{ table.names.camelCase }}:storeMany)"
+        checkable="authorize('{{ table.names.camelCase }}:storeMany')"
       @endif
       hoverable
       striped
