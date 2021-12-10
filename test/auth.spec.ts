@@ -15,7 +15,7 @@ import {
 } from 'App/Interfaces/Enums'
 
 const BASE_URL = `http://${Env.get('HOST')}:${Env.get('PORT')}`
-
+let projectId = 1
 const fulProjectInput = {
   name: 'CIFullAPITest',
   database: DatabaseEnum.MySQL,
@@ -688,7 +688,23 @@ const fulProjectInput = {
     enabled: true,
     multipleRoles: true,
     canAdminCreateRoles: true,
-    roles: ['Admin', 'User', 'Engineer'],
+    roles: [
+      {
+        name: 'Admin',
+        description: 'Random struing lorem ipsum',
+        default: false,
+      },
+      {
+        name: 'User',
+        description: 'Random struing lorem ipsum',
+        default: true,
+      },
+      {
+        name: 'Engineer',
+        description: 'Random struing lorem ipsum',
+        default: false,
+      },
+    ],
     permissions: [],
     matrix: [
       {
@@ -791,13 +807,14 @@ test.group('Auth', (group) => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
     assert.isObject(body)
+    projectId = body.id
   })
 
   test('Generate plain project API Part - 2', async (assert) => {
     let shouldCheckAgain = true
     while (shouldCheckAgain) {
       const { body } = await supertest(BASE_URL)
-        .get('/api/project/1')
+        .get(`/api/project/${projectId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
       if (body.status === 'failed') throw new Error('Project creation failed')
