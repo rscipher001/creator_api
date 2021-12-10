@@ -81,10 +81,22 @@
               />
             </template>
             @if(table.operations.edit)
-            <b-dropdown-item @click="edit(props.row.id)" aria-role="edititem">Edit</b-dropdown-item>
+              <b-dropdown-item
+                v-if="authorize('{{ table.names.pascalCase }}.edit')"
+                @click="edit(props.row.id)"
+                aria-role="edititem"
+              >
+                Edit
+              </b-dropdown-item>
             @endif
             @if(table.operations.destroy)
-            <b-dropdown-item @click="destroy(props.row.id)" aria-role="listitem">Delete</b-dropdown-item>
+              <b-dropdown-item
+                v-if="authorize('{{ table.names.pascalCase }}.destroy')"
+                @click="destroy(props.row.id)"
+                aria-role="listitem"
+              >
+                Delete
+              </b-dropdown-item>
             @endif
         </b-dropdown>
       </b-table-column>
@@ -96,6 +108,7 @@
             <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
             <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
             <b-button
+              v-if="authorize('{{ table.names.pascalCase }}.create')"
               type="is-primary block mt-5"
               tag="router-link"
               to="/{{ table.names.camelCase }}/create"
@@ -154,6 +167,11 @@ export default {
         destroyManyAction: "destroyMany",
       @endif
     }),
+    @if(input.rbac.enabled)
+      ...mapActions('auth', {
+        authorize: 'authorize',
+      }),
+    @endif
 
     index() {
       this.indexAction({

@@ -24,8 +24,12 @@ export default class AuthController {
     const { email, password } = input
     const token = await auth.use('api').attempt(email, password)
     const { token: tokenString } = token.toJSON()
-    const user = auth.user!!
-
+    const user = auth.user!;
+    @if(input.rbac.enabled)
+      await user.load('role', (roleQuery) => {
+        roleQuery.preload('permissions')
+      });
+    @endif
     return {
       token: tokenString,
       user: user,
@@ -56,7 +60,11 @@ export default class AuthController {
       await user.save()
       const token = await auth.use('api').login(user)
       const { token: tokenString } = token.toJSON()
-
+      @if(input.rbac.enabled)
+        await user.load('role', (roleQuery) => {
+          roleQuery.preload('permissions')
+        });
+      @endif
       return {
         token: tokenString,
         user,
@@ -84,8 +92,14 @@ export default class AuthController {
     @endif
   }: HttpContextContract) {
     @if(input.logging.enabled)
-      logger.info('AuthController.me')
+      logger.info('AuthController.me');
     @endif
-    return auth.user
+    const user = auth.user!;
+    @if(input.rbac.enabled)
+      await user.load('role', (roleQuery) => {
+        roleQuery.preload('permissions')
+      });
+    @endif
+    return user;
   }
 }

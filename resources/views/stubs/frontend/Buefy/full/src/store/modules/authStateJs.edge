@@ -47,14 +47,7 @@ export default {
         commit("setLoading", { key: key, value: false });
       }
       if (state.user) {
-        dispatch(
-          "refreshUser"
-          @if(input.rbac.enabled)
-          ,{
-            with: ['roles.permissions']
-          }
-          @endif
-        );
+        dispatch("refreshUser");
       }
     },
 
@@ -357,6 +350,9 @@ export default {
             user
           @endif
         );
+        @if(input.rbac.enabled)
+          dispatch("preparePermissions");
+        @endif
       } catch (e) {
         console.error(e);
         dispatch("unsetTokens");
@@ -373,14 +369,15 @@ export default {
     },
 
     @if(input.rbac.enabled)
-      prepareRoles({ state }) {
+      preparePermissions({ state }) {
+        state.permissions = [];
         const user = state.user;
         if (!user) return false;
-        if(Array.isArray(user.roles)) {
+        if (Array.isArray(user.roles)) {
           user.roles.forEach((role) =>{
             role.forEach((p) => state.permissions.push(p.name))
           })
-        } else if(user.role) {
+        } else if (user.role) {
           user.role.permissions.forEach((p) => state.permissions.push(p.name))
         }
       },
