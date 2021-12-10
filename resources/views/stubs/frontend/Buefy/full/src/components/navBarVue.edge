@@ -25,7 +25,7 @@
           @each(table in input.tables.filter(table => !table.inSetting))
             @if(table.operations.index)
               <b-navbar-item
-                v-if="authorize('{{ table.names.camelCase }}.index')"
+                v-if="authorize('{{ table.names.camelCase }}:index')"
                 tag="router-link"
                 :to="{ path: '/{{ table.names.camelCase }}' }"
               >
@@ -34,7 +34,7 @@
             @endif
             @if(table.operations.create)
               <b-navbar-item
-                v-if="authorize('{{ table.names.camelCase }}.create')"
+                v-if="authorize('{{ table.names.camelCase }}:create')"
                 tag="router-link"
                 :to="{ path: '/{{ table.names.camelCase }}/create' }"
               >
@@ -61,7 +61,7 @@
         <b-navbar-dropdown v-else :label="user.name || user.email">
           @if(input.rbac.enabled)
             <b-navbar-item
-              v-if="authorize('role.update')"
+              v-if="authorize('role:update')"
               tag="router-link"
               to="/rbacMatrix"
               type="is-link"
