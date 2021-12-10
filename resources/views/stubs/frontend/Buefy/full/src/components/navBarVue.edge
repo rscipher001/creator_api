@@ -96,10 +96,13 @@ export default {
   methods: {
     ...mapActions('auth', {
       logoutAction: 'logout',
-      @if(input.rbac.enabled)
-        authorize: 'authorize',
-      @endif
     }),
+
+    @if(input.rbac.enabled)
+      authorize(permission) {
+        return this.permissions.indexOf(permission) !== -1;
+      },
+    @endif
 
     async logout() {
       try {

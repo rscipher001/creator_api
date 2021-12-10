@@ -381,10 +381,6 @@ export default {
           user.role.permissions.forEach((p) => state.permissions.push(p.name))
         }
       },
-
-      authorize({ state }, permission) {
-        return state.permissions.includes(permission);
-      },
     @endif
   },
 

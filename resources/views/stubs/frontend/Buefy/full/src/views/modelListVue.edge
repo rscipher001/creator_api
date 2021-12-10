@@ -168,9 +168,9 @@ export default {
       @endif
     }),
     @if(input.rbac.enabled)
-      ...mapActions('auth', {
-        authorize: 'authorize',
-      }),
+      authorize(permission) {
+        return this.permissions.indexOf(permission) !== -1;
+      },
     @endif
 
     index() {
