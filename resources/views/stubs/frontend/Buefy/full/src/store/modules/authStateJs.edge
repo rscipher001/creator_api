@@ -383,7 +383,7 @@ export default {
       },
 
       authorize({ state }, permission) {
-        return state.permissions.include(permission);
+        return state.permissions.includes(permission);
       },
     @endif
   },
