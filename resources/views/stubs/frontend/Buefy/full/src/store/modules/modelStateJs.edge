@@ -5,8 +5,6 @@ import HttpService from '../../services/http.service';
 @endif
 import ValidationException from '../../exceptions/ValidationException';
 
-
-
 const resource = '{{ table.names.camelCase }}';
 @if(!input.camelCaseStrategy && containsUnderscoreColumn)
 
@@ -224,21 +222,24 @@ export default {
 
     @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
       @each(operation in ['attach', 'detach', 'sync'])
-        async {{ operation }}({ commit }, {
+        async {{ operation }}({ state, commit }, {
           id,
           relation, // Should be camelCase
-          relationId{{ operation === 'sync' ? 's':'' }},
+          relationId{{ operation === 'sync' ? 's' : '' }},
         }) {
           commit('setLoading', { key: '{{ operation }}', value: true });
           try {
-            await HttpService.authPost(
-              `/${resource}/${id}/${this.relations[relation].names.camelCasePlural}{{{
+            {{ operation === 'sync' ? '' : 'const item =' }} await HttpService.authPost(
+              `/${resource}/${id}/${state.relations[relation].camelCasePlural}{{{
                 operation !== 'sync' ? '/${relationId}' : ''
-              }}}/{{ operation }}${relation}`,
+              }}}/{{ operation }}`,
               @if(operation === 'sync')
                 relationIds
               @endif
             );
+            @if (['attach', 'detach'].includes(operation))
+              commit("replace", { id, item });
+            @endif
             commit('setLoading', { key: '{{ operation }}', value: false });
           } catch (e) {
             commit('setLoading', { key: '{{ operation }}', value: false });

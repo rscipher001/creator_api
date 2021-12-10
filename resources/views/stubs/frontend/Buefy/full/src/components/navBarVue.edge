@@ -51,6 +51,11 @@
           @endif
         </div>
         <b-navbar-dropdown v-else :label="user.name || user.email">
+          @if(input.rbac.enabled)
+            <b-navbar-item tag="router-link" to="/rbacMatrix" type="is-link">
+              RBAC Matrix
+            </b-navbar-item>
+          @endif
           <b-navbar-item tag="router-link" to="/setting/profile" type="is-link">
             Setting
           </b-navbar-item>

@@ -21,52 +21,63 @@ const routes = [
     },
   },
   @if(input.auth.register)
-  {
-    path: '/register',
-    name: 'Register',
-    component: () => import('../views/Register.vue'),
-    meta: {
-      guest: true,
+    {
+      path: '/register',
+      name: 'Register',
+      component: () => import('../views/Register.vue'),
+      meta: {
+        guest: true,
+      },
     },
-  },
   @endif
   @if(input.auth.passwordReset)
-  {
-    path: "/forgot_password/request",
-    name: "Forgot Password Request",
-    component: () => import("../views/ForgotPasswordRequest.vue"),
-    meta: {
-      guest: true,
+    {
+      path: "/forgot_password/request",
+      name: "Forgot Password Request",
+      component: () => import("../views/ForgotPasswordRequest.vue"),
+      meta: {
+        guest: true,
+      },
     },
-  },
-  {
-    path: "/forgot_password/verify",
-    name: "Forgot Password Verify",
-    component: () => import("../views/ForgotPasswordUpdate.vue"),
-    meta: {
-      guest: true,
+    {
+      path: "/forgot_password/verify",
+      name: "Forgot Password Verify",
+      component: () => import("../views/ForgotPasswordUpdate.vue"),
+      meta: {
+        guest: true,
+      },
     },
-  },
-  {
-    path: "/email/verify",
-    name: "VerifyEmail",
-    component: () => import("../views/VerifyEmail.vue"),
-  },
-  {
-    path: "/emailUpdate",
-    name: "UpdateEmail",
-    component: () =>
-      import(/* webpackChunkName: "updateEmail" */ "../views/UpdateEmail.vue"),
-  },
-  {
-    path: "/email/verificationPending",
-    name: "EmailVerificationPending",
-    component: () => import("../views/EmailVerificationPending.vue"),
-    meta: {
-      auth: true,
-      emailUnverified: true,
+    {
+      path: "/email/verify",
+      name: "VerifyEmail",
+      component: () => import("../views/VerifyEmail.vue"),
     },
-  },
+    {
+      path: "/emailUpdate",
+      name: "UpdateEmail",
+      component: () =>
+        import(/* webpackChunkName: "updateEmail" */ "../views/UpdateEmail.vue"),
+    },
+    {
+      path: "/email/verificationPending",
+      name: "EmailVerificationPending",
+      component: () => import("../views/EmailVerificationPending.vue"),
+      meta: {
+        auth: true,
+        emailUnverified: true,
+      },
+    },
+  @endif
+  @if(input.rbac.enabled)
+    {
+      path: "/rbacMatrix",
+      name: "RbacMatrix",
+      component: () => import("../views/RbacMatrix.vue"),
+      meta: {
+        auth: true,
+        ensureEmailIsVerified: true,
+      },
+    },
   @endif
   {
     path: "/setting",
