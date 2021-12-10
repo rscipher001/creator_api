@@ -616,8 +616,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       if ({{ relation.modelNames.camelCasePlural }}.length) {
         await {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').sync({{ relation.modelNames.camelCasePlural }}.map(i => i.id));
       }
-      await role.load('{{ relation.modelNames.camelCasePlural }}');
-      return role;
+      await {{ table.names.camelCase }}.load('{{ relation.modelNames.camelCasePlural }}');
+      return {{ table.names.camelCase }};
     }
   @endeach
 }
