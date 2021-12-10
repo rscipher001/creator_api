@@ -82,7 +82,7 @@
             </template>
             @if(table.operations.edit)
               <b-dropdown-item
-                v-if="authorize('{{ table.names.pascalCase }}.edit')"
+                v-if="authorize('{{ table.names.camelCase }}.edit')"
                 @click="edit(props.row.id)"
                 aria-role="edititem"
               >
@@ -91,7 +91,7 @@
             @endif
             @if(table.operations.destroy)
               <b-dropdown-item
-                v-if="authorize('{{ table.names.pascalCase }}.destroy')"
+                v-if="authorize('{{ table.names.camelCase }}.destroy')"
                 @click="destroy(props.row.id)"
                 aria-role="listitem"
               >
@@ -108,7 +108,7 @@
             <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
             <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
             <b-button
-              v-if="authorize('{{ table.names.pascalCase }}.create')"
+              v-if="authorize('{{ table.names.camelCase }}.create')"
               type="is-primary block mt-5"
               tag="router-link"
               to="/{{ table.names.camelCase }}/create"

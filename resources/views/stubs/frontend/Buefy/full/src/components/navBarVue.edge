@@ -25,7 +25,7 @@
           @each(table in input.tables.filter(table => !table.inSetting))
             @if(table.operations.index)
               <b-navbar-item
-                v-if="authorize('{{ table.names.pascalCase }}.index')"
+                v-if="authorize('{{ table.names.camelCase }}.index')"
                 tag="router-link"
                 :to="{ path: '/{{ table.names.camelCase }}' }"
               >
@@ -34,7 +34,7 @@
             @endif
             @if(table.operations.create)
               <b-navbar-item
-                v-if="authorize('{{ table.names.pascalCase }}.create')"
+                v-if="authorize('{{ table.names.camelCase }}.create')"
                 tag="router-link"
                 :to="{ path: '/{{ table.names.camelCase }}/create' }"
               >
