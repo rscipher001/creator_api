@@ -27,6 +27,7 @@ export default class AuthGenerator {
     await this.copySettingProfileView()
     await this.copySettingAccountView()
     await this.copySettingSecurityView()
+    await this.copyRbacMatrixView()
   }
 
   protected async copyRegisterView() {
@@ -128,6 +129,22 @@ export default class AuthGenerator {
         }
       )
       await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copyRbacMatrixView() {
+    if (this.input.rbac.enabled) {
+      const path = `${this.input.spaPath}/src/views/RbacMatrix.vue`
+      const exists = await HelperService.fileExists(path)
+      if (!exists) {
+        const content = await View.render(
+          `stubs/frontend/${this.input.tech.frontend}/full/src/views/rbacMatrixVue`,
+          {
+            input: this.input,
+          }
+        )
+        await HelperService.writeFile(path, content)
+      }
     }
   }
 

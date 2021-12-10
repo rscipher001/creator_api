@@ -171,21 +171,6 @@ export default class RBACGenerator {
     await HelperService.writeJson(filePath, content)
   }
 
-  // Copy src/views/RbacMatrix.vue
-  protected async createView() {
-    const path = `${this.input.spaPath}/src/views/RbacMatrix.vue`
-    const exists = await HelperService.fileExists(path)
-    if (!exists) {
-      const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/src/views/rbacMatrixVue`,
-        {
-          input: this.input,
-        }
-      )
-      await HelperService.writeFile(path, content)
-    }
-  }
-
   /**
    * Steps
    * 1. Add seeder data
@@ -212,7 +197,6 @@ export default class RBACGenerator {
     await this.createStartBouncerTs()
 
     await this.createSeeders()
-    await this.createView()
   }
 
   public async init() {
