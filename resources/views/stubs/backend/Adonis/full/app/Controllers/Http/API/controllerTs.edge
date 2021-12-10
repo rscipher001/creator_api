@@ -1,9 +1,13 @@
 @set('belongsToAuth', table.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
+@set('hasRelations', table.relations.length)
 import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}';
 @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)~
   @each(parentTable in table.routeParentTables)
     import {{ parentTable.names.pascalCase }} from 'App/Models/{{ parentTable.names.pascalCase }}';
   @endeach
+@endif
+@if(table.operations.index && hasRelations)
+  import { ExtractModelRelations } from '@ioc:Adonis/Lucid/Orm'
 @endif
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 @if(table.operations.store)
@@ -68,9 +72,25 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           {{ table.routeParentTables[lastIndex].names.camelCase }}Id,
         @endif
       }
-      return {{ table.names.pascalCase }}.query()
-      .where(condition)
-      .paginate(page, size)
+
+      @if(hasRelations)
+        const queryBuilder = {{ table.names.pascalCase }}.query()
+        const relationsString: string = request.input('relations')
+        let preLoadRelation: string[] = []
+        if (relationsString) {
+          preLoadRelation = relationsString.split(',')
+        }
+        if (preLoadRelation.length) {
+          preLoadRelation.forEach((relation) => {
+            queryBuilder.preload(relation as ExtractModelRelations<{{ table.names.pascalCase }}>)
+          })
+        }
+        return queryBuilder.where(condition).paginate(page, size)
+      @else
+        return {{ table.names.pascalCase }}.query()
+          .where(condition)
+          .paginate(page, size)
+      @endif
     }
   @endif
 
@@ -453,7 +473,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
     @set('relationModel', input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
-    @set('relationModelBelongsToAuth', relationModel.relations.filter(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
+    @set('relationModelBelongsToAuth', relationModel.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
     public async attach{{ relation.modelNames.pascalCase }}({
       request,
       @if(belongsToAuth || relationModelBelongsToAuth)
@@ -470,12 +490,14 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         input, table
       })
       const condition: { [key: string]: any } = {};
+      const id = request.param('id');
+      condition.id = id
       @if(belongsToAuth)
         condition.{{
           input.camelCaseStrategy ?
             `${input.auth.table.names.camelCase}Id` :
             `${input.auth.table.names.snakeCase}_id`
-        }} = auth.user!.id
+        }} = auth.user!.id;
       @endif
       @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
         @set('lastIndex', table.routeParentTables.length - 1)
@@ -495,7 +517,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @endif
       }).firstOrFail()
 
-      return {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').attach([{{ relation.modelNames.camelCase }}.id])
+      await {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').attach([{{ relation.modelNames.camelCase }}.id])
+      await {{ table.names.camelCase }}.load('{{ relation.modelNames.camelCasePlural }}')
+      return {{ table.names.camelCase }}
     }
 
     public async detach{{ relation.modelNames.pascalCase }}({
@@ -514,12 +538,14 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         input, table
       })
       const condition: { [key: string]: any } = {};
+      const id = request.param('id');
+      condition.id = id;
       @if(belongsToAuth)
         condition.{{
           input.camelCaseStrategy ?
             `${input.auth.table.names.camelCase}Id` :
             `${input.auth.table.names.snakeCase}_id`
-        }} = auth.user!.id
+        }} = auth.user!.id;
       @endif
       @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
         @set('lastIndex', table.routeParentTables.length - 1)
@@ -539,12 +565,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @endif
       }).firstOrFail()
 
-      return {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').detach([{{ relation.modelNames.camelCase }}.id])
+      await {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').detach([{{ relation.modelNames.camelCase }}.id]);
+      await {{ table.names.camelCase }}.load('{{ relation.modelNames.camelCasePlural }}');
+      return {{ table.names.camelCase }};
     }
 
     public async sync{{ relation.modelNames.pascalCasePlural }}({
       request,
-      response,
       @if(belongsToAuth || relationModelBelongsToAuth)
         auth,
       @endif
@@ -560,6 +587,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         input, table
       })
       const condition: { [key: string]: any } = {};
+      const id = request.param('id');
+      condition.id = id;
       @if(belongsToAuth)
         condition.{{
           input.camelCaseStrategy ?
@@ -585,9 +614,10 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @endif
       }).whereIn('id', ids)
       if ({{ relation.modelNames.camelCasePlural }}.length) {
-        return {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').sync({{ relation.modelNames.camelCasePlural }}.map(i => i.id))
+        await {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').sync({{ relation.modelNames.camelCasePlural }}.map(i => i.id));
       }
-      return response.noContent()
+      await role.load('{{ relation.modelNames.camelCasePlural }}');
+      return role;
     }
   @endeach
 }
