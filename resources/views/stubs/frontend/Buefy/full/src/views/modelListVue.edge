@@ -47,7 +47,7 @@
       :data="items"
       @if(table.operations.storeMany)
         :checked-rows.sync="selectItems"
-        checkable="authorize('{{ table.names.camelCase }}:storeMany')"
+        :checkable="authorize('{{ table.names.camelCase }}:storeMany')"
       @endif
       hoverable
       striped
