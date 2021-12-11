@@ -1,3 +1,4 @@
+@set('hasFilterableColumn', !!table.columns.find(c => c.meta.filterable))
 <template>
   <section class="container">
     <b-loading is-full-page v-model="isLoading"></b-loading>
@@ -61,7 +62,7 @@
       </div>
     </div>
 
-    @if(table.columns.find(c => c.meta.filterable))
+    @if(hasFilterableColumn)
       <div class="section py-4">
         <div class="columns box py-0">
           <div class="column">
@@ -192,7 +193,7 @@
                 {{{
                   `{{ props.row.${camelCase(column)}.toFixed(${decimalCount}) }}`
                 }}}
-              @elseif (currentColumn.type === 'Date')
+              @elseif(currentColumn.type === 'Date')
                 {{{
                   `new Date({{ props.row.${camelCase(column)} }}).toLocaleString()`
                 }}}
@@ -302,6 +303,13 @@ export default {
       currentPageNo: 1,
       currentPageSize: 10,
       multiSelect: false,
+      @if(hasFilterableColumn)
+        filter: {
+          @each(column in table.columns.filter(c => c.meta.filterable))
+            {{ column.names.camelCase }}: null,
+          @endeach
+        },
+      @endif
       @if(table.operations.storeMany)
         selectedItems: [],
       @endif
@@ -329,10 +337,18 @@ export default {
     @endif
 
     index() {
-      this.indexAction({
+      const indexQueryParams = {
         size: this.currentPageSize,
         page: this.currentPageNo,
-      });
+      };
+      @if(hasFilterableColumn)
+        @each(column in table.columns.filter(c => c.meta.filterable))
+          if (this.filter.{{ column.names.camelCase }}) {
+            indexQueryParams.{{ column.names.camelCase }} = this.filter.{{ column.names.camelCase }};
+          }
+        @endeach
+      @endif
+      this.indexAction(indexQueryParams);
     },
 
     @if(table.operations.edit)
@@ -413,6 +429,13 @@ export default {
     async currentPageNo() {
       return this.index();
     },
+    @if(hasFilterableColumn)
+      @each(column in table.columns.filter(c => c.meta.filterable))
+        'filter.{{ column.names.camelCase }}': function() {
+          this.indexAction()
+        },
+      @endeach
+    @endif
   },
 
   computed: {
