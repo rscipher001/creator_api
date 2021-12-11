@@ -1,88 +1,34 @@
 <template>
-  <section class="section">
-    <div class="container is-max-desktop">
+  <section class="container">
+    <div class="section py-4">
       <div class="columns">
-        <aside class="column is-3">
-          <p class="menu-label">General</p>
-          <ul class="menu-list">
-            <b-button
-              tag="router-link"
-              to="/setting/profile"
-              :active="currentRouteName === 'SettingProfile'"
-              :type="
-                currentRouteName === 'SettingProfile'
-                  ? 'is-primary'
-                  : 'is-light'
-              "
-              icon-left="account"
-            >
-              Profile
-            </b-button>
-            @if(input.mailEnabled)
-              <b-button
-                tag="router-link"
-                to="/setting/account"
-                :active="currentRouteName === 'SettingAccount'"
-                :type="
-                  currentRouteName === 'SettingAccount'
-                    ? 'is-primary'
-                    : 'is-light'
-                "
-                icon-left="email"
-              >
-                Account
+        <div class="column px-0">
+          <div class="level">
+            <div class="level-left is-size-3">Settings</div>
+            <div class="level-right">
+              <b-button tag="router-link" to="/dashboard" type="is-white">
+                Dashboard
               </b-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section py-4">
+      <div class="columns box px-2 py-2">
+        <div class="column px-0 py-0">
+          <b-tabs v-model="activeTab" type="is-boxed">
+            <b-tab-item label="Profile">
+              <Profile />
+            </b-tab-item>
+            @if(input.mailEnabled)
+              <b-tab-item label="Email"><Email /></b-tab-item>
             @endif
-            <b-button
-              tag="router-link"
-              to="/setting/security"
-              :active="currentRouteName === 'SettingSecurity'"
-              :type="
-                currentRouteName === 'SettingSecurity'
-                  ? 'is-primary'
-                  : 'is-light'
-              "
-              icon-left="lock"
-            >
-              Security
-            </b-button>
-          </ul>
-          @if(input.tables.find(t => t.inSetting))
-            @each(table in input.tables.filter(t => t.inSetting))
-              <p class="menu-label">{{ capitalCase(table.names.pascalCase) }}</p>
-              @if(table.operations.index)
-                <b-button
-                  tag="router-link"
-                  to="/setting/{{ table.names.camelCase }}"
-                  :active="currentRouteName === '{{ table.names.pascalCase }}Index'"
-                  :type="
-                    currentRouteName === '{{ table.names.pascalCase }}Index'
-                      ? 'is-primary'
-                      : 'is-light'
-                  "
-                >
-                  {{ capitalCase(table.names.pascalCase) }} List
-                </b-button>
-              @endif
-              @if (table.operations.create)
-                <b-button
-                  tag="router-link"
-                  to="/setting/{{ table.names.camelCase }}/create"
-                  :active="currentRouteName === '{{ table.names.pascalCase }}Create'"
-                  :type="
-                    currentRouteName === '{{ table.names.pascalCase }}Create'
-                      ? 'is-primary'
-                      : 'is-light'
-                  "
-                >
-                  New {{ capitalCase(table.names.pascalCase) }}
-                </b-button>
-              @endif
-            @endeach
-          @endif
-        </aside>
-        <div class="column box is-9 has-background-white">
-          <router-view />
+            <b-tab-item label="Password">
+              <Password />
+            </b-tab-item>
+          </b-tabs>
         </div>
       </div>
     </div>
@@ -90,13 +36,25 @@
 </template>
 
 <script>
-// import { mapState, mapActions } from "vuex";
+import Profile from "../views/setting/Profile.vue";
+@if(input.mailEnabled)
+  import Email from "../views/setting/Account.vue";
+@endif
+import Password from "../views/setting/Security.vue";
 
 export default {
-  computed: {
-    currentRouteName() {
-      return this.$route.name;
-    },
+  components: {
+    Profile,
+    @if(input.mailEnabled)
+      Email,
+    @endif
+    Password,
+  },
+
+  data() {
+    return {
+      activeTab: 0,
+    };
   },
 };
 </script>

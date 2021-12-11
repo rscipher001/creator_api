@@ -1,7 +1,7 @@
 <template>
   <section class="container">
     <b-loading is-full-page v-model="isLoading"></b-loading>
-    <div class="section py-5">
+    <div class="section py-4">
       <div class="columns">
         <div class="column px-0">
           <div class="level">
@@ -53,7 +53,7 @@
     </div>
 
     @if(table.columns.find(c => c.meta.filterable))
-      <div class="section py-5">
+      <div class="section py-4">
         <div class="columns box py-0">
           <div class="column">
             <b-field label="Page Size">
@@ -151,7 +151,7 @@
       </div>
     @endif
 
-    <div class="section py-5">
+    <div class="section py-4">
       <div class="columns box">
         <b-table
           v-if="items.length"
@@ -246,7 +246,7 @@
       </div>
     </div>
 
-    <div class="section py-5">
+    <div class="section py-4">
       <div class="columns">
         <div class="column px-0">
           <b-pagination

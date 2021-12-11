@@ -4,7 +4,7 @@
 @set('nonAuthBelongsToRelations', table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth'))
 <template>
   <section class="container">
-    <div class="section py-5">
+    <div class="section py-4">
       <div class="columns">
         <div class="column px-0">
           <div class="level">
@@ -15,7 +15,7 @@
       </div>
     </div>
     
-    <div class="section py-5">
+    <div class="section py-4">
       <div class="columns box">
         <div class="column">
           <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
