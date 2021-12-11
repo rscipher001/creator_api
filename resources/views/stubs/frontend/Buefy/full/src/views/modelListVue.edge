@@ -1,7 +1,7 @@
 <template>
   <section class="container">
-    <div class="section">
-      <b-loading is-full-page v-model="isLoading"></b-loading>
+    <b-loading is-full-page v-model="isLoading"></b-loading>
+    <div class="section py-5">
       <div class="columns">
         <div class="column px-0">
           <div class="level">
@@ -39,8 +39,8 @@
                     >CSV</b-dropdown-item>
                   </b-dropdown>
                 @endif
-                <b-button @click="destroyMany" type="is-white">
-                  Enable Multiselect
+                <b-button @click="multiselect = !multiselect" type="is-white">
+                  {{ multiselect ? 'Disable' : 'Enable' }} Multiselect
                 </b-button>
                 @if(table.operations.create)
                   <b-button tag="router-link" to="{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/create" type="is-primary">New</b-button>
@@ -50,8 +50,10 @@
           </div>
         </div>
       </div>
+    </div>
 
-      @if(table.columns.find(c => c.meta.filterable))
+    @if(table.columns.find(c => c.meta.filterable))
+      <div class="section py-5">
         <div class="columns box py-0">
           <div class="column">
             <b-field label="Page Size">
@@ -146,10 +148,13 @@
             </b-field>
           @endeach
         </div>
-      @endif
+      </div>
+    @endif
 
-      <div class="columns box mt-1" v-if="items.length">
+    <div class="section py-5">
+      <div class="columns box">
         <b-table
+          v-if="items.length"
           class="column"
           :data="items"
           @if(table.operations.storeMany)
@@ -218,43 +223,48 @@
             </b-dropdown>
           </b-table-column>
         </b-table>
-      </div>
-      <div class="hero is-medium" v-else>
-        <div class="hero-body container is-flex has-text-centered">
-          <div class="is-flex-direction-colomn">
-            @if(table.operations.create)
-              <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
-              <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
-              <b-button
-                v-if="authorize('{{ table.names.camelCase }}:create')"
-                type="is-primary block mt-5"
-                tag="router-link"
-                to="/{{ table.names.camelCase }}/create"
-              >
-                New
-              </b-button>
-            @else
-              <h1 class="is-size-2">There are no {{ capitalCase(table.names.pascalCase) }}</h1>
-            @endif
+        <div class="hero is-medium column" v-else>
+          <div class="hero-body container is-flex has-text-centered">
+            <div class="is-flex-direction-colomn">
+              @if(table.operations.create)
+                <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
+                <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
+                <b-button
+                  v-if="authorize('{{ table.names.camelCase }}:create')"
+                  type="is-primary block mt-5"
+                  tag="router-link"
+                  to="/{{ table.names.camelCase }}/create"
+                >
+                  New
+                </b-button>
+              @else
+                <h1 class="is-size-2">There are no {{ capitalCase(table.names.pascalCase) }}</h1>
+              @endif
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="section">
-      <b-pagination
-        v-if="meta.lastPage > 1"
-        v-model="currentPageNo"
-        :current.sync="currentPageNo"
-        :total="meta.total"
-        :per-page="meta.perPage"
-        icon-prev="arrow-left"
-        icon-next="arrow-right"
-        order="is-centered"
-        aria-next-label="Next page"
-        aria-previous-label="Previous page"
-        aria-page-label="Page"
-        aria-current-label="Current page">
-      </b-pagination>
+
+    <div class="section py-5">
+      <div class="columns">
+        <div class="column px-0">
+          <b-pagination
+            v-if="meta.lastPage > 1"
+            v-model="currentPageNo"
+            :current.sync="currentPageNo"
+            :total="meta.total"
+            :per-page="meta.perPage"
+            icon-prev="arrow-left"
+            icon-next="arrow-right"
+            order="is-centered"
+            aria-next-label="Next page"
+            aria-previous-label="Previous page"
+            aria-page-label="Page"
+            aria-current-label="Current page">
+          </b-pagination>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -269,6 +279,7 @@ export default {
     return {
       currentPageNo: 1,
       currentPageSize: 10,
+      multiSelect: false,
       @if(table.operations.storeMany)
         selectItems: [],
       @endif
