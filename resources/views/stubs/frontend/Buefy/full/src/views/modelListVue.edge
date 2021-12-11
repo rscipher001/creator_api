@@ -435,7 +435,7 @@ export default {
     @if(hasFilterableColumn)
       @each(column in table.columns.filter(c => c.meta.filterable))
         'filter.{{ column.names.camelCase }}': function() {
-          this.indexAction()
+          this.index()
         },
       @endeach
     @endif
