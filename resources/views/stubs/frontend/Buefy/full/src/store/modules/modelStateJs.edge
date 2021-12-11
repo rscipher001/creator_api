@@ -86,9 +86,9 @@ export default {
           const { data: items, meta } = await HttpService.authGet(
             `/${resource}`,
             @if(input.camelCaseStrategy)
-              toCamelCase(filter)
-            @else
               filter
+            @else
+              toCamelCase(filter)
             @endif
           );
           commit('load', {
