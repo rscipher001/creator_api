@@ -1,149 +1,153 @@
 <template>
-  <section class="container section">
-    <b-loading is-full-page v-model="isLoading"></b-loading>
-    <div class="level">
-      <div class="level-left is-size-3">@{{ items.length }} {{ capitalCase(table.names.pascalCasePlural) }}</div>
-      @if(table.operations.storeMany || table.operations.store || table.operations.destroyMany)
-        <div
-          class="level-right"
-          v-if="authorize('{{ table.names.camelCase }}:storeMany') || authorize('{{ table.names.camelCase }}:destroyMany') || authorize('{{ table.names.camelCase }}:store')"
-        >
-          @if(table.operations.destroyMany)
-            <b-button
-              v-if="selectItems.length && authorize('{{ table.names.camelCase }}:destroyMany')"
-              @click="destroyMany"
-              type="is-danger"
-            >
-              Delete Selected
-            </b-button>
+  <section class="container">
+    <div class="section">
+      <b-loading is-full-page v-model="isLoading"></b-loading>
+      <div class="level">
+        <div class="level-left is-size-3">@{{ items.length }} {{ capitalCase(table.names.pascalCasePlural) }}</div>
+        @if(table.operations.storeMany || table.operations.store || table.operations.destroyMany)
+          <div
+            class="level-right"
+            v-if="authorize('{{ table.names.camelCase }}:storeMany') || authorize('{{ table.names.camelCase }}:destroyMany') || authorize('{{ table.names.camelCase }}:store')"
+          >
+            @if(table.operations.destroyMany)
+              <b-button
+                v-if="selectItems.length && authorize('{{ table.names.camelCase }}:destroyMany')"
+                @click="destroyMany"
+                type="is-danger"
+              >
+                Delete Selected
+              </b-button>
+            @endif
+            @if(table.operations.storeMany)
+              <b-dropdown
+                v-if="authorize('{{ table.names.camelCase }}:storeMany')"
+                aria-role="list"
+                class="mx-1"
+              >
+                <template #trigger="{ active }">
+                  <b-button
+                    label="Import From"
+                    type="is-primary"
+                    :icon-right="active ? 'menu-up' : 'menu-down'"
+                  />
+                </template>
+                <b-dropdown-item
+                  @click="$router.push('/{{ table.names.camelCase }}/import/csv')"
+                  aria-role="listitem"
+                >CSV</b-dropdown-item>
+              </b-dropdown>
+            @endif
+            @if(table.operations.create)
+              <b-button tag="router-link" to="{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/create" type="is-light">New</b-button>
+            @endif
+          </div>
+        @endif
+      </div>
+      <b-table
+        v-if="items.length"
+        :data="items"
+        @if(table.operations.storeMany)
+          :checked-rows.sync="selectItems"
+          :checkable="authorize('{{ table.names.camelCase }}:destroyMany')"
+        @endif
+        hoverable
+      >
+        @each(column in table.indexColumns)
+          @set('currentColumn', table.columns.find((c) => c.names.pascalCase === pascalCase(column)))
+          <b-table-column field="{{ camelCase(column) }}" label="{{
+            currentColumn.input.displayName || capitalCase(column)
+          }}" v-slot="props" {{
+            ['Decimal', 'Integer'].includes(currentColumn.type) ? 'numeric' : ''
+          }}>
+            @if('Decimal' === currentColumn.type && currentColumn.input.decimal.step !== 'any')
+              @set('decimalCount', `${currentColumn.input.decimal.step}`.split('.')[1].length)
+              {{{
+                `{{ props.row.${camelCase(column)}.toFixed(${decimalCount}) }}`
+              }}}
+            @elseif (currentColumn.type === 'Date')
+              {{{
+                `new Date({{ props.row.${camelCase(column)} }}).toLocaleString()`
+              }}}
+            @else
+              {{{
+                `{{ props.row.${camelCase(column)} }}`
+              }}}
+            @endif
+          </b-table-column>
+        @endeach
+        <b-table-column
+          label="Action"
+          @if(table.operations.edit && table.operations.destroy)
+            v-slot="props"
           @endif
-          @if(table.operations.storeMany)
-            <b-dropdown
-              v-if="authorize('{{ table.names.camelCase }}:storeMany')"
-              aria-role="list"
-              class="mx-1"
-            >
+        >
+          <b-dropdown aria-role="list">
               <template #trigger="{ active }">
                 <b-button
-                  label="Import From"
+                  label="More"
                   type="is-primary"
+                  outlined
                   :icon-right="active ? 'menu-up' : 'menu-down'"
                 />
               </template>
-              <b-dropdown-item
-                @click="$router.push('/{{ table.names.camelCase }}/import/csv')"
-                aria-role="listitem"
-              >CSV</b-dropdown-item>
-            </b-dropdown>
-          @endif
-          @if(table.operations.create)
-            <b-button tag="router-link" to="{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/create" type="is-light">New</b-button>
-          @endif
-        </div>
-      @endif
-    </div>
-    <b-table
-      v-if="items.length"
-      :data="items"
-      @if(table.operations.storeMany)
-        :checked-rows.sync="selectItems"
-        :checkable="authorize('{{ table.names.camelCase }}:destroyMany')"
-      @endif
-      hoverable
-    >
-      @each(column in table.indexColumns)
-        @set('currentColumn', table.columns.find((c) => c.names.pascalCase === pascalCase(column)))
-        <b-table-column field="{{ camelCase(column) }}" label="{{
-          currentColumn.input.displayName || capitalCase(column)
-        }}" v-slot="props" {{
-          ['Decimal', 'Integer'].includes(currentColumn.type) ? 'numeric' : ''
-        }}>
-          @if('Decimal' === currentColumn.type && currentColumn.input.decimal.step !== 'any')
-            @set('decimalCount', `${currentColumn.input.decimal.step}`.split('.')[1].length)
-            {{{
-              `{{ props.row.${camelCase(column)}.toFixed(${decimalCount}) }}`
-            }}}
-          @elseif (currentColumn.type === 'Date')
-            {{{
-              `new Date({{ props.row.${camelCase(column)} }}).toLocaleString()`
-            }}}
-          @else
-            {{{
-              `{{ props.row.${camelCase(column)} }}`
-            }}}
-          @endif
+              @if(table.operations.edit)
+                <b-dropdown-item
+                  v-if="authorize('{{ table.names.camelCase }}:edit')"
+                  @click="edit(props.row.id)"
+                  aria-role="edititem"
+                >
+                  Edit
+                </b-dropdown-item>
+              @endif
+              @if(table.operations.destroy)
+                <b-dropdown-item
+                  v-if="authorize('{{ table.names.camelCase }}:destroy')"
+                  @click="destroy(props.row.id)"
+                  aria-role="listitem"
+                >
+                  Delete
+                </b-dropdown-item>
+              @endif
+          </b-dropdown>
         </b-table-column>
-      @endeach
-      <b-table-column
-        label="Action"
-        @if(table.operations.edit && table.operations.destroy)
-          v-slot="props"
-        @endif
-      >
-         <b-dropdown aria-role="list">
-            <template #trigger="{ active }">
+      </b-table>
+      <div class="hero is-medium" v-else>
+        <div class="hero-body container is-flex has-text-centered">
+          <div class="is-flex-direction-colomn">
+            @if(table.operations.create)
+              <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
+              <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
               <b-button
-                label="More"
-                type="is-primary"
-                outlined
-                :icon-right="active ? 'menu-up' : 'menu-down'"
-              />
-            </template>
-            @if(table.operations.edit)
-              <b-dropdown-item
-                v-if="authorize('{{ table.names.camelCase }}:edit')"
-                @click="edit(props.row.id)"
-                aria-role="edititem"
+                v-if="authorize('{{ table.names.camelCase }}:create')"
+                type="is-primary block mt-5"
+                tag="router-link"
+                to="/{{ table.names.camelCase }}/create"
               >
-                Edit
-              </b-dropdown-item>
+                New
+              </b-button>
+            @else
+              <h1 class="is-size-2">There are no {{ capitalCase(table.names.pascalCase) }}</h1>
             @endif
-            @if(table.operations.destroy)
-              <b-dropdown-item
-                v-if="authorize('{{ table.names.camelCase }}:destroy')"
-                @click="destroy(props.row.id)"
-                aria-role="listitem"
-              >
-                Delete
-              </b-dropdown-item>
-            @endif
-        </b-dropdown>
-      </b-table-column>
-    </b-table>
-    <div class="hero is-medium" v-else>
-      <div class="hero-body container is-flex has-text-centered">
-        <div class="is-flex-direction-colomn">
-          @if(table.operations.create)
-            <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
-            <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
-            <b-button
-              v-if="authorize('{{ table.names.camelCase }}:create')"
-              type="is-primary block mt-5"
-              tag="router-link"
-              to="/{{ table.names.camelCase }}/create"
-            >
-              New
-            </b-button>
-          @else
-            <h1 class="is-size-2">There are no {{ capitalCase(table.names.pascalCase) }}</h1>
-          @endif
+          </div>
         </div>
       </div>
     </div>
-    <b-pagination
-      v-if="meta.lastPage > 1"
-      v-model="currentPageNo"
-      :current.sync="currentPageNo"
-      :total="meta.total"
-      :per-page="meta.perPage"
-      icon-prev="arrow-left"
-      icon-next="arrow-right"
-      order="is-centered"
-      aria-next-label="Next page"
-      aria-previous-label="Previous page"
-      aria-page-label="Page"
-      aria-current-label="Current page">
-    </b-pagination>
+    <div class="section">
+      <b-pagination
+        v-if="meta.lastPage > 1"
+        v-model="currentPageNo"
+        :current.sync="currentPageNo"
+        :total="meta.total"
+        :per-page="meta.perPage"
+        icon-prev="arrow-left"
+        icon-next="arrow-right"
+        order="is-centered"
+        aria-next-label="Next page"
+        aria-previous-label="Previous page"
+        aria-page-label="Page"
+        aria-current-label="Current page">
+      </b-pagination>
+    </div>
   </section>
 </template>
 
