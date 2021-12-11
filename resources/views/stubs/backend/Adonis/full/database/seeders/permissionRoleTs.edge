@@ -2,7 +2,7 @@ import Role from 'App/Models/Role'
 import Permission from 'App/Models/Permission'
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
 
-export default class PermissionRoleSeeder extends BaseSeeder {
+export default class PermissionRole extends BaseSeeder {
   public async run() {
     @each(item in matrix)
       const {{ item.role }} = await Role.findBy('name', '{{ item.role }}')

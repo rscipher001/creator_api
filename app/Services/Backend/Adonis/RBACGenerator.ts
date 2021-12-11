@@ -50,11 +50,11 @@ export default class RBACGenerator {
   }
 
   protected async matrixSeeder() {
-    const filePath = `${this.input.path}/database/seeders/PermissionRoleSeeder.ts`
+    const filePath = `${this.input.path}/database/seeders/PermissionRole.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/backend/${this.input.tech.backend}/full/database/seeders/permissionRoleSeederTs`,
+        `stubs/backend/${this.input.tech.backend}/full/database/seeders/permissionRoleTs`,
         {
           input: this.input,
           matrix: this.input.rbac.matrix,
