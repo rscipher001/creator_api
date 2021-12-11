@@ -22,6 +22,31 @@
       </div>
 
       <div class="section py-4">
+        <div class="columns box py-2">
+          <div class="column">
+            <b-field label="Permission">
+              <b-input
+                v-model="filter.permission"
+                maxlength="127"
+                placeholder="Filter permissions..."
+              >
+              </b-input>
+            </b-field>
+          </div>
+          <div class="column">
+            <b-field label="Role">
+              <b-input
+                v-model="filter.role"
+                maxlength="127"
+                placeholder="Filter roles..."
+              >
+              </b-input>
+            </b-field>
+          </div>
+        </div>
+      </div>
+
+      <div class="section py-4">
         <div class="columns box">
           <div class="column">
             <table class="table is-bordered is-hoverable is-fullwidth">
@@ -29,7 +54,7 @@
                 <tr>
                   <th>Permission</th>
                   <th
-                    v-for="(role, roleIndex) in roles"
+                    v-for="(role, roleIndex) in filteredRoles"
                     :key="'role_' + roleIndex"
                     class="is-capitalized"
                   >
@@ -39,11 +64,11 @@
               </thead>
               <tbody>
                 <tr
-                  v-for="(permission, permissionIndex) in permissions"
+                  v-for="(permission, permissionIndex) in filteredPermissions"
                   :key="'permission_' + permissionIndex"
                 >
                   <td>@{{ permission.name }}</td>
-                  <td v-for="(role, roleIndex) in roles" :key="'role_' + roleIndex">
+                  <td v-for="(role, roleIndex) in filteredRoles" :key="'role_' + roleIndex">
                     <b-button
                       type="is-ghost"
                       @click="togglePermission(role, permission)"
@@ -84,6 +109,10 @@
     data() {
       return {
         loading: false,
+        filter: {
+          role: "",
+          permission: "",
+        },
       };
     },
   
@@ -149,6 +178,18 @@
         permissions: (state) => state.items,
         permissionsMeta: (state) => state.meta,
       }),
+      filteredRoles() {
+        return this.roles.filter((role) => {
+          return role.name.toLowerCase().includes(this.filter.role.toLowerCase());
+        });
+      },
+      filteredPermissions() {
+        return this.permissions.filter((permission) => {
+          return permission.name
+            .toLowerCase()
+            .includes(this.filter.permission.toLowerCase());
+        });
+      },
     },
   };
   </script>
