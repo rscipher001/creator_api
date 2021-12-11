@@ -1,7 +1,5 @@
 <template>
   <section>
-    <b-loading is-full-page v-model="isLoading"></b-loading>
-    <h1 class="is-size-5">Account Setting</h1>
     <hr class="my-2" />
     <form method="POST" @submit.prevent="updateAccount">
       <div class="section" v-if="existingRequest">
