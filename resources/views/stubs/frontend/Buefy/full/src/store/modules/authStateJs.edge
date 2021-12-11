@@ -81,6 +81,9 @@ export default {
             user,
           @endif
         });
+        @if(input.rbac.enabled)
+          dispatch("preparePermissions");
+        @endif
         commit("setLoading", { key: "login", value: false });
       } catch (e) {
         commit("setLoading", { key: "login", value: false });
@@ -103,6 +106,9 @@ export default {
             user,
           @endif
         });
+        @if(input.rbac.enabled)
+          dispatch("preparePermissions");
+        @endif
         commit("setLoading", { key: "register", value: false });
       } catch (e) {
         commit("setLoading", { key: "register", value: false });
