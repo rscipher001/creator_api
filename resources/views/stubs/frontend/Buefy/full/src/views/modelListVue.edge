@@ -296,6 +296,7 @@
 </template>
 
 <script>
+import debounce from "lodash/debounce";
 import { mapActions, mapState } from 'vuex';
 
 export default {
@@ -338,6 +339,10 @@ export default {
         return this.permissions.indexOf(permission) !== -1;
       },
     @endif
+
+    _index: debounce(function () {
+      this.index();
+    }, 2000),
 
     index() {
       const indexQueryParams = {
@@ -430,12 +435,15 @@ export default {
 
   watch: {
     async currentPageNo() {
-      return this.index();
+      return this._index();
+    },
+    async currentPageSize() {
+      return this._index();
     },
     @if(hasFilterableColumn)
       @each(column in table.columns.filter(c => c.meta.filterable))
         'filter.{{ column.names.camelCase }}': function() {
-          this.index()
+          this._index()
         },
       @endeach
     @endif

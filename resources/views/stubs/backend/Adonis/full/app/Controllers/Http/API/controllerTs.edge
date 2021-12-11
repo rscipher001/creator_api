@@ -59,30 +59,33 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
       })
-      const condition: { [key: string]: any } = {
-        @if(belongsToAuth)
-        {{
+      const queryBuilder = {{ table.names.pascalCase }}.query()
+
+      @if(belongsToAuth)
+        queryBuilder.where('{{
           input.camelCaseStrategy ?
             `${input.auth.table.names.camelCase}Id` :
             `${input.auth.table.names.snakeCase}_id`
-        }}: auth.user!.id,
-        @endif
-        @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-          @set('lastIndex', table.routeParentTables.length - 1)
-          {{ table.routeParentTables[lastIndex].names.camelCase }}Id,
-        @endif
-      }
+        }}', auth.user!.id)
+      @endif
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+        @set('lastIndex', table.routeParentTables.length - 1)
+        queryBuilder.where('{{ table.routeParentTables[lastIndex].names.camelCase }}Id', {{ table.routeParentTables[lastIndex].names.camelCase }}Id)
+      @endif
 
       @each(column in table.columns.filter(c => c.meta.filterable))
         if (request.input('{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}')) {
-          condition.{{
+          queryBuilder.where('{{
             input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase
-          }} = request.input('{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}');
+          }}',
+          @if(column.type === 'String')
+            'like',
+          @endif
+          request.input('{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'));
         }
       @endeach
 
       @if(hasRelations)
-        const queryBuilder = {{ table.names.pascalCase }}.query()
         const relationsString: string = request.input('relations')
         let preLoadRelation: string[] = []
         if (relationsString) {
@@ -93,12 +96,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             queryBuilder.preload(relation as ExtractModelRelations<{{ table.names.pascalCase }}>)
           })
         }
-        return queryBuilder.where(condition).paginate(page, size)
-      @else
-        return {{ table.names.pascalCase }}.query()
-          .where(condition)
-          .paginate(page, size)
       @endif
+      return queryBuilder.paginate(page, size)
     }
   @endif
 

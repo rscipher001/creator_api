@@ -1,4 +1,7 @@
-@set('containsUnderscoreColumn', table.columns.find(c => c.columnName.indexOf('_') >= 0))
+@if(!input.camelCaseStrategy)
+  import camelCase from "lodash/camelCase";
+  import snakeCase from "lodash/snakeCase";
+@endif
 import HttpService from '../../services/http.service';
 @if(!input.camelCaseStrategy)
   import HelperService from "../../services/helper.service";
@@ -6,23 +9,27 @@ import HttpService from '../../services/http.service';
 import ValidationException from '../../exceptions/ValidationException';
 
 const resource = '{{ table.names.camelCase }}';
-@if(!input.camelCaseStrategy && containsUnderscoreColumn)
+@if(!input.camelCaseStrategy)
 
-  const toCamelCaseAttributes = (item) => {
-    @each(column in table.columns.filter(c => c.columnName.indexOf('_') >= 0))
-      item.{{ column.names.camelCase }} = item.{{ column.names.snakeCase }};
-      delete item.{{ column.names.snakeCase }};
-    @endeach
-    return item;
-  };
+const toCamelCase = (obj) => {
+  if (obj) {
+    return Object.keys(obj).reduce((acc, key) => {
+      acc[camelCase(key)] = obj[key];
+      return acc;
+    }, {});
+  }
+  return obj;
+};
 
-  const fromCamelCaseAttributes = (item) => {
-    @each(column in table.columns.filter(c => c.columnName.indexOf('_') >= 0))
-      item.{{ column.names.snakeCase }} = item.{{ column.names.camelCase }};
-      delete item.{{ column.names.camelCase }};
-    @endeach
-    return item;
-  };
+const toSnakeCase = (obj) => {
+  if (obj) {
+    return Object.keys(obj).reduce((acc, key) => {
+      acc[snakeCase(key)] = obj[key];
+      return acc;
+    }, {});
+  }
+  return obj;
+};
 
 @endif
 export default {
@@ -76,10 +83,17 @@ export default {
       async index({ commit }, filter) {
         commit('setLoading', { key: 'index', value: true });
         try {
-          const { data: items, meta } = await HttpService.authGet(`/${resource}`, filter);
+          const { data: items, meta } = await HttpService.authGet(
+            `/${resource}`,
+            @if(input.camelCaseStrategy)
+              toCamelCase(filter)
+            @else
+              filter
+            @endif
+          );
           commit('load', {
-            @if(containsUnderscoreColumn)
-              items: items.map((item) => toCamelCaseAttributes(item)),
+            @if(!input.camelCaseStrategy)
+              items: items.map((item) => toCamelCase(item)),
             @else
               items,
             @endif
@@ -103,8 +117,8 @@ export default {
         try {
           const item = await HttpService.authPost(
             `/${resource}`,
-            @if(containsUnderscoreColumn)
-              fromCamelCaseAttributes(input)
+            @if(!input.camelCaseStrategy)
+              toSnakeCase(input)
             @else
               input
             @endif
@@ -112,8 +126,8 @@ export default {
           commit('setLoading', { key: 'store', value: false });
           commit(
             'add',
-            @if(containsUnderscoreColumn)
-              toCamelCaseAttributes(item)
+            @if(!input.camelCaseStrategy)
+              toCamelCase(item)
             @else
               item
             @endif
@@ -134,8 +148,8 @@ export default {
         try {
           const items = await HttpService.authPost(
             `/${resource}/store/many`, {
-            @if(containsUnderscoreColumn)
-              items: inputs.map(i => fromCamelCaseAttributes(i))
+            @if(!input.camelCaseStrategy)
+              items: inputs.map(i => toSnakeCase(i))
             @else
               items: inputs
             @endif
@@ -143,8 +157,8 @@ export default {
           commit('setLoading', { key: 'storeMany', value: false });
           commit(
             'addMany',
-            @if(containsUnderscoreColumn)
-              items.map((item) => toCamelCaseAttributes(item))
+            @if(!input.camelCaseStrategy)
+              items.map((item) => toCamelCase(item))
             @else
               items
             @endif
@@ -165,8 +179,8 @@ export default {
         try {
           const item = await HttpService.authPut(
             `/${resource}/${id}`,
-            @if(containsUnderscoreColumn)
-              fromCamelCaseAttributes(input)
+            @if(!input.camelCaseStrategy)
+              toSnakeCase(input)
             @else
               input
             @endif
@@ -174,8 +188,8 @@ export default {
           commit(
             'replace', {
               id,
-              @if(containsUnderscoreColumn)
-                item: toCamelCaseAttributes(item)
+              @if(!input.camelCaseStrategy)
+                item: toCamelCase(item)
               @else
                 item
               @endif

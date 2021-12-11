@@ -14,9 +14,6 @@ export default class SPAGenerator {
    * Package saves state in local storage
    */
   public async addVuexPersistPackage() {
-    await HelperService.execute('npm', ['install', 'vuex-persistedstate'], {
-      cwd: this.input.spaPath,
-    })
     const path = `${this.input.spaPath}/src/store/index.js`
     let content = await HelperService.readFile(path)
 
@@ -73,9 +70,13 @@ export default class SPAGenerator {
   }
 
   public async installBuefy() {
-    await HelperService.execute('npm', ['install', 'buefy', 'axios'], {
-      cwd: this.input.spaPath,
-    })
+    await HelperService.execute(
+      'npm',
+      ['install', 'buefy', 'axios', 'vuex-persistedstate', 'lodash'],
+      {
+        cwd: this.input.spaPath,
+      }
+    )
   }
 
   protected async installCsvParse() {
