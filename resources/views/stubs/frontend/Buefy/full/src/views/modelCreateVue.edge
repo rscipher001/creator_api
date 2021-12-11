@@ -3,7 +3,7 @@
 @set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
 @set('nonAuthBelongsToRelations', table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth'))
 <template>
-  <section class="container mt-5">
+  <section class="container section">
     <div class="level">
       <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{ capitalCase(table.names.pascalCase) }}</div>
       <div class="level-right"><b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-light">Back</b-button></div>

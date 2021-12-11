@@ -1,5 +1,5 @@
 <template>
-  <section class="container mt-5">
+  <section class="container section">
     <b-loading is-full-page v-model="isLoading"></b-loading>
     <div class="level">
       <div class="level-left is-size-3">@{{ items.length }} {{ capitalCase(table.names.pascalCasePlural) }}</div>
@@ -50,7 +50,6 @@
         :checkable="authorize('{{ table.names.camelCase }}:destroyMany')"
       @endif
       hoverable
-      striped
     >
       @each(column in table.indexColumns)
         @set('currentColumn', table.columns.find((c) => c.names.pascalCase === pascalCase(column)))
