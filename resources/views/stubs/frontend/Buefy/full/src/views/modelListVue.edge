@@ -2,115 +2,223 @@
   <section class="container">
     <div class="section">
       <b-loading is-full-page v-model="isLoading"></b-loading>
-      <div class="level">
-        <div class="level-left is-size-3">@{{ items.length }} {{ capitalCase(table.names.pascalCasePlural) }}</div>
-        @if(table.operations.storeMany || table.operations.store || table.operations.destroyMany)
-          <div
-            class="level-right"
-            v-if="authorize('{{ table.names.camelCase }}:storeMany') || authorize('{{ table.names.camelCase }}:destroyMany') || authorize('{{ table.names.camelCase }}:store')"
-          >
-            @if(table.operations.destroyMany)
-              <b-button
-                v-if="selectItems.length && authorize('{{ table.names.camelCase }}:destroyMany')"
-                @click="destroyMany"
-                type="is-danger"
+      <div class="columns">
+        <div class="column px-0">
+          <div class="level">
+            <div class="level-left is-size-3">@{{ items.length }} {{ capitalCase(table.names.pascalCasePlural) }}</div>
+            @if(table.operations.storeMany || table.operations.store || table.operations.destroyMany)
+              <div
+                class="level-right buttons"
+                v-if="authorize('{{ table.names.camelCase }}:storeMany') || authorize('{{ table.names.camelCase }}:destroyMany') || authorize('{{ table.names.camelCase }}:store')"
               >
-                Delete Selected
-              </b-button>
+                @if(table.operations.destroyMany)
+                  <b-button
+                    v-if="selectItems.length && authorize('{{ table.names.camelCase }}:destroyMany')"
+                    @click="destroyMany"
+                    type="is-danger"
+                  >
+                    Delete Selected
+                  </b-button>
+                @endif
+                @if(table.operations.storeMany)
+                  <b-dropdown
+                    v-if="authorize('{{ table.names.camelCase }}:storeMany')"
+                    aria-role="list"
+                    class="mx-1"
+                  >
+                    <template #trigger="{ active }">
+                      <b-button
+                        label="Import From"
+                        type="is-white"
+                        :icon-right="active ? 'menu-up' : 'menu-down'"
+                      />
+                    </template>
+                    <b-dropdown-item
+                      @click="$router.push('/{{ table.names.camelCase }}/import/csv')"
+                      aria-role="listitem"
+                    >CSV</b-dropdown-item>
+                  </b-dropdown>
+                @endif
+                <b-button @click="destroyMany" type="is-white">
+                  Enable Multiselect
+                </b-button>
+                @if(table.operations.create)
+                  <b-button tag="router-link" to="{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/create" type="is-primary">New</b-button>
+                @endif
+              </div>
             @endif
-            @if(table.operations.storeMany)
-              <b-dropdown
-                v-if="authorize('{{ table.names.camelCase }}:storeMany')"
-                aria-role="list"
-                class="mx-1"
+          </div>
+        </div>
+      </div>
+
+      @if(table.columns.find(c => c.meta.filterable))
+        <div class="columns box py-0">
+          <div class="column">
+            <b-field label="Page Size">
+              <b-select
+                v-model="currentPageSize"
+                placeholder="Select page size"
+                expanded
               >
+                <option
+                  v-for="(option, index) in [10, 25, 50, 100, 200, 500]"
+                  :value="option"
+                  :key="index"
+                >
+                  {{ option }}
+                </option>
+              </b-select>
+            </b-field>
+          </div>
+          @each(column in table.columns.filter(c => c.meta.filterable))
+            <b-field label="{{ column.input.displayName || column.names.capitalCase }}">
+              @if(column.type === 'String')
+                @if(column.input.type === 'Input')
+                  <b-input
+                    @if(column.meta.maxLength !== undefined)
+                      maxlength="{{ column.meta.maxLength }}"
+                    @endif
+                  ></b-input>
+                @elseif(column.input.type === 'Select')
+                  <b-select expanded>
+                    @each(option in column.input.select.options)
+                      @if(option.value)
+                        <option value="{{ option.value }}">{{ option.label }}</option>
+                      @else
+                        <option value="{{ option }}">{{ option }}</option>
+                      @endif
+                    @endeach
+                  </b-select>
+                @elseif(column.input.type === 'Radio')
+                  @each(option in column.input.radio.options)
+                    @if(option.value)
+                      <b-radio-button
+                        v-model="form.{{ column.names.camelCase }}"
+                        native-value="{{ option.value }}"
+                        type="is-primary is-outlined is-light"
+                      >
+                        <span>{{ option.label }}</span>
+                      </b-radio-button>
+                    @else
+                      <b-radio-button
+                        v-model="form.{{ column.names.camelCase }}"
+                        native-value="{{ option }}"
+                        type="is-primary is-outlined is-light"
+                      >
+                        <span>{{ option }}</span>
+                      </b-radio-button>
+                    @endif
+                  @endeach
+                @endif
+              @elseif(column.type === 'Number')
+                <b-input
+                  type="number"
+                  @if(column.meta.max !== undefined)
+                    max="{{ column.meta.max }}"
+                  @endif
+                  @if(column.meta.min !== undefined)
+                    min="{{ column.meta.min }}"
+                  @endif
+                >
+                </b-input>
+              @elseif(column.type === 'Decimal')
+                <b-input
+                  type="number"
+                  @if(column.input.decimal.step !== undefined)
+                    step="{{ column.input.decimal.step }}"
+                  @else
+                    step="any"
+                  @endif
+                  @if(column.meta.max !== undefined)
+                    max="{{ column.meta.max }}"
+                  @endif
+                  @if(column.meta.min !== undefined)
+                    min="{{ column.meta.min }}"
+                  @endif
+                ></b-input>
+              @elseif(column.type === 'Boolean')
+                <b-switch>
+                  {{ column.input?.displayName ?? column.names.camelCase }}
+                </b-switch>
+              @elseif(column.type === 'Date')
+                <b-datepicker />
+              @endif
+            </b-field>
+          @endeach
+        </div>
+      @endif
+
+      <div class="columns box mt-1" v-if="items.length">
+        <b-table
+          class="column"
+          :data="items"
+          @if(table.operations.storeMany)
+            :checked-rows.sync="selectItems"
+            :checkable="authorize('{{ table.names.camelCase }}:destroyMany')"
+          @endif
+          hoverable
+          bordered
+        >
+          @each(column in table.indexColumns)
+            @set('currentColumn', table.columns.find((c) => c.names.pascalCase === pascalCase(column)))
+            <b-table-column field="{{ camelCase(column) }}" label="{{
+              currentColumn.input.displayName || capitalCase(column)
+            }}" v-slot="props" {{
+              ['Decimal', 'Integer'].includes(currentColumn.type) ? 'numeric' : ''
+            }}>
+              @if('Decimal' === currentColumn.type && currentColumn.input.decimal.step !== 'any')
+                @set('decimalCount', `${currentColumn.input.decimal.step}`.split('.')[1].length)
+                {{{
+                  `{{ props.row.${camelCase(column)}.toFixed(${decimalCount}) }}`
+                }}}
+              @elseif (currentColumn.type === 'Date')
+                {{{
+                  `new Date({{ props.row.${camelCase(column)} }}).toLocaleString()`
+                }}}
+              @else
+                {{{
+                  `{{ props.row.${camelCase(column)} }}`
+                }}}
+              @endif
+            </b-table-column>
+          @endeach
+          <b-table-column
+            label="Action"
+            @if(table.operations.edit && table.operations.destroy)
+              v-slot="props"
+            @endif
+          >
+            <b-dropdown aria-role="list">
                 <template #trigger="{ active }">
                   <b-button
-                    label="Import From"
+                    label="More"
                     type="is-primary"
+                    outlined
                     :icon-right="active ? 'menu-up' : 'menu-down'"
                   />
                 </template>
-                <b-dropdown-item
-                  @click="$router.push('/{{ table.names.camelCase }}/import/csv')"
-                  aria-role="listitem"
-                >CSV</b-dropdown-item>
-              </b-dropdown>
-            @endif
-            @if(table.operations.create)
-              <b-button tag="router-link" to="{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/create" type="is-light">New</b-button>
-            @endif
-          </div>
-        @endif
-      </div>
-      <b-table
-        v-if="items.length"
-        :data="items"
-        @if(table.operations.storeMany)
-          :checked-rows.sync="selectItems"
-          :checkable="authorize('{{ table.names.camelCase }}:destroyMany')"
-        @endif
-        hoverable
-      >
-        @each(column in table.indexColumns)
-          @set('currentColumn', table.columns.find((c) => c.names.pascalCase === pascalCase(column)))
-          <b-table-column field="{{ camelCase(column) }}" label="{{
-            currentColumn.input.displayName || capitalCase(column)
-          }}" v-slot="props" {{
-            ['Decimal', 'Integer'].includes(currentColumn.type) ? 'numeric' : ''
-          }}>
-            @if('Decimal' === currentColumn.type && currentColumn.input.decimal.step !== 'any')
-              @set('decimalCount', `${currentColumn.input.decimal.step}`.split('.')[1].length)
-              {{{
-                `{{ props.row.${camelCase(column)}.toFixed(${decimalCount}) }}`
-              }}}
-            @elseif (currentColumn.type === 'Date')
-              {{{
-                `new Date({{ props.row.${camelCase(column)} }}).toLocaleString()`
-              }}}
-            @else
-              {{{
-                `{{ props.row.${camelCase(column)} }}`
-              }}}
-            @endif
+                @if(table.operations.edit)
+                  <b-dropdown-item
+                    v-if="authorize('{{ table.names.camelCase }}:edit')"
+                    @click="edit(props.row.id)"
+                    aria-role="edititem"
+                  >
+                    Edit
+                  </b-dropdown-item>
+                @endif
+                @if(table.operations.destroy)
+                  <b-dropdown-item
+                    v-if="authorize('{{ table.names.camelCase }}:destroy')"
+                    @click="destroy(props.row.id)"
+                    aria-role="listitem"
+                  >
+                    Delete
+                  </b-dropdown-item>
+                @endif
+            </b-dropdown>
           </b-table-column>
-        @endeach
-        <b-table-column
-          label="Action"
-          @if(table.operations.edit && table.operations.destroy)
-            v-slot="props"
-          @endif
-        >
-          <b-dropdown aria-role="list">
-              <template #trigger="{ active }">
-                <b-button
-                  label="More"
-                  type="is-primary"
-                  outlined
-                  :icon-right="active ? 'menu-up' : 'menu-down'"
-                />
-              </template>
-              @if(table.operations.edit)
-                <b-dropdown-item
-                  v-if="authorize('{{ table.names.camelCase }}:edit')"
-                  @click="edit(props.row.id)"
-                  aria-role="edititem"
-                >
-                  Edit
-                </b-dropdown-item>
-              @endif
-              @if(table.operations.destroy)
-                <b-dropdown-item
-                  v-if="authorize('{{ table.names.camelCase }}:destroy')"
-                  @click="destroy(props.row.id)"
-                  aria-role="listitem"
-                >
-                  Delete
-                </b-dropdown-item>
-              @endif
-          </b-dropdown>
-        </b-table-column>
-      </b-table>
+        </b-table>
+      </div>
       <div class="hero is-medium" v-else>
         <div class="hero-body container is-flex has-text-centered">
           <div class="is-flex-direction-colomn">
@@ -160,6 +268,7 @@ export default {
   data() {
     return {
       currentPageNo: 1,
+      currentPageSize: 10,
       @if(table.operations.storeMany)
         selectItems: [],
       @endif
@@ -188,7 +297,7 @@ export default {
 
     index() {
       this.indexAction({
-        size: 10,
+        size: this.currentPageSize,
         page: this.currentPageNo,
       });
     },
