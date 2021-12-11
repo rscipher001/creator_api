@@ -13,7 +13,7 @@
               >
                 @if(table.operations.destroyMany)
                   <b-button
-                    v-if="selectItems.length && authorize('{{ table.names.camelCase }}:destroyMany')"
+                    v-if="selectedItems.length && authorize('{{ table.names.camelCase }}:destroyMany')"
                     @click="destroyMany"
                     type="is-danger"
                   >
@@ -39,8 +39,8 @@
                     >CSV</b-dropdown-item>
                   </b-dropdown>
                 @endif
-                <b-button @click="multiselect = !multiselect" type="is-white">
-                  {{ multiselect ? 'Disable' : 'Enable' }} Multiselect
+                <b-button @click="toggleMultiselect" type="is-white">
+                  @{{ multiselect ? "Disable" : "Enable" }} Multiselect
                 </b-button>
                 @if(table.operations.create)
                   <b-button tag="router-link" to="{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/create" type="is-primary">New</b-button>
@@ -158,8 +158,8 @@
           class="column"
           :data="items"
           @if(table.operations.storeMany)
-            :checked-rows.sync="selectItems"
-            :checkable="authorize('{{ table.names.camelCase }}:destroyMany')"
+            :checked-rows.sync="selectedItems"
+            :checkable="authorize('{{ table.names.camelCase }}:destroyMany') && multiSelect"
           @endif
           hoverable
           bordered
@@ -281,7 +281,7 @@ export default {
       currentPageSize: 10,
       multiSelect: false,
       @if(table.operations.storeMany)
-        selectItems: [],
+        selectedItems: [],
       @endif
     };
   },
@@ -359,14 +359,14 @@ export default {
           hasIcon: true,
           onConfirm: async () => {
             try {
-              await this.destroyManyAction(this.selectItems.map((i) => i.id));
+              await this.destroyManyAction(this.selectedItems.map((i) => i.id));
               this.$buefy.toast.open({
                 message: "Deleted",
                 type: "is-success",
                 position: "is-bottom-right",
               });
               this.currentPageNo = 1;
-              this.selectItems = [];
+              this.selectedItems = [];
               await this.index();
             } catch (e) {
               console.error(e);
@@ -378,6 +378,11 @@ export default {
             }
           },
         });
+      },
+
+      toggleMultiselect() {
+        this.multiSelect = !this.multiSelect;
+        this.selectedItems = [];
       },
     @endif
   },
