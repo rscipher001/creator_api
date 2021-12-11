@@ -21,11 +21,13 @@
         Dashboard
       </b-navbar-item>
       <b-navbar-dropdown label="Pages">
-          @if(!auth)
+        @if(!auth)
           @each(table in input.tables.filter(table => !table.inSetting))
             @if(table.operations.index)
               <b-navbar-item
-                v-if="authorize('{{ table.names.camelCase }}:index')"
+                @if(input.rbac.enabled)
+                  v-if="authorize('{{ table.names.camelCase }}:index')"
+                @endif
                 tag="router-link"
                 :to="{ path: '/{{ table.names.camelCase }}' }"
               >
@@ -34,7 +36,9 @@
             @endif
             @if(table.operations.create)
               <b-navbar-item
-                v-if="authorize('{{ table.names.camelCase }}:create')"
+                @if(input.rbac.enabled)
+                  v-if="authorize('{{ table.names.camelCase }}:create')"
+                @endif
                 tag="router-link"
                 :to="{ path: '/{{ table.names.camelCase }}/create' }"
               >

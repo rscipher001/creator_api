@@ -9,7 +9,9 @@
             @if(table.operations.storeMany || table.operations.store || table.operations.destroyMany)
               <div
                 class="level-right buttons"
-                v-if="authorize('{{ table.names.camelCase }}:storeMany') || authorize('{{ table.names.camelCase }}:destroyMany') || authorize('{{ table.names.camelCase }}:store')"
+                @if(input.rbac.enabled)
+                  v-if="authorize('{{ table.names.camelCase }}:storeMany') || authorize('{{ table.names.camelCase }}:destroyMany') || authorize('{{ table.names.camelCase }}:store')"
+                @endif
               >
                 @if(table.operations.destroyMany)
                   <b-button
@@ -22,7 +24,9 @@
                 @endif
                 @if(table.operations.storeMany)
                   <b-dropdown
-                    v-if="authorize('{{ table.names.camelCase }}:storeMany')"
+                    @if(input.rbac.enabled)
+                      v-if="authorize('{{ table.names.camelCase }}:storeMany')"
+                    @endif
                     aria-role="list"
                     class="mx-1"
                   >
@@ -204,7 +208,9 @@
                 </template>
                 @if(table.operations.edit)
                   <b-dropdown-item
-                    v-if="authorize('{{ table.names.camelCase }}:edit')"
+                    @if(input.rbac.enabled)
+                      v-if="authorize('{{ table.names.camelCase }}:edit')"
+                    @endif
                     @click="edit(props.row.id)"
                     aria-role="edititem"
                   >
@@ -213,7 +219,9 @@
                 @endif
                 @if(table.operations.destroy)
                   <b-dropdown-item
-                    v-if="authorize('{{ table.names.camelCase }}:destroy')"
+                    @if(input.rbac.enabled)
+                      v-if="authorize('{{ table.names.camelCase }}:destroy')"
+                    @endif
                     @click="destroy(props.row.id)"
                     aria-role="listitem"
                   >
@@ -230,7 +238,9 @@
                 <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
                 <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
                 <b-button
-                  v-if="authorize('{{ table.names.camelCase }}:create')"
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ table.names.camelCase }}:create')"
+                  @endif
                   type="is-primary block mt-5"
                   tag="router-link"
                   to="/{{ table.names.camelCase }}/create"

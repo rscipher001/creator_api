@@ -31,6 +31,7 @@ export interface Logging {
 
 export interface Meta {
   expose: boolean // If this field is false then it won't show in create/update form
+  filterable?: boolean // If true generate filter option on list page
   dbLength?: number // Override length in db, useful for fields like password
   secret?: boolean // These fields won't be serialized like password, only works with string for now
   required: boolean // Required or not on db level, propogated in all layers
