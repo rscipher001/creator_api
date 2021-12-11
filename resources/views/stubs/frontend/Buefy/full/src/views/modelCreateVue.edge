@@ -3,207 +3,220 @@
 @set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
 @set('nonAuthBelongsToRelations', table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth'))
 <template>
-  <section class="container section">
-    <div class="level">
-      <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{ capitalCase(table.names.pascalCase) }}</div>
-      <div class="level-right"><b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-light">Back</b-button></div>
-    </div>
-    <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
-      @each(column in exposedColumns)
-      @if(column.type === 'String')
-      <b-field
-        horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
-        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
-        :message="errors.{{ column.names.camelCase }}"
-      >
-        @if(column.input.type === 'Input')
-        <b-input
-          v-model="form.{{ column.names.camelCase }}"
-          @if(column.meta.multiline)
-          type="textarea"
-          @elseif(column.meta.email)
-          type="email"
-          @endif
-          @if(column.meta.maxLength !== undefined)
-          maxlength="{{ column.meta.maxLength }}"
-          @endif
-          @if(column.meta.minLength !== undefined)
-          minlength="{{ column.meta.minLength }}"
-          @endif
-          @if(column.meta.required)
-          required
-          @endif
-        ></b-input>
-        @elseif(column.input.type === 'Select')
-        <b-select
-          v-model="form.{{ column.names.camelCase }}"
-          expanded
-          @if(column.meta.required)
-          required
-          @endif
-        >
-          @each(option in column.input.select.options)
-          @if(option.value)
-          <option value="{{ option.value }}">{{ option.label }}</option>
-          @else
-          <option value="{{ option }}">{{ option }}</option>
-          @endif
-          @endeach
-        </b-select>
-        @elseif(column.input.type === 'Radio')
-        @each(option in column.input.radio.options)
-        @if(option.value)
-        <b-radio-button
-          v-model="form.{{ column.names.camelCase }}"
-          native-value="{{ option.value }}"
-          type="is-primary is-outlined is-light"
-        >
-          <span>{{ option.label }}</span>
-        </b-radio-button>
-        @else
-        <b-radio-button
-          v-model="form.{{ column.names.camelCase }}"
-          native-value="{{ option }}"
-          type="is-primary is-outlined is-light"
-        >
-          <span>{{ option }}</span>
-        </b-radio-button>
-        @endif
-        @endeach
-        @endif
-      </b-field>
-
-      @elseif(column.type === 'Integer')
-      <b-field
-        horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
-        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
-        :message="errors.{{ column.names.camelCase }}"
-      >
-        <b-input
-          v-model="form.{{ column.names.camelCase }}"
-          type="number"
-          @if(column.meta.max !== undefined)
-          max="{{ column.meta.max }}"
-          @endif
-          @if(column.meta.min !== undefined)
-          min="{{ column.meta.min }}"
-          @endif
-          @if(column.meta.required)
-          required
-          @endif
-        ></b-input>
-      </b-field>
-
-      @elseif(column.type === 'Decimal')
-      <b-field
-        horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
-        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
-        :message="errors.{{ column.names.camelCase }}"
-      >
-        <b-input
-          v-model="form.{{ column.names.camelCase }}"
-          type="number"
-          @if(column.input.decimal.step !== undefined)
-          step="{{ column.input.decimal.step }}"
-          @else
-          step="any"
-          @endif
-          @if(column.meta.max !== undefined)
-          max="{{ column.meta.max }}"
-          @endif
-          @if(column.meta.min !== undefined)
-          min="{{ column.meta.min }}"
-          @endif
-          @if(column.meta.required)
-          required
-          @endif
-        ></b-input>
-      </b-field>
-
-      @elseif(column.type === 'Boolean')
-      <b-field
-        horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
-        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
-        :message="errors.{{ column.names.camelCase }}"
-      >
-        <b-switch v-model="form.{{ column.names.camelCase }}">{{ column.input?.displayName ?? column.names.camelCase }}</b-switch>
-      </b-field>
-      @elseif(column.type === 'Date')
-      <b-field
-        horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
-        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
-        :message="errors.{{ column.names.camelCase }}"
-        open-on-focus
-      >
-        <b-datepicker v-model="form.{{ column.names.camelCase }}" />
-      </b-field>
-      @elseif(column.type === 'File')
-      <b-field
-        class="file" horizontal
-        label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
-        :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
-        :message="errors.{{ column.names.camelCase }}"
-      >
-        <b-upload @input="onFileAdd($event, '{{ column.names.camelCase }}')" v-model="form.{{ column.names.camelCase }}" expanded>
-          <a class="button is-primary is-fullwidth">
-            <b-icon icon="upload"></b-icon>
-            <span>
-              {{{ `{{ (form.${column.names.camelCase} && form.${column.names.camelCase}.name) || 'Select ${column.input.displayName || capitalCase(column.names.pascalCase)}' }}` }}}
-            </span>
-          </a>
-        </b-upload>
-        <b-button
-          class="is-fullwidth"
-          v-if="form.{{ column.names.camelCase }}"
-          type="is-light"
-          @click="form.{{ column.names.camelCase }} = null"
-        >
-          Clear file
-        </b-button>
-      </b-field>
-      @endif
-      @endeach
-
-      @each(relation in nonAuthBelongsToRelations)
-        <b-field
-          label="{{ relation.names.pascalCase }}"
-          :type="errors.{{ relation.names.camelCase }} ? 'is-danger' : ''"
-          :message="errors.{{ relation.names.camelCase }}"
-          horizontal
-        >
-          <b-select
-            v-model="form.{{ relation.names.camelCase }}Id"
-            expanded
-            @if(relation.required)
-            required
-            @endif
-          >
-            <option v-for="({{
-              relation.names.camelCase
-            }}, {{
-              relation.names.camelCase
-            }}Index) in {{ relation.names.camelCasePlural }}" :key="{{
-              relation.names.camelCase
-            }}Index" :value="{{
-              relation.names.camelCase
-            }}.id">
-              {{ safe(`{{ ${relation.names.camelCase}.name }}`) }}
-            </option>
-          </b-select>
-        </b-field>
-      @endeach
-
-      <div class="is-flex is-justify-content-flex-end">
-        <b-button type="is-primary" native-type="submit" :loading="isLoading">
-          @{{ editMode.enabled ? 'Update' : 'Create' }} {{ capitalCase(table.names.pascalCase) }}
-        </b-button>
+  <section class="container">
+    <div class="section py-5">
+      <div class="columns">
+        <div class="column px-0">
+          <div class="level">
+            <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{ capitalCase(table.names.pascalCase) }}</div>
+            <div class="level-right"><b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-white">Back</b-button></div>
+          </div>
+        </div>
       </div>
-    </form>
+    </div>
+    
+    <div class="section py-5">
+      <div class="columns box">
+        <div class="column">
+          <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
+            @each(column in exposedColumns)
+            @if(column.type === 'String')
+            <b-field
+              horizontal
+              label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+              :message="errors.{{ column.names.camelCase }}"
+            >
+              @if(column.input.type === 'Input')
+              <b-input
+                v-model="form.{{ column.names.camelCase }}"
+                @if(column.meta.multiline)
+                type="textarea"
+                @elseif(column.meta.email)
+                type="email"
+                @endif
+                @if(column.meta.maxLength !== undefined)
+                maxlength="{{ column.meta.maxLength }}"
+                @endif
+                @if(column.meta.minLength !== undefined)
+                minlength="{{ column.meta.minLength }}"
+                @endif
+                @if(column.meta.required)
+                required
+                @endif
+              ></b-input>
+              @elseif(column.input.type === 'Select')
+              <b-select
+                v-model="form.{{ column.names.camelCase }}"
+                expanded
+                @if(column.meta.required)
+                required
+                @endif
+              >
+                @each(option in column.input.select.options)
+                @if(option.value)
+                <option value="{{ option.value }}">{{ option.label }}</option>
+                @else
+                <option value="{{ option }}">{{ option }}</option>
+                @endif
+                @endeach
+              </b-select>
+              @elseif(column.input.type === 'Radio')
+              @each(option in column.input.radio.options)
+              @if(option.value)
+              <b-radio-button
+                v-model="form.{{ column.names.camelCase }}"
+                native-value="{{ option.value }}"
+                type="is-primary is-outlined is-light"
+              >
+                <span>{{ option.label }}</span>
+              </b-radio-button>
+              @else
+              <b-radio-button
+                v-model="form.{{ column.names.camelCase }}"
+                native-value="{{ option }}"
+                type="is-primary is-outlined is-light"
+              >
+                <span>{{ option }}</span>
+              </b-radio-button>
+              @endif
+              @endeach
+              @endif
+            </b-field>
+
+            @elseif(column.type === 'Integer')
+            <b-field
+              horizontal
+              label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+              :message="errors.{{ column.names.camelCase }}"
+            >
+              <b-input
+                v-model="form.{{ column.names.camelCase }}"
+                type="number"
+                @if(column.meta.max !== undefined)
+                max="{{ column.meta.max }}"
+                @endif
+                @if(column.meta.min !== undefined)
+                min="{{ column.meta.min }}"
+                @endif
+                @if(column.meta.required)
+                required
+                @endif
+              ></b-input>
+            </b-field>
+
+            @elseif(column.type === 'Decimal')
+            <b-field
+              horizontal
+              label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+              :message="errors.{{ column.names.camelCase }}"
+            >
+              <b-input
+                v-model="form.{{ column.names.camelCase }}"
+                type="number"
+                @if(column.input.decimal.step !== undefined)
+                step="{{ column.input.decimal.step }}"
+                @else
+                step="any"
+                @endif
+                @if(column.meta.max !== undefined)
+                max="{{ column.meta.max }}"
+                @endif
+                @if(column.meta.min !== undefined)
+                min="{{ column.meta.min }}"
+                @endif
+                @if(column.meta.required)
+                required
+                @endif
+              ></b-input>
+            </b-field>
+
+            @elseif(column.type === 'Boolean')
+            <b-field
+              horizontal
+              label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+              :message="errors.{{ column.names.camelCase }}"
+            >
+              <b-switch v-model="form.{{ column.names.camelCase }}">{{ column.input?.displayName ?? column.names.camelCase }}</b-switch>
+            </b-field>
+            @elseif(column.type === 'Date')
+            <b-field
+              horizontal
+              label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+              :message="errors.{{ column.names.camelCase }}"
+              open-on-focus
+            >
+              <b-datepicker v-model="form.{{ column.names.camelCase }}" />
+            </b-field>
+            @elseif(column.type === 'File')
+            <b-field
+              class="file" horizontal
+              label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+              :message="errors.{{ column.names.camelCase }}"
+            >
+              <b-upload @input="onFileAdd($event, '{{ column.names.camelCase }}')" v-model="form.{{ column.names.camelCase }}" expanded>
+                <a class="button is-primary is-fullwidth">
+                  <b-icon icon="upload"></b-icon>
+                  <span>
+                    {{{ `{{ (form.${column.names.camelCase} && form.${column.names.camelCase}.name) || 'Select ${column.input.displayName || capitalCase(column.names.pascalCase)}' }}` }}}
+                  </span>
+                </a>
+              </b-upload>
+              <b-button
+                class="is-fullwidth"
+                v-if="form.{{ column.names.camelCase }}"
+                type="is-light"
+                @click="form.{{ column.names.camelCase }} = null"
+              >
+                Clear file
+              </b-button>
+            </b-field>
+            @endif
+            @endeach
+
+            @each(relation in nonAuthBelongsToRelations)
+              <b-field
+                label="{{ relation.names.pascalCase }}"
+                :type="errors.{{ relation.names.camelCase }} ? 'is-danger' : ''"
+                :message="errors.{{ relation.names.camelCase }}"
+                horizontal
+              >
+                <b-select
+                  v-model="form.{{ relation.names.camelCase }}Id"
+                  expanded
+                  @if(relation.required)
+                  required
+                  @endif
+                >
+                  <option v-for="({{
+                    relation.names.camelCase
+                  }}, {{
+                    relation.names.camelCase
+                  }}Index) in {{ relation.names.camelCasePlural }}" :key="{{
+                    relation.names.camelCase
+                  }}Index" :value="{{
+                    relation.names.camelCase
+                  }}.id">
+                    {{ safe(`{{ ${relation.names.camelCase}.name }}`) }}
+                  </option>
+                </b-select>
+              </b-field>
+            @endeach
+
+            <div class="is-flex is-justify-content-flex-end">
+              <b-button type="is-primary" native-type="submit" :loading="isLoading">
+                @{{ editMode.enabled ? 'Update' : 'Create' }} {{ capitalCase(table.names.pascalCase) }}
+              </b-button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
