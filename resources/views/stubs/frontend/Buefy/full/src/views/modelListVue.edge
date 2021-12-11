@@ -40,7 +40,7 @@
                   </b-dropdown>
                 @endif
                 <b-button @click="toggleMultiselect" type="is-white">
-                  @{{ multiselect ? "Disable" : "Enable" }} Multiselect
+                  @{{ multiSelect ? "Disable" : "Enable" }} Multiselect
                 </b-button>
                 @if(table.operations.create)
                   <b-button tag="router-link" to="{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/create" type="is-primary">New</b-button>

@@ -41,12 +41,14 @@
               </section>
             </form>
           </div>
-          <div v-else class="section px-0 pb-5 pt-1">
-            <h1 class="is-size-4 has-text-centered">
-              Review the following @{{ form.items.length }} items carefully and
-              click upload button to start importing.
-            </h1>
-            <b-table v-if="form.items.length" :data="form.items">
+          <div v-else>
+            <div class="section px-0 pb-5 pt-1">
+              <h1 class="is-size-4 has-text-centered">
+                Review the following @{{ form.items.length }} items carefully and
+                click upload button to start importing.
+              </h1>
+            </div>
+            <b-table v-if="form.items.length" :data="form.items" bordered>
               @each(column in table.columns.filter(column => column.type !== 'File'))
                 <b-table-column field="{{
                   column.names.camelCase
