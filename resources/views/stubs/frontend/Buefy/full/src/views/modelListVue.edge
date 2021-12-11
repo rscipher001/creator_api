@@ -88,12 +88,13 @@
                 @if(column.type === 'String')
                   @if(column.input.type === 'Input')
                     <b-input
+                      v-model="filter.{{ column.names.camelCase }}"
                       @if(column.meta.maxLength !== undefined)
                         maxlength="{{ column.meta.maxLength }}"
                       @endif
                     ></b-input>
                   @elseif(column.input.type === 'Select')
-                    <b-select expanded>
+                    <b-select v-model="filter.{{ column.names.camelCase }}" expanded>
                       @each(option in column.input.select.options)
                         @if(option.value)
                           <option value="{{ option.value }}">{{ option.label }}</option>
@@ -105,8 +106,8 @@
                   @elseif(column.input.type === 'Radio')
                     @each(option in column.input.radio.options)
                       @if(option.value)
-                        <b-radio-button
-                          v-model="form.{{ column.names.camelCase }}"
+                        <b-radio-button 
+                          v-model="filter.{{ column.names.camelCase }}"
                           native-value="{{ option.value }}"
                           type="is-primary is-outlined is-light"
                         >
@@ -114,7 +115,7 @@
                         </b-radio-button>
                       @else
                         <b-radio-button
-                          v-model="form.{{ column.names.camelCase }}"
+                          v-model="filter.{{ column.names.camelCase }}"
                           native-value="{{ option }}"
                           type="is-primary is-outlined is-light"
                         >
@@ -125,6 +126,7 @@
                   @endif
                 @elseif(column.type === 'Number')
                   <b-input
+                    v-model="filter.{{ column.names.camelCase }}"
                     type="number"
                     @if(column.meta.max !== undefined)
                       max="{{ column.meta.max }}"
@@ -136,6 +138,7 @@
                   </b-input>
                 @elseif(column.type === 'Decimal')
                   <b-input
+                    v-model="filter.{{ column.names.camelCase }}"
                     type="number"
                     @if(column.input.decimal.step !== undefined)
                       step="{{ column.input.decimal.step }}"
@@ -150,11 +153,11 @@
                     @endif
                   ></b-input>
                 @elseif(column.type === 'Boolean')
-                  <b-switch>
+                  <b-switch v-model="filter.{{ column.names.camelCase }}">
                     @{{ column.input?.displayName ?? column.names.camelCase }}
                   </b-switch>
                 @elseif(column.type === 'Date')
-                  <b-datepicker />
+                  <b-datepicker v-model="filter.{{ column.names.camelCase }}" />
                 @endif
               </b-field>
             </div>
@@ -344,7 +347,7 @@ export default {
       @if(hasFilterableColumn)
         @each(column in table.columns.filter(c => c.meta.filterable))
           if (this.filter.{{ column.names.camelCase }}) {
-            indexQueryParams.{{ column.names.camelCase }} = this.filter.{{ column.names.camelCase }};
+            indexQueryParams.{{ column.names.camelCase }} = this.filter.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}};
           }
         @endeach
       @endif
