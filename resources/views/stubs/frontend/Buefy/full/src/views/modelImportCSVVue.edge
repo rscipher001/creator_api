@@ -1,76 +1,89 @@
 <template>
-  <section class="container section">
+  <section class="container">
     <b-loading is-full-page v-model="parseLoading"></b-loading>
-    <div class="level">
-      <div class="level-left is-size-3">Import {{ capitalCase(table.names.pascalCase) }}</div>
-      <div class="level-right">
-        <b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-light">
-          Back
-        </b-button>
+    <div class="section py-5">
+      <div class="columns">
+        <div class="column px-0">
+          <div class="level">
+            <div class="level-left is-size-3">Import {{ capitalCase(table.names.pascalCase) }}</div>
+            <div class="level-right">
+              <b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-white">
+                Back
+              </b-button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <div v-if="activeScreen === 'upload'">
-      <p class="mb-5 has-text-centered">
-        <a :href="csvUrl">Download sample CSV file</a>
-        and create all {{ pluralize(noCase(table.names.camelCase)) }} list in Excel or any other spreadsheet software and upload it
-      </p>
 
-      <form method="POST" @submit.prevent="preview">
-        <section
-          class="is-flex is-justify-content-center is-align-items-center"
-        >
-          <b-field class="file is-primary" :class="{ 'has-name': !!file }">
-            <b-upload @input="preview" v-model="file" class="file-label">
-              <span class="file-cta">
-                <b-icon class="file-icon" icon="upload"></b-icon>
-                <span class="file-label">Click to upload</span>
-              </span>
-              <span class="file-name" v-if="file">@{{ file.name }}</span>
-            </b-upload>
-          </b-field>
-        </section>
-      </form>
-    </div>
-    <div v-else>
-      <h1>
-        Review the following @{{ form.items.length }} items carefully and
-        click upload button to start importing.
-      </h1>
-      <b-table v-if="form.items.length" :data="form.items">
-        @each(column in table.columns.filter(column => column.type !== 'File'))
-          <b-table-column field="{{
-            column.names.camelCase
-          }}" label="{{
-            column.input.displayName || capitalCase(column.names.camelCase)
-          }}" v-slot="props" {{
-            ['Decimal', 'Integer'].includes(column.type) ? 'numeric' : ''
-          }}>
-            @if('Decimal' === column.type && column.input.decimal.step !== 'any')
-              @set('decimalCount', `${column.input.decimal.step}`.split('.')[1].length)
-              {{{
-                `{{ props.row.${column.names.camelCase}.toFixed(${decimalCount}) }}`
-              }}}
-            @elseif(column.type === 'Date')
-              {{{
-                `new Date({{ props.row.${column.names.camelCase} }}).toLocaleString()`
-              }}}
-            @else
-              {{{
-                `{{ props.row.${column.names.camelCase} }}`
-              }}}
-            @endif
-          </b-table-column>
-        @endeach
-      </b-table>
-      <div class="buttons mt-5">
-        <b-button
-          @click="storeMany"
-          :loading="loading.storeMany"
-          type="is-primary"
-          expanded
-        >
-          Start Importing
-        </b-button>
+    <div class="section py-5">
+      <div class="columns box">
+        <div class="column">
+          <div v-if="activeScreen === 'upload'">
+            <p class="mb-5 has-text-centered">
+              <a :href="csvUrl">Download sample CSV file</a>
+              and create all {{ pluralize(noCase(table.names.camelCase)) }} list in Excel or any other spreadsheet software and upload it
+            </p>
+
+            <form method="POST" @submit.prevent="preview">
+              <section
+                class="is-flex is-justify-content-center is-align-items-center"
+              >
+                <b-field class="file is-primary" :class="{ 'has-name': !!file }">
+                  <b-upload @input="preview" v-model="file" class="file-label">
+                    <span class="file-cta">
+                      <b-icon class="file-icon" icon="upload"></b-icon>
+                      <span class="file-label">Click to upload</span>
+                    </span>
+                    <span class="file-name" v-if="file">@{{ file.name }}</span>
+                  </b-upload>
+                </b-field>
+              </section>
+            </form>
+          </div>
+          <div v-else class="section px-0 pb-5 pt-1">
+            <h1 class="is-size-4 has-text-centered">
+              Review the following @{{ form.items.length }} items carefully and
+              click upload button to start importing.
+            </h1>
+            <b-table v-if="form.items.length" :data="form.items">
+              @each(column in table.columns.filter(column => column.type !== 'File'))
+                <b-table-column field="{{
+                  column.names.camelCase
+                }}" label="{{
+                  column.input.displayName || capitalCase(column.names.camelCase)
+                }}" v-slot="props" {{
+                  ['Decimal', 'Integer'].includes(column.type) ? 'numeric' : ''
+                }}>
+                  @if('Decimal' === column.type && column.input.decimal.step !== 'any')
+                    @set('decimalCount', `${column.input.decimal.step}`.split('.')[1].length)
+                    {{{
+                      `{{ props.row.${column.names.camelCase}.toFixed(${decimalCount}) }}`
+                    }}}
+                  @elseif(column.type === 'Date')
+                    {{{
+                      `new Date({{ props.row.${column.names.camelCase} }}).toLocaleString()`
+                    }}}
+                  @else
+                    {{{
+                      `{{ props.row.${column.names.camelCase} }}`
+                    }}}
+                  @endif
+                </b-table-column>
+              @endeach
+            </b-table>
+            <div class="buttons mt-5">
+              <b-button
+                @click="storeMany"
+                :loading="loading.storeMany"
+                type="is-primary"
+                expanded
+              >
+                Start Importing
+              </b-button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
