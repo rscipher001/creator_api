@@ -76,85 +76,87 @@
                   :value="option"
                   :key="index"
                 >
-                  {{ option }}
+                  @{{ option }}
                 </option>
               </b-select>
             </b-field>
           </div>
           @each(column in table.columns.filter(c => c.meta.filterable))
-            <b-field label="{{ column.input.displayName || column.names.capitalCase }}">
-              @if(column.type === 'String')
-                @if(column.input.type === 'Input')
-                  <b-input
-                    @if(column.meta.maxLength !== undefined)
-                      maxlength="{{ column.meta.maxLength }}"
-                    @endif
-                  ></b-input>
-                @elseif(column.input.type === 'Select')
-                  <b-select expanded>
-                    @each(option in column.input.select.options)
+            <div class="column">
+              <b-field label="{{ column.input.displayName || capitalCase(column.names.pascalCase) }}">
+                @if(column.type === 'String')
+                  @if(column.input.type === 'Input')
+                    <b-input
+                      @if(column.meta.maxLength !== undefined)
+                        maxlength="{{ column.meta.maxLength }}"
+                      @endif
+                    ></b-input>
+                  @elseif(column.input.type === 'Select')
+                    <b-select expanded>
+                      @each(option in column.input.select.options)
+                        @if(option.value)
+                          <option value="{{ option.value }}">{{ option.label }}</option>
+                        @else
+                          <option value="{{ option }}">{{ option }}</option>
+                        @endif
+                      @endeach
+                    </b-select>
+                  @elseif(column.input.type === 'Radio')
+                    @each(option in column.input.radio.options)
                       @if(option.value)
-                        <option value="{{ option.value }}">{{ option.label }}</option>
+                        <b-radio-button
+                          v-model="form.{{ column.names.camelCase }}"
+                          native-value="{{ option.value }}"
+                          type="is-primary is-outlined is-light"
+                        >
+                          <span>@{{ option.label }}</span>
+                        </b-radio-button>
                       @else
-                        <option value="{{ option }}">{{ option }}</option>
+                        <b-radio-button
+                          v-model="form.{{ column.names.camelCase }}"
+                          native-value="{{ option }}"
+                          type="is-primary is-outlined is-light"
+                        >
+                          <span>@{{ option }}</span>
+                        </b-radio-button>
                       @endif
                     @endeach
-                  </b-select>
-                @elseif(column.input.type === 'Radio')
-                  @each(option in column.input.radio.options)
-                    @if(option.value)
-                      <b-radio-button
-                        v-model="form.{{ column.names.camelCase }}"
-                        native-value="{{ option.value }}"
-                        type="is-primary is-outlined is-light"
-                      >
-                        <span>{{ option.label }}</span>
-                      </b-radio-button>
-                    @else
-                      <b-radio-button
-                        v-model="form.{{ column.names.camelCase }}"
-                        native-value="{{ option }}"
-                        type="is-primary is-outlined is-light"
-                      >
-                        <span>{{ option }}</span>
-                      </b-radio-button>
+                  @endif
+                @elseif(column.type === 'Number')
+                  <b-input
+                    type="number"
+                    @if(column.meta.max !== undefined)
+                      max="{{ column.meta.max }}"
                     @endif
-                  @endeach
+                    @if(column.meta.min !== undefined)
+                      min="{{ column.meta.min }}"
+                    @endif
+                  >
+                  </b-input>
+                @elseif(column.type === 'Decimal')
+                  <b-input
+                    type="number"
+                    @if(column.input.decimal.step !== undefined)
+                      step="{{ column.input.decimal.step }}"
+                    @else
+                      step="any"
+                    @endif
+                    @if(column.meta.max !== undefined)
+                      max="{{ column.meta.max }}"
+                    @endif
+                    @if(column.meta.min !== undefined)
+                      min="{{ column.meta.min }}"
+                    @endif
+                  ></b-input>
+                @elseif(column.type === 'Boolean')
+                  <b-switch>
+                    @{{ column.input?.displayName ?? column.names.camelCase }}
+                  </b-switch>
+                @elseif(column.type === 'Date')
+                  <b-datepicker />
                 @endif
-              @elseif(column.type === 'Number')
-                <b-input
-                  type="number"
-                  @if(column.meta.max !== undefined)
-                    max="{{ column.meta.max }}"
-                  @endif
-                  @if(column.meta.min !== undefined)
-                    min="{{ column.meta.min }}"
-                  @endif
-                >
-                </b-input>
-              @elseif(column.type === 'Decimal')
-                <b-input
-                  type="number"
-                  @if(column.input.decimal.step !== undefined)
-                    step="{{ column.input.decimal.step }}"
-                  @else
-                    step="any"
-                  @endif
-                  @if(column.meta.max !== undefined)
-                    max="{{ column.meta.max }}"
-                  @endif
-                  @if(column.meta.min !== undefined)
-                    min="{{ column.meta.min }}"
-                  @endif
-                ></b-input>
-              @elseif(column.type === 'Boolean')
-                <b-switch>
-                  {{ column.input?.displayName ?? column.names.camelCase }}
-                </b-switch>
-              @elseif(column.type === 'Date')
-                <b-datepicker />
-              @endif
-            </b-field>
+              </b-field>
+            </div>
           @endeach
         </div>
       </div>
