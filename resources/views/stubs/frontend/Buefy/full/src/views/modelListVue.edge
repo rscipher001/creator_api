@@ -15,7 +15,12 @@
               >
                 @if(table.operations.destroyMany)
                   <b-button
-                    v-if="selectedItems.length && authorize('{{ table.names.camelCase }}:destroyMany')"
+                    v-if="
+                    selectedItems.length
+                    @if(input.rbac.enabled)
+                      && authorize('{{ table.names.camelCase }}:destroyMany')
+                    @endif
+                    "
                     @click="destroyMany"
                     type="is-danger"
                   >
@@ -163,7 +168,12 @@
           :data="items"
           @if(table.operations.storeMany)
             :checked-rows.sync="selectedItems"
-            :checkable="authorize('{{ table.names.camelCase }}:destroyMany') && multiSelect"
+            :checkable="
+            multiSelect
+            @if(input.rbac.enabled)
+              && authorize('{{ table.names.camelCase }}:destroyMany')
+            @endif
+            "
           @endif
           hoverable
           bordered
