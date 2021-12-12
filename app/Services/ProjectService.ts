@@ -114,7 +114,6 @@ class BackendProjectService {
       // If admin can create new roles then we need to store this information in the database
       // Create roles table and add relation with user table
       const roleTable = {
-        inSetting: false,
         generateRoute: true,
         generateController: true,
         generateModel: true,
@@ -196,7 +195,6 @@ class BackendProjectService {
         ],
       }
       const permissionTable = {
-        inSetting: false,
         generateRoute: true,
         generateController: true,
         generateModel: true,
@@ -521,11 +519,12 @@ class BackendProjectService {
   protected prepareAuthTable() {
     const columns: any = [
       {
-        name: 'name',
+        name: 'Name',
         type: 'String',
         meta: {
           displayName: 'Name',
           required: true,
+          filterable: true,
           minLength: 2,
           maxLength: 127,
         },
@@ -534,11 +533,12 @@ class BackendProjectService {
         },
       },
       {
-        name: 'email',
+        name: 'Email',
         type: 'String',
         meta: {
           displayName: 'Email',
           required: true,
+          filterable: true,
           minLength: 6,
           maxLength: 127,
           email: true,
@@ -549,7 +549,7 @@ class BackendProjectService {
         },
       },
       {
-        name: 'password',
+        name: 'Password',
         type: 'String',
         meta: {
           displayName: 'Password',
@@ -596,6 +596,7 @@ class BackendProjectService {
         },
       })
     }
+    this.input.auth.table.indexColumns = ['Name', 'Email']
     this.input.auth.table.columns.splice(0, 0, ...columns)
   }
 

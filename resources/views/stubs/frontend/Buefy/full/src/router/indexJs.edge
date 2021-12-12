@@ -99,11 +99,10 @@ const routes = [
       ensureEmailIsVerified: true,
     },
   },
-  @each(table in input.tables.filter(t => !t.inSetting))~
+  @each(table in input.tables.concat([input.auth.table]))~
     @!component(`stubs/frontend/${input.tech.frontend}/partial/crudGenerator/routerJs`, {
       table,
       input,
-      inSetting: false,
     })~
   @endeach
 ];

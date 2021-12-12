@@ -53,7 +53,7 @@
                 <b-table-column field="{{
                   column.names.camelCase
                 }}" label="{{
-                  column.input.displayName || capitalCase(column.names.camelCase)
+                  column.input?.displayName || capitalCase(column.names.camelCase)
                 }}" v-slot="props" {{
                   ['Decimal', 'Integer'].includes(column.type) ? 'numeric' : ''
                 }}>

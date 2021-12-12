@@ -117,7 +117,6 @@ export interface Table {
   timestamps: boolean
   relations: Relation[]
   seederUniqueKey?: string // To ensure seeder data is not duplicate
-  inSetting?: boolean // If true, it will be added to setting
 }
 
 export interface Relation {

@@ -53,7 +53,7 @@
                   @{{ multiSelect ? "Disable" : "Enable" }} Multiselect
                 </b-button>
                 @if(table.operations.create)
-                  <b-button tag="router-link" to="{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/create" type="is-primary">New</b-button>
+                  <b-button tag="router-link" to="/{{ table.names.camelCase }}/create" type="is-primary">New</b-button>
                 @endif
               </div>
             @endif
@@ -361,7 +361,7 @@ export default {
 
     @if(table.operations.edit)
       edit(id) {
-        this.$router.push(`{{ table.inSetting ? '/setting': '' }}/{{ table.names.camelCase }}/${id}/edit`);
+        this.$router.push(`/{{ table.names.camelCase }}/${id}/edit`);
       },
     @endif
 

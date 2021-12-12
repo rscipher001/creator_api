@@ -1,10 +1,10 @@
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
-import ProjectInput from 'App/Interfaces/ProjectInput'
+import ProjectInput, { Table } from 'App/Interfaces/ProjectInput'
 
 export default class CRUDGenerator {
   private input: ProjectInput
-  private models: string[]
+  private models: string[] // Used for state registration in store/index.js
 
   constructor(input: ProjectInput) {
     this.input = input
@@ -14,8 +14,7 @@ export default class CRUDGenerator {
   /**
    * Create view for creating and updating resource
    */
-  protected async createCreateView(i: number) {
-    const table = this.input.tables[i]
+  protected async createCreateView(table: Table) {
     const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}Create.vue`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -33,8 +32,7 @@ export default class CRUDGenerator {
   /**
    * Create view for listing resource
    */
-  protected async createListView(i: number) {
-    const table = this.input.tables[i]
+  protected async createListView(table: Table) {
     const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}List.vue`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -52,8 +50,7 @@ export default class CRUDGenerator {
   /**
    * Create view for importing CSV page
    */
-  protected async createStoreManyView(i: number) {
-    const table = this.input.tables[i]
+  protected async createStoreManyView(table: Table) {
     const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}ImportCSV.vue`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -71,8 +68,7 @@ export default class CRUDGenerator {
   /**
    * Create state for resource
    */
-  protected async createState(i: number) {
-    const table = this.input.tables[i]
+  protected async createState(table: Table) {
     const filePath = `${this.input.spaPath}/src/store/modules/${table.names.camelCase}.state.js`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
@@ -90,8 +86,7 @@ export default class CRUDGenerator {
   /**
    * Import state for resource
    */
-  protected async importState(i: number) {
-    const table = this.input.tables[i]
+  protected async importState(table: Table) {
     const storePath = `${this.input.spaPath}/src/store/index.js`
     let storeContent = await HelperService.readFile(storePath)
 
@@ -153,11 +148,24 @@ export default class CRUDGenerator {
    * Steps
    */
   protected async start() {
+    // Auth table
+    await this.createCreateView(this.input.auth.table)
+    await this.createListView(this.input.auth.table)
+    await this.createStoreManyView(this.input.auth.table)
+    await HelperService.execute('npm', ['run', 'lint'], { cwd: this.input.spaPath })
+    await HelperService.commit(
+      `CRUD Added for ${this.input.auth.table.names.pascalCase}`,
+      this.input.spaPath
+    )
+    this.models.push(this.input.auth.table.names.camelCase)
+
+    // All non auth tables
     for (let i = 0; i < this.input.tables.length; i += 1) {
       if (!this.input.tables[i].generateUI) continue
-      await this.createCreateView(i)
-      await this.createListView(i)
-      await this.createStoreManyView(i)
+      const table = this.input.tables[i]
+      await this.createCreateView(table)
+      await this.createListView(table)
+      await this.createStoreManyView(table)
       await HelperService.execute('npm', ['run', 'lint'], { cwd: this.input.spaPath })
       await HelperService.commit(
         `CRUD Added for ${this.input.tables[i].names.pascalCase}`,
@@ -168,10 +176,18 @@ export default class CRUDGenerator {
     await this.registerRoutes()
 
     // Run loop for states separately to avoid unused import warning which results in commit failure
+    // Auth table
+    if (this.input.auth.table.generateUI) {
+      await this.createState(this.input.auth.table)
+      await this.importState(this.input.auth.table)
+    }
+
+    // Non auth table
     for (let i = 0; i < this.input.tables.length; i += 1) {
-      if (!this.input.tables[i].generateUI) continue
-      await this.createState(i)
-      await this.importState(i)
+      const table = this.input.tables[i]
+      if (!table.generateUI) continue
+      await this.createState(table)
+      await this.importState(table)
     }
     await this.registerStates()
     await this.addRoutes()

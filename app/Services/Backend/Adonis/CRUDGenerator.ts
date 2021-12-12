@@ -12,8 +12,7 @@ export default class CRUDGenerator {
   }
 
   // Create app/Models/{Model}.ts
-  protected async createModel(i: number) {
-    const table = this.input.tables[i]
+  protected async createModel(table) {
     if (!table.generateModel) return
     const filePath = `${this.input.path}/app/Models/${table.names.pascalCase}.ts`
     const fileExists = await HelperService.fileExists(filePath)
@@ -31,8 +30,7 @@ export default class CRUDGenerator {
   }
 
   // Create migration
-  protected async createMigration(i: number) {
-    const table = this.input.tables[i]
+  protected async createMigration(table) {
     if (!table.generateMigration) return
     const namePart = `${table.names.snakeCasePlural}.ts`
     const migrationsPath = `${this.input.path}/database/migrations`
@@ -79,8 +77,7 @@ export default class CRUDGenerator {
   }
 
   // Create Validators
-  protected async createValidators(i: number) {
-    const table = this.input.tables[i]
+  protected async createValidators(table) {
     // Store and storeMany
     if (table.operations.store) {
       const filePath = `${this.input.path}/app/Validators/Store${table.names.pascalCase}Validator.ts`
@@ -131,8 +128,7 @@ export default class CRUDGenerator {
   }
 
   // Create Controller
-  protected async createController(i: number) {
-    const table = this.input.tables[i]
+  protected async createController(table) {
     if (!table.generateController) return
 
     // Get all roles from controller
@@ -161,32 +157,48 @@ export default class CRUDGenerator {
     }
   }
 
+  protected async generatePublicRoutes(table: Table) {
+    if (this.input.types.includes(ProjectType.API)) {
+      return View.render(
+        `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/crudRoutesTs`,
+        {
+          table,
+          type: ProjectType.API,
+        }
+      )
+    }
+  }
+
+  protected async generateAuthRoutes(table: Table) {
+    return View.render(
+      `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/csvRoutesTs`,
+      {
+        table,
+        type: ProjectType.API,
+      }
+    )
+  }
+
   // Add routes
   protected async addRoutes() {
     const filePath = `${this.input.path}/start/routes.ts`
     let content = await HelperService.readFile(filePath)
     let apiAuthContent = ''
     let apiPublicContent = ''
+    // Add auth table routes
+    if (this.input.auth.table.generateRoute) {
+      apiAuthContent += await this.generatePublicRoutes(this.input.auth.table)
+      if (this.input.auth.table.operations.storeMany) {
+        apiPublicContent += await this.generateAuthRoutes(this.input.auth.table)
+      }
+    }
+    // Add other table routes
     for (let i = 0; i < this.input.tables.length; i += 1) {
       const table = this.input.tables[i]
       if (!table.generateRoute) continue
-      if (this.input.types.includes(ProjectType.API)) {
-        apiAuthContent += await View.render(
-          `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/crudRoutesTs`,
-          {
-            table,
-            type: ProjectType.API,
-          }
-        )
-      }
+      apiAuthContent += await this.generatePublicRoutes(table)
       if (table.operations.storeMany) {
-        apiPublicContent += await View.render(
-          `stubs/backend/${this.input.tech.backend}/partials/crudGenerator/csvRoutesTs`,
-          {
-            table,
-            type: ProjectType.API,
-          }
-        )
+        apiPublicContent += await this.generateAuthRoutes(table)
       }
     }
     content += await View.render(
@@ -301,11 +313,20 @@ export default class CRUDGenerator {
       await mkdirp(`${this.input.path}/app/Controllers/Http/API/`),
     ])
 
+    // CRUD for users table
+    await this.createValidators(this.input.auth.table)
+    await this.createController(this.input.auth.table)
+    await HelperService.commit(
+      `CRUD Added for ${this.input.auth.table.names.pascalCase}`,
+      this.input.path
+    )
+
     for (let i = 0; i < this.input.tables.length; i += 1) {
-      await this.createMigration(i)
-      await this.createModel(i)
-      await this.createValidators(i)
-      await this.createController(i)
+      const table = this.input.tables[i]
+      await this.createMigration(table)
+      await this.createModel(table)
+      await this.createValidators(table)
+      await this.createController(table)
       await HelperService.commit(
         `CRUD Added for ${this.input.tables[i].names.pascalCase}`,
         this.input.path

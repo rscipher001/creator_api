@@ -1,7 +1,7 @@
 @set('belongsToAuth', table.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
 @set('hasRelations', table.relations.length)
 import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}';
-@if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)~
+@if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)~
   @each(parentTable in table.routeParentTables)
     import {{ parentTable.names.pascalCase }} from 'App/Models/{{ parentTable.names.pascalCase }}';
   @endeach
@@ -68,8 +68,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }}', auth.user!.id)
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-        @set('lastIndex', table.routeParentTables.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+        @set('lastIndex', table.routeParentTables?.length - 1)
         queryBuilder.where('{{ table.routeParentTables[lastIndex].names.camelCase }}Id', {{ table.routeParentTables[lastIndex].names.camelCase }}Id)
       @endif
 
@@ -151,8 +151,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
       })
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-        @set('lastIndex', table.routeParentTables.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+        @set('lastIndex', table.routeParentTables?.length - 1)
         input.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -166,8 +166,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
               `${input.auth.table.names.snakeCase}_id`
           }} = auth.user!.id
         @endif
-        @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-          @set('lastIndex', table.routeParentTables.length - 1)
+        @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+          @set('lastIndex', table.routeParentTables?.length - 1)
           condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
             table.routeParentTables[lastIndex].names.camelCase
           }}Id
@@ -234,8 +234,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
               input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
             }}
           @endeach
-          @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-            @set('lastIndex', table.routeParentTables.length - 1)
+          @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+            @set('lastIndex', table.routeParentTables?.length - 1)
             input.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
               table.routeParentTables[lastIndex].names.camelCase
             }}Id
@@ -276,8 +276,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-        @set('lastIndex', table.routeParentTables.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+        @set('lastIndex', table.routeParentTables?.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -322,8 +322,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-        @set('lastIndex', table.routeParentTables.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+        @set('lastIndex', table.routeParentTables?.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -384,8 +384,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-        @set('lastIndex', table.routeParentTables.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+        @set('lastIndex', table.routeParentTables?.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -430,8 +430,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-        @set('lastIndex', table.routeParentTables.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+        @set('lastIndex', table.routeParentTables?.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -506,8 +506,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id;
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-        @set('lastIndex', table.routeParentTables.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+        @set('lastIndex', table.routeParentTables?.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -554,8 +554,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id;
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-        @set('lastIndex', table.routeParentTables.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+        @set('lastIndex', table.routeParentTables?.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -603,8 +603,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${input.auth.table.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-        @set('lastIndex', table.routeParentTables.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
+        @set('lastIndex', table.routeParentTables?.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
