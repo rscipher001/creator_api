@@ -688,7 +688,6 @@ const fulProjectInput = {
   rbac: {
     enabled: true,
     multipleRoles: true,
-    canAdminCreateRoles: true,
     roles: [
       {
         name: 'Admin',

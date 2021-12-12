@@ -132,7 +132,6 @@ export interface Relation {
 export interface RBAC {
   enabled: boolean
   multipleRoles: boolean
-  canAdminCreateRoles: boolean
   roles: Role[]
   permissions: Permission[]
   matrix: RBACMatrix[]

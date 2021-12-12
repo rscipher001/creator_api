@@ -1,3 +1,4 @@
+@set('hasManyRoles', input.auth.table.relations.find(r => r.type === 'ManyToMany' && r.modelNames.pascalCase === 'Role'))
 /**
  * Contract source: https://git.io/Jte3T
  *
@@ -31,11 +32,23 @@ import Bouncer from '@ioc:Adonis/Addons/Bouncer'
 */
 const checkPermission = async (user: User, permission: string) => {
   await user.load((loader) => {
-    loader.load('role', (role) => {
-      role.preload('permissions')
-    })
+    @if(hasManyRoles)
+      loader.load('roles', (rolesQueryBuilder) => {
+        rolesQueryBuilder.preload('permissions')
+      })
+    @else
+      loader.load('role', (roleQueryBuilder) => {
+        roleQueryBuilder.preload('permissions')
+      })
+    @endif
   })
-  return !!user.role.permissions.find((p) => p.name === permission)
+  const permissions: string[] = [];
+  @if(hasManyRoles)
+    user.roles.forEach((r) => r.permissions.forEach((p) => permissions.push(p.name)));
+  @else
+    user.role.permissions.forEach((p) => permissions.push(p.name));
+  @endif
+  return permissions.includes(permission)
 }
 
 export const { actions } = Bouncer

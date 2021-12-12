@@ -142,7 +142,6 @@ export default class CreateProjectValidator {
     rbac: schema.object().members({
       enabled: schema.boolean(),
       multipleRoles: schema.boolean.optional([rules.requiredWhen('rbac.enabled', '=', true)]),
-      canAdminCreateRoles: schema.boolean.optional([rules.requiredWhen('rbac.enabled', '=', true)]),
       roles: schema.array.optional([rules.requiredWhen('rbac.enabled', '=', true)]).members(
         schema.object().members({
           name: schema.string({ trim: true }),

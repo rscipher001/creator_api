@@ -61,11 +61,11 @@ export default {
       @if(table.operations.destroyMany)
         destroyMany: false,
       @endif
-      @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
+      @if(table.relations.find((relation) => relation.type === 'ManyToMany'))
         attach: false,
         detach: false,
         sync: false,
-      @endeach
+      @endif
     },
     meta: {},
     items: [],
@@ -234,7 +234,7 @@ export default {
       },
     @endif
 
-    @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
+    @if(table.relations.find((relation) => relation.type === 'ManyToMany'))
       @each(operation in ['attach', 'detach', 'sync'])
         async {{ operation }}({ state, commit }, {
           id,
@@ -264,7 +264,7 @@ export default {
           }
         },
       @endeach
-    @endeach
+    @endif
   },
 
   mutations: {

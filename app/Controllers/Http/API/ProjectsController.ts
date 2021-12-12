@@ -9,8 +9,8 @@ import CreateProjectValidator from 'App/Validators/CreateProjectValidator'
 
 export default class ProjectsController {
   public async index({ request, auth }: HttpContextContract) {
-    const page = request.input('page_no', 1)
-    const limit = request.input('page_size', 10)
+    const page = request.input('pageNo', 1)
+    const limit = request.input('pageSize', 10)
     return Project.query().where('userId', auth.user!.id).paginate(page, limit)
   }
 

@@ -381,7 +381,7 @@ export default {
         if (!user) return false;
         if (Array.isArray(user.roles)) {
           user.roles.forEach((role) =>{
-            role.forEach((p) => state.permissions.push(p.name))
+            role.permissions.forEach((p) => state.permissions.push(p.name))
           })
         } else if (user.role) {
           user.role.permissions.forEach((p) => state.permissions.push(p.name))

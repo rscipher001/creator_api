@@ -57,8 +57,8 @@
                 }}" v-slot="props" {{
                   ['Decimal', 'Integer'].includes(column.type) ? 'numeric' : ''
                 }}>
-                  @if('Decimal' === column.type && column.input.decimal.step !== 'any')
-                    @set('decimalCount', `${column.input.decimal.step}`.split('.')[1].length)
+                  @if('Decimal' === column.type && column.input?.decimal.step !== 'any')
+                    @set('decimalCount', `${column.input?.decimal.step}`.split('.')[1].length)
                     {{{
                       `{{ props.row.${column.names.camelCase}.toFixed(${decimalCount}) }}`
                     }}}

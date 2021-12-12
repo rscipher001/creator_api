@@ -1,3 +1,4 @@
+@set('hasManyRoles', input.auth.table.relations.find(r => r.type === 'ManyToMany' && r.modelNames.pascalCase === 'Role'))
 @if(input.rbac.enabled)
   import Role from 'App/Models/Role'
 @endif
@@ -7,7 +8,6 @@ import LoginValidator from 'App/Validators/LoginValidator'
   import RegisterValidator from 'App/Validators/RegisterValidator'
 @endif
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-
 
 export default class AuthController {
   public async login({
@@ -25,10 +25,16 @@ export default class AuthController {
     const token = await auth.use('api').attempt(email, password)
     const { token: tokenString } = token.toJSON()
     const user = auth.user!;
-    @if(input.rbac.enabled)
-      await user.load('role', (roleQuery) => {
-        roleQuery.preload('permissions')
-      });
+    @if(input.rbac.enabled)~
+      @if(hasManyRoles)
+        await user.load('roles', (rolesQuery) => {
+          rolesQuery.preload('permissions')
+        });
+      @else
+        await user.load('role', (roleQuery) => {
+          roleQuery.preload('permissions')
+        });
+      @endif
     @endif
     return {
       token: tokenString,
@@ -48,7 +54,7 @@ export default class AuthController {
         logger.info('AuthController.register')
       @endif
       const input: { [key: string]: any } = await request.validate(RegisterValidator)
-      @if (input.rbac.enabled)
+      @if (input.rbac.enabled && !hasManyRoles)
         const defaultRole = await Role.findBy('default', true)
         input.roleId = defaultRole!.id
       @endif
@@ -58,12 +64,22 @@ export default class AuthController {
       */
       const user = await {{ table.names.pascalCase }}.create(input)
       await user.save()
+      @if (input.rbac.enabled && hasManyRoles)
+        const defaultRole = await Role.findBy('default', true);
+        await user.relation('roles').attach([defaultRole.id]);
+      @endif
       const token = await auth.use('api').login(user)
       const { token: tokenString } = token.toJSON()
       @if(input.rbac.enabled)
-        await user.load('role', (roleQuery) => {
-          roleQuery.preload('permissions')
-        });
+        @if(hasManyRoles)
+          await user.load('roles', (rolesQuery) => {
+            rolesQuery.preload('permissions')
+          });
+        @else
+          await user.load('role', (roleQuery) => {
+            roleQuery.preload('permissions')
+          });
+        @endif
       @endif
       return {
         token: tokenString,
@@ -96,9 +112,15 @@ export default class AuthController {
     @endif
     const user = auth.user!;
     @if(input.rbac.enabled)
-      await user.load('role', (roleQuery) => {
-        roleQuery.preload('permissions')
-      });
+      @if(hasManyRoles)
+        await user.load('roles', (rolesQuery) => {
+          rolesQuery.preload('permissions')
+        });
+      @else
+        await user.load('role', (roleQuery) => {
+          roleQuery.preload('permissions')
+        });
+      @endif
     @endif
     return user;
   }

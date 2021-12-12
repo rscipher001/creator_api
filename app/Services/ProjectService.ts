@@ -110,152 +110,166 @@ class BackendProjectService {
     const rbac = this.input.rbac
     if (!rbac.enabled) return
 
-    if (rbac.canAdminCreateRoles) {
-      // If admin can create new roles then we need to store this information in the database
-      // Create roles table and add relation with user table
-      const roleTable = {
-        generateRoute: true,
-        generateController: true,
-        generateModel: true,
-        generateMigration: true,
-        generateUI: true,
-        seederUniqueKey: 'name',
-        relations: [
-          {
-            type: 'HasMany',
-            withModel: '$auth',
-            name: '',
-            required: true,
-          },
-          {
-            type: 'ManyToMany',
-            withModel: 'Permission',
-            name: '',
-            required: true,
-          },
-        ],
-        operations: {
-          index: true,
-          create: true,
-          store: true,
-          edit: true,
-          show: true,
-          update: true,
-          destroy: true,
-          storeMany: true,
-          destroyMany: true,
+    const roleTable = {
+      generateRoute: true,
+      generateController: true,
+      generateModel: true,
+      generateMigration: true,
+      generateUI: true,
+      seederUniqueKey: 'name',
+      relations: [
+        {
+          type: 'ManyToMany',
+          withModel: 'Permission',
+          name: '',
+          required: true,
         },
-        customOperations: [],
-        name: 'Role',
-        timestamps: false,
-        indexColumns: ['Name', 'Description', 'Default'],
-        columns: [
-          {
-            name: 'Name',
-            type: 'String',
-            meta: {
-              trim: true,
-              expose: true,
-              displayName: 'Name',
-              required: true,
-              minLength: 2,
-              maxLength: 127,
-            },
-            input: {
-              type: 'Input',
-            },
-          },
-          {
-            name: 'Description',
-            type: 'String',
-            meta: {
-              displayName: '',
-              required: false,
-              expose: true,
-              trim: true,
-              maxLength: 256,
-              multiline: true,
-            },
-            input: {
-              type: 'Input',
-            },
-          },
-          {
-            name: 'Default',
-            type: 'Boolean',
-            meta: {
-              displayName: '',
-              required: false,
-              expose: true,
-            },
-            input: {
-              type: 'Input',
-            },
-          },
-        ],
-      }
-      const permissionTable = {
-        generateRoute: true,
-        generateController: true,
-        generateModel: true,
-        generateMigration: true,
-        generateUI: true,
-        seederUniqueKey: 'name',
-        relations: [
-          {
-            type: 'ManyToMany',
-            withModel: 'Role',
-            name: '',
+      ],
+      operations: {
+        index: true,
+        create: true,
+        store: true,
+        edit: true,
+        show: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
+      name: 'Role',
+      timestamps: false,
+      indexColumns: ['Name', 'Description', 'Default'],
+      columns: [
+        {
+          name: 'Name',
+          type: 'String',
+          meta: {
+            trim: true,
+            expose: true,
+            displayName: 'Name',
             required: true,
+            minLength: 2,
+            maxLength: 127,
           },
-        ],
-        operations: {
-          index: true,
-          create: true,
-          store: true,
-          edit: true,
-          show: true,
-          update: true,
-          destroy: true,
-          storeMany: true,
-          destroyMany: true,
+          input: {
+            type: 'Input',
+          },
         },
-        customOperations: [],
-        name: 'Permission',
-        timestamps: false,
-        indexColumns: ['Name', 'Description'],
-        columns: [
-          {
-            name: 'Name',
-            type: 'String',
-            meta: {
-              trim: true,
-              expose: true,
-              displayName: 'Name',
-              required: true,
-              minLength: 2,
-              maxLength: 127,
-            },
-            input: {
-              type: 'Input',
-            },
+        {
+          name: 'Description',
+          type: 'String',
+          meta: {
+            displayName: '',
+            required: false,
+            expose: true,
+            trim: true,
+            maxLength: 256,
+            multiline: true,
           },
-          {
-            name: 'Description',
-            type: 'String',
-            meta: {
-              expose: true,
-              required: false,
-              trim: true,
-              maxLength: 256,
-              multiline: true,
-            },
-            input: {
-              type: 'Input',
-            },
+          input: {
+            type: 'Input',
           },
-        ],
-      }
+        },
+        {
+          name: 'Default',
+          type: 'Boolean',
+          meta: {
+            displayName: '',
+            required: false,
+            expose: true,
+          },
+          input: {
+            type: 'Input',
+          },
+        },
+      ],
+    }
+    const permissionTable = {
+      generateRoute: true,
+      generateController: true,
+      generateModel: true,
+      generateMigration: true,
+      generateUI: true,
+      seederUniqueKey: 'name',
+      relations: [
+        {
+          type: 'ManyToMany',
+          withModel: 'Role',
+          name: '',
+          required: true,
+        },
+      ],
+      operations: {
+        index: true,
+        create: true,
+        store: true,
+        edit: true,
+        show: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
+      name: 'Permission',
+      timestamps: false,
+      indexColumns: ['Name', 'Description'],
+      columns: [
+        {
+          name: 'Name',
+          type: 'String',
+          meta: {
+            trim: true,
+            expose: true,
+            displayName: 'Name',
+            required: true,
+            minLength: 2,
+            maxLength: 127,
+          },
+          input: {
+            type: 'Input',
+          },
+        },
+        {
+          name: 'Description',
+          type: 'String',
+          meta: {
+            expose: true,
+            required: false,
+            trim: true,
+            maxLength: 256,
+            multiline: true,
+          },
+          input: {
+            type: 'Input',
+          },
+        },
+      ],
+    }
+
+    if (rbac.multipleRoles) {
+      // User <> Role many2many
+      roleTable.relations.push({
+        type: 'ManyToMany',
+        withModel: '$auth',
+        name: '',
+        required: true,
+      })
+      this.input.auth.table.relations.push({
+        type: 'ManyToMany',
+        withModel: 'Role',
+        name: '',
+        required: true,
+      })
+    } else {
+      // User belongs to role
+      roleTable.relations.push({
+        type: 'HasMany',
+        withModel: '$auth',
+        name: '',
+        required: true,
+      })
       this.input.auth.table.relations.push({
         type: 'BelongsTo',
         withModel: 'Role',
@@ -263,17 +277,9 @@ class BackendProjectService {
         required: true,
         lazy: true,
       })
-      this.input.tables.unshift(permissionTable)
-      this.input.tables.unshift(roleTable)
-    } else {
-      // If admin can't create new roles then we can use a json file to store roles
     }
-
-    if (rbac.multipleRoles) {
-      // User can have multiple roles, we can save roles in user table as json array type or csv
-    } else {
-      // User can have one role, we can save role name in user table
-    }
+    this.input.tables.unshift(permissionTable)
+    this.input.tables.unshift(roleTable)
 
     this.input.rbac.roles = this.input.rbac.roles.map((r: Role) => {
       r.name = HelperService.toSingularCameCase(r.name)
