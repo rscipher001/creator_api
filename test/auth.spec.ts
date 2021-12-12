@@ -53,8 +53,8 @@ const fulProjectInput = {
     passwordReset: true,
     passwordChange: true,
     table: {
-      generateController: false,
-      generateUI: false,
+      generateController: true,
+      generateUI: true,
       generateModel: true,
       generateMigration: true,
       operations: {
@@ -66,6 +66,7 @@ const fulProjectInput = {
         destroyMany: true,
       },
       customOperations: [],
+      indexColumns: ['Name', 'Email'],
       relations: [],
       name: 'User',
       timestamps: true,
