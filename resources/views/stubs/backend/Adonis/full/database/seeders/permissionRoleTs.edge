@@ -1,0 +1,19 @@
+import Role from 'App/Models/Role'
+import Permission from 'App/Models/Permission'
+import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
+
+export default class PermissionRole extends BaseSeeder {
+  public async run() {
+    @each(item in matrix)
+      const {{ item.role }} = await Role.findBy('name', '{{ item.role }}')
+      const {{ item.role }}Permissions = await Permission.query().whereIn('name', [
+        @each(permission in item.permissions)
+          '{{ permission }}',
+        @endeach
+      ])
+      if ({{ item.role }}Permissions.length) {
+        await {{ item.role }}!.related('permissions').sync({{ item.role }}Permissions.map(p => p.id))
+      }
+    @endeach
+  }
+}

@@ -22,13 +22,16 @@ export default class ProfileGenerator {
     }
 
     // Generate AccountValidator
-    const accountValidatorViewPath = `${basePath}/accountValidatorTs`
-    const accountValidatorPath = `${this.input.path}/app/Validators/AccountValidator.ts`
-    const accountValidatorFileExists = await HelperService.fileExists(accountValidatorPath)
-    if (!accountValidatorFileExists) {
-      const content = await View.render(accountValidatorViewPath)
-      await HelperService.writeFile(accountValidatorPath, content)
+    if (this.input.mailEnabled) {
+      const accountValidatorViewPath = `${basePath}/accountValidatorTs`
+      const accountValidatorPath = `${this.input.path}/app/Validators/AccountValidator.ts`
+      const accountValidatorFileExists = await HelperService.fileExists(accountValidatorPath)
+      if (!accountValidatorFileExists) {
+        const content = await View.render(accountValidatorViewPath)
+        await HelperService.writeFile(accountValidatorPath, content)
+      }
     }
+
     // Generate SecurityValidator
     const changePasswordValidatorViewPath = `${basePath}/changePasswordValidatorTs`
     const changePasswordValidatorPath = `${this.input.path}/app/Validators/ChangePasswordValidator.ts`
@@ -126,6 +129,7 @@ export default class ProfileGenerator {
         {
           email,
           password,
+          input: this.input,
         }
       )
       await HelperService.writeFile(filePath, content)
@@ -138,7 +142,10 @@ export default class ProfileGenerator {
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
-        `stubs/backend/${this.input.tech.backend}/full/app/Controllers/Http/API/profileControllerTs`
+        `stubs/backend/${this.input.tech.backend}/full/app/Controllers/Http/API/profileControllerTs`,
+        {
+          input: this.input,
+        }
       )
       await HelperService.writeFile(filePath, content)
     }
@@ -249,21 +256,23 @@ export default class ProfileGenerator {
    * 6. Register routes
    */
   protected async start() {
-    // 0. Copy VerificationModel
-    await this.createModel()
-
-    // 1. Copy email verification controller
-    await this.createApiEmailVerificationController()
-
     // 2. Copy profile controller
     await this.createApiProfileController()
 
-    // 3. Copy and register email ensured middleware
-    await this.createAppMiddlewareEnsureEmailIsVerifiedTs()
-    await this.addMiddlewaresToKernel()
+    // 0. Copy VerificationModel
+    if (this.input.mailEnabled) {
+      await this.createModel()
 
-    // 4. Copy email templates
-    await this.copyEmailTemplates()
+      // 1. Copy email verification controller
+      await this.createApiEmailVerificationController()
+
+      // 3. Copy and register email ensured middleware
+      await this.createAppMiddlewareEnsureEmailIsVerifiedTs()
+      await this.addMiddlewaresToKernel()
+
+      // 4. Copy email templates
+      await this.copyEmailTemplates()
+    }
 
     // 5. Generate validators
     await this.generateProfileValidators()

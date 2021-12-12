@@ -4,23 +4,32 @@ import supertest from 'supertest'
 import Env from '@ioc:Adonis/Core/Env'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Encryption from '@ioc:Adonis/Core/Encryption'
+import {
+  ProjectType,
+  Database as DatabaseEnum,
+  Mailer,
+  Storage,
+  Backend,
+  Frontend,
+  RelationType,
+} from 'App/Interfaces/Enums'
 
 const BASE_URL = `http://${Env.get('HOST')}:${Env.get('PORT')}`
-
+let projectId = 1
 const fulProjectInput = {
   name: 'CIFullAPITest',
-  database: 'mysql',
-  types: ['api'],
-  mailers: ['smtp'],
+  database: DatabaseEnum.MySQL,
+  types: [ProjectType.API],
+  mailers: [Mailer.SMTP],
   mailEnabled: true,
   storageEnabled: true,
-  defaultMailer: 'smtp',
-  storageDrivers: ['local'],
-  defaultStorageDriver: 'local',
+  defaultMailer: Mailer.SMTP,
+  storageDrivers: [Storage.Local],
+  defaultStorageDriver: Storage.Local,
   camelCaseStrategy: true,
   tech: {
-    backend: 'adonis',
-    frontend: 'buefy',
+    backend: Backend.Adonis,
+    frontend: Frontend.Buefy,
   },
   generate: {
     api: {
@@ -44,11 +53,20 @@ const fulProjectInput = {
     passwordReset: true,
     passwordChange: true,
     table: {
-      generateController: false,
-      generateUI: false,
+      generateController: true,
+      generateUI: true,
       generateModel: true,
       generateMigration: true,
-      operations: [],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
+      indexColumns: ['Name', 'Email'],
       relations: [],
       name: 'User',
       timestamps: true,
@@ -71,31 +89,38 @@ const fulProjectInput = {
       singleton: false,
       parent: null,
       routeParents: [],
-      indexColumns: ['name', 'isoCode'],
-      operations: ['index', 'store', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      indexColumns: ['Name', 'ISOCode'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '2',
-            maxLength: '127',
-            dbLength: '',
+            minLength: 2,
+            maxLength: 127,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -103,7 +128,7 @@ const fulProjectInput = {
             },
           },
           name: 'name',
-          type: 'string',
+          type: 'String',
         },
         {
           meta: {
@@ -111,23 +136,22 @@ const fulProjectInput = {
             required: true,
             expose: true,
             trim: true,
-            minLength: '3',
-            maxLength: '3',
-            dbLength: '',
+            minLength: 3,
+            maxLength: 3,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -135,7 +159,7 @@ const fulProjectInput = {
             },
           },
           name: 'isoCode',
-          type: 'string',
+          type: 'String',
         },
       ],
       relations: [],
@@ -151,29 +175,37 @@ const fulProjectInput = {
       parent: null,
       routeParents: ['Country'],
       indexColumns: ['name'],
-      operations: ['index', 'store', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '2',
-            maxLength: '127',
+            minLength: 2,
+            maxLength: 127,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -181,29 +213,29 @@ const fulProjectInput = {
             },
           },
           name: 'name',
-          type: 'string',
+          type: 'String',
         },
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '3',
-            maxLength: '3',
+            minLength: 3,
+            maxLength: 3,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -211,12 +243,12 @@ const fulProjectInput = {
             },
           },
           name: 'isoCode',
-          type: 'string',
+          type: 'String',
         },
       ],
       relations: [
         {
-          type: 'belongsTo',
+          type: RelationType.BelongsTo,
           withModel: 'Country',
           name: '',
           required: true,
@@ -234,30 +266,38 @@ const fulProjectInput = {
       parent: '$auth',
       routeParents: [],
       indexColumns: ['address'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '25',
-            maxLength: '512',
+            minLength: 25,
+            maxLength: 512,
             multiline: true,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -265,12 +305,12 @@ const fulProjectInput = {
             },
           },
           name: 'address',
-          type: 'string',
+          type: 'String',
         },
       ],
       relations: [
         {
-          type: 'belongsTo',
+          type: RelationType.BelongsTo,
           withModel: '$auth',
           name: '',
           required: true,
@@ -288,29 +328,37 @@ const fulProjectInput = {
       parent: null,
       routeParents: [],
       indexColumns: ['name'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '2',
-            maxLength: '127',
+            minLength: 2,
+            maxLength: 127,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -318,12 +366,12 @@ const fulProjectInput = {
             },
           },
           name: 'name',
-          type: 'string',
+          type: 'String',
         },
       ],
       relations: [
         {
-          type: 'manyToMany',
+          type: RelationType.ManyToMany,
           withModel: 'seller',
           name: '',
           required: true,
@@ -341,29 +389,37 @@ const fulProjectInput = {
       parent: null,
       indexColumns: ['name'],
       routeParents: [],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '2',
-            maxLength: '127',
+            minLength: 2,
+            maxLength: 127,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -371,12 +427,12 @@ const fulProjectInput = {
             },
           },
           name: 'name',
-          type: 'string',
+          type: 'String',
         },
       ],
       relations: [
         {
-          type: 'manyToMany',
+          type: RelationType.ManyToMany,
           withModel: 'Product',
           name: '',
           required: true,
@@ -393,30 +449,38 @@ const fulProjectInput = {
       parent: '$auth',
       routeParents: [],
       indexColumns: ['address'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '25',
-            maxLength: '512',
+            minLength: 25,
+            maxLength: 512,
             multiline: true,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -424,12 +488,12 @@ const fulProjectInput = {
             },
           },
           name: 'address',
-          type: 'string',
+          type: 'String',
         },
       ],
       relations: [
         {
-          type: 'belongsTo',
+          type: RelationType.BelongsTo,
           withModel: '$auth',
           name: '',
           required: true,
@@ -446,30 +510,38 @@ const fulProjectInput = {
       parent: 'Minion',
       routeParents: ['Minion'],
       indexColumns: ['address'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '25',
-            maxLength: '512',
+            minLength: 25,
+            maxLength: 512,
             multiline: true,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -477,12 +549,12 @@ const fulProjectInput = {
             },
           },
           name: 'address',
-          type: 'string',
+          type: 'String',
         },
       ],
       relations: [
         {
-          type: 'belongsTo',
+          type: RelationType.BelongsTo,
           withModel: 'Minion',
           name: '',
           required: true,
@@ -499,30 +571,38 @@ const fulProjectInput = {
       parent: 'Task',
       indexColumns: ['address'],
       routeParents: ['Task', 'Minion'],
-      operations: ['index', 'store', 'show', 'update', 'destroy', 'storeMany', 'destroyMany'],
+      operations: {
+        index: true,
+        store: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '25',
-            maxLength: '512',
+            minLength: 25,
+            maxLength: 512,
             multiline: true,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -530,12 +610,12 @@ const fulProjectInput = {
             },
           },
           name: 'address',
-          type: 'string',
+          type: 'String',
         },
       ],
       relations: [
         {
-          type: 'belongsTo',
+          type: RelationType.BelongsTo,
           withModel: 'Task',
           name: '',
           required: true,
@@ -553,30 +633,38 @@ const fulProjectInput = {
       indexColumns: ['address'],
       parent: 'Subtask',
       routeParents: ['Subtask', 'Task', 'Minion'],
-      operations: ['store', 'show', 'destroy'],
+      operations: {
+        index: false,
+        store: true,
+        update: false,
+        destroy: true,
+        storeMany: false,
+        destroyMany: false,
+      },
+      customOperations: [],
       columns: [
         {
           meta: {
             required: true,
             expose: true,
             trim: true,
-            minLength: '25',
-            maxLength: '512',
+            minLength: 25,
+            maxLength: 512,
             multiline: true,
           },
           input: {
-            type: 'input',
+            type: 'Input',
             decimal: {
               step: 'any',
             },
             select: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             radio: {
               types: ['object', 'string', 'number'],
-              type: 'string',
+              type: 'String',
               options: [],
             },
             checkbox: {
@@ -584,12 +672,12 @@ const fulProjectInput = {
             },
           },
           name: 'address',
-          type: 'string',
+          type: 'String',
         },
       ],
       relations: [
         {
-          type: 'belongsTo',
+          type: RelationType.BelongsTo,
           withModel: 'Subtask',
           name: '',
           required: true,
@@ -597,6 +685,35 @@ const fulProjectInput = {
       ],
     },
   ],
+  rbac: {
+    enabled: true,
+    multipleRoles: true,
+    roles: [
+      {
+        name: 'Admin',
+        description: 'Random struing lorem ipsum',
+        default: false,
+      },
+      {
+        name: 'User',
+        description: 'Random struing lorem ipsum',
+        default: true,
+      },
+      {
+        name: 'Engineer',
+        description: 'Random struing lorem ipsum',
+        default: false,
+      },
+    ],
+    permissions: [],
+    matrix: [
+      {
+        role: 'Admin',
+        permissions: [],
+        default: false,
+      },
+    ],
+  },
 }
 
 test.group('Auth', (group) => {
@@ -690,13 +807,14 @@ test.group('Auth', (group) => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
     assert.isObject(body)
+    projectId = body.id
   })
 
   test('Generate plain project API Part - 2', async (assert) => {
     let shouldCheckAgain = true
     while (shouldCheckAgain) {
       const { body } = await supertest(BASE_URL)
-        .get('/api/project/1')
+        .get(`/api/project/${projectId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
       if (body.status === 'failed') throw new Error('Project creation failed')

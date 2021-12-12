@@ -14,7 +14,8 @@ export default class ProfileController {
   public async updateProfile({ auth, request }: HttpContextContract) {
     const user = auth.user!
     const input = await request.validate(ProfileValidator)
-    await user.merge(input).save()
+    user.merge(input)
+    await user.save()
     return user
   }
 

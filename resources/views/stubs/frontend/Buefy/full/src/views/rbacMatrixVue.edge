@@ -1,0 +1,196 @@
+<template>
+    <section class="container">
+      <b-loading is-full-page v-model="loading"></b-loading>
+      <div class="section py-4">
+        <div class="columns">
+          <div class="column px-0">
+            <div class="level">
+              <div class="level-left is-size-3">Roles &amp; Permissions</div>
+              <div class="level-right">
+                <div class="buttons">      
+                  <b-button tag="router-link" to="/role/create" type="is-white"
+                    >New Role</b-button
+                  >
+                  <b-button tag="router-link" to="/permission/create" type="is-white"
+                    >New Permission</b-button
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section py-4">
+        <div class="columns box py-2">
+          <div class="column">
+            <b-field label="Permission">
+              <b-input
+                v-model="filter.permission"
+                maxlength="127"
+                placeholder="Filter permissions..."
+              >
+              </b-input>
+            </b-field>
+          </div>
+          <div class="column">
+            <b-field label="Role">
+              <b-input
+                v-model="filter.role"
+                maxlength="127"
+                placeholder="Filter roles..."
+              >
+              </b-input>
+            </b-field>
+          </div>
+        </div>
+      </div>
+
+      <div class="section py-4">
+        <div class="columns box">
+          <div class="column">
+            <table class="table is-bordered is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th>Permission</th>
+                  <th
+                    v-for="(role, roleIndex) in filteredRoles"
+                    :key="'role_' + roleIndex"
+                    class="is-capitalized"
+                  >
+                    @{{ role.name }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(permission, permissionIndex) in filteredPermissions"
+                  :key="'permission_' + permissionIndex"
+                >
+                  <td>@{{ permission.name }}</td>
+                  <td v-for="(role, roleIndex) in filteredRoles" :key="'role_' + roleIndex">
+                    <b-button
+                      type="is-ghost"
+                      @click="togglePermission(role, permission)"
+                    >
+                      <b-icon
+                        :icon="
+                          hasPermission(role, permission)
+                            ? 'checkbox-marked'
+                            : 'close-box'
+                        "
+                        :type="
+                          hasPermission(role, permission) ? 'is-success' : 'is-danger'
+                        "
+                        size="is-medium"
+                      ></b-icon>
+                    </b-button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </template>
+  
+  <script>
+  import { mapActions, mapState } from "vuex";
+  
+  export default {
+    name: "RbacMatrix",
+  
+    created() {
+      this.index();
+    },
+  
+    data() {
+      return {
+        loading: false,
+        filter: {
+          role: "",
+          permission: "",
+        },
+      };
+    },
+  
+    methods: {
+      ...mapActions("role", {
+        roleIndexAction: "index",
+        roleAttachAction: "attach",
+        roleDetachAction: "detach",
+      }),
+      ...mapActions("permission", {
+        permissionIndexAction: "index",
+      }),
+  
+      index() {
+        this.roleIndexAction({
+          size: 1000,
+          relations: "permissions",
+        });
+        this.permissionIndexAction({
+          size: 1000,
+        });
+      },
+  
+      hasPermission(role, permission) {
+        return role.permissions.find((p) => p.name === permission.name);
+      },
+  
+      togglePermission(role, permission) {
+        if (this.hasPermission(role, permission)) {
+          this.removePermission(role, permission);
+        } else {
+          this.addPermission(role, permission);
+        }
+      },
+  
+      addPermission(role, permission) {
+        this.roleAttachAction({
+          id: role.id,
+          relation: "permission",
+          relationId: permission.id,
+        });
+      },
+  
+      removePermission(role, permission) {
+        this.roleDetachAction({
+          id: role.id,
+          relation: "permission",
+          relationId: permission.id,
+        });
+      },
+    },
+  
+    computed: {
+      ...mapState("auth", {
+        user: (state) => state.user,
+        userPermissions: (state) => state.permissions,
+      }),
+      ...mapState("role", {
+        roles: (state) => state.items,
+        rolesMeta: (state) => state.meta,
+      }),
+      ...mapState("permission", {
+        permissions: (state) => state.items,
+        permissionsMeta: (state) => state.meta,
+      }),
+      filteredRoles() {
+        return this.roles.filter((role) => {
+          return role.name.toLowerCase().includes(this.filter.role.toLowerCase());
+        });
+      },
+      filteredPermissions() {
+        return this.permissions.filter((permission) => {
+          return permission.name
+            .toLowerCase()
+            .includes(this.filter.permission.toLowerCase());
+        });
+      },
+    },
+  };
+  </script>
+  

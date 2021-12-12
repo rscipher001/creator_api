@@ -1,0 +1,417 @@
+@set('containsUnderscoreColumn', input.auth.table.columns.find(c => c.columnName.indexOf('_') >= 0))
+import HttpService from "../../services/http.service";
+import LocalStorageService from '../../services/localStorage.service';
+import ValidationException from "../../exceptions/ValidationException";
+
+@if(!input.camelCaseStrategy && containsUnderscoreColumn)
+  const processUser = (user) => {
+    @each(column in input.auth.table.columns.filter(c => c.columnName.indexOf('_') >= 0))
+      user.{{ column.names.camelCase }} = user.{{ column.names.snakeCase }};
+      delete user.{{ column.names.snakeCase }};
+    @endeach
+    return user;
+  };
+@endif
+
+export default {
+  namespaced: true,
+
+  state: () => ({
+    loading: {
+      login: false,
+      logout: false,
+      register: false,
+      getAccount: false,
+      verifyEmail: false,
+      updateEmail: false,
+      @if(input.storageEnabled)
+        updateAvatar: false,
+      @endif
+      updateProfile: false,
+      @if(input.mailEnabled)
+        updateAccount: false,
+      @endif
+      forgotPasswordVerify: false,
+      forgotPasswordUpdate: false,
+      forgotPasswordRequest: false,
+      resendVerificationEmail: false,
+    },
+    token: null, // Authorization token
+    user: null, // Logged in user basic profile
+    permissions: []
+  }),
+
+  actions: {
+    bootstrap({ state, dispatch, commit }) {
+      for (const key in state.loading) {
+        commit("setLoading", { key: key, value: false });
+      }
+      if (state.user) {
+        dispatch("refreshUser");
+      }
+    },
+
+    setUserToken({ commit }, { user, token }) {
+      LocalStorageService.setJSON("user", user);
+      LocalStorageService.setAuthToken(token);
+      commit("setUserToken", { user, token });
+    },
+
+    /**
+     * Update user keys
+     */
+    updateUser({ commit }, user) {
+      commit("setUser", user);
+    },
+
+    unsetTokens({ commit }) {
+      localStorage.clear();
+      commit("unsetTokens");
+    },
+
+    async login({ dispatch, commit }, input) {
+      try {
+        commit("setLoading", { key: "login", value: true });
+        const { user, token } = await HttpService.post("/login", input);
+        dispatch("setUserToken", {
+          token,
+          @if(containsUnderscoreColumn)
+            user: processUser(user),
+          @else
+            user,
+          @endif
+        });
+        @if(input.rbac.enabled)
+          dispatch("preparePermissions");
+        @endif
+        commit("setLoading", { key: "login", value: false });
+      } catch (e) {
+        commit("setLoading", { key: "login", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async register({ commit, dispatch }, input) {
+      commit("setLoading", { key: "register", value: true });
+      try {
+        const { user, token } = await HttpService.post("/register", input);
+        dispatch("setUserToken", {
+          token,
+          @if(containsUnderscoreColumn)
+            user: processUser(user),
+          @else
+            user,
+          @endif
+        });
+        @if(input.rbac.enabled)
+          dispatch("preparePermissions");
+        @endif
+        commit("setLoading", { key: "register", value: false });
+      } catch (e) {
+        commit("setLoading", { key: "register", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async forgotPasswordRequest({ commit }, input) {
+      commit("setLoading", { key: "forgotPasswordRequest", value: true });
+      try {
+        const message = await HttpService.post(
+          "/password/forget/request",
+          input
+        );
+        commit("setLoading", { key: "forgotPasswordRequest", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "forgotPasswordRequest", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async forgotPasswordVerify({ commit }, input) {
+      commit("setLoading", { key: "forgotPasswordVerify", value: true });
+      try {
+        const message = await HttpService.post(
+          "/password/forget/verify",
+          input
+        );
+        commit("setLoading", { key: "forgotPasswordVerify", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "forgotPasswordVerify", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async resendVerificationEmail({ commit }, input) {
+      commit("setLoading", { key: "resendVerificationEmail", value: true });
+      try {
+        const message = await HttpService.authPost("/email/resend", input);
+        commit("setLoading", { key: "resendVerificationEmail", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "resendVerificationEmail", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async verifyEmail({ commit }, input) {
+      commit("setLoading", { key: "verifyEmail", value: true });
+      try {
+        const message = await HttpService.post("/email/verify", input);
+        commit("setLoading", { key: "verifyEmail", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "verifyEmail", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async updateEmail({ commit }, input) {
+      commit("setLoading", { key: "updateEmail", value: true });
+      try {
+        const message = await HttpService.post("/email/update", input);
+        commit("setLoading", { key: "updateEmail", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "updateEmail", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async forgotPasswordUpdate({ commit }, input) {
+      commit("setLoading", { key: "forgotPasswordUpdate", value: true });
+      try {
+        const message = await HttpService.post(
+          "/password/forget/update",
+          input
+        );
+        commit("setLoading", { key: "forgotPasswordUpdate", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "forgotPasswordUpdate", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async updateProfile({ commit, dispatch }, input) {
+      commit("setLoading", { key: "updateProfile", value: true });
+      try {
+        const user = await HttpService.authPost("/me/profile", input);
+        dispatch(
+          "updateUser",
+          @if(containsUnderscoreColumn)
+            processUser(user)
+          @else
+            user
+          @endif
+        );
+        commit("setLoading", { key: "updateProfile", value: false });
+      } catch (e) {
+        commit("setLoading", { key: "updateProfile", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    @if(input.mailEnabled)
+    /**
+     * Get update email request
+     */
+    async getAccount({ commit }) {
+      commit("setLoading", { key: "getAccount", value: true });
+      try {
+        const emailRequest = await HttpService.authGet("/me/profile/account");
+        commit("setLoading", { key: "getAccount", value: false });
+        return emailRequest;
+      } catch (e) {
+        commit("setLoading", { key: "getAccount", value: false });
+        throw e;
+      }
+    },
+
+    /**
+     * Delete update email request
+     */
+    async deleteAccount({ commit }) {
+      commit("setLoading", { key: "deleteAccount", value: true });
+      try {
+        await HttpService.authDelete("/me/profile/account");
+        commit("setLoading", { key: "deleteAccount", value: false });
+      } catch (e) {
+        commit("setLoading", { key: "deleteAccount", value: false });
+        throw e;
+      }
+    },
+
+    async updateAccount({ commit }, input) {
+      commit("setLoading", { key: "updateAccount", value: true });
+      try {
+        const message = await HttpService.authPost("/me/profile/account", input);
+        commit("setLoading", { key: "updateAccount", value: false });
+        return message;
+      } catch (e) {
+        commit("setLoading", { key: "updateAccount", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+    @endif
+
+    @if(input.storageEnabled)
+      async updateAvatar({ commit, dispatch }, input) {
+        commit("setLoading", { key: "updateAvatar", value: true });
+        try {
+          const user = await HttpService.authPost("/me/profile/avatar", input);
+          dispatch(
+            "updateUser",
+            @if(containsUnderscoreColumn)
+              processUser(user)
+            @else
+              user
+            @endif
+          );
+          commit("setLoading", { key: "updateAvatar", value: false });
+        } catch (e) {
+          commit("setLoading", { key: "updateAvatar", value: false });
+          if (e.response && e.response.status === 422) {
+            throw new ValidationException(e.message, e.response.data.errors);
+          }
+          throw e;
+        }
+      },
+
+      async deleteAvatar({ commit, dispatch }, input) {
+        commit("setLoading", { key: "deleteAvatar", value: true });
+        try {
+          const user = await HttpService.authPost("/me/profile/avatar", input);
+          dispatch(
+            "updateUser",
+            @if(containsUnderscoreColumn)
+              processUser(user)
+            @else
+              user
+            @endif
+          );
+          commit("setLoading", { key: "deleteAvatar", value: false });
+        } catch (e) {
+          commit("setLoading", { key: "deleteAvatar", value: false });
+          if (e.response && e.response.status === 422) {
+            throw new ValidationException(e.message, e.response.data.errors);
+          }
+          throw e;
+        }
+      },
+    @endif
+    async updatePassword({ commit }, input) {
+      commit("setLoading", { key: "updatePassword", value: true });
+      try {
+        await HttpService.authPost("/me/profile/password", input);
+        commit("setLoading", { key: "updatePassword", value: false });
+      } catch (e) {
+        commit("setLoading", { key: "updatePassword", value: false });
+        if (e.response && e.response.status === 422) {
+          throw new ValidationException(e.message, e.response.data.errors);
+        }
+        throw e;
+      }
+    },
+
+    async refreshUser({ dispatch }, input) {
+      try {
+        const user = await HttpService.authGet("/me", input);
+        dispatch(
+          "updateUser",
+          @if(containsUnderscoreColumn)
+            processUser(user)
+          @else
+            user
+          @endif
+        );
+        @if(input.rbac.enabled)
+          dispatch("preparePermissions");
+        @endif
+      } catch (e) {
+        console.error(e);
+        dispatch("unsetTokens");
+      }
+    },
+
+    async logout({ dispatch }) {
+      try {
+        await HttpService.authPost("/logout");
+      } catch (e) {
+        /***/
+      }
+      dispatch("unsetTokens");
+    },
+
+    @if(input.rbac.enabled)
+      preparePermissions({ state }) {
+        state.permissions = [];
+        const user = state.user;
+        if (!user) return false;
+        if (Array.isArray(user.roles)) {
+          user.roles.forEach((role) =>{
+            role.permissions.forEach((p) => state.permissions.push(p.name))
+          })
+        } else if (user.role) {
+          user.role.permissions.forEach((p) => state.permissions.push(p.name))
+        }
+      },
+    @endif
+  },
+
+  mutations: {
+    setUserToken(state, { token, user }) {
+      state.token = token;
+      state.user = user;
+    },
+
+    unsetTokens(state) {
+      state.token = null;
+      state.user = null;
+    },
+
+    setUser(state, user) {
+      state.user = user;
+    },
+
+    setTokens(state, { user, token }) {
+      state.token = token;
+      state.user = user;
+    },
+
+    setLoading(state, { key, value }) {
+      state.loading[key] = value;
+    },
+  },
+};

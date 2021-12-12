@@ -27,6 +27,7 @@ export default class AuthGenerator {
     await this.copySettingProfileView()
     await this.copySettingAccountView()
     await this.copySettingSecurityView()
+    await this.copyRbacMatrixView()
   }
 
   protected async copyRegisterView() {
@@ -122,9 +123,28 @@ export default class AuthGenerator {
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/src/views/SettingVue`
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/SettingVue`,
+        {
+          input: this.input,
+        }
       )
       await HelperService.writeFile(path, content)
+    }
+  }
+
+  protected async copyRbacMatrixView() {
+    if (this.input.rbac.enabled) {
+      const path = `${this.input.spaPath}/src/views/RbacMatrix.vue`
+      const exists = await HelperService.fileExists(path)
+      if (!exists) {
+        const content = await View.render(
+          `stubs/frontend/${this.input.tech.frontend}/full/src/views/rbacMatrixVue`,
+          {
+            input: this.input,
+          }
+        )
+        await HelperService.writeFile(path, content)
+      }
     }
   }
 
@@ -160,6 +180,7 @@ export default class AuthGenerator {
         `stubs/frontend/${this.input.tech.frontend}/full/src/views/setting/AccountVue`,
         {
           email,
+          input: this.input,
         }
       )
       await HelperService.writeFile(path, content)
@@ -192,6 +213,7 @@ export default class AuthGenerator {
         `stubs/frontend/${this.input.tech.frontend}/full/src/views/setting/SecurityVue`,
         {
           password,
+          input: this.input,
         }
       )
       await HelperService.writeFile(path, content)
@@ -269,16 +291,16 @@ export default class AuthGenerator {
   /**
    * Update routes file with auth routes
    */
-  protected async addRoutes() {
-    const path = `${this.input.spaPath}/src/router/index.js`
-    const content = await View.render(
-      `stubs/frontend/${this.input.tech.frontend}/full/src/router/indexJs`,
-      {
-        input: this.input,
-      }
-    )
-    await HelperService.writeFile(path, content)
-  }
+  // protected async addRoutes() {
+  //   const path = `${this.input.spaPath}/src/router/index.js`
+  //   const content = await View.render(
+  //     `stubs/frontend/${this.input.tech.frontend}/full/src/router/indexJs`,
+  //     {
+  //       input: this.input,
+  //     }
+  //   )
+  //   await HelperService.writeFile(path, content)
+  // }
 
   protected async copyAsset() {
     const path = `${this.input.spaPath}/src/assets/programming.svg`
@@ -298,7 +320,7 @@ export default class AuthGenerator {
     await this.copyState()
     await this.importState()
     await this.registerState()
-    await this.addRoutes()
+    // await this.addRoutes()
     await this.copyPages()
     await this.copyAsset()
     await this.copyEnv()

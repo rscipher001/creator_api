@@ -14,9 +14,6 @@ export default class SPAGenerator {
    * Package saves state in local storage
    */
   public async addVuexPersistPackage() {
-    await HelperService.execute('npm', ['install', 'vuex-persistedstate'], {
-      cwd: this.input.spaPath,
-    })
     const path = `${this.input.spaPath}/src/store/index.js`
     let content = await HelperService.readFile(path)
 
@@ -64,6 +61,7 @@ export default class SPAGenerator {
 
     await this.createJsConfigJson()
     await this.createSrcConstantsIndexJs()
+    await this.createSrcServicesHelperServiceJs()
     await this.createSrcServicesHttpServiceJs()
     await this.createSrcServicesLocalStorageServiceJs()
     await this.createSrcExceptionsValidationExceptionJs()
@@ -72,9 +70,21 @@ export default class SPAGenerator {
   }
 
   public async installBuefy() {
-    await HelperService.execute('npm', ['install', 'buefy', 'axios'], {
-      cwd: this.input.spaPath,
-    })
+    await HelperService.execute(
+      'npm',
+      ['install', 'buefy', 'axios', 'vuex-persistedstate', 'lodash'],
+      {
+        cwd: this.input.spaPath,
+      }
+    )
+  }
+
+  protected async installCsvParse() {
+    if (this.input.tables.find((table) => table.operations.storeMany)) {
+      await HelperService.execute('npm', ['install', 'csv-parse'], {
+        cwd: this.input.spaPath,
+      })
+    }
   }
 
   /**
@@ -137,7 +147,21 @@ export default class SPAGenerator {
     await HelperService.execute('git', ['config', '--local', 'user.email', this.input.git.email], {
       cwd: this.input.spaPath,
     })
+    await this.replacePublicIndexHtml()
     await this.installBuefy()
+    await this.installCsvParse()
+  }
+
+  // Replace public/index.html with file that contains material design icons
+  protected async replacePublicIndexHtml() {
+    const filePath = `${this.input.spaPath}/public/index.html`
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/public/indexHtml`,
+      {
+        input: this.input,
+      }
+    )
+    await HelperService.writeFile(filePath, content)
   }
 
   public async addNavbar() {
@@ -150,6 +174,20 @@ export default class SPAGenerator {
       }
     )
     await HelperService.writeFile(filePath, content)
+  }
+
+  public async createSrcServicesHelperServiceJs() {
+    const filePath = `${this.input.spaPath}/src/services/helper.service.js`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/frontend/${this.input.tech.frontend}/full/src/services/helperServiceJs`,
+        {
+          input: this.input,
+        }
+      )
+      await HelperService.writeFile(filePath, content)
+    }
   }
 
   public async createSrcServicesHttpServiceJs() {

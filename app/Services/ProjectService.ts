@@ -2,11 +2,19 @@ import Env from '@ioc:Adonis/Core/Env'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
-import ProjectInput, { Table, Relation, RelationType } from 'App/Interfaces/ProjectInput'
+import { RelationType, RequestMethod } from 'App/Interfaces/Enums'
+import ProjectInput, {
+  Table,
+  Relation,
+  Permission,
+  Role,
+  RBACMatrix,
+} from 'App/Interfaces/ProjectInput'
 
 import AdonisInit from 'App/Services/Backend/Adonis/Init'
 import AdonisAuthGenerator from 'App/Services/Backend/Adonis/AuthGenerator'
 import AdonisCRUDGenerator from 'App/Services/Backend/Adonis/CRUDGenerator'
+import AdonisRBACGenerator from 'App/Services/Backend/Adonis/RBACGenerator'
 import AdonisTestGenerator from 'App/Services/Backend/Adonis/TestGenerator'
 import AdonisMailerGenerator from 'App/Services/Backend/Adonis/MailerGenerator'
 import AdonisTenantGenerator from 'App/Services/Backend/Adonis/TenantGenerator'
@@ -30,21 +38,30 @@ class BackendProjectService {
   }
 
   public prepareTable(table): Table {
-    table.name = string.pascalCase(table.name)
+    table.name = HelperService.toSingularPascalCase(table.name)
     table.names = HelperService.generateNames(table.name)
     table.tableName = this.input.camelCaseStrategy
       ? table.names.camelCasePlural
       : table.names.snakeCasePlural
-    table.operations = table.operations.map((operation) => operation.toLocaleLowerCase())
     table.columns = table.columns.map((column) => {
-      column.name = string.pascalCase(column.name)
+      column.name = HelperService.toSingularPascalCase(column.name)
       column.names = HelperService.generateNames(column.name)
       column.columnName = this.input.camelCaseStrategy
         ? column.names.camelCase
         : column.names.snakeCase
-      column.type = column.type.toLowerCase()
       return column
     })
+    table.operations = {
+      index: Boolean(table.operations.index),
+      create: Boolean(table.operations.create),
+      store: Boolean(table.operations.store),
+      show: Boolean(table.operations.show),
+      edit: Boolean(table.operations.edit),
+      update: Boolean(table.operations.update),
+      destroy: Boolean(table.operations.destroy),
+      storeMany: Boolean(table.operations.storeMany),
+      destroyMany: Boolean(table.operations.destroyMany),
+    }
     if (Array.isArray(table.indexColumns)) {
       table.indexColumns = table.indexColumns.map((columnName) => string.pascalCase(columnName))
     }
@@ -65,7 +82,7 @@ class BackendProjectService {
         }
 
         if (relation.name) {
-          relation.names = HelperService.generateNames(relation.names)
+          relation.names = HelperService.generateNames(relation.name)
           relation.name = relation.names.pascalCase
         } else {
           relation.names = relation.modelNames
@@ -77,33 +94,265 @@ class BackendProjectService {
     } else {
       table.relations = []
     }
+    if (Array.isArray(table.customOperations) && table.customOperations.length) {
+      table.customOperations.map((op) => {
+        return {
+          name: string.camelCase(op.name),
+          method: RequestMethod[op.method],
+          singular: op.singular,
+        }
+      })
+    }
     return table
+  }
+
+  protected prepareRBAC() {
+    const rbac = this.input.rbac
+    if (!rbac.enabled) return
+
+    const roleTable = {
+      generateRoute: true,
+      generateController: true,
+      generateModel: true,
+      generateMigration: true,
+      generateUI: true,
+      seederUniqueKey: 'name',
+      relations: [
+        {
+          type: 'ManyToMany',
+          withModel: 'Permission',
+          name: '',
+          required: true,
+        },
+      ],
+      operations: {
+        index: true,
+        create: true,
+        store: true,
+        edit: true,
+        show: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
+      name: 'Role',
+      timestamps: false,
+      indexColumns: ['Name', 'Description', 'Default'],
+      columns: [
+        {
+          name: 'Name',
+          type: 'String',
+          meta: {
+            trim: true,
+            expose: true,
+            displayName: 'Name',
+            required: true,
+            minLength: 2,
+            maxLength: 127,
+          },
+          input: {
+            type: 'Input',
+          },
+        },
+        {
+          name: 'Description',
+          type: 'String',
+          meta: {
+            displayName: '',
+            required: false,
+            expose: true,
+            trim: true,
+            maxLength: 256,
+            multiline: true,
+          },
+          input: {
+            type: 'Input',
+          },
+        },
+        {
+          name: 'Default',
+          type: 'Boolean',
+          meta: {
+            displayName: '',
+            required: false,
+            expose: true,
+          },
+          input: {
+            type: 'Input',
+          },
+        },
+      ],
+    }
+    const permissionTable = {
+      generateRoute: true,
+      generateController: true,
+      generateModel: true,
+      generateMigration: true,
+      generateUI: true,
+      seederUniqueKey: 'name',
+      relations: [
+        {
+          type: 'ManyToMany',
+          withModel: 'Role',
+          name: '',
+          required: true,
+        },
+      ],
+      operations: {
+        index: true,
+        create: true,
+        store: true,
+        edit: true,
+        show: true,
+        update: true,
+        destroy: true,
+        storeMany: true,
+        destroyMany: true,
+      },
+      customOperations: [],
+      name: 'Permission',
+      timestamps: false,
+      indexColumns: ['Name', 'Description'],
+      columns: [
+        {
+          name: 'Name',
+          type: 'String',
+          meta: {
+            trim: true,
+            expose: true,
+            displayName: 'Name',
+            required: true,
+            minLength: 2,
+            maxLength: 127,
+          },
+          input: {
+            type: 'Input',
+          },
+        },
+        {
+          name: 'Description',
+          type: 'String',
+          meta: {
+            expose: true,
+            required: false,
+            trim: true,
+            maxLength: 256,
+            multiline: true,
+          },
+          input: {
+            type: 'Input',
+          },
+        },
+      ],
+    }
+
+    if (rbac.multipleRoles) {
+      // User <> Role many2many
+      roleTable.relations.push({
+        type: 'ManyToMany',
+        withModel: '$auth',
+        name: '',
+        required: true,
+      })
+      this.input.auth.table.relations.push({
+        type: 'ManyToMany',
+        withModel: 'Role',
+        name: '',
+        required: true,
+      })
+    } else {
+      // User belongs to role
+      roleTable.relations.push({
+        type: 'HasMany',
+        withModel: '$auth',
+        name: '',
+        required: true,
+      })
+      this.input.auth.table.relations.push({
+        type: 'BelongsTo',
+        withModel: 'Role',
+        name: '',
+        required: true,
+        lazy: true,
+      })
+    }
+    this.input.tables.unshift(permissionTable)
+    this.input.tables.unshift(roleTable)
+
+    this.input.rbac.roles = this.input.rbac.roles.map((r: Role) => {
+      r.name = HelperService.toSingularCameCase(r.name)
+      if (r.description === undefined) {
+        r.description = ''
+      }
+      return r
+    })
+
+    this.input.rbac.permissions = this.input.rbac.permissions.map((permission: Permission) => {
+      const [r, p] = permission.name.split(':')
+      const resourceName = HelperService.toSingularCameCase(r)
+      const permissionName = HelperService.toSingularCameCase(p)
+      if (permission.description === undefined) {
+        permission.description = ''
+      }
+      permission.name = `${resourceName}:${permissionName}`
+      return permission
+    })
+
+    this.input.rbac.matrix = this.input.rbac.matrix.map((matrixItem: RBACMatrix) => {
+      matrixItem.role = HelperService.toSingularCameCase(matrixItem.role)
+      matrixItem.permissions = matrixItem.permissions.map((permission) => {
+        const [r, p] = permission.split(':')
+        const resourceName = HelperService.toSingularCameCase(r)
+        const permissionName = HelperService.toSingularCameCase(p)
+        return `${resourceName}:${permissionName}`
+      })
+      return matrixItem
+    })
   }
 
   /**
    * Prepares input by cleaning and standardize it
    */
   public prepare(): ProjectInput {
+    this.prepareAuthTable()
+    this.prepareRBAC()
+    this.input.name = HelperService.toSingularPascalCase(this.input.name)
     const projectInput: any = {}
-    projectInput.id = this.projectId
-    projectInput.camelCaseStrategy = !!this.input.camelCaseStrategy
+
+    // Fields that don't need processing
+    projectInput.camelCaseStrategy = this.input.camelCaseStrategy
     projectInput.generate = this.input.generate
+
+    projectInput.database = this.input.database
+    projectInput.types = this.input.types
+    projectInput.logging = {
+      enabled: true,
+    }
+
+    projectInput.mailers = this.input.mailers
+    projectInput.mailEnabled = this.input.mailEnabled
+
+    projectInput.storageEnabled = this.input.storageEnabled
+    projectInput.storageDrivers = this.input.storageDrivers
+    projectInput.defaultStorageDriver = this.input.defaultStorageDriver
+
+    projectInput.rbac = this.input.rbac
+    projectInput.tech = this.input.tech
+    projectInput.auth = this.input.auth
+    projectInput.tenantSettings = this.input.tenantSettings
+
+    // Fields that needs processign
+    projectInput.id = this.projectId
     projectInput.names = HelperService.generateExtendedNames(this.input.name)
     projectInput.name = projectInput.names.pascalCase
+
     projectInput.projectsPath = Application.makePath(Env.get('PROJECT_PATH'))
     projectInput.basePath = `${this.projectId}-${projectInput.names.dashCase}`
     projectInput.path = `${projectInput.projectsPath}/${projectInput.basePath}`
     projectInput.spaPath = `${projectInput.projectsPath}/${projectInput.basePath}-spa`
-    projectInput.database = this.input.database.toLocaleLowerCase()
-    projectInput.types = this.input.types.map((t) => t.toLowerCase())
-    projectInput.mailEnabled = this.input.mailEnabled
-    projectInput.mailers = this.input.mailers
-    projectInput.defaultMailer = this.input.defaultMailer
-    projectInput.storageEnabled = this.input.storageEnabled
-    projectInput.storageDrivers = this.input.storageDrivers
-    projectInput.defaultStorageDriver = this.input.defaultStorageDriver
-    projectInput.tech = this.input.tech
-    projectInput.auth = this.input.auth
+    projectInput.defaultMailer = this.input.defaultMailer.toLowerCase()
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
 
     if (this.input.auth.passwordReset) {
@@ -111,10 +360,9 @@ class BackendProjectService {
     }
 
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
-    projectInput.tenantSettings = this.input.tenantSettings
     if (!this.input.git) {
       projectInput.git = {
-        email: '22148496+RSCipher001@users.noreply.github.com',
+        email: '22148496+SecureSnowball@users.noreply.github.com',
         name: 'Ravindra Sisodia',
       }
     } else {
@@ -152,7 +400,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         authTable.relations.push({
-          type: RelationType['belongsTo'],
+          type: RelationType.BelongsTo,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -161,7 +409,7 @@ class BackendProjectService {
           lazy: true,
         })
         tenantTable.relations.push({
-          type: RelationType['hasOne'],
+          type: RelationType.HasOne,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -179,7 +427,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         tenantTable.relations.push({
-          type: RelationType['belongsTo'],
+          type: RelationType.BelongsTo,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -188,7 +436,7 @@ class BackendProjectService {
           lazy: false,
         })
         authTable.relations.push({
-          type: RelationType['hasMany'],
+          type: RelationType.HasMany,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -206,7 +454,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         authTable.relations.push({
-          type: RelationType['belongsTo'],
+          type: RelationType.BelongsTo,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -215,7 +463,7 @@ class BackendProjectService {
           lazy: true,
         })
         tenantTable.relations.push({
-          type: RelationType['hasMany'],
+          type: RelationType.HasMany,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -232,7 +480,7 @@ class BackendProjectService {
         const authTable = this.projectInput.auth.table
         const tenantTable = this.projectInput.tables[tenantTableIndex]
         authTable.relations.push({
-          type: RelationType['hasMany'],
+          type: RelationType.HasMany,
           withModel: tenantTable.names.pascalCase,
           modelNames: tenantTable.names,
           names: tenantTable.names,
@@ -241,7 +489,7 @@ class BackendProjectService {
           lazy: false,
         })
         tenantTable.relations.push({
-          type: RelationType['hasMany'],
+          type: RelationType.HasMany,
           withModel: authTable.names.pascalCase,
           modelNames: authTable.names,
           names: authTable.names,
@@ -275,40 +523,40 @@ class BackendProjectService {
    * Add private fields to auth table
    */
   protected prepareAuthTable() {
-    this.input.auth.table.columns.splice(
-      0,
-      0,
+    const columns: any = [
       {
-        name: 'name',
-        type: 'string',
+        name: 'Name',
+        type: 'String',
         meta: {
           displayName: 'Name',
           required: true,
+          filterable: true,
           minLength: 2,
           maxLength: 127,
         },
         input: {
-          type: 'input',
+          type: 'Input',
         },
       },
       {
-        name: 'email',
-        type: 'string',
+        name: 'Email',
+        type: 'String',
         meta: {
           displayName: 'Email',
           required: true,
+          filterable: true,
           minLength: 6,
           maxLength: 127,
           email: true,
           unique: true,
         },
         input: {
-          type: 'input',
+          type: 'Input',
         },
       },
       {
-        name: 'password',
-        type: 'string',
+        name: 'Password',
+        type: 'String',
         meta: {
           displayName: 'Password',
           trim: true,
@@ -319,28 +567,32 @@ class BackendProjectService {
           required: true,
         },
         input: {
-          type: 'input',
+          type: 'Input',
         },
       },
       {
         name: 'rememberMeToken',
-        type: 'string',
+        type: 'String',
         meta: {
           expose: false,
           required: false,
         },
       },
-      {
+    ]
+    if (this.input.mailEnabled) {
+      columns.push({
         name: 'emailVerifiedAt',
-        type: 'date',
+        type: 'Date',
         meta: {
           expose: false,
           required: false,
         },
-      },
-      {
-        name: 'avatar',
-        type: 'file',
+      })
+    }
+    if (this.input.storageEnabled) {
+      columns.push({
+        name: 'Avatar',
+        type: 'File',
         meta: {
           required: false,
           expose: true,
@@ -348,8 +600,10 @@ class BackendProjectService {
           maxSize: '1mb',
           extensions: ['jpg', 'png', 'jpeg'],
         },
-      }
-    )
+      })
+    }
+    this.input.auth.table.indexColumns = ['Name', 'Email']
+    this.input.auth.table.columns.splice(0, 0, ...columns)
   }
 
   /**
@@ -368,7 +622,7 @@ class BackendProjectService {
       columns: [
         {
           name: 'email',
-          type: 'string',
+          type: 'String',
           meta: {
             ...emailColumn,
             ...{
@@ -378,7 +632,7 @@ class BackendProjectService {
         },
         {
           name: 'token',
-          type: 'string',
+          type: 'String',
           meta: {
             expose: false,
             index: true,
@@ -388,7 +642,7 @@ class BackendProjectService {
         },
         {
           name: 'reason',
-          type: 'string',
+          type: 'String',
           meta: {
             expose: false,
             index: true,
@@ -399,14 +653,14 @@ class BackendProjectService {
       ],
       relations: [
         {
-          type: 'belongsTo',
+          type: 'BelongsTo',
           withModel: '$auth',
           name: '',
           required: false,
         },
       ],
     }
-    this.input.tables.push(verificationTokenTable)
+    this.input.tables.unshift(verificationTokenTable)
   }
 
   /**
@@ -439,7 +693,12 @@ class BackendProjectService {
         const auth = new AdonisAuthGenerator(this.projectInput)
         await auth.init()
 
+        // Add RBAC
+        const rbac = new AdonisRBACGenerator(this.projectInput)
+        await rbac.init()
+
         if (
+          this.projectInput.mailEnabled &&
           this.projectInput.mailers.length &&
           (this.projectInput.auth.passwordChange || this.projectInput.auth.passwordReset)
         ) {
@@ -469,6 +728,11 @@ class BackendProjectService {
           const test = new AdonisTestGenerator(this.projectInput)
           await test.init()
         }
+
+        // Add build step in pre commit hooks
+        // Removed during generation to avoid slow down and
+        // Non fatal build failures
+        await init.ehancePreCommitHook()
       }
 
       // Prepare frontend
@@ -497,7 +761,6 @@ class BackendProjectService {
    * Prepare input
    */
   public async init() {
-    this.prepareAuthTable()
     this.prepare() // Clean and preprocess input
     await this.start() // Start generation
   }

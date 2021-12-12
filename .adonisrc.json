@@ -22,7 +22,8 @@
     "@adonisjs/auth",
     "@adonisjs/view",
     "@adonisjs/mail",
-    "@adonisjs/attachment-lite"
+    "@adonisjs/attachment-lite",
+    "@adonisjs/redis"
   ],
   "aceProviders": ["@adonisjs/repl"],
   "metaFiles": [

@@ -44,6 +44,10 @@ jobs:
           SMTP_PORT: 587
           SMTP_USERNAME: apikey
           SMTP_PASSWORD: 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
+          REDIS_CONNECTION: local
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          REDIS_PASSWORD: placeholder
       - name: Run Tests
         run: |
           npm run format
@@ -68,6 +72,10 @@ jobs:
           SMTP_PORT: 587
           SMTP_USERNAME: apikey
           SMTP_PASSWORD: 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
+          REDIS_CONNECTION: local
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          REDIS_PASSWORD: placeholder
       - name: Run project creation test
         run: |
           npm test
@@ -91,3 +99,7 @@ jobs:
           SMTP_PORT: 587
           SMTP_USERNAME: apikey
           SMTP_PASSWORD: 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
+          REDIS_CONNECTION: local
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          REDIS_PASSWORD: placeholder

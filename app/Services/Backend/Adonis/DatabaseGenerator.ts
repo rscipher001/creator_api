@@ -3,12 +3,25 @@ import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import mkdirp from 'mkdirp'
+import { Database } from 'App/Interfaces/Enums'
 
 export default class DatabaseGenerator {
   private input: ProjectInput
 
   constructor(input: ProjectInput) {
     this.input = input
+  }
+
+  // Create start/events.ts
+  protected async createStartEventsTs() {
+    const filePath = `${this.input.path}/start/events.ts`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(
+        `stubs/backend/${this.input.tech.backend}/full/start/eventsTs`
+      )
+      await HelperService.writeFile(filePath, content)
+    }
   }
 
   // Create app/NamingStrategy/CamelCaseStrategy.ts
@@ -39,8 +52,10 @@ export default class DatabaseGenerator {
     const content = await HelperService.readJson(filePath)
     const command = '@adonisjs/lucid/build/commands'
     const provider = '@adonisjs/lucid'
+    const preload = './start/events'
     if (!content.commands.includes(command)) content.commands.push(command)
     if (!content.providers.includes(provider)) content.providers.push(provider)
+    if (!content.preloads.includes(preload)) content.preloads.push(preload)
     await HelperService.writeJson(filePath, content)
   }
 
@@ -139,7 +154,7 @@ export default class DatabaseGenerator {
           name: 'connection',
           propertyName: 'connection',
           type: 'string',
-          description: 'Define a custom database connection for the migration',
+          description: 'The connection flag is used to lookup the directory for the migration file',
         },
         {
           name: 'folder',
@@ -297,14 +312,14 @@ export default class DatabaseGenerator {
       { database }
     )
     switch (database) {
-      case 'mysql':
+      case Database.MySQL:
         if (content.indexOf('MYSQL_HOST') === -1) {
           content += part
           content += '\n'
           await HelperService.writeFile(filePath, content)
         }
         break
-      case 'pg':
+      case Database.PostgreSQL:
         if (content.indexOf('PG_HOST') === -1) {
           content += part
           content += '\n'
@@ -325,7 +340,7 @@ export default class DatabaseGenerator {
       { database }
     )
     switch (database) {
-      case 'mysql':
+      case Database.MySQL:
         if (content.indexOf('MYSQL_HOST') === -1) {
           const envTsLines = content.split(os.EOL) // File to array by newLines
           // If last line ie empty and second last line is closing Env.rules with })
@@ -338,7 +353,7 @@ export default class DatabaseGenerator {
           }
         }
         break
-      case 'pg':
+      case Database.PostgreSQL:
         if (content.indexOf('PG_HOST') === -1) {
           const envTsLines = content.split(os.EOL) // File to array by newLines
           // If last line ie empty and second last line is closing Env.rules with })
@@ -429,9 +444,10 @@ export default class DatabaseGenerator {
     await this.updateAdonisrcJson()
     await this.updateAceManifestJson()
     await this.updateTsconfigJson()
+    await this.createStartEventsTs()
 
     switch (this.input.database) {
-      case 'mysql':
+      case Database.MySQL:
         await this.initMysql()
     }
 

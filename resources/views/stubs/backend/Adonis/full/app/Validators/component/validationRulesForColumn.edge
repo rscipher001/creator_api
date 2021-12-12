@@ -1,0 +1,53 @@
+{{ column.columnName }}: schema.
+@if(['Integer', 'Decimal'].includes(column.type))
+  number
+@elseif(column.type === 'String')
+  string
+@elseif(column.type === 'Date')
+  date
+@elseif(column.type === 'Boolean')
+  boolean
+@elseif(column.type === 'File')
+  file
+@endif
+{{ column.meta.required ? '' : '.optional' }}(
+  {{{ column.meta.trim ? '{ trim: true },': column.type === 'String' ? '{},' :
+    column.type === 'Date' ? "{ format: 'iso' },": '' }}}
+  @if(column.type === 'File')
+  {
+    @if(column.meta.maxSize)
+    size: '{{ column.meta.maxSize }}',
+    @endif
+    @if(Array.isArray(column.meta.extensions) && column.meta.extensions.length)
+      extnames: [
+        @each(extension in column.meta.extensions)
+          "{{ extension }}",
+        @endeach
+      ],
+    @endif
+  }
+  @else
+  [
+    @if(column.meta.maxLength)
+      rules.maxLength({{ column.meta.maxLength }}),
+    @endif
+    @if(column.meta.minLength)
+      rules.minLength({{ column.meta.minLength }}),
+    @endif
+    @if(column.meta.email)
+      rules.email(),
+    @endif
+    @if(column.meta.unique)
+      rules.unique({
+        table: '{{ table.tableName }}',
+        column: '{{ column.columnName }}',
+        @if(action === 'update')
+          whereNot: {
+            id: this.ctx.request.param('{{table.names.camelCase }}Id'),
+          },
+        @endif
+      }),
+    @endif
+  ]
+  @endif
+),

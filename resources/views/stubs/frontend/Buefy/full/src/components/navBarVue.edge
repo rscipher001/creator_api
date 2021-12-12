@@ -1,0 +1,125 @@
+<template>
+  <b-navbar type="is-primary">
+    <template #brand>
+      <b-navbar-item tag="router-link" :to="{ path: '/' }">
+        <img src="@/assets/logo.png" alt="{{ input.name }}">
+      </b-navbar-item>
+    </template>
+    <template #start>
+      <b-navbar-item
+        tag="router-link"
+        :to="{ path: '/' }"
+        :active="currentRouteName === 'Home'"
+      >
+        Home
+      </b-navbar-item>
+      <b-navbar-item
+        tag="router-link"
+        :to="{ path: '/dashboard' }"
+        :active="currentRouteName === 'Dashboard'"
+      >
+        Dashboard
+      </b-navbar-item>
+      <b-navbar-dropdown label="Pages">
+        @if(!auth)
+          @each(table in input.tables.concat([input.auth.table]))
+            @if(table.operations.index)
+              <b-navbar-item
+                @if(input.rbac.enabled)
+                  v-if="authorize('{{ table.names.camelCase }}:index')"
+                @endif
+                tag="router-link"
+                :to="{ path: '/{{ table.names.camelCase }}' }"
+              >
+                {{ table.names.pascalCase }} List
+              </b-navbar-item>
+            @endif
+            @if(table.operations.create)
+              <b-navbar-item
+                @if(input.rbac.enabled)
+                  v-if="authorize('{{ table.names.camelCase }}:create')"
+                @endif
+                tag="router-link"
+                :to="{ path: '/{{ table.names.camelCase }}/create' }"
+              >
+                Create {{ table.names.pascalCase }}
+              </b-navbar-item>
+            @endif
+          @endeach
+        @endif
+      </b-navbar-dropdown>
+    </template>
+
+    <template #end>
+      <b-navbar-item tag="div">
+        <div class="buttons" v-if="!token">
+          <b-button tag="router-link" to="/login" type="is-link">
+            Login
+          </b-button>
+          @if(input.auth.register)
+            <b-button tag="router-link" to="/register" type="is-light">
+              Register
+            </b-button>
+          @endif
+        </div>
+        <b-navbar-dropdown v-else :label="user.name || user.email">
+          @if(input.rbac.enabled)
+            <b-navbar-item
+              v-if="authorize('role:update')"
+              tag="router-link"
+              to="/rbacMatrix"
+              type="is-link"
+            >
+              RBAC Matrix
+            </b-navbar-item>
+          @endif
+          <b-navbar-item tag="router-link" to="/setting" type="is-link">
+            Setting
+          </b-navbar-item>
+          <b-navbar-item @click.prevent="logout">Logout</b-navbar-item>
+        </b-navbar-dropdown>
+      </b-navbar-item>
+    </template>
+  </b-navbar>
+</template>
+<script>
+import { mapState, mapActions } from 'vuex';
+
+export default {
+  computed: mapState('auth', {
+    user: (state) => state.user,
+    @if(input.rbac.enabled)
+      permissions: (state) => state.permissions,
+    @endif
+    token: (state) => state.token,
+    currentRouteName() {
+      return this.$route.name;
+    },
+  }),
+
+  methods: {
+    ...mapActions('auth', {
+      logoutAction: 'logout',
+    }),
+
+    @if(input.rbac.enabled)
+      authorize(permission) {
+        return this.permissions.indexOf(permission) !== -1;
+      },
+    @endif
+
+    async logout() {
+      try {
+        await this.logoutAction();
+        window.location.reload();
+      } catch (e) {
+        this.$buefy.toast.open({
+          message: 'Logout failed',
+          type: 'is-danger',
+          position: 'is-bottom-right',
+        });
+      }
+    },
+  },
+};
+</script>

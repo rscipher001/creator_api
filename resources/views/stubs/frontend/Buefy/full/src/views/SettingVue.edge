@@ -1,0 +1,60 @@
+<template>
+  <section class="container">
+    <div class="section py-4">
+      <div class="columns">
+        <div class="column px-0">
+          <div class="level">
+            <div class="level-left is-size-3">Settings</div>
+            <div class="level-right">
+              <b-button tag="router-link" to="/dashboard" type="is-white">
+                Dashboard
+              </b-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section py-4">
+      <div class="columns box px-2 py-2">
+        <div class="column px-0 py-0">
+          <b-tabs v-model="activeTab" type="is-boxed">
+            <b-tab-item label="Profile">
+              <Profile />
+            </b-tab-item>
+            @if(input.mailEnabled)
+              <b-tab-item label="Email"><Email /></b-tab-item>
+            @endif
+            <b-tab-item label="Password">
+              <Password />
+            </b-tab-item>
+          </b-tabs>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script>
+import Profile from "../views/setting/Profile.vue";
+@if(input.mailEnabled)
+  import Email from "../views/setting/Account.vue";
+@endif
+import Password from "../views/setting/Security.vue";
+
+export default {
+  components: {
+    Profile,
+    @if(input.mailEnabled)
+      Email,
+    @endif
+    Password,
+  },
+
+  data() {
+    return {
+      activeTab: 0,
+    };
+  },
+};
+</script>

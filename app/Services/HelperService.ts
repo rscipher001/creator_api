@@ -98,6 +98,14 @@ class HelperService {
   public insertLines(content, index, newLines) {
     return content.substring(0, index) + newLines + content.substr(index)
   }
+
+  public toSingularPascalCase(input: string) {
+    return string.pascalCase(string.singularize(input))
+  }
+
+  public toSingularCameCase(input: string) {
+    return string.camelCase(string.singularize(input))
+  }
 }
 
 export default new HelperService()

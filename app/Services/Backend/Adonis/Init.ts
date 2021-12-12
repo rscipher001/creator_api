@@ -30,6 +30,15 @@ export default class Init {
     await HelperService.writeFile(filePath, content)
   }
 
+  // Create README.md
+  protected async createReadmeMd() {
+    const filePath = `${this.input.path}/README.md`
+    const content = await View.render(`stubs/backend/${this.input.tech.backend}/full/readmeMd`, {
+      input: this.input,
+    })
+    await HelperService.writeFile(filePath, content)
+  }
+
   protected async addPreCommitHook() {
     await HelperService.execute('npx', ['husky-init'], {
       cwd: this.input.path,
@@ -41,8 +50,25 @@ export default class Init {
     const fileExists = await HelperService.fileExists(filePath)
     if (fileExists) {
       let content = await HelperService.readFile(filePath)
-      await HelperService.writeFile(filePath, content.replace('npm test', 'npm run format'))
+      await HelperService.writeFile(
+        filePath,
+        content.replace('npm test', 'npm run format\ngit add -A')
+        // content.replace('npm test', 'npm run format\nnpm run build\ngit add -A')
+      )
     }
+  }
+
+  public async ehancePreCommitHook() {
+    const filePath = `${this.input.path}/.husky/pre-commit`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (fileExists) {
+      let content = await HelperService.readFile(filePath)
+      await HelperService.writeFile(
+        filePath,
+        content.replace('npm run format\ngit add -A', 'npm run format\nnpm run build\ngit add -A')
+      )
+    }
+    await HelperService.commit('Pre commit hook updated', this.input.path)
   }
 
   /**
@@ -69,7 +95,7 @@ export default class Init {
         'init',
         'adonis-ts-app@latest',
         this.input.basePath, // ProjectPath
-        `--boilerplate=${type}`, // API or web type project
+        `--boilerplate=${type.toLocaleLowerCase()}`, // api/web
         `--name=${this.input.name}`, // Project name
         '--eslint', // Enable ESLint
         '--prettier', // Enable prettiter
@@ -82,6 +108,7 @@ export default class Init {
     // 2. Add .vscode folder
     await this.createVscodeExtenstionsJson()
     await this.createDotNvmrc()
+    await this.createReadmeMd()
 
     // 3. Initiate git repo
     await HelperService.execute('git', ['init'], {

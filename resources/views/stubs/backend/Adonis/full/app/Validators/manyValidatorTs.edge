@@ -1,0 +1,30 @@
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+
+export default class StoreMany{{ table.names.pascalCase }}Validator {
+  constructor(protected ctx: HttpContextContract) {}
+
+  public schema = schema.create({
+    items: schema.array().members(
+      schema.object().members({
+        @each(column in table.columns.filter(c => c.meta.expose !== false))~
+          @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRulesForColumn`, {
+            table,
+            column,
+            input
+          })~
+        @endeach
+        @each(relation in table.relations)~
+          @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
+            @!component(`stubs/backend/${input.tech.backend}/full/app/Validators/component/validationRulesForRelation`, {
+              table,
+              relation,
+              input
+            })~
+          @endif
+        @endeach
+      })
+    ),
+  })
+  public messages = {}
+}

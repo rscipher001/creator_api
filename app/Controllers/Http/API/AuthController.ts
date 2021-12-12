@@ -8,7 +8,7 @@ export default class AuthController {
     const { email, password } = await request.validate(LoginValidator)
     const token = await auth.use('api').attempt(email, password)
     const { token: tokenString } = token.toJSON()
-    const user = auth.user!!
+    const user = auth.user!
 
     return {
       token: tokenString,
