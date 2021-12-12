@@ -81,7 +81,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @if(column.type === 'String')
             'like',
           @endif
-          request.input('{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'));
+          `%${request.input('{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}')}%`);
         }
       @endeach
 
