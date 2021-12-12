@@ -102,6 +102,7 @@ export interface Table {
   name: string // Name of the Model
   names: Names // CamelCase, PascalCase, SnakeCase, etc of name
   tableName: string // In DB
+  defaultColumn?: string // This column will be used as label with this table data is displayed somewhere
   generateController: boolean // Generate controller if true
   generateModel: boolean // Generate model if true
   generateMigration: boolean // Generate migration if true

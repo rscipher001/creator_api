@@ -52,6 +52,7 @@ export default class CreateProjectValidator {
     generateController: schema.boolean(),
     generateModel: schema.boolean(),
     generateMigration: schema.boolean(),
+    defaultColumn: schema.string.optional({ trim: true }),
     timestamps: schema.boolean.optional(),
     generateRoute: schema.boolean.optional(),
     singleton: schema.boolean.optional(),
