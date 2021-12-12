@@ -262,14 +262,14 @@ export default class CRUDGenerator {
             {
               type: RelationType.BelongsTo,
               required: true,
-              withModel: 'Role',
-              modelNames: HelperService.generateNames('Role'),
+              withModel: tableOneNames.pascalCase,
+              modelNames: HelperService.generateNames(tableOneNames.pascalCase),
             },
             {
               type: RelationType.BelongsTo,
               required: true,
-              withModel: 'Permission',
-              modelNames: HelperService.generateNames('Permission'),
+              withModel: tableTwoNames.pascalCase,
+              modelNames: HelperService.generateNames(tableTwoNames.pascalCase),
             },
           ],
         }

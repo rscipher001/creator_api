@@ -66,7 +66,7 @@ export default class AuthController {
       await user.save()
       @if (input.rbac.enabled && hasManyRoles)
         const defaultRole = await Role.findBy('default', true);
-        await user.relation('roles').attach([defaultRole.id]);
+        await user.related('roles').attach([defaultRole!.id]);
       @endif
       const token = await auth.use('api').login(user)
       const { token: tokenString } = token.toJSON()
