@@ -40,6 +40,11 @@ class BackendProjectService {
   public prepareTable(table): Table {
     table.name = HelperService.toSingularPascalCase(table.name)
     table.names = HelperService.generateNames(table.name)
+    if (table.defaultColumn && this.input.camelCaseStrategy) {
+      table.defaultColumn = this.input.camelCaseStrategy
+        ? HelperService.toSingularCameCase(table.defaultColumn)
+        : HelperService.toSingularSnakeCase(table.defaultColumn)
+    }
     table.tableName = this.input.camelCaseStrategy
       ? table.names.camelCasePlural
       : table.names.snakeCasePlural
@@ -117,6 +122,7 @@ class BackendProjectService {
       generateMigration: true,
       generateUI: true,
       seederUniqueKey: 'name',
+      defaultColumn: 'name',
       relations: [
         {
           type: 'ManyToMany',
@@ -192,6 +198,7 @@ class BackendProjectService {
       generateMigration: true,
       generateUI: true,
       seederUniqueKey: 'name',
+      defaultColumn: 'name',
       relations: [
         {
           type: 'ManyToMany',

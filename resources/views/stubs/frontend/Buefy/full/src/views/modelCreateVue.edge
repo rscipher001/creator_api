@@ -180,6 +180,7 @@
             @endeach
 
             @each(relation in nonAuthBelongsToRelations)
+              @set('relationModel', input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
               <b-field
                 label="{{ relation.names.pascalCase }}"
                 :type="errors.{{ relation.names.camelCase }} ? 'is-danger' : ''"
@@ -194,15 +195,15 @@
                   @endif
                 >
                   <option v-for="({{
-                    relation.names.camelCase
+                    relationModel.names.camelCase
                   }}, {{
-                    relation.names.camelCase
-                  }}Index) in {{ relation.names.camelCasePlural }}" :key="{{
-                    relation.names.camelCase
+                    relationModel.names.camelCase
+                  }}Index) in {{ relationModel.names.camelCasePlural }}" :key="{{
+                    relationModel.names.camelCase
                   }}Index" :value="{{
-                    relation.names.camelCase
+                    relationModel.names.camelCase
                   }}.id">
-                    {{ safe(`{{ ${relation.names.camelCase}.name }}`) }}
+                    {{ safe(`{{ ${relationModel.names.camelCase}.${relationModel.defaultColumn} }}`) }}
                   </option>
                 </b-select>
               </b-field>
@@ -227,6 +228,9 @@ import ValidationException from '../exceptions/ValidationException';
 export default {
   name: '{{ table.names.pascalCase }}Create',
   created() {
+    @each(relation in nonAuthBelongsToRelations)
+      this.{{ relation.modelNames.camelCase }}IndexAction();
+    @endeach
     if (this.$route.params.id) {
       const id = parseInt(this.$route.params.id, 10);
       this.editMode.enabled = true;
@@ -270,6 +274,11 @@ export default {
       storeAction: 'store',
       updateAction: 'update',
     }),
+    @each(relation in nonAuthBelongsToRelations)
+      ...mapActions("{{ relation.modelNames.pascalCase }}", {
+        {{ relation.modelNames.camelCase }}IndexAction: "index",
+      }),
+    @endeach
 
     async store() {
       try {
