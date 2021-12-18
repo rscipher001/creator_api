@@ -610,6 +610,7 @@ class BackendProjectService {
       })
     }
     this.input.auth.table.indexColumns = ['Name', 'Email']
+    this.input.auth.table.defaultColumn = 'Name'
     this.input.auth.table.columns.splice(0, 0, ...columns)
   }
 

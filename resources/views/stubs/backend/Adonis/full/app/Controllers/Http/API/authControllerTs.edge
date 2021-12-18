@@ -55,8 +55,10 @@ export default class AuthController {
       @endif
       const input: { [key: string]: any } = await request.validate(RegisterValidator)
       @if (input.rbac.enabled && !hasManyRoles)
-        const defaultRole = await Role.findBy('default', true)
-        input.roleId = defaultRole!.id
+        const defaultRole = await Role.findBy('default', true);
+        if(defaultRole) {
+          input.roleId = defaultRole.id;
+        }
       @endif
 
       /**
@@ -66,7 +68,9 @@ export default class AuthController {
       await user.save()
       @if (input.rbac.enabled && hasManyRoles)
         const defaultRole = await Role.findBy('default', true);
-        await user.related('roles').attach([defaultRole!.id]);
+        if (defaultRole) {
+          await user.related('roles').attach([defaultRole.id]);
+        }
       @endif
       const token = await auth.use('api').login(user)
       const { token: tokenString } = token.toJSON()
