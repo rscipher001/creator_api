@@ -126,8 +126,9 @@ export interface Relation {
   modelNames: Names // Model name in all forms
   names?: Names // Relation name in all forms
   name?: string // Relation name, by default table name is used
-  required: boolean
+  required: boolean // Not applicable to many to many
   lazy?: boolean // Migration will be created separately for foreign key
+  showInputOnCreatePage?: boolean // Show dropdown for selecting/attaching relation on create page, for required relation it is shown `
 }
 
 export interface RBAC {

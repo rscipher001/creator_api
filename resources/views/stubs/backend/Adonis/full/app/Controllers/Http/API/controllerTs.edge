@@ -56,10 +56,12 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @endif
       const page = request.input('page', 1)
       const size = request.input('size', 10)
+      const sortBy: string = request.input('sortBy', 'id')
+      const sortType = request.input('sortType', 'asc')
       @!component(`stubs/backend/${input.tech.backend}/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
         input, table
       })
-      const queryBuilder = {{ table.names.pascalCase }}.query()
+      const queryBuilder = {{ table.names.pascalCase }}.query().orderBy(sortBy, sortType)
 
       @if(belongsToAuth)
         queryBuilder.where('{{

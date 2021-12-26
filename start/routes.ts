@@ -44,6 +44,7 @@ Route.group(() => {
 
   Route.get('/project', 'API/ProjectsController.index')
   Route.post('/project', 'API/ProjectsController.store')
+  Route.post('/project/draft', 'API/ProjectsController.storeAsDraft')
   Route.get('/project/:projectId', 'API/ProjectsController.show')
 
   // Project link generate and download options

@@ -18,6 +18,7 @@ export default class CreateProjectValidator {
     withModel: schema.string({ trim: true }),
     name: schema.string.optional({ trim: true }),
     required: schema.boolean(),
+    showInputOnCreatePage: schema.boolean.optional(),
   })
 
   protected columnSchema = schema.object().members({

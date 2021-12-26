@@ -11,7 +11,8 @@ export default class ProjectsController {
   public async index({ request, auth }: HttpContextContract) {
     const page = request.input('pageNo', 1)
     const limit = request.input('pageSize', 10)
-    return Project.query().where('userId', auth.user!.id).paginate(page, limit)
+    const sort = request.input('sort', 'desc')
+    return Project.query().where('userId', auth.user!.id).orderBy('id', sort).paginate(page, limit)
   }
 
   public async show({ request, auth }: HttpContextContract) {
@@ -43,6 +44,28 @@ export default class ProjectsController {
       userId: auth.user!.id,
     })
     this.generateProject(input, project)
+    return project
+  }
+
+  public async storeAsDraft({ request, response, auth }: HttpContextContract) {
+    const input = await request.validate(CreateProjectValidator)
+    // Pre checks to ensure there is no contracitory settings
+    if (input.auth.passwordReset && !input.mailEnabled) {
+      return response.badRequest({
+        error: 'Password reset requires mailing feature',
+      })
+    }
+    if (input.tenantSettings.tenant && !input.tenantSettings.table) {
+      return response.badRequest({
+        error: 'Tenant table should be selected when tenant option is enabled',
+      })
+    }
+    const project = await Project.create({
+      status: 'draft',
+      name: input.name,
+      rawInput: JSON.stringify(input),
+      userId: auth.user!.id,
+    })
     return project
   }
 
