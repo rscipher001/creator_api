@@ -35,6 +35,7 @@ export default class CreateProjectValidator {
       email: schema.boolean.optional(),
       expose: schema.boolean.optional(),
       filterable: schema.boolean.optional(),
+      sortable: schema.boolean.optional(),
       unique: schema.boolean.optional(),
       trim: schema.boolean.optional(),
     }),

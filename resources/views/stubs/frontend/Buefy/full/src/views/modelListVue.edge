@@ -196,7 +196,11 @@
               currentColumn.input?.displayName || capitalCase(column)
             }}" v-slot="props" {{
               ['Decimal', 'Integer'].includes(currentColumn.type) ? 'numeric' : ''
-            }}>
+            }}
+            @if(currentColumn.meta.sortable)
+              sortable
+            @endif
+            >
               @if('Decimal' === currentColumn.type && currentColumn.input?.decimal.step !== 'any')
                 @set('decimalCount', `${currentColumn.input?.decimal.step}`.split('.')[1].length)
                 {{{
