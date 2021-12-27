@@ -209,8 +209,11 @@
               </b-field>
             @endeach
 
-            @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
-              @set('relationModel', relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
+            @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+              @set(
+                'relationModel',
+                relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
+              )
               @if(relationModel)
                 <b-field
                   label="{{ capitalCase(relation.names.pascalCasePlural) }}"
@@ -256,7 +259,7 @@ export default {
     @each(relation in nonAuthBelongsToRelations)
       this.{{ relation.modelNames.camelCase }}IndexAction();
     @endeach
-    @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
+    @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
       this.{{ relation.modelNames.camelCase }}IndexAction();
     @endeach
     if (this.$route.params.id) {
@@ -293,7 +296,7 @@ export default {
         @each(relation in nonAuthBelongsToRelations)
           {{ relation.names.camelCase }}Id: null,
         @endeach
-        @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
+        @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
           {{ relation.names.camelCasePlural }}: [],
         @endeach
       },
@@ -310,7 +313,7 @@ export default {
         {{ relation.modelNames.camelCase }}IndexAction: "index",
       }),
     @endeach
-    @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
+    @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
       ...mapActions("{{ relation.modelNames.camelCase }}", {
         {{ relation.modelNames.camelCase }}IndexAction: "index",
       }),
@@ -328,7 +331,7 @@ export default {
           @each(relation in nonAuthBelongsToRelations)
             {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
           @endeach
-          @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
+          @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             {{ relation.names.camelCase }}Ids: this.form.{{ relation.names.camelCasePlural }}.map(({ id }) => id),
           @endeach
         }
@@ -368,7 +371,7 @@ export default {
           @each(relation in nonAuthBelongsToRelations)
             {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
           @endeach
-          @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
+          @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             {{ relation.names.camelCase }}Ids: this.form.{{ relation.names.camelCasePlural }}.map(({ id }) => id),
           @endeach
         }
@@ -414,7 +417,7 @@ export default {
           @each(relation in nonAuthBelongsToRelations)
             payload.append("{{ relation.names.camelCase }}Id", this.form.{{ relation.names.camelCase }}Id);
           @endeach
-          @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
+          @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             payload.append("{{ relation.names.camelCase }}Ids", this.form.{{ relation.names.camelCasePlural }}.map(({ id }) => id));
           @endeach
         } else {
@@ -425,7 +428,7 @@ export default {
             @each(relation in nonAuthBelongsToRelations)
               {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
             @endeach
-            @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
+            @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
               {{ relation.names.camelCase }}Ids: this.form.{{ relation.names.camelCasePlural }}.map(({ id }) => id),
             @endeach
           }
@@ -438,7 +441,7 @@ export default {
       },
     @endif
 
-    @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
+    @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
       @set('relationModel', relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
       getFiltered{{ relation.modelNames.pascalCasePlural }}(query) {
         return this.{{ relation.modelNames.camelCasePlural }}.filter((option) => {
@@ -463,7 +466,7 @@ export default {
         {{ relation.modelNames.camelCasePlural }}: (state) => state.items,
       }),
     @endeach
-    @each(relation in table.relations.filter(r => r.type === 'ManyToMany'))
+    @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
       ...mapState("{{ relation.modelNames.camelCase }}", {
         {{ relation.modelNames.camelCasePlural }}: (state) => state.items,
       }),

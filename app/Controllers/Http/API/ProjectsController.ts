@@ -11,15 +11,25 @@ export default class ProjectsController {
   public async index({ request, auth }: HttpContextContract) {
     const page = request.input('pageNo', 1)
     const limit = request.input('pageSize', 10)
-    const sort = request.input('sort', 'desc')
-    return Project.query().where('userId', auth.user!.id).orderBy('id', sort).paginate(page, limit)
+    const sortBy: string = request.input('sortBy', 'id')
+    const sortType = request.input('sortType', 'desc')
+    const queryBuilder = Project.query().where('userId', auth.user!.id).orderBy(sortBy, sortType)
+
+    if (request.input('name')) {
+      queryBuilder.where('name', 'like', `%${request.input('name')}%`)
+    }
+    if (request.input('status')) {
+      queryBuilder.where('status', request.input('status'))
+    }
+
+    return queryBuilder.paginate(page, limit)
   }
 
   public async show({ request, auth }: HttpContextContract) {
     return Project.query()
       .where({
         userId: auth.user!.id,
-        id: request.param('projectId'),
+        id: request.param('id'),
       })
       .first()
   }
@@ -47,7 +57,20 @@ export default class ProjectsController {
     return project
   }
 
-  public async storeAsDraft({ request, response, auth }: HttpContextContract) {
+  public async generateDraft({ request, auth }: HttpContextContract) {
+    const projectId: number = request.param('id')
+    const project = await Project.query()
+      .where({
+        id: projectId,
+        userId: auth.user!.id,
+        status: 'draft',
+      })
+      .firstOrFail()
+    this.generateProject(JSON.parse(project.rawInput), project)
+    return project
+  }
+
+  public async storeDraft({ request, response, auth }: HttpContextContract) {
     const input = await request.validate(CreateProjectValidator)
     // Pre checks to ensure there is no contracitory settings
     if (input.auth.passwordReset && !input.mailEnabled) {
@@ -69,6 +92,34 @@ export default class ProjectsController {
     return project
   }
 
+  public async updateDraft({ request, response, auth }: HttpContextContract) {
+    const projectId: number = request.param('id')
+    const project = await Project.query()
+      .where({
+        id: projectId,
+        userId: auth.user!.id,
+        status: 'draft',
+      })
+      .firstOrFail()
+
+    const input = await request.validate(CreateProjectValidator)
+    // Pre checks to ensure there is no contracitory settings
+    if (input.auth.passwordReset && !input.mailEnabled) {
+      return response.badRequest({
+        error: 'Password reset requires mailing feature',
+      })
+    }
+    if (input.tenantSettings.tenant && !input.tenantSettings.table) {
+      return response.badRequest({
+        error: 'Tenant table should be selected when tenant option is enabled',
+      })
+    }
+
+    project.rawInput = JSON.stringify(input)
+    await project.save()
+    return project
+  }
+
   public async destroy({ request, auth, response }: HttpContextContract) {
     const projectId: number = request.param('id')
     const project = await Project.query()
@@ -83,7 +134,7 @@ export default class ProjectsController {
   }
 
   public async generateSignedUrl({ request, auth }) {
-    const projectId = request.param('projectId')
+    const projectId = request.param('id')
     const type = request.param('type')
     const project = await Project.query()
       .where({
@@ -104,7 +155,7 @@ export default class ProjectsController {
     if (!request.hasValidSignature()) {
       throw new Error('Signature is invalid')
     }
-    const id = request.param('projectId')
+    const id = request.param('id')
     const type = request.param('type')
     const project = await Project.findOrFail(id)
     const input = JSON.parse(project.rawInput)

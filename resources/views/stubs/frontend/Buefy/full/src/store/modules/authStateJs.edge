@@ -347,6 +347,7 @@ export default {
 
     async refreshUser({ dispatch }, input) {
       try {
+        if (!navigator.onLine) return; // If offline then don't logout
         const user = await HttpService.authGet("/me", input);
         dispatch(
           "updateUser",

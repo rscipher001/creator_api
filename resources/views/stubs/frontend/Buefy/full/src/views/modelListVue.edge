@@ -172,6 +172,9 @@
           v-if="items.length"
           class="column"
           :data="items"
+          :default-sort="['id', 'desc']"
+          @sort="sort"
+          backend-sorting
           @if(table.operations.storeMany)
             :checked-rows.sync="selectedItems"
             :checkable="
@@ -184,6 +187,9 @@
           hoverable
           bordered
         >
+          <b-table-column field="id" label="ID" v-slot="props" sortable>
+            @{{ props.row.id }}
+          </b-table-column>
           @each(column in table.indexColumns)
             @set('currentColumn', table.columns.find((c) => c.names.pascalCase === pascalCase(column)))
             <b-table-column field="{{ camelCase(column) }}" label="{{
@@ -306,6 +312,8 @@ export default {
     return {
       currentPageNo: 1,
       currentPageSize: 10,
+      sortBy: "id",
+      sortType: "desc",
       multiSelect: false,
       @if(hasFilterableColumn)
         filter: {
@@ -344,10 +352,18 @@ export default {
       this.index();
     }, 2000),
 
+    sort(sortBy, sortType) {
+      this.sortBy = sortBy;
+      this.sortType = sortType;
+      this.index();
+    },
+
     index() {
       const indexQueryParams = {
         size: this.currentPageSize,
         page: this.currentPageNo,
+        sortBy: this.sortBy,
+        sortType: this.sortType,
       };
       @if(hasFilterableColumn)
         @each(column in table.columns.filter(c => c.meta.filterable))

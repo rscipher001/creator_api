@@ -9,9 +9,7 @@ Route.group(() => {
   Route.post('/register', 'API/AuthController.register')
 
   // Public API for downloading project
-  Route.get('/project/:projectId/download/:type', 'API/ProjectsController.download').as(
-    'projectDownload'
-  )
+  Route.get('/project/:id/download/:type', 'API/ProjectsController.download').as('projectDownload')
 
   // Email verification
   Route.post('/email/verify', 'API/EmailVerificationController.verifyEmail')
@@ -44,11 +42,15 @@ Route.group(() => {
 
   Route.get('/project', 'API/ProjectsController.index')
   Route.post('/project', 'API/ProjectsController.store')
-  Route.post('/project/draft', 'API/ProjectsController.storeAsDraft')
-  Route.get('/project/:projectId', 'API/ProjectsController.show')
+  Route.get('/project/:id', 'API/ProjectsController.show')
+  Route.delete('/project/:id', 'API/ProjectsController.destroy')
+
+  Route.post('/draft/project', 'API/ProjectsController.storeDraft')
+  Route.put('/draft/project/:id', 'API/ProjectsController.updateDraft')
+  Route.post('/draft/project/:id/generate', 'API/ProjectsController.generateDraft')
 
   // Project link generate and download options
-  Route.get('/project/:projectId/generate/:type', 'API/ProjectsController.generateSignedUrl').as(
+  Route.get('/project/:id/generate/:type', 'API/ProjectsController.generateSignedUrl').as(
     'generateSignedUrl'
   )
 })
