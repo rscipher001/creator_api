@@ -47,6 +47,7 @@ export default class ProjectsController {
         error: 'Tenant table should be selected when tenant option is enabled',
       })
     }
+    // Ensure roles have permission and there is a default role
     const project = await Project.create({
       status: 'queued',
       name: input.name,
