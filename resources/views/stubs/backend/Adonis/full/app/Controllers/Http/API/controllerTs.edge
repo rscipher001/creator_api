@@ -484,7 +484,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     @set('relationModel', relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
     @if(relationModel)
       @set('relationModelBelongsToAuth', relationModel.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
-      public async attach{{ relation.modelNames.pascalCase }}({
+      public async attach{{ relation.names.pascalCase }}({
         request,
         @if(belongsToAuth || relationModelBelongsToAuth)
           auth,
@@ -527,12 +527,12 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @endif
         }).firstOrFail()
 
-        await {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').attach([{{ relation.modelNames.camelCase }}.id])
-        await {{ table.names.camelCase }}.load('{{ relation.modelNames.camelCasePlural }}')
+        await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').attach([{{ relation.modelNames.camelCase }}.id])
+        await {{ table.names.camelCase }}.load('{{ relation.names.camelCasePlural }}')
         return {{ table.names.camelCase }}
       }
 
-      public async detach{{ relation.modelNames.pascalCase }}({
+      public async detach{{ relation.names.pascalCase }}({
         request,
         @if(belongsToAuth || relationModelBelongsToAuth)
           auth,
@@ -575,12 +575,12 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @endif
         }).firstOrFail()
 
-        await {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').detach([{{ relation.modelNames.camelCase }}.id]);
-        await {{ table.names.camelCase }}.load('{{ relation.modelNames.camelCasePlural }}');
+        await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').detach([{{ relation.modelNames.camelCase }}.id]);
+        await {{ table.names.camelCase }}.load('{{ relation.names.camelCasePlural }}');
         return {{ table.names.camelCase }};
       }
 
-      public async sync{{ relation.modelNames.pascalCasePlural }}({
+      public async sync{{ relation.names.pascalCasePlural }}({
         request,
         @if(belongsToAuth || relationModelBelongsToAuth)
           auth,
@@ -624,9 +624,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @endif
         }).whereIn('id', ids)
         if ({{ relation.modelNames.camelCasePlural }}.length) {
-          await {{ table.names.camelCase }}.related('{{ relation.modelNames.camelCasePlural }}').sync({{ relation.modelNames.camelCasePlural }}.map(i => i.id));
+          await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').sync({{ relation.modelNames.camelCasePlural }}.map(i => i.id));
         }
-        await {{ table.names.camelCase }}.load('{{ relation.modelNames.camelCasePlural }}');
+        await {{ table.names.camelCase }}.load('{{ relation.names.camelCasePlural }}');
         return {{ table.names.camelCase }};
       }
     @else

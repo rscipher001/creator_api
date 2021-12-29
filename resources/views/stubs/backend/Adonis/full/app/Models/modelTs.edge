@@ -110,7 +110,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
     @elseif(relation.type === 'ManyToMany')
       @manyToMany(() => {{ relation.modelNames.pascalCase }})
       public {{
-        relation.modelNames.camelCasePlural
+        relation.names.camelCasePlural
       }}: ManyToMany<typeof {{ relation.modelNames.pascalCase }}>
     @endif
   @endeach
