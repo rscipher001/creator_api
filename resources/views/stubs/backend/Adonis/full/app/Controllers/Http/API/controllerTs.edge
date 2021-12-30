@@ -185,14 +185,18 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         return {{ table.names.pascalCase }}.create(input);
       @else
         @if(table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-          @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
-          const {{ relationColumnName }}: number[] = input.{{ relationColumnName }};
-          delete input.{{ relationColumnName }};
-
+          @each(relation in table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+            @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
+            const {{ relationColumnName }}: number[] = input.{{ relationColumnName }};
+            delete input.{{ relationColumnName }};
+          @endeach
           const product = await Product.create(input);
-          if (Array.isArray({{ relationColumnName }}) && {{ relationColumnName }}.length) {
-            await product.related('keywords').attach({{ relationColumnName }});
-          }
+          @each(relation in table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+            @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
+            if (Array.isArray({{ relationColumnName }}) && {{ relationColumnName }}.length) {
+              await product.related('keywords').attach({{ relationColumnName }});
+            }
+          @endeach
           return product;
         @else
           return {{ table.names.pascalCase }}.create(input);
