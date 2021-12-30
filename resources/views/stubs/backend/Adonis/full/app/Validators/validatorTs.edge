@@ -24,6 +24,17 @@ export default class {{ action === 'store' ? 'Store' : 'Update' }}{{ table.names
           relation,
           input
         })~
+      @elseif(relation.type === 'ManyToMany' && relation.showInputOnCreatePage)
+        {{
+          input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids'
+        }}: schema.array().members(
+          schema.number([
+            rules.exists({
+              table: '{{ input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural }}',
+              column: 'id',
+            }),
+          ])
+        ),
       @endif
     @endeach
   })

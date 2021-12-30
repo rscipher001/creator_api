@@ -130,7 +130,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           input.camelCaseStrategy ?
             `${input.auth.table.names.camelCase}Id` :
             `${input.auth.table.names.snakeCase}_id`
-        }} = auth.user!.id
+        }} = auth.user!.id;
       @endif
       @each(fileColumn in table.columns.filter(column => column.type === 'File' && column.meta.expose !== false))
         if (input.{{
@@ -146,7 +146,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           else {
             delete input.{{
               input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
-            }}
+            }};
           }
         @endif
       @endeach
@@ -157,16 +157,16 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @set('lastIndex', table.routeParentTables?.length - 1)
         input.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
-        }}Id
+        }}Id;
       @endif
       @if(table.singleton)
-        const condition: { [key: string]: any } = {}
+        const condition: { [key: string]: any } = {};
         @if(belongsToAuth)
           condition.{{
             input.camelCaseStrategy ?
               `${input.auth.table.names.camelCase}Id` :
               `${input.auth.table.names.snakeCase}_id`
-          }} = auth.user!.id
+          }} = auth.user!.id;
         @endif
         @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
           @set('lastIndex', table.routeParentTables?.length - 1)
@@ -178,13 +178,25 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           table.names.pascalCase
         }}.query().where(condition).first()
         if ({{ table.names.camelCase }}) {
-          {{ table.names.camelCase }}.merge(input)
-          await {{ table.names.camelCase }}.save()
-          return {{ table.names.camelCase }}
+          {{ table.names.camelCase }}.merge(input);
+          await {{ table.names.camelCase }}.save();
+          return {{ table.names.camelCase }};
         }
-        return {{ table.names.pascalCase }}.create(input)
+        return {{ table.names.pascalCase }}.create(input);
       @else
-        return {{ table.names.pascalCase }}.create(input)
+        @if(table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+          @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
+          const {{ relationColumnName }}: number[] = input.{{ relationColumnName }};
+          delete input.{{ relationColumnName }};
+
+          const product = await Product.create(input);
+          if (Array.isArray({{ relationColumnName }}) && {{ relationColumnName }}.length) {
+            await product.related('keywords').attach({{ relationColumnName }});
+          }
+          return product;
+        @else
+          return {{ table.names.pascalCase }}.create(input);
+        @endif
       @endif
     }
   @endif

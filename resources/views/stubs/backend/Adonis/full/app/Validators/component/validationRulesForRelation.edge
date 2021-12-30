@@ -1,10 +1,10 @@
 {{
-  input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+  input.camelCaseStrategy ? relation.names.camelCase + 'Id': relation.names.snakeCase + '_id'
 }}: schema.number{{
   relation.required ? '' : '.optional'
 }}([
   rules.exists({
     table: '{{ input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural }}',
-    column: 'id'
+    column: 'id',
   })
 ]),
