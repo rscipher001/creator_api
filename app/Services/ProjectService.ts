@@ -40,7 +40,7 @@ class BackendProjectService {
   public prepareTable(table): Table {
     table.name = HelperService.toSingularPascalCase(table.name)
     table.names = HelperService.generateNames(table.name)
-    if (table.defaultColumn && this.input.camelCaseStrategy) {
+    if (table.defaultColumn) {
       table.defaultColumn = this.input.camelCaseStrategy
         ? HelperService.toSingularCameCase(table.defaultColumn)
         : HelperService.toSingularSnakeCase(table.defaultColumn)
