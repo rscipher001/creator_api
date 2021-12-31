@@ -12,7 +12,7 @@ export default class PermissionRole extends BaseSeeder {
         @endeach
       ])
       if ({{ item.role }}Permissions.length) {
-        await {{ item.role }}!.related('permissions').sync({{ item.role }}Permissions.map(p => p.id))
+        await {{ item.role }}?.related('permissions').sync({{ item.role }}Permissions.map(p => p.id))
       }
     @endeach
   }
