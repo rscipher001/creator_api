@@ -226,7 +226,7 @@
                   <b-taginput
                     v-model="form.{{ relation.names.camelCasePlural }}"
                     field="{{ relationModel.defaultColumn }}"
-                    :data="{{ relationModel.names.camelCasePlural }}"
+                    :data="filtered{{ relationModel.names.PascalCasePlural }}"
                     expanded
                     autocomplete
                     open-on-focus
@@ -262,7 +262,7 @@ export default {
       this.{{ relation.modelNames.camelCase }}IndexAction();
     @endeach
     @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-      this.{{ relation.modelNames.camelCase }}IndexAction();
+      this.{{ relation.modelNames.camelCase }}Index();
     @endeach
     if (this.$route.params.id) {
       const id = parseInt(this.$route.params.id, 10);
@@ -298,6 +298,9 @@ export default {
         id: null,
       },
       errors: {},
+      @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+        filtered{{ relation.modelNames.camelCasePlural }}: [],
+      @endeach
       form: {
         @each(column in exposedColumns)
           {{ column.names.camelCase }}: {{ column.type === 'Boolean' ? false : null }},
@@ -482,12 +485,20 @@ export default {
 
     @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
       @set('relationModel', relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
-      getFiltered{{ relation.modelNames.pascalCasePlural }}(query) {
-        return this.{{ relation.modelNames.camelCasePlural }}.filter((option) => {
-          return (
-            option.{{ relationModel.defaultColumn }}.toString().toLowerCase().indexOf(query.toLowerCase()) >= 0
-          );
+      async {{ relation.modelNames.camelCase }}Index() {
+        await this.{{ relation.modelNames.camelCase }}IndexAction({
+          pageSize: 999,
+          pageNo: 1,
         });
+        this.filtered{{ relation.modelNames.pascalCasePlural }} = this.{{ relation.modelNames.camelCasePlural }};
+      },
+
+      getFiltered{{ relation.modelNames.pascalCasePlural }}(query) {
+        this.filtered{{ relation.modelNames.pascalCasePlural }} = this.{{ relation.modelNames.camelCasePlural }}.filter(
+          (option) => (
+            option.{{ relationModel.defaultColumn }}.toString().toLowerCase().indexOf(query.toLowerCase()) >= 0
+          )
+        );
       },
     @endeach
   },
