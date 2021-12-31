@@ -194,7 +194,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
             if (Array.isArray({{ relation.names.camelCase }}Ids) && {{ relation.names.camelCase }}Ids.length) {
-              await {{ table.names.camelCase }}.related({{ relation.names.camelCasePlural }}).attach({{ relation.names.camelCase }}Ids);
+              await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').attach({{ relation.names.camelCase }}Ids);
             }
           @endeach
           return {{ table.names.camelCase }};
