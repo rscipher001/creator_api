@@ -187,14 +187,14 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @if(table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
           @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
-            const {{ relationColumnName }}: number[] = input.{{ relationColumnName }};
+            const {{ relation.names.camelCase }}Ids: number[] = input.{{ relationColumnName }};
             delete input.{{ relationColumnName }};
           @endeach
           const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.create(input);
           @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
-            if (Array.isArray({{ relationColumnName }}) && {{ relationColumnName }}.length) {
-              await {{ table.names.camelCase }}.related('keywords').attach({{ relationColumnName }});
+            if (Array.isArray({{ relation.names.camelCase }}Ids) && {{ relation.names.camelCase }}Ids.length) {
+              await {{ table.names.camelCase }}.related({{ relation.names.camelCasePlural }}).attach({{ relation.names.camelCase }}Ids);
             }
           @endeach
           return {{ table.names.camelCase }};
@@ -380,6 +380,16 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         }
       @endeach
       const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
+      @if(table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+        @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+          @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
+          const {{ relation.names.camelCase }}Ids: number[] = input.{{ relationColumnName }}
+          delete input.{{ relationColumnName }}
+          if (Array.isArray({{ relation.names.camelCase }}Ids) && {{ relation.names.camelCase }}Ids.length) {
+            await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').sync({{ relation.names.camelCase }}Ids)
+          }
+        @endeach
+      @endif
       {{ table.names.camelCase }}.merge(input)
       await {{ table.names.camelCase }}.save()
       return {{ table.names.camelCase }}
