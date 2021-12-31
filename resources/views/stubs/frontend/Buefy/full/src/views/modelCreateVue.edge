@@ -308,7 +308,7 @@ export default {
         @each(relation in nonAuthBelongsToRelations)
           {{ relation.names.camelCase }}Id: null,
         @endeach
-        @if(hasM2MRelationOnCreatePage)
+        @if(hasM2MRelationOnCreatePage)~
           @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             {{ relation.names.camelCasePlural }}: [],
           @endeach
