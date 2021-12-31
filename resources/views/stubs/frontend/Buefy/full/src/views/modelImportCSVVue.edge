@@ -48,7 +48,7 @@
                 click upload button to start importing.
               </h1>
             </div>
-            <b-table v-if="form.items.length" :data="form.items" bordered>
+            <b-table v-if="form.items.length && form.items.length <= 1000" :data="form.items" bordered>
               @each(column in table.columns.filter(column => column.type !== 'File'))
                 <b-table-column field="{{
                   column.names.camelCase
@@ -74,6 +74,17 @@
                 </b-table-column>
               @endeach
             </b-table>
+            <div v-else>
+              <p class="has-text-centered">
+                <div class="notification is-primary is-light">
+                  Your CSV file contain more than 1000 items, displaying this many
+                  items can crash your browser or can crash your system, to ensure
+                  your system safety preview is disable for large amount of items.
+  
+                  <strong>You can still import items without preview</strong>.
+                </div>
+              </p>
+            </div>
             <div class="buttons mt-5">
               <b-button
                 @click="storeMany"
