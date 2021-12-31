@@ -44,8 +44,8 @@
           <div v-else>
             <div class="section px-0 pb-5 pt-1">
               <h1 class="is-size-4 has-text-centered">
-                Review the following @{{ form.items.length }} items carefully and
-                click upload button to start importing.
+                Review the following @{{ form.items.length }} items
+                <em>carefully</em> and click upload button to start importing.
               </h1>
             </div>
             <b-table v-if="form.items.length && form.items.length <= 1000" :data="form.items" bordered>
@@ -70,20 +70,70 @@
                     {{{
                       `{{ props.row.${column.names.camelCase} }}`
                     }}}
+                    @if(column.type === 'String' && column.meta.minlength)
+                      <b-tooltip
+                        v-if="props.row.{{ column.names.camelCase }}.length < {{ column.meta.minlength }}"
+                        label="Minimum length should be {{ column.meta.minlength }}"
+                        type="is-danger"
+                      >
+                        <b-icon
+                          size="is-small"
+                          type="is-danger"
+                          icon="alert-circle-outline"
+                        ></b-icon>
+                      </b-tooltip>
+                    @endif
+                    @if(column.type === 'String' && column.meta.maxlength)
+                      <b-tooltip
+                        v-if="props.row.{{ column.names.camelCase }}.length > {{ column.meta.maxlength }}"
+                        label="Maximim length should be {{ column.meta.maxlength }}"
+                        type="is-danger"
+                      >
+                        <b-icon
+                          size="is-small"
+                          type="is-danger"
+                          icon="alert-circle-outline"
+                        ></b-icon>
+                      </b-tooltip>
+                    @endif
+                    @if(column.type === 'Integer' && column.meta.min !== undefined)
+                      <b-tooltip
+                        v-if="props.row.{{ column.names.camelCase }} < {{ column.meta.min }}"
+                        label="Minimum allowed value is {{ column.meta.min }}"
+                        type="is-danger"
+                      >
+                        <b-icon
+                          size="is-small"
+                          type="is-danger"
+                          icon="alert-circle-outline"
+                        ></b-icon>
+                      </b-tooltip>
+                    @endif
+                    @if(column.type === 'Integer' && column.meta.max !== undefined)
+                      <b-tooltip
+                        v-if="props.row.{{ column.names.camelCase }} > {{ column.meta.max }}"
+                        label="Maximum allowed value is {{ column.meta.max }}"
+                        type="is-danger"
+                      >
+                        <b-icon
+                          size="is-small"
+                          type="is-danger"
+                          icon="alert-circle-outline"
+                        ></b-icon>
+                      </b-tooltip>
+                    @endif
                   @endif
                 </b-table-column>
               @endeach
             </b-table>
-            <div v-else>
-              <p class="has-text-centered">
-                <div class="notification is-primary is-light">
-                  Your CSV file contain more than 1000 items, displaying this many
-                  items can crash your browser or can crash your system, to ensure
-                  your system safety preview is disable for large amount of items.
-  
-                  <strong>You can still import items without preview</strong>.
-                </div>
-              </p>
+            <div v-else class="has-text-centered">
+              <div class="notification is-primary is-light">
+                Your CSV file contain more than 1000 items, displaying this many
+                items can crash your browser or can crash your system, to ensure
+                your system safety preview is disable for large amount of items.
+
+                <strong>You can still import items without preview</strong>.
+              </div>
             </div>
             <div class="buttons mt-5">
               <b-button
