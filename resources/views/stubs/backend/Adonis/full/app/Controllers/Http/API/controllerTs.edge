@@ -185,19 +185,19 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         return {{ table.names.pascalCase }}.create(input);
       @else
         @if(table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-          @each(relation in table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+          @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
             const {{ relationColumnName }}: number[] = input.{{ relationColumnName }};
             delete input.{{ relationColumnName }};
           @endeach
-          const product = await Product.create(input);
-          @each(relation in table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+          const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.create(input);
+          @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
             if (Array.isArray({{ relationColumnName }}) && {{ relationColumnName }}.length) {
-              await product.related('keywords').attach({{ relationColumnName }});
+              await {{ table.names.camelCase }}.related('keywords').attach({{ relationColumnName }});
             }
           @endeach
-          return product;
+          return {{ table.names.camelCase }};
         @else
           return {{ table.names.pascalCase }}.create(input);
         @endif
@@ -304,7 +304,22 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         const id = request.param('id')
         condition.id = id
       @endif
-      return {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
+      @if(table.relations.length)
+        const queryBuilder = {{ table.names.pascalCase }}.query()
+        const relationsString: string = request.input('relations')
+        let preLoadRelation: string[] = []
+        if (relationsString) {
+          preLoadRelation = relationsString.split(',')
+        }
+        if (preLoadRelation.length) {
+          preLoadRelation.forEach((relation) => {
+            queryBuilder.preload(relation as ExtractModelRelations<{{ table.names.pascalCase }}>)
+          })
+        }
+        return queryBuilder.where(condition).firstOrFail()
+      @else
+        return {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
+      @endif
     }
   @endif
 
