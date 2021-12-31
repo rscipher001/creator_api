@@ -299,7 +299,7 @@ export default {
       },
       errors: {},
       @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-        filtered{{ relation.modelNames.camelCasePlural }}: [],
+        filtered{{ relation.modelNames.pascalCasePlural }}: [],
       @endeach
       form: {
         @each(column in exposedColumns)
