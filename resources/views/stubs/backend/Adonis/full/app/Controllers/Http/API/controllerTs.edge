@@ -1,5 +1,6 @@
 @set('belongsToAuth', table.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
 @set('hasRelations', table.relations.length)
+@set('hasM2MRelationOnCreatePage', table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
 import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}';
 @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)~
   @each(parentTable in table.routeParentTables)
@@ -33,6 +34,9 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 @each(relation in table.relations.filter((r) => r.type === 'ManyToMany'))
   import {{ relation.modelNames.pascalCase }} from 'App/Models/{{ relation.modelNames.pascalCase }}';
 @endeach
+@if(hasM2MRelationOnCreatePage)
+  import Database from '@ioc:Adonis/Lucid/Database'
+@endif
 
 export default class {{ table.names.pascalCasePlural }}Controller {
   @if(table.operations.index && !table.singleton)
@@ -184,20 +188,30 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         }
         return {{ table.names.pascalCase }}.create(input);
       @else
-        @if(table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+        @if(hasM2MRelationOnCreatePage)
           @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
             @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
             const {{ relation.names.camelCase }}Ids: number[] = input.{{ relationColumnName }};
             delete input.{{ relationColumnName }};
           @endeach
-          const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.create(input);
-          @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-            @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
-            if (Array.isArray({{ relation.names.camelCase }}Ids) && {{ relation.names.camelCase }}Ids.length) {
-              await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').attach({{ relation.names.camelCase }}Ids);
-            }
-          @endeach
-          return {{ table.names.camelCase }};
+          const trx = await Database.transaction()
+          try {
+            const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.create(input);
+            @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+              @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
+              if (Array.isArray({{ relation.names.camelCase }}Ids) && {{ relation.names.camelCase }}Ids.length) {
+                await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').attach({{ relation.names.camelCase }}Ids);
+              }
+            @endeach
+            await trx.commit()
+            return {{ table.names.camelCase }};
+          } catch (e) {
+            @if(input.logging.enabled)
+              logger.error('{{ table.names.pascalCasePlural }}Controller.store');
+            @endif
+            await trx.rollback()
+            throw e
+          }
         @else
           return {{ table.names.pascalCase }}.create(input);
         @endif
@@ -380,19 +394,30 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         }
       @endeach
       const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
-      @if(table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-        @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-          @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
-          const {{ relation.names.camelCase }}Ids: number[] = input.{{ relationColumnName }}
-          delete input.{{ relationColumnName }}
-          if (Array.isArray({{ relation.names.camelCase }}Ids) && {{ relation.names.camelCase }}Ids.length) {
-            await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').sync({{ relation.names.camelCase }}Ids)
-          }
-        @endeach
+      @if(hasM2MRelationOnCreatePage)
+        const trx = await Database.transaction()
+        try {
+          @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+            @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
+            const {{ relation.names.camelCase }}Ids: number[] = input.{{ relationColumnName }}
+            delete input.{{ relationColumnName }}
+            if (Array.isArray({{ relation.names.camelCase }}Ids) && {{ relation.names.camelCase }}Ids.length) {
+              await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').sync({{ relation.names.camelCase }}Ids)
+            }
+          @endeach
       @endif
       {{ table.names.camelCase }}.merge(input)
       await {{ table.names.camelCase }}.save()
       return {{ table.names.camelCase }}
+      @if(hasM2MRelationOnCreatePage)
+        } catch (e) {
+          @if(input.logging.enabled)
+            logger.error('{{ table.names.pascalCasePlural }}Controller.update')
+          @endif
+          await trx.rollback()
+          throw e
+        }
+      @endif
     }
   @endif
 
