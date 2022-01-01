@@ -190,7 +190,10 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @else
         @if(hasM2MRelationOnCreatePage)
           @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-            @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
+            @set(
+              'relationColumnName',
+              input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids'
+            )
             const {{ relation.names.camelCase }}Ids: number[] = input.{{ relationColumnName }};
             delete input.{{ relationColumnName }};
           @endeach
@@ -198,9 +201,14 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           try {
             const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.create(input);
             @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-              @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
+              @set(
+                'relationColumnName',
+                input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids'
+              )
               if (Array.isArray({{ relation.names.camelCase }}Ids) && {{ relation.names.camelCase }}Ids.length) {
-                await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').attach({{ relation.names.camelCase }}Ids);
+                await {{ table.names.camelCase }}.related('{{
+                  relation.names.camelCasePlural
+                }}').attach({{ relation.names.camelCase }}Ids);
               }
             @endeach
             await trx.commit()
@@ -393,16 +401,23 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           }}
         }
       @endeach
-      const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail()
+      const {{ table.names.camelCase }} = await {{
+        table.names.pascalCase
+      }}.query().where(condition).firstOrFail()
       @if(hasM2MRelationOnCreatePage)
         const trx = await Database.transaction()
         try {
           @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-            @set('relationColumnName', input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids')
+            @set(
+              'relationColumnName',
+              input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids'
+            )
             const {{ relation.names.camelCase }}Ids: number[] = input.{{ relationColumnName }}
             delete input.{{ relationColumnName }}
             if (Array.isArray({{ relation.names.camelCase }}Ids) && {{ relation.names.camelCase }}Ids.length) {
-              await {{ table.names.camelCase }}.related('{{ relation.names.camelCasePlural }}').sync({{ relation.names.camelCase }}Ids)
+              await {{ table.names.camelCase }}.related('{{
+                relation.names.camelCasePlural
+              }}').sync({{ relation.names.camelCase }}Ids)
             }
           @endeach
       @endif
@@ -589,8 +604,12 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             table.routeParentTables[lastIndex].names.camelCase
           }}Id
         @endif
-        const {{ table.names.camelCase }} = await {{ table.names.pascalCase }}.query().where(condition).firstOrFail();
-        const {{ relation.modelNames.camelCase }} = await {{ relation.modelNames.pascalCase }}.query().where({
+        const {{ table.names.camelCase }} = await {{
+          table.names.pascalCase
+        }}.query().where(condition).firstOrFail();
+        const {{
+          relation.modelNames.camelCase
+        }} = await {{ relation.modelNames.pascalCase }}.query().where({
           id: request.param('{{ relation.modelNames.camelCase }}Id'),
           @if(relationModelBelongsToAuth)
             {{

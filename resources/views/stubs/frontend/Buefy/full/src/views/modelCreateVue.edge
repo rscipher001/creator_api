@@ -1,8 +1,14 @@
 @set('fileColumns', table.columns.filter(c => c.type === 'File'))
 @set('fileColumnsLastIndex', fileColumns.length - 1)
 @set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
-@set('nonAuthBelongsToRelations', table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth'))
-@set('hasM2MRelationOnCreatePage', table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+@set(
+  'nonAuthBelongsToRelations',
+  table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth')
+)
+@set(
+  'hasM2MRelationOnCreatePage',
+  table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage)
+)
 <template>
   <section class="container">
     <b-loading is-full-page v-model="loading.show"></b-loading>
