@@ -8,9 +8,13 @@ export default class Users extends BaseSchema {
       @each(relation in table.relations)~
         @if(relation.type === 'BelongsTo' && relation.lazy)
         table.integer('{{
-          input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+          input.camelCaseStrategy ?
+            relation.modelNames.camelCase + 'Id' :
+            relation.modelNames.snakeCase + '_id'
         }}').unsigned().references('id').inTable('{{
-          input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural
+          input.camelCaseStrategy ?
+            relation.modelNames.camelCasePlural :
+            relation.modelNames.snakeCasePlural
         }}').{{ relation.required ? 'notNullable()' : 'nullable()' }}
         @endif
       @endeach
@@ -22,10 +26,14 @@ export default class Users extends BaseSchema {
       @each(relation in table.relations)~
         @if(relation.type === 'BelongsTo' && relation.lazy)
           table.dropForeign('{{
-            input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+            input.camelCaseStrategy ?
+              relation.modelNames.camelCase + 'Id':
+              relation.modelNames.snakeCase + '_id'
           }}')
           table.dropColumn('{{
-            input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+            input.camelCaseStrategy ?
+              relation.modelNames.camelCase + 'Id':
+              relation.modelNames.snakeCase + '_id'
           }}')
         @endif
       @endeach

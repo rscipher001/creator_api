@@ -16,8 +16,12 @@
       <div class="columns">
         <div class="column px-0">
           <div class="level">
-            <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{ capitalCase(table.names.pascalCase) }}</div>
-            <div class="level-right"><b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-white">Back</b-button></div>
+            <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{
+              capitalCase(table.names.pascalCase)
+            }}</div>
+            <div class="level-right"><b-button tag="router-link" to="/{{
+              table.names.camelCase
+            }}" type="is-white">Back</b-button></div>
           </div>
         </div>
       </div>
@@ -31,7 +35,9 @@
             @if(column.type === 'String')
             <b-field
               horizontal
-              label="{{ column.input?.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              label="{{ column.input?.displayName || capitalCase(column.names.pascalCase) }}{{
+                column.meta.required ? ' *' : ''
+              }}"
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
             >
@@ -39,18 +45,18 @@
               <b-input
                 v-model="form.{{ column.names.camelCase }}"
                 @if(column.meta.multiline)
-                type="textarea"
+                  type="textarea"
                 @elseif(column.meta.email)
-                type="email"
+                  type="email"
                 @endif
                 @if(column.meta.maxLength !== undefined)
-                maxlength="{{ column.meta.maxLength }}"
+                  maxlength="{{ column.meta.maxLength }}"
                 @endif
                 @if(column.meta.minLength !== undefined)
-                minlength="{{ column.meta.minLength }}"
+                  minlength="{{ column.meta.minLength }}"
                 @endif
                 @if(column.meta.required)
-                required
+                  required
                 @endif
               ></b-input>
               @elseif(column.input?.type === 'Select')
@@ -58,15 +64,15 @@
                 v-model="form.{{ column.names.camelCase }}"
                 expanded
                 @if(column.meta.required)
-                required
+                  required
                 @endif
               >
                 @each(option in column.input?.select.options)
-                @if(option.value)
-                <option value="{{ option.value }}">{{ option.label }}</option>
-                @else
-                <option value="{{ option }}">{{ option }}</option>
-                @endif
+                  @if(option.value)
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                  @else
+                    <option value="{{ option }}">{{ option }}</option>
+                  @endif
                 @endeach
               </b-select>
               @elseif(column.input?.type === 'Radio')
@@ -95,7 +101,9 @@
             @elseif(column.type === 'Integer')
             <b-field
               horizontal
-              label="{{ column.input?.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              label="{{
+                column.input?.displayName || capitalCase(column.names.pascalCase)
+              }}{{ column.meta.required ? ' *' : '' }}"
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
             >
@@ -117,7 +125,9 @@
             @elseif(column.type === 'Decimal')
             <b-field
               horizontal
-              label="{{ column.input?.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              label="{{
+                column.input?.displayName || capitalCase(column.names.pascalCase)
+              }}{{ column.meta.required ? ' *' : '' }}"
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
             >
@@ -144,16 +154,22 @@
             @elseif(column.type === 'Boolean')
             <b-field
               horizontal
-              label="{{ column.input?.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              label="{{
+                column.input?.displayName || capitalCase(column.names.pascalCase)
+              }}{{ column.meta.required ? ' *' : '' }}"
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
             >
-              <b-switch v-model="form.{{ column.names.camelCase }}">{{ column.input?.displayName ?? column.names.camelCase }}</b-switch>
+              <b-switch v-model="form.{{ column.names.camelCase }}">{{
+                column.input?.displayName ?? column.names.camelCase
+              }}</b-switch>
             </b-field>
             @elseif(column.type === 'Date')
             <b-field
               horizontal
-              label="{{ column.input?.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              label="{{
+                column.input?.displayName || capitalCase(column.names.pascalCase)
+              }}{{ column.meta.required ? ' *' : '' }}"
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
               open-on-focus
@@ -163,15 +179,25 @@
             @elseif(column.type === 'File')
             <b-field
               class="file" horizontal
-              label="{{ column.input?.displayName || capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}"
+              label="{{
+                column.input?.displayName || capitalCase(column.names.pascalCase)
+              }}{{ column.meta.required ? ' *' : '' }}"
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
             >
-              <b-upload @input="onFileAdd($event, '{{ column.names.camelCase }}')" v-model="form.{{ column.names.camelCase }}" expanded>
+              <b-upload @input="onFileAdd($event, '{{
+                column.names.camelCase
+              }}')" v-model="form.{{ column.names.camelCase }}" expanded>
                 <a class="button is-primary is-fullwidth">
                   <b-icon icon="upload"></b-icon>
                   <span>
-                    {{{ `{{ (form.${column.names.camelCase} && form.${column.names.camelCase}.name) || 'Select ${column.input?.displayName || capitalCase(column.names.pascalCase)}' }}` }}}
+                    {{{
+                      `{{
+                        (form.${column.names.camelCase} && form.${column.names.camelCase}.name) ||
+                        'Select ${column.input?.displayName ||
+                          capitalCase(column.names.pascalCase)}'
+                      }}`
+                    }}}
                   </span>
                 </a>
               </b-upload>
