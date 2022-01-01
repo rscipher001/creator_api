@@ -29,6 +29,8 @@ export default class CreateProjectValidator {
       required: schema.boolean.optional(),
       minLength: schema.number.optional(),
       maxLength: schema.number.optional(),
+      min: schema.number.optional(),
+      max: schema.number.optional(),
       maxSize: schema.string.optional({ trim: true }),
       extensions: schema.array.optional().members(schema.string({ trim: true })),
       dbLength: schema.number.optional(),
