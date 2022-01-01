@@ -70,10 +70,10 @@
                     {{{
                       `{{ props.row.${column.names.camelCase} }}`
                     }}}
-                    @if(column.type === 'String' && column.meta.minlength)
+                    @if(column.type === 'String' && column.meta.minLength)
                       <b-tooltip
-                        v-if="props.row.{{ column.names.camelCase }}.length < {{ column.meta.minlength }}"
-                        label="Minimum length should be {{ column.meta.minlength }}"
+                        v-if="props.row.{{ column.names.camelCase }}.length < {{ column.meta.minLength }}"
+                        label="Minimum length should be {{ column.meta.minLength }}"
                         type="is-danger"
                       >
                         <b-icon
@@ -83,10 +83,10 @@
                         ></b-icon>
                       </b-tooltip>
                     @endif
-                    @if(column.type === 'String' && column.meta.maxlength)
+                    @if(column.type === 'String' && column.meta.maxLength)
                       <b-tooltip
-                        v-if="props.row.{{ column.names.camelCase }}.length > {{ column.meta.maxlength }}"
-                        label="Maximim length should be {{ column.meta.maxlength }}"
+                        v-if="props.row.{{ column.names.camelCase }}.length > {{ column.meta.maxLength }}"
+                        label="Maximim length should be {{ column.meta.maxLength }}"
                         type="is-danger"
                       >
                         <b-icon
