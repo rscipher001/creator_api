@@ -36,18 +36,48 @@ export default class ProjectsController {
 
   public async store({ request, response, auth }: HttpContextContract) {
     const input = await request.validate(CreateProjectValidator)
+    const generator = new Generator(input, 0)
+    const prepareInput = generator.prepare()
     // Pre checks to ensure there is no contracitory settings
-    if (input.auth.passwordReset && !input.mailEnabled) {
+    if (prepareInput.auth.passwordReset && !prepareInput.mailEnabled) {
       return response.badRequest({
         error: 'Password reset requires mailing feature',
       })
     }
-    if (input.tenantSettings.tenant && !input.tenantSettings.table) {
+    if (prepareInput.tenantSettings.tenant && !prepareInput.tenantSettings.table) {
       return response.badRequest({
         error: 'Tenant table should be selected when tenant option is enabled',
       })
     }
     // Ensure roles have permission and there is a default role
+    // Ensure there are no duplicate relations on auth model
+    // Ensure there are no duplicate relations on other models
+    const authTable = prepareInput.auth.table
+    // Put all relations in array, unique that array
+    // If size reduces after unique then there are duplicate relations
+    // Store table name and relation name in table:relation format
+    const authRelations: string[] = []
+    authTable.relations.forEach((relation) => {
+      authRelations.push(`${relation.modelNames.pascalCase}:${relation.names?.pascalCase}`)
+    })
+    if (authRelations.length !== new Set(authRelations).size) {
+      return response.badRequest({
+        error: 'On Auth table you have duplicate relations',
+      })
+    }
+
+    for (let i = 0; i < prepareInput.tables.length; i++) {
+      const table = prepareInput.tables[i]
+      const relations: string[] = []
+      table.relations.forEach((relation) => {
+        relations.push(`${relation.modelNames.pascalCase}:${relation.names?.pascalCase}`)
+      })
+      if (relations.length !== new Set(relations).size) {
+        return response.badRequest({
+          error: `On ${table.names.pascalCase} table you have duplicate relations`,
+        })
+      }
+    }
     const project = await Project.create({
       status: 'queued',
       name: input.name,
