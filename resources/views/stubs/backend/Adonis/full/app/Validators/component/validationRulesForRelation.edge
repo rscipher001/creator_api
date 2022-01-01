@@ -1,4 +1,9 @@
-@set('relationModel', relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
+@set(
+  'relationModel',
+  ['$auth', '$nonAuth'].includes(relation.withModel) ?
+    input.auth.table :
+    input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
+)
 @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
   {{
     input.camelCaseStrategy ? relation.names.camelCase + 'Id': relation.names.snakeCase + '_id'
@@ -8,9 +13,15 @@
     rules.exists({
       table: '{{ input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural }}',
       column: 'id',
-      @if(relationModel.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
+      @if(relationModel.relations.find(
+        r => r.type === 'BelongsTo' && ['$auth', '$nonAuth'].includes(r.withModel))
+      )
         where: {
-          {{ input.camelCaseStrategy ? `${input.auth.table.names.camelCase}Id` : `${input.auth.table.names.snakeCase}_id` }}: this.ctx.auth.user!.id,
+          {{
+            input.camelCaseStrategy ?
+              `${input.auth.table.names.camelCase}Id` :
+              `${input.auth.table.names.snakeCase}_id`
+          }}: this.ctx.auth.user!.id,
         },
       @endif
     })
@@ -23,9 +34,15 @@
       rules.exists({
         table: '{{ input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural }}',
         column: 'id',
-        @if(relationModel.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
+        @if(relationModel.relations.find(
+          r => r.type === 'BelongsTo' && ['$auth', '$nonAuth'].includes(r.withModel))
+        )
           where: {
-            {{ input.camelCaseStrategy ? `${input.auth.table.names.camelCase}Id` : `${input.auth.table.names.snakeCase}_id` }}: this.ctx.auth.user!.id,
+            {{
+              input.camelCaseStrategy ?
+                `${input.auth.table.names.camelCase}Id` :
+                `${input.auth.table.names.snakeCase}_id`
+            }}: this.ctx.auth.user!.id,
           },
         @endif
       }),

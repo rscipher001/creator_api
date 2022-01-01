@@ -547,9 +547,17 @@ export default class {{ table.names.pascalCasePlural }}Controller {
   @endif
 
   @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
-    @set('relationModel', relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
+    @set(
+      'relationModel',
+      ['$auth', '$nonAuth'].includes(relation.withModel) ?
+        input.auth.table :
+        input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
+    )
     @if(relationModel)
-      @set('relationModelBelongsToAuth', relationModel.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth'))
+      @set(
+        'relationModelBelongsToAuth',
+        relationModel.relations.find(r => r.type === 'BelongsTo' && r.withModel === '$auth')
+      )
       public async attach{{ relation.names.pascalCase }}({
         request,
         @if(belongsToAuth || relationModelBelongsToAuth)

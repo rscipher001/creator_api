@@ -182,7 +182,12 @@
             @endeach
 
             @each(relation in nonAuthBelongsToRelations)
-              @set('relationModel', relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
+            @set(
+              'relationModel',
+              ['$auth', '$nonAuth'].includes(relation.withModel) ?
+                input.auth.table :
+                input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
+            )
               <b-field
                 label="{{ capitalCase(relation.names.pascalCase) }}"
                 :type="errors.{{ relation.names.camelCase }} ? 'is-danger' : ''"
@@ -214,7 +219,9 @@
             @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
               @set(
                 'relationModel',
-                relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
+                ['$auth', '$nonAuth'].includes(relation.withModel) ?
+                  input.auth.table :
+                  input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
               )
               @if(relationModel)
                 <b-field
@@ -484,7 +491,12 @@ export default {
     @endif
 
     @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
-      @set('relationModel', relation.withModel === '$auth' ? input.auth.table : input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase))
+    @set(
+      'relationModel',
+      ['$auth', '$nonAuth'].includes(relation.withModel) ?
+        input.auth.table :
+        input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
+    )
       async {{ relation.modelNames.camelCase }}Index() {
         await this.{{ relation.modelNames.camelCase }}IndexAction({
           pageSize: 999,

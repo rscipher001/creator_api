@@ -79,8 +79,10 @@ class BackendProjectService {
     }
     if (Array.isArray(table.relations)) {
       table.relations = table.relations.map((relation: Relation): Relation => {
-        if (relation.withModel === '$auth') {
+        if (['$auth', '$nonAuth'].includes(relation.withModel)) {
           relation.modelNames = HelperService.generateNames(this.input.auth.table.name)
+        } else if (relation.withModel === '$tenant') {
+          relation.modelNames = HelperService.generateNames(this.projectInput.tenantSettings.table)
         } else {
           relation.modelNames = HelperService.generateNames(relation.withModel)
           relation.withModel = relation.modelNames.pascalCase
@@ -349,6 +351,14 @@ class BackendProjectService {
     projectInput.tech = this.input.tech
     projectInput.auth = this.input.auth
     projectInput.tenantSettings = this.input.tenantSettings
+    if (projectInput.tenantSettings.table) {
+      projectInput.tenantSettings.name = HelperService.toSingularPascalCase(
+        projectInput.tenantSettings.table
+      )
+      projectInput.tenantSettings.names = HelperService.generateExtendedNames(
+        projectInput.tenantSettings.table
+      )
+    }
 
     // Fields that needs processign
     projectInput.id = this.projectId
@@ -366,6 +376,8 @@ class BackendProjectService {
       this.addReseTokenTables()
     }
 
+    // Do it twice to ensure relation setting is in place
+    projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
     if (!this.input.git) {
       projectInput.git = {
