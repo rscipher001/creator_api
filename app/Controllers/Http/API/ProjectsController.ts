@@ -36,7 +36,7 @@ export default class ProjectsController {
 
   public async store({ request, response, auth }: HttpContextContract) {
     const input = await request.validate(CreateProjectValidator)
-    const generator = new Generator(input, 0)
+    const generator = new Generator(JSON.parse(JSON.stringify(input)), 0)
     const prepareInput = generator.prepare()
     // Pre checks to ensure there is no contracitory settings
     if (prepareInput.auth.passwordReset && !prepareInput.mailEnabled) {
