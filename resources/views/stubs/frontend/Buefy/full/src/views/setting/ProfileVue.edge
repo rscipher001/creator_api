@@ -5,7 +5,9 @@
     <div class="column is-three-quarters">
     @endif
     <form method="POST" @submit.prevent="updateProfile">
-      @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))
+      @each(column in input.auth.table.columns.filter(
+        c => c.meta.expose !== false && c.type !== 'File'
+      ))
         @if(!['Email', 'Password',].includes(column.name))
         <b-field
           label="{{
@@ -79,7 +81,9 @@ export default {
 
   mounted() {
     // if (this.$refs.profileSettingName) this.$refs.profileSettingName.focus();
-    @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))
+    @each(column in input.auth.table.columns.filter(
+      c => c.meta.expose !== false && c.type !== 'File'
+    ))
     @if(column.meta.expose !== false)
     @if(!['Email', 'Password',].includes(column.name))
     this.form.{{ column.names.camelCase }} = this.user.{{ column.names.camelCase }};
@@ -93,7 +97,9 @@ export default {
       file: {},
       errors: {},
       form: {
-        @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))
+        @each(column in input.auth.table.columns.filter(
+          c => c.meta.expose !== false && c.type !== 'File'
+        ))
         @if(column.meta.expose !== false)
         @if(!['Email', 'Password',].includes(column.name))
         {{ column.names.camelCase }}: "",
@@ -114,9 +120,11 @@ export default {
     async updateProfile() {
       try {
         await this.updateProfileAction({
-          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))
+          @each(column in input.auth.table.columns.filter(
+            c => c.meta.expose !== false && c.type !== 'File'
+          ))
           @if(!['Email', 'Password',].includes(column.name))
-          {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
+            {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
           @endif
           @endeach
         });

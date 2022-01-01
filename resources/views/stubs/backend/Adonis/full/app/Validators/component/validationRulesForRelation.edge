@@ -11,7 +11,11 @@
     relation.required ? '' : '.optional'
   }}([
     rules.exists({
-      table: '{{ input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural }}',
+      table: '{{
+        input.camelCaseStrategy ?
+          relation.modelNames.camelCasePlural :
+          relation.modelNames.snakeCasePlural
+      }}',
       column: 'id',
       @if(relationModel.relations.find(
         r => r.type === 'BelongsTo' && ['$auth', '$nonAuth'].includes(r.withModel))
@@ -32,7 +36,11 @@
   }}: schema.array().members(
     schema.number([
       rules.exists({
-        table: '{{ input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural }}',
+        table: '{{
+          input.camelCaseStrategy ?
+            relation.modelNames.camelCasePlural :
+            relation.modelNames.snakeCasePlural
+        }}',
         column: 'id',
         @if(relationModel.relations.find(
           r => r.type === 'BelongsTo' && ['$auth', '$nonAuth'].includes(r.withModel))

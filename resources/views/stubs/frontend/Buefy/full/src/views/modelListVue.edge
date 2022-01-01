@@ -6,12 +6,20 @@
       <div class="columns">
         <div class="column px-0">
           <div class="level">
-            <div class="level-left is-size-3">@{{ items.length }} {{ capitalCase(table.names.pascalCasePlural) }}</div>
-            @if(table.operations.storeMany || table.operations.store || table.operations.destroyMany)
+            <div class="level-left is-size-3">@{{ items.length }} {{
+              capitalCase(table.names.pascalCasePlural)
+            }}</div>
+            @if(
+              table.operations.storeMany || table.operations.store || table.operations.destroyMany
+            )
               <div
                 class="level-right buttons"
                 @if(input.rbac.enabled)
-                  v-if="authorize('{{ table.names.camelCase }}:storeMany') || authorize('{{ table.names.camelCase }}:destroyMany') || authorize('{{ table.names.camelCase }}:store')"
+                  v-if="
+                    authorize('{{ table.names.camelCase }}:storeMany') ||
+                    authorize('{{ table.names.camelCase }}:destroyMany') ||
+                    authorize('{{ table.names.camelCase }}:store')
+                  "
                 @endif
               >
                 @if(table.operations.destroyMany)
@@ -53,7 +61,13 @@
                   @{{ multiSelect ? "Disable" : "Enable" }} Multiselect
                 </b-button>
                 @if(table.operations.create)
-                  <b-button tag="router-link" to="/{{ table.names.camelCase }}/create" type="is-primary">New</b-button>
+                  <b-button
+                    tag="router-link"
+                    to="/{{ table.names.camelCase }}/create"
+                    type="is-primary"
+                  >
+                    New
+                  </b-button>
                 @endif
               </div>
             @endif
@@ -84,7 +98,9 @@
           </div>
           @each(column in table.columns.filter(c => c.meta.filterable))
             <div class="column">
-              <b-field label="{{ column.input?.displayName || capitalCase(column.names.pascalCase) }}">
+              <b-field label="{{
+                column.input?.displayName || capitalCase(column.names.pascalCase)
+              }}">
                 @if(column.type === 'String')
                   @if(column.input?.type === 'Input')
                     <b-input
@@ -191,7 +207,9 @@
             @{{ props.row.id }}
           </b-table-column>
           @each(column in table.indexColumns)
-            @set('currentColumn', table.columns.find((c) => c.names.pascalCase === pascalCase(column)))
+            @set('currentColumn', table.columns.find(
+              (c) => c.names.pascalCase === pascalCase(column)
+            ))
             <b-table-column field="{{ camelCase(column) }}" label="{{
               currentColumn.input?.displayName || capitalCase(column)
             }}" v-slot="props" {{
@@ -262,7 +280,9 @@
             <div class="is-flex-direction-colomn">
               @if(table.operations.create)
                 <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
-                <p class="is-size-4">Click new to create your first {{ noCase(table.names.pascalCasePlural) }}</p>
+                <p class="is-size-4">Click new to create your first {{
+                  noCase(table.names.pascalCasePlural)
+                }}</p>
                 <b-button
                   @if(input.rbac.enabled)
                     v-if="authorize('{{ table.names.camelCase }}:create')"
@@ -372,7 +392,9 @@ export default {
       @if(hasFilterableColumn)
         @each(column in table.columns.filter(c => c.meta.filterable))
           if (this.filter.{{ column.names.camelCase }}) {
-            indexQueryParams.{{ column.names.camelCase }} = this.filter.{{ column.names.camelCase }}{{ column.type === 'Date' ? '.toISOString()' : ''}};
+            indexQueryParams.{{ column.names.camelCase }} = this.filter.{{
+              column.names.camelCase
+            }}{{ column.type === 'Date' ? '.toISOString()' : ''}};
           }
         @endeach
       @endif
@@ -389,7 +411,9 @@ export default {
       destroy(id) {
         this.$buefy.dialog.confirm({
           title: 'Deleting {{ capitalCase(table.names.pascalCase) }}',
-          message: 'Are you sure you want to <b>delete</b> this {{ table.names.camelCase }}? Only unused {{ table.names.camelCase }} can be deleted',
+          message: 'Are you sure you want to <b>delete</b> this {{
+            table.names.camelCase
+          }}? Only unused {{ table.names.camelCase }} can be deleted',
           confirmText: 'Delete {{ capitalCase(table.names.pascalCase) }}',
           type: 'is-danger',
           hasIcon: true,
@@ -419,7 +443,9 @@ export default {
         this.$buefy.dialog.confirm({
           title: 'Deleting {{ capitalCase(table.names.pascalCasePlural) }}',
           message:
-            "Are you sure you want to <b>delete</b> these {{ noCase(table.names.pascalCasePlural) }}? Only unused {{ noCase(table.names.pascalCase) }} can be deleted",
+            "Are you sure you want to <b>delete</b> these {{
+              noCase(table.names.pascalCasePlural)
+            }}? Only unused {{ noCase(table.names.pascalCase) }} can be deleted",
           confirmText: 'Delete {{ capitalCase(table.names.pascalCasePlural) }}',
           type: "is-danger",
           hasIcon: true,

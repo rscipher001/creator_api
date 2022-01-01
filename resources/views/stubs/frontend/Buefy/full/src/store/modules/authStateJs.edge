@@ -1,4 +1,7 @@
-@set('containsUnderscoreColumn', input.auth.table.columns.find(c => c.columnName.indexOf('_') >= 0))
+@set(
+  'containsUnderscoreColumn',
+  input.auth.table.columns.find(c => c.columnName.indexOf('_') >= 0)
+)
 import HttpService from "../../services/http.service";
 import LocalStorageService from '../../services/localStorage.service';
 import ValidationException from "../../exceptions/ValidationException";

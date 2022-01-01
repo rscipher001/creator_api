@@ -18,11 +18,26 @@
             ></b-input>
           </b-field>
 
-          <b-field label="Password *" :type="errors.password ? 'is-danger' : ''" :message="errors.password">
-            <b-input v-model="form.password" type="password" maxlength="{{ email.meta.maxLength || 72 }}" password-reveal required></b-input>
+          <b-field
+            label="Password *"
+            :type="errors.password ? 'is-danger' : ''"
+            :message="errors.password"
+          >
+            <b-input
+              v-model="form.password"
+              type="password"
+              maxlength="{{ email.meta.maxLength || 72 }}"
+              password-reveal required
+            ></b-input>
           </b-field>
 
-          <b-button :loading="loading.login" type="is-primary is-fullwidth" native-type="submit">Login</b-button>
+          <b-button
+            :loading="loading.login"
+            type="is-primary is-fullwidth"
+            native-type="submit"
+          >
+            Login
+          </b-button>
         </form>
         @if(input.auth.register)
         <b-button class="is-fullwidth mt-2" tag="router-link" to="/register" type="is-light">

@@ -51,7 +51,9 @@ export default class EmailVerificationController {
       logger.info('EmailVerificationController.verifyEmail')
     @endif
     const tokenVerificationScheam = schema.create({
-      email: schema.string({ trim: true }, [rules.email(), rules.maxLength({{ email.meta.maxLength || 256 }})]),
+      email: schema.string({ trim: true }, [rules.email(), rules.maxLength({{
+        email.meta.maxLength || 256
+      }})]),
       token: schema.string({ trim: true }, [rules.maxLength(128), rules.minLength(128)]),
     })
     const input = {
@@ -80,7 +82,9 @@ export default class EmailVerificationController {
       logger.info('EmailVerificationController.updateEmail')
     @endif
     const tokenVerificationScheam = schema.create({
-      email: schema.string({ trim: true }, [rules.email(), rules.maxLength({{ email.meta.maxLength || 256 }})]),
+      email: schema.string({ trim: true }, [rules.email(), rules.maxLength({{
+        email.meta.maxLength || 256
+      }})]),
       token: schema.string({ trim: true }, [rules.maxLength(128), rules.minLength(128)]),
     })
     const input = {

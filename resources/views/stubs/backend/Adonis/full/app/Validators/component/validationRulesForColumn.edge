@@ -34,7 +34,11 @@
     @if(column.meta.minLength && column.type === 'String')
       rules.minLength({{ column.meta.minLength }}),
     @endif
-    @if(column.meta.min !== undefined && column.meta.max !== undefined && ['Integer', 'Decimal'].includes(column.type))
+    @if(
+      column.meta.min !== undefined &&
+      column.meta.max !== undefined &&
+      ['Integer', 'Decimal'].includes(column.type)
+    )
       rules.range({{ column.meta.min }}, {{ column.meta.max }}),
     @endif
     @if(column.meta.email)

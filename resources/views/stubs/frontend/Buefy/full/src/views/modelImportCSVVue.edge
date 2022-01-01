@@ -5,7 +5,9 @@
       <div class="columns">
         <div class="column px-0">
           <div class="level">
-            <div class="level-left is-size-3">Import {{ capitalCase(table.names.pascalCase) }}</div>
+            <div class="level-left is-size-3">Import {{
+              capitalCase(table.names.pascalCase)
+            }}</div>
             <div class="level-right">
               <b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-white">
                 Back
@@ -22,7 +24,9 @@
           <div v-if="activeScreen === 'upload'">
             <p class="mb-5 has-text-centered">
               <a :href="csvUrl">Download sample CSV file</a>
-              and create all {{ pluralize(noCase(table.names.camelCase)) }} list in Excel or any other spreadsheet software and upload it
+              and create all {{
+                pluralize(noCase(table.names.camelCase))
+              }} list in Excel or any other spreadsheet software and upload it
             </p>
 
             <form method="POST" @submit.prevent="preview">
@@ -48,7 +52,11 @@
                 <em>carefully</em> and click upload button to start importing.
               </h1>
             </div>
-            <b-table v-if="form.items.length && form.items.length <= 1000" :data="form.items" bordered>
+            <b-table
+              v-if="form.items.length && form.items.length <= 1000"
+              :data="form.items"
+              bordered
+            >
               @each(column in table.columns.filter(column => column.type !== 'File'))
                 <b-table-column field="{{
                   column.names.camelCase
@@ -72,7 +80,9 @@
                     }}}
                     @if(column.type === 'String' && column.meta.minLength)
                       <b-tooltip
-                        v-if="props.row.{{ column.names.camelCase }}.length < {{ column.meta.minLength }}"
+                        v-if="props.row.{{ column.names.camelCase }}.length < {{
+                          column.meta.minLength
+                        }}"
                         label="Minimum length should be {{ column.meta.minLength }}"
                         type="is-danger"
                       >
@@ -85,7 +95,9 @@
                     @endif
                     @if(column.type === 'String' && column.meta.maxLength)
                       <b-tooltip
-                        v-if="props.row.{{ column.names.camelCase }}.length > {{ column.meta.maxLength }}"
+                        v-if="props.row.{{ column.names.camelCase }}.length > {{
+                          column.meta.maxLength
+                        }}"
                         label="Maximim length should be {{ column.meta.maxLength }}"
                         type="is-danger"
                       >
@@ -201,12 +213,16 @@ export default {
               @if(column.meta.required)
                 if(item.{{ column.names.camelCase }})
               @endif
-              itemInput.{{ column.names.camelCase }} = parseInt(item.{{ column.names.camelCase }});
+              itemInput.{{ column.names.camelCase }} = parseInt(item.{{
+                column.names.camelCase
+              }});
             @elseif(column.type === 'Decimal')
               @if(column.meta.required)
                 if(item.{{ column.names.camelCase }})
               @endif
-              itemInput.{{ column.names.camelCase }} = parseFloat(item.{{ column.names.camelCase }});
+              itemInput.{{ column.names.camelCase }} = parseFloat(item.{{
+                column.names.camelCase
+              }});
             @else
               itemInput.{{ column.names.camelCase }} = item.{{ column.names.camelCase }};
             @endif

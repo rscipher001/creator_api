@@ -1,4 +1,9 @@
-@set('hasManyRoles', input.auth.table.relations.find(r => r.type === 'ManyToMany' && r.modelNames.pascalCase === 'Role'))
+@set(
+  'hasManyRoles',
+  input.auth.table.relations.find(
+    r => r.type === 'ManyToMany' && r.modelNames.pascalCase === 'Role'
+  )
+)
 @if(input.rbac.enabled)
   import Role from 'App/Models/Role'
 @endif

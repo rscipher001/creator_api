@@ -40,7 +40,9 @@ import {
   import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite'
 @endif
 @each(relation in table.relations)
-  import {{ relation.modelNames.pascalCase }} from 'App/Models/{{ relation.modelNames.pascalCase }}'
+  import {{ relation.modelNames.pascalCase }} from 'App/Models/{{
+    relation.modelNames.pascalCase
+  }}'
 @endeach
 
 export default class {{ table.names.pascalCase }} extends BaseModel {
@@ -54,10 +56,14 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
         preComputeUrl: true,
         disk: '{{ input.defaultStorageDriver.toLowerCase() }}',
       })
-      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: AttachmentContract {{ column.meta.required ? '' : ' | null' }}
+      public {{ column.names.camelCase }}{{
+        column.meta.required ? '' : '?'
+      }}: AttachmentContract {{ column.meta.required ? '' : ' | null' }}
     @elseif(column.type === 'Date')
       @column.dateTime()
-      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: DateTime {{ column.meta.required ? '' : ' | null' }}
+      public {{ column.names.camelCase }}{{
+        column.meta.required ? '' : '?'
+      }}: DateTime {{ column.meta.required ? '' : ' | null' }}
     @else
       @if(column.meta.secret)
         @column({
@@ -79,7 +85,9 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @each(relation in table.relations)
     @if(relation.type === 'BelongsTo')
     @column()
-    public {{ relation.names.camelCase }}Id{{relation.required ? '' : '?' }}: number {{ relation.required ? '' : '| null' }}
+    public {{ relation.names.camelCase }}Id{{
+      relation.required ? '' : '?'
+    }}: number {{ relation.required ? '' : '| null' }}
     @endif
   @endeach
 
