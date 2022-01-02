@@ -1,6 +1,7 @@
 import {
   schema,
-  @if((table.columns.filter(c => c.meta.expose !== false)).length)
+  {{-- Ensure at least one column is exposed and all columns are not files --}}
+  @if(table.columns.find(c => c.meta.expose !== false) && table.columns.find(c => c.type !== 'File'))
     rules,
   @endif
 } from '@ioc:Adonis/Core/Validator'
