@@ -164,18 +164,6 @@ export default class SPAGenerator {
     await HelperService.writeFile(filePath, content)
   }
 
-  public async addNavbar() {
-    const filePath = `${this.input.spaPath}/src/components/NavBar.vue`
-    const content = await View.render(
-      `stubs/frontend/${this.input.tech.frontend}/full/src/components/navBarVue`,
-      {
-        input: this.input,
-        auth: true, // Tell navbar that generate auth only route
-      }
-    )
-    await HelperService.writeFile(filePath, content)
-  }
-
   public async createSrcServicesHelperServiceJs() {
     const filePath = `${this.input.spaPath}/src/services/helper.service.js`
     const fileExists = await HelperService.fileExists(filePath)
@@ -306,11 +294,24 @@ export default class SPAGenerator {
     await HelperService.writeFile(filePath, content)
   }
 
+  protected async createSrcComponentsFooterVue() {
+    const filePath = `${this.input.spaPath}/src/components/Footer.vue`
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/src/components/footerVue`,
+      {
+        input: this.input,
+        auth: true, // Generate all routes, not nav only
+      }
+    )
+    await HelperService.writeFile(filePath, content)
+  }
+
   /**
    * Adds navbar and basic stuff
    */
   public async addBasicStuff() {
     await this.createSrcComponentsNavBarVue()
+    await this.createSrcComponentsFooterVue()
     await this.updateSrcAppVue()
   }
 

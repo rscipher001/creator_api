@@ -15,7 +15,7 @@ export default class {{ table.names.pascalCase }}Seeder extends BaseSeeder {
     [
       @each(item in items)
       {
-        @each(column in table.columns.filter(column => column.type !== 'File'))~
+        @each(column in table.columns.filter(column => column.type !== 'File' && item[column.names.camelCase] !== undefined))~
           @if (column.type === 'String')
             {{ column.names.camelCase }}: '{{ item[column.names.camelCase] }}',
           @elseif (column.type === 'Date')

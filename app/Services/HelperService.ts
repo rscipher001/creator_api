@@ -106,6 +106,10 @@ class HelperService {
   public toSingularCameCase(input: string) {
     return string.camelCase(string.singularize(input))
   }
+
+  public toSingularSnakeCase(input: string) {
+    return string.snakeCase(string.singularize(input))
+  }
 }
 
 export default new HelperService()

@@ -38,9 +38,13 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
       @each(relation in table.relations)~
         @if(relation.type === 'BelongsTo' && relation.lazy !== true)
         table.integer('{{
-          input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
+          input.camelCaseStrategy ?
+            relation.names.camelCase + 'Id':
+            relation.names.snakeCase + '_id'
         }}').unsigned().references('id').inTable('{{
-          input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural
+          input.camelCaseStrategy ?
+            relation.modelNames.camelCasePlural :
+            relation.modelNames.snakeCasePlural
         }}').{{ relation.required ? 'notNullable()' : 'nullable()' }}
         @endif
       @endeach
@@ -48,8 +52,12 @@ export default class {{ table.names.pascalCasePlural }}Schema extends BaseSchema
         /**
         * Uses timestampz for PostgreSQL and DATETIME2 for MSSQL
         */
-        table.timestamp('{{ input.camelCaseStrategy ? 'createdAt' : 'created_at' }}', { useTz: true }).notNullable()
-        table.timestamp('{{ input.camelCaseStrategy ? 'updatedAt' : 'updated_at' }}', { useTz: true }).notNullable()
+        table.timestamp('{{
+          input.camelCaseStrategy ? 'createdAt' : 'created_at'
+        }}', { useTz: true }).notNullable()
+        table.timestamp('{{
+          input.camelCaseStrategy ? 'updatedAt' : 'updated_at'
+        }}', { useTz: true }).notNullable()
       @endif
     })
   }

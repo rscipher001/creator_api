@@ -40,6 +40,11 @@ class BackendProjectService {
   public prepareTable(table): Table {
     table.name = HelperService.toSingularPascalCase(table.name)
     table.names = HelperService.generateNames(table.name)
+    if (table.defaultColumn) {
+      table.defaultColumn = this.input.camelCaseStrategy
+        ? HelperService.toSingularCameCase(table.defaultColumn)
+        : HelperService.toSingularSnakeCase(table.defaultColumn)
+    }
     table.tableName = this.input.camelCaseStrategy
       ? table.names.camelCasePlural
       : table.names.snakeCasePlural
@@ -74,8 +79,10 @@ class BackendProjectService {
     }
     if (Array.isArray(table.relations)) {
       table.relations = table.relations.map((relation: Relation): Relation => {
-        if (relation.withModel === '$auth') {
+        if (['$auth', '$nonAuth'].includes(relation.withModel)) {
           relation.modelNames = HelperService.generateNames(this.input.auth.table.name)
+        } else if (relation.withModel === '$tenant') {
+          relation.modelNames = HelperService.generateNames(this.projectInput.tenantSettings.table)
         } else {
           relation.modelNames = HelperService.generateNames(relation.withModel)
           relation.withModel = relation.modelNames.pascalCase
@@ -117,6 +124,7 @@ class BackendProjectService {
       generateMigration: true,
       generateUI: true,
       seederUniqueKey: 'name',
+      defaultColumn: 'name',
       relations: [
         {
           type: 'ManyToMany',
@@ -192,6 +200,7 @@ class BackendProjectService {
       generateMigration: true,
       generateUI: true,
       seederUniqueKey: 'name',
+      defaultColumn: 'name',
       relations: [
         {
           type: 'ManyToMany',
@@ -342,6 +351,14 @@ class BackendProjectService {
     projectInput.tech = this.input.tech
     projectInput.auth = this.input.auth
     projectInput.tenantSettings = this.input.tenantSettings
+    if (projectInput.tenantSettings.table) {
+      projectInput.tenantSettings.name = HelperService.toSingularPascalCase(
+        projectInput.tenantSettings.table
+      )
+      projectInput.tenantSettings.names = HelperService.generateExtendedNames(
+        projectInput.tenantSettings.table
+      )
+    }
 
     // Fields that needs processign
     projectInput.id = this.projectId
@@ -359,6 +376,8 @@ class BackendProjectService {
       this.addReseTokenTables()
     }
 
+    // Do it twice to ensure relation setting is in place
+    projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
     if (!this.input.git) {
       projectInput.git = {
@@ -603,6 +622,7 @@ class BackendProjectService {
       })
     }
     this.input.auth.table.indexColumns = ['Name', 'Email']
+    this.input.auth.table.defaultColumn = 'Name'
     this.input.auth.table.columns.splice(0, 0, ...columns)
   }
 

@@ -1,4 +1,9 @@
-@set('hasManyRoles', input.auth.table.relations.find(r => r.type === 'ManyToMany' && r.modelNames.pascalCase === 'Role'))
+@set(
+  'hasManyRoles',
+  input.auth.table.relations.find(
+    r => r.type === 'ManyToMany' && r.modelNames.pascalCase === 'Role'
+  )
+)
 /**
  * Contract source: https://git.io/Jte3T
  *

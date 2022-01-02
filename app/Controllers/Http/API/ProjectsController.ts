@@ -11,19 +11,97 @@ export default class ProjectsController {
   public async index({ request, auth }: HttpContextContract) {
     const page = request.input('pageNo', 1)
     const limit = request.input('pageSize', 10)
-    return Project.query().where('userId', auth.user!.id).paginate(page, limit)
+    const sortBy: string = request.input('sortBy', 'id')
+    const sortType = request.input('sortType', 'desc')
+    const queryBuilder = Project.query().where('userId', auth.user!.id).orderBy(sortBy, sortType)
+
+    if (request.input('name')) {
+      queryBuilder.where('name', 'like', `%${request.input('name')}%`)
+    }
+    if (request.input('status')) {
+      queryBuilder.where('status', request.input('status'))
+    }
+
+    return queryBuilder.paginate(page, limit)
   }
 
   public async show({ request, auth }: HttpContextContract) {
     return Project.query()
       .where({
         userId: auth.user!.id,
-        id: request.param('projectId'),
+        id: request.param('id'),
       })
       .first()
   }
 
   public async store({ request, response, auth }: HttpContextContract) {
+    const input = await request.validate(CreateProjectValidator)
+    const generator = new Generator(JSON.parse(JSON.stringify(input)), 0)
+    const prepareInput = generator.prepare()
+    // Pre checks to ensure there is no contracitory settings
+    if (prepareInput.auth.passwordReset && !prepareInput.mailEnabled) {
+      return response.badRequest({
+        error: 'Password reset requires mailing feature',
+      })
+    }
+    if (prepareInput.tenantSettings.tenant && !prepareInput.tenantSettings.table) {
+      return response.badRequest({
+        error: 'Tenant table should be selected when tenant option is enabled',
+      })
+    }
+    // Ensure roles have permission and there is a default role
+    // Ensure there are no duplicate relations on auth model
+    // Ensure there are no duplicate relations on other models
+    const authTable = prepareInput.auth.table
+    // Put all relations in array, unique that array
+    // If size reduces after unique then there are duplicate relations
+    // Store table name and relation name in table:relation format
+    const authRelations: string[] = []
+    authTable.relations.forEach((relation) => {
+      authRelations.push(`${relation.modelNames.pascalCase}:${relation.names?.pascalCase}`)
+    })
+    if (authRelations.length !== new Set(authRelations).size) {
+      return response.badRequest({
+        error: 'On Auth table you have duplicate relations',
+      })
+    }
+
+    for (let i = 0; i < prepareInput.tables.length; i++) {
+      const table = prepareInput.tables[i]
+      const relations: string[] = []
+      table.relations.forEach((relation) => {
+        relations.push(`${relation.modelNames.pascalCase}:${relation.names?.pascalCase}`)
+      })
+      if (relations.length !== new Set(relations).size) {
+        return response.badRequest({
+          error: `On ${table.names.pascalCase} table you have duplicate relations`,
+        })
+      }
+    }
+    const project = await Project.create({
+      status: 'queued',
+      name: input.name,
+      rawInput: JSON.stringify(input),
+      userId: auth.user!.id,
+    })
+    this.generateProject(input, project)
+    return project
+  }
+
+  public async generateDraft({ request, auth }: HttpContextContract) {
+    const projectId: number = request.param('id')
+    const project = await Project.query()
+      .where({
+        id: projectId,
+        userId: auth.user!.id,
+        status: 'draft',
+      })
+      .firstOrFail()
+    this.generateProject(JSON.parse(project.rawInput), project)
+    return project
+  }
+
+  public async storeDraft({ request, response, auth }: HttpContextContract) {
     const input = await request.validate(CreateProjectValidator)
     // Pre checks to ensure there is no contracitory settings
     if (input.auth.passwordReset && !input.mailEnabled) {
@@ -37,12 +115,39 @@ export default class ProjectsController {
       })
     }
     const project = await Project.create({
-      status: 'queued',
+      status: 'draft',
       name: input.name,
       rawInput: JSON.stringify(input),
       userId: auth.user!.id,
     })
-    this.generateProject(input, project)
+    return project
+  }
+
+  public async updateDraft({ request, response, auth }: HttpContextContract) {
+    const projectId: number = request.param('id')
+    const project = await Project.query()
+      .where({
+        id: projectId,
+        userId: auth.user!.id,
+        status: 'draft',
+      })
+      .firstOrFail()
+
+    const input = await request.validate(CreateProjectValidator)
+    // Pre checks to ensure there is no contracitory settings
+    if (input.auth.passwordReset && !input.mailEnabled) {
+      return response.badRequest({
+        error: 'Password reset requires mailing feature',
+      })
+    }
+    if (input.tenantSettings.tenant && !input.tenantSettings.table) {
+      return response.badRequest({
+        error: 'Tenant table should be selected when tenant option is enabled',
+      })
+    }
+
+    project.rawInput = JSON.stringify(input)
+    await project.save()
     return project
   }
 
@@ -60,7 +165,7 @@ export default class ProjectsController {
   }
 
   public async generateSignedUrl({ request, auth }) {
-    const projectId = request.param('projectId')
+    const projectId = request.param('id')
     const type = request.param('type')
     const project = await Project.query()
       .where({
@@ -81,7 +186,7 @@ export default class ProjectsController {
     if (!request.hasValidSignature()) {
       throw new Error('Signature is invalid')
     }
-    const id = request.param('projectId')
+    const id = request.param('id')
     const type = request.param('type')
     const project = await Project.findOrFail(id)
     const input = JSON.parse(project.rawInput)

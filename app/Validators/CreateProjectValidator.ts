@@ -18,6 +18,7 @@ export default class CreateProjectValidator {
     withModel: schema.string({ trim: true }),
     name: schema.string.optional({ trim: true }),
     required: schema.boolean(),
+    showInputOnCreatePage: schema.boolean.optional(),
   })
 
   protected columnSchema = schema.object().members({
@@ -26,14 +27,18 @@ export default class CreateProjectValidator {
     meta: schema.object().members({
       displayName: schema.string.optional({ trim: true }),
       required: schema.boolean.optional(),
+      multiline: schema.boolean.optional(),
       minLength: schema.number.optional(),
       maxLength: schema.number.optional(),
+      min: schema.number.optional(),
+      max: schema.number.optional(),
       maxSize: schema.string.optional({ trim: true }),
       extensions: schema.array.optional().members(schema.string({ trim: true })),
       dbLength: schema.number.optional(),
       email: schema.boolean.optional(),
       expose: schema.boolean.optional(),
       filterable: schema.boolean.optional(),
+      sortable: schema.boolean.optional(),
       unique: schema.boolean.optional(),
       trim: schema.boolean.optional(),
     }),
@@ -52,6 +57,7 @@ export default class CreateProjectValidator {
     generateController: schema.boolean(),
     generateModel: schema.boolean(),
     generateMigration: schema.boolean(),
+    defaultColumn: schema.string.optional({ trim: true }),
     timestamps: schema.boolean.optional(),
     generateRoute: schema.boolean.optional(),
     singleton: schema.boolean.optional(),

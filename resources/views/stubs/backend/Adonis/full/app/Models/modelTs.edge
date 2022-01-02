@@ -1,3 +1,7 @@
+@set('relationNames', table.relations.map(r => r.modelNames.pascalCase))
+@set('allModels', Array.from(new Set(relationNames)))
+{{-- Sort model names by string length because it looks good in UI --}}
+@set('models', allModels.sort((a, b) => a.length > b.length ? 1 : -1))
 @if (table.columns.find(c => c.type === 'Date') || table.timestamps)
   import { DateTime } from 'luxon'
 @endif
@@ -39,8 +43,8 @@ import {
 @if(table.columns.find(column => column.type === 'File'))
   import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite'
 @endif
-@each(relation in table.relations)
-  import {{ relation.modelNames.pascalCase }} from 'App/Models/{{ relation.modelNames.pascalCase }}'
+@each(model in models)
+  import {{ model }} from 'App/Models/{{ model }}'
 @endeach
 
 export default class {{ table.names.pascalCase }} extends BaseModel {
@@ -54,10 +58,14 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
         preComputeUrl: true,
         disk: '{{ input.defaultStorageDriver.toLowerCase() }}',
       })
-      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: AttachmentContract {{ column.meta.required ? '' : ' | null' }}
+      public {{ column.names.camelCase }}{{
+        column.meta.required ? '' : '?'
+      }}: AttachmentContract {{ column.meta.required ? '' : ' | null' }}
     @elseif(column.type === 'Date')
       @column.dateTime()
-      public {{ column.names.camelCase }}{{ column.meta.required ? '' : '?' }}: DateTime {{ column.meta.required ? '' : ' | null' }}
+      public {{ column.names.camelCase }}{{
+        column.meta.required ? '' : '?'
+      }}: DateTime {{ column.meta.required ? '' : ' | null' }}
     @else
       @if(column.meta.secret)
         @column({
@@ -79,7 +87,9 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
   @each(relation in table.relations)
     @if(relation.type === 'BelongsTo')
     @column()
-    public {{ relation.names.camelCase }}Id{{relation.required ? '' : '?' }}: number {{ relation.required ? '' : '| null' }}
+    public {{ relation.names.camelCase }}Id{{
+      relation.required ? '' : '?'
+    }}: number {{ relation.required ? '' : '| null' }}
     @endif
   @endeach
 
@@ -110,7 +120,7 @@ export default class {{ table.names.pascalCase }} extends BaseModel {
     @elseif(relation.type === 'ManyToMany')
       @manyToMany(() => {{ relation.modelNames.pascalCase }})
       public {{
-        relation.modelNames.camelCasePlural
+        relation.names.camelCasePlural
       }}: ManyToMany<typeof {{ relation.modelNames.pascalCase }}>
     @endif
   @endeach

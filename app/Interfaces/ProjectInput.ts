@@ -32,6 +32,7 @@ export interface Logging {
 export interface Meta {
   expose: boolean // If this field is false then it won't show in create/update form
   filterable?: boolean // If true generate filter option on list page
+  sortable?: boolean // If true table can be sorted with this column
   dbLength?: number // Override length in db, useful for fields like password
   secret?: boolean // These fields won't be serialized like password, only works with string for now
   required: boolean // Required or not on db level, propogated in all layers
@@ -102,6 +103,7 @@ export interface Table {
   name: string // Name of the Model
   names: Names // CamelCase, PascalCase, SnakeCase, etc of name
   tableName: string // In DB
+  defaultColumn?: string // This column will be used as label with this table data is displayed somewhere
   generateController: boolean // Generate controller if true
   generateModel: boolean // Generate model if true
   generateMigration: boolean // Generate migration if true
@@ -125,8 +127,9 @@ export interface Relation {
   modelNames: Names // Model name in all forms
   names?: Names // Relation name in all forms
   name?: string // Relation name, by default table name is used
-  required: boolean
+  required: boolean // Not applicable to many to many
   lazy?: boolean // Migration will be created separately for foreign key
+  showInputOnCreatePage?: boolean // Show dropdown for selecting/attaching relation on create page, for required relation it is shown `
 }
 
 export interface RBAC {

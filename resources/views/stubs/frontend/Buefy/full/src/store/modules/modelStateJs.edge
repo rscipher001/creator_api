@@ -52,6 +52,9 @@ export default {
       @if(table.operations.storeMany)
         storeMany: false,
       @endif
+      @if(table.operations.show || table.operations.edit)
+        show: false,
+      @endif
       @if(table.operations.update)
         update: false,
       @endif
@@ -79,6 +82,7 @@ export default {
         commit("setLoading", { key: key, value: false });
       }
     },
+
     @if(table.operations.index)
       async index({ commit }, filter) {
         commit('setLoading', { key: 'index', value: true });
@@ -173,6 +177,21 @@ export default {
       },
     @endif
 
+    @if(table.operations.show || table.operations.edit)
+      async show({ commit }, { id, filter }) {
+        commit("setLoading", { key: "show", value: true });
+        try {
+          const item = await HttpService.authGet(`/${resource}/${id}`, filter);
+          commit("setLoading", { key: "show", value: false });
+          return item;
+        } catch (e) {
+          commit("setLoading", { key: "show", value: false });
+          console.error(e);
+          throw e;
+        }
+      },
+    @endif
+
     @if(table.operations.update)
       async update({ commit }, { id, input }) {
         commit('setLoading', { key: 'update', value: true });
@@ -236,6 +255,7 @@ export default {
 
     @if(table.relations.find((relation) => relation.type === 'ManyToMany'))
       @each(operation in ['attach', 'detach', 'sync'])
+
         async {{ operation }}({ state, commit }, {
           id,
           relation, // Should be camelCase

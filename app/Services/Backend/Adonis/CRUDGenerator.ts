@@ -264,12 +264,14 @@ export default class CRUDGenerator {
               required: true,
               withModel: tableOneNames.pascalCase,
               modelNames: HelperService.generateNames(tableOneNames.pascalCase),
+              names: HelperService.generateNames(tableOneNames.pascalCase),
             },
             {
               type: RelationType.BelongsTo,
               required: true,
               withModel: tableTwoNames.pascalCase,
               modelNames: HelperService.generateNames(tableTwoNames.pascalCase),
+              names: HelperService.generateNames(tableTwoNames.pascalCase),
             },
           ],
         }

@@ -5,30 +5,38 @@
         <form method="POST" @submit.prevent="register">
           <h1 class="is-size-3 has-text-centered pb-5">Register</h1>
 
-          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))
+          @each(column in input.auth.table.columns.filter(
+            c => c.meta.expose !== false && c.type !== 'File'
+          ))
           @if(!['Password'].includes(column.name))
-          <b-field label="{{
-            column.input?.displayName || column.names.pascalCase
-          }}{{
-            column.meta.required ? ' *' : ''
-          }}" :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''" :message="errors.{{ column.names.camelCase }}">
+          <b-field
+            label="{{
+              column.input?.displayName || column.names.pascalCase
+            }}{{ column.meta.required ? ' *' : '' }}"
+            :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
+            :message="errors.{{ column.names.camelCase }}"
+          >
             <b-input
               v-model="form.{{ column.names.camelCase }}"
               @if(column.meta.maxLength !== undefined)
-              maxlength="{{ column.meta.maxLength }}"
+                maxlength="{{ column.meta.maxLength }}"
               @endif
               @if(column.meta.minLength !== undefined)
-              minlength="{{ column.meta.minLength }}"
+                minlength="{{ column.meta.minLength }}"
               @endif
               @if(column.meta.required)
-              required
+                required
               @endif
             ></b-input>
           </b-field>
           @endif
           @endeach
 
-          <b-field label="Password *" :type="errors.password ? 'is-danger' : ''" :message="errors.password">
+          <b-field
+            label="Password *"
+            :type="errors.password ? 'is-danger' : ''"
+            :message="errors.password"
+          >
             <b-input
               v-model="form.password"
               type="password"
@@ -51,7 +59,13 @@
               required
             ></b-input>
           </b-field>
-          <b-button :loading="loading.register" type="is-primary is-fullwidth" native-type="submit">Register</b-button>
+          <b-button
+            :loading="loading.register"
+            type="is-primary is-fullwidth"
+            native-type="submit"
+          >
+            Register
+          </b-button>
         </form>
         <b-button class="is-fullwidth mt-2" tag="router-link" to="/login" type="is-light">
           Login
@@ -71,7 +85,9 @@ export default {
     return {
       errors: {},
       form: {
-        @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))~
+        @each(column in input.auth.table.columns.filter(
+          c => c.meta.expose !== false && c.type !== 'File'
+        ))~
           @if(!['Password'].includes(column.name))
             {{ column.names.camelCase }}: '',
           @endif
@@ -89,7 +105,9 @@ export default {
     async register() {
       try {
         await this.registerAction({
-          @each(column in input.auth.table.columns.filter(c => c.meta.expose !== false && c.type !== 'File'))~
+          @each(column in input.auth.table.columns.filter(
+            c => c.meta.expose !== false && c.type !== 'File'
+          ))~
             @if(!['Password'].includes(column.name))
               {{ column.names.camelCase }}: this.form.{{ column.names.camelCase }},
             @endif

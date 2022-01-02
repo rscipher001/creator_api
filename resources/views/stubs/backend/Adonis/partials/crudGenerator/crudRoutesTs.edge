@@ -94,7 +94,12 @@
       ).join('') : ''
     }}/{{
       table.names.camelCase
-    }}{{ operation.singular ? '/:id' : '' }}/{{ operation.name }}', 'API/{{ table.names.pascalCasePlural }}Controller.{{ operation.name }}');
+    }}{{
+      operation.singular ?
+      '/:id' : ''
+    }}/{{ operation.name }}', 'API/{{
+      table.names.pascalCasePlural
+    }}Controller.{{ operation.name }}');
   @endeach
 @endif
 @if(Array.isArray(table.relations) && table.relations.length)~
@@ -107,7 +112,9 @@
       table.names.camelCase
     }}/:id/{{
       relation.modelNames.camelCasePlural
-    }}/:{{ relation.modelNames.camelCase }}Id/attach', 'API/{{ table.names.pascalCasePlural }}Controller.attach{{ relation.modelNames.pascalCase }}');
+    }}/:{{ relation.modelNames.camelCase }}Id/attach', 'API/{{
+      table.names.pascalCasePlural
+    }}Controller.attach{{ relation.modelNames.pascalCase }}');
     Route.post('{{
       table.routeParentTables?.length ? table.routeParentTables.map(
         parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
@@ -116,7 +123,9 @@
       table.names.camelCase
     }}/:id/{{
       relation.modelNames.camelCasePlural
-    }}/:{{ relation.modelNames.camelCase }}Id/detach', 'API/{{ table.names.pascalCasePlural }}Controller.detach{{ relation.modelNames.pascalCase }}');
+    }}/:{{ relation.modelNames.camelCase }}Id/detach', 'API/{{
+      table.names.pascalCasePlural
+    }}Controller.detach{{ relation.modelNames.pascalCase }}');
     Route.post('{{
       table.routeParentTables?.length ? table.routeParentTables.map(
         parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
@@ -125,6 +134,8 @@
       table.names.camelCase
     }}/:id/{{
       relation.modelNames.camelCasePlural
-    }}/sync', 'API/{{ table.names.pascalCasePlural }}Controller.sync{{ relation.modelNames.pascalCasePlural }}');
+    }}/sync', 'API/{{
+      table.names.pascalCasePlural
+    }}Controller.sync{{ relation.modelNames.pascalCasePlural }}');
   @endeach
 @endif

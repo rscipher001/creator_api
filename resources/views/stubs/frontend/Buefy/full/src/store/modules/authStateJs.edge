@@ -1,4 +1,7 @@
-@set('containsUnderscoreColumn', input.auth.table.columns.find(c => c.columnName.indexOf('_') >= 0))
+@set(
+  'containsUnderscoreColumn',
+  input.auth.table.columns.find(c => c.columnName.indexOf('_') >= 0)
+)
 import HttpService from "../../services/http.service";
 import LocalStorageService from '../../services/localStorage.service';
 import ValidationException from "../../exceptions/ValidationException";
@@ -347,6 +350,7 @@ export default {
 
     async refreshUser({ dispatch }, input) {
       try {
+        if (!navigator.onLine) return; // If offline then don't logout
         const user = await HttpService.authGet("/me", input);
         dispatch(
           "updateUser",

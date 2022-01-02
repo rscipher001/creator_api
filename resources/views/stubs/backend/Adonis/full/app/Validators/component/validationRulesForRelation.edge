@@ -1,10 +1,63 @@
-{{
-  input.camelCaseStrategy ? relation.modelNames.camelCase + 'Id': relation.modelNames.snakeCase + '_id'
-}}: schema.number{{
-  relation.required ? '' : '.optional'
-}}([
-  rules.exists({
-    table: '{{ input.camelCaseStrategy ? relation.modelNames.camelCasePlural : relation.modelNames.snakeCasePlural }}',
-    column: 'id'
-  })
-]),
+@set(
+  'relationModel',
+  ['$auth', '$nonAuth'].includes(relation.withModel) ?
+    input.auth.table :
+    input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
+)
+@if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
+  {{
+    input.camelCaseStrategy ?
+      relation.names.camelCase + 'Id':
+      relation.names.snakeCase + '_id'
+  }}: schema.number{{
+    relation.required ? '' : '.optional'
+  }}([
+    rules.exists({
+      table: '{{
+        input.camelCaseStrategy ?
+          relation.modelNames.camelCasePlural :
+          relation.modelNames.snakeCasePlural
+      }}',
+      column: 'id',
+      @set(
+        'relationModelBelongsToAuth',
+        relationModel.relations.find(r => r.type === 'BelongsTo' && '$auth' === r.withModel)
+      )
+      @if(relationModelBelongsToAuth)
+        where: {
+          {{
+            input.camelCaseStrategy ?
+              `${relationModelBelongsToAuth.names.camelCase}Id` :
+              `${relationModelBelongsToAuth.names.snakeCase}_id`
+          }}: this.ctx.auth.user!.id,
+        },
+      @endif
+    })
+  ]),
+@elseif(relation.type === 'ManyToMany' && relation.showInputOnCreatePage)
+  {{
+    input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids'
+  }}: schema.array().members(
+    schema.number([
+      rules.exists({
+        table: '{{
+          input.camelCaseStrategy ?
+            relation.modelNames.camelCasePlural :
+            relation.modelNames.snakeCasePlural
+        }}',
+        column: 'id',
+        @if(relationModel.relations.find(
+          r => r.type === 'BelongsTo' && ['$auth', '$nonAuth'].includes(r.withModel))
+        )
+          where: {
+            {{
+              input.camelCaseStrategy ?
+                `${input.auth.table.names.camelCase}Id` :
+                `${input.auth.table.names.snakeCase}_id`
+            }}: this.ctx.auth.user!.id,
+          },
+        @endif
+      }),
+    ])
+  ),
+@endif
