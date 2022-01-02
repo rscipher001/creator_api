@@ -9,7 +9,7 @@ import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }
     import {{ parentTable.names.pascalCase }} from 'App/Models/{{ parentTable.names.pascalCase }}';
   @endeach
 @endif
-@if(table.operations.index && hasRelations)
+@if((table.operations.index || table.operations.show) && hasRelations)
   import { ExtractModelRelations } from '@ioc:Adonis/Lucid/Orm'
 @endif
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
@@ -585,7 +585,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(Array.isArray(table.customOperations) && table.customOperations.length)~
     @each(operation in table.customOperations)
-      public async {{ operation.name }}({ {
+      public async {{ operation.name }}({
         request,
         @if(belongsToAuth)
           auth,

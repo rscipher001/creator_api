@@ -4,12 +4,12 @@
     r => r.type === 'ManyToMany' && r.modelNames.pascalCase === 'Role'
   )
 )
-@if(input.rbac.enabled)
-  import Role from 'App/Models/Role'
-@endif
-import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}'
 import LoginValidator from 'App/Validators/LoginValidator'
 @if(input.auth.register)
+  @if(input.rbac.enabled)
+    import Role from 'App/Models/Role'
+  @endif
+  import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}'
   import RegisterValidator from 'App/Validators/RegisterValidator'
 @endif
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'

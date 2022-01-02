@@ -27,6 +27,7 @@ export default class CreateProjectValidator {
     meta: schema.object().members({
       displayName: schema.string.optional({ trim: true }),
       required: schema.boolean.optional(),
+      multiline: schema.boolean.optional(),
       minLength: schema.number.optional(),
       maxLength: schema.number.optional(),
       min: schema.number.optional(),
