@@ -20,7 +20,7 @@ export default class {{ table.names.pascalCase }}Seeder extends BaseSeeder {
             {{ column.names.camelCase }}: '{{ item[column.names.camelCase] }}',
           @elseif (column.type === 'Date')
             {{ column.names.camelCase }}: new Date({{ item[column.names.camelCase] }}),
-          @else
+          @else if (item[column.names.camelCase] !== undefined)
             {{ column.names.camelCase }}: {{ item[column.names.camelCase] }},
           @endif
         @endeach

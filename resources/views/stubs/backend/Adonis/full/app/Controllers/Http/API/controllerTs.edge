@@ -76,8 +76,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @if(belongsToAuth)
         queryBuilder.where('{{
           input.camelCaseStrategy ?
-            `${input.auth.table.names.camelCase}Id` :
-            `${input.auth.table.names.snakeCase}_id`
+            `${belongsToAuth.names.camelCase}Id` :
+            `${belongsToAuth.names.snakeCase}_id`
         }}', auth.user!.id)
       @endif
       @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
@@ -148,8 +148,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @if(belongsToAuth)
         input.{{
           input.camelCaseStrategy ?
-            `${input.auth.table.names.camelCase}Id` :
-            `${input.auth.table.names.snakeCase}_id`
+            `${belongsToAuth.names.camelCase}Id` :
+            `${belongsToAuth.names.snakeCase}_id`
         }} = auth.user!.id;
       @endif
       @each(fileColumn in table.columns.filter(
@@ -188,8 +188,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @if(belongsToAuth)
           condition.{{
             input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
+              `${belongsToAuth.names.camelCase}Id` :
+              `${belongsToAuth.names.snakeCase}_id`
           }} = auth.user!.id;
         @endif
         @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
@@ -301,8 +301,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @if(belongsToAuth)
             input.{{
               input.camelCaseStrategy ?
-                `${input.auth.table.names.camelCase}Id` :
-                `${input.auth.table.names.snakeCase}_id`
+                `${belongsToAuth.names.camelCase}Id` :
+                `${belongsToAuth.names.snakeCase}_id`
             }} = auth.user!.id
           @endif
           @each(fileColumn in table.columns.filter(column => column.type === 'File'))
@@ -350,8 +350,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @if(belongsToAuth)
         condition.{{
           input.camelCaseStrategy ?
-            `${input.auth.table.names.camelCase}Id` :
-            `${input.auth.table.names.snakeCase}_id`
+            `${belongsToAuth.names.camelCase}Id` :
+            `${belongsToAuth.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
       @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
@@ -417,8 +417,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @if(belongsToAuth)
         condition.{{
           input.camelCaseStrategy ?
-            `${input.auth.table.names.camelCase}Id` :
-            `${input.auth.table.names.snakeCase}_id`
+            `${belongsToAuth.names.camelCase}Id` :
+            `${belongsToAuth.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
       @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
@@ -517,8 +517,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @if(belongsToAuth)
         condition.{{
           input.camelCaseStrategy ?
-            `${input.auth.table.names.camelCase}Id` :
-            `${input.auth.table.names.snakeCase}_id`
+            `${belongsToAuth.names.camelCase}Id` :
+            `${belongsToAuth.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
       @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
@@ -567,8 +567,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @if(belongsToAuth)
         condition.{{
           input.camelCaseStrategy ?
-            `${input.auth.table.names.camelCase}Id` :
-            `${input.auth.table.names.snakeCase}_id`
+            `${belongsToAuth.names.camelCase}Id` :
+            `${belongsToAuth.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
       @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
@@ -608,14 +608,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @if(belongsToAuth)
           condition.{{
             input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
+              `${belongsToAuth.names.camelCase}Id` :
+              `${belongsToAuth.names.snakeCase}_id`
           }} = auth.user!.id
         @endif
         @if(operation.singular)
           const id = request.param('id')
           condition.id = id
-          condition.{{ input.auth.table.names.camelCase }} = auth.user!.id
         @endif
       }
     @endeach
@@ -658,8 +657,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @if(belongsToAuth)
           condition.{{
             input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
+              `${belongsToAuth.names.camelCase}Id` :
+              `${belongsToAuth.names.snakeCase}_id`
           }} = auth.user!.id;
         @endif
         @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
@@ -678,8 +677,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @if(relationModelBelongsToAuth)
             {{
               input.camelCaseStrategy ?
-                `${input.auth.table.names.camelCase}Id` :
-                `${input.auth.table.names.snakeCase}_id`
+                `${relationModelBelongsToAuth.names.camelCase}Id` :
+                `${relationModelBelongsToAuth.names.snakeCase}_id`
             }}: auth.user!.id,
           @endif
         }).firstOrFail()
@@ -716,8 +715,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @if(belongsToAuth)
           condition.{{
             input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
+              `${belongsToAuth.names.camelCase}Id` :
+              `${belongsToAuth.names.snakeCase}_id`
           }} = auth.user!.id;
         @endif
         @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
@@ -736,8 +735,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @if(relationModelBelongsToAuth)
             {{
               input.camelCaseStrategy ?
-                `${input.auth.table.names.camelCase}Id` :
-                `${input.auth.table.names.snakeCase}_id`
+                `${relationModelBelongsToAuth.names.camelCase}Id` :
+                `${relationModelBelongsToAuth.names.snakeCase}_id`
             }}: auth.user!.id,
           @endif
         }).firstOrFail()
@@ -775,8 +774,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @if(belongsToAuth)
           condition.{{
             input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
+              `${belongsToAuth.names.camelCase}Id` :
+              `${belongsToAuth.names.snakeCase}_id`
           }} = auth.user!.id
         @endif
         @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
@@ -795,8 +794,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @if(relationModelBelongsToAuth)
             {{
               input.camelCaseStrategy ?
-                `${input.auth.table.names.camelCase}Id` :
-                `${input.auth.table.names.snakeCase}_id`
+                `${relationModelBelongsToAuth.names.camelCase}Id` :
+                `${relationModelBelongsToAuth.names.snakeCase}_id`
             }}: auth.user!.id,
           @endif
         }).whereIn('id', ids)
