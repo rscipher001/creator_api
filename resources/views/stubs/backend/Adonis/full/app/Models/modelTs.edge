@@ -1,3 +1,7 @@
+@set('relationNames', table.relations.map(r => r.modelNames.pascalCase))
+@set('allModels', Array.from(new Set(relationNames)))
+{{-- Sort model names by string length because it looks good in UI --}}
+@set('models', allModels.sort((a, b) => a.length > b.length ? 1 : -1))
 @if (table.columns.find(c => c.type === 'Date') || table.timestamps)
   import { DateTime } from 'luxon'
 @endif
@@ -39,10 +43,8 @@ import {
 @if(table.columns.find(column => column.type === 'File'))
   import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite'
 @endif
-@each(relation in Array.from(new Set(table.relations.map(r => r.modelNames.pascalCase))))
-  import {{ relation }} from 'App/Models/{{
-    relation
-  }}'
+@each(model in models)
+  import {{ model }} from 'App/Models/{{ model }}'
 @endeach
 
 export default class {{ table.names.pascalCase }} extends BaseModel {
