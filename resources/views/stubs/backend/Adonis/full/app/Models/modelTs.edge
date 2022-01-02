@@ -39,9 +39,9 @@ import {
 @if(table.columns.find(column => column.type === 'File'))
   import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite'
 @endif
-@each(relation in table.relations)
-  import {{ relation.modelNames.pascalCase }} from 'App/Models/{{
-    relation.modelNames.pascalCase
+@each(relation in Array.from(new Set(table.relations.map(r => r.modelNames.pascalCase))))
+  import {{ relation }} from 'App/Models/{{
+    relation
   }}'
 @endeach
 
