@@ -2,16 +2,18 @@
   const {{ parentTable.names.camelCase }}Id = request.param('{{ parentTable.names.camelCase }}Id');
   await {{ parentTable.names.pascalCase }}.query().where({
     id: {{ parentTable.names.camelCase }}Id,
-    @if(
+    @set(
+      'belongsToAuth',
       parentTable.relations.find(
         relation => relation.type === 'BelongsTo' && relation.withModel === '$auth'
       )
     )
-    {{
-      input.camelCaseStrategy ?
-        `${input.auth.table.names.camelCase}Id` :
-        `${input.auth.table.names.snakeCase}_id`
-    }}: auth.user!.id,
+    @if(belongsToAuth)
+      {{
+        input.camelCaseStrategy ?
+          `${belongsToAuth.names.camelCase}Id` :
+          `${belongsToAuth.names.snakeCase}_id`
+      }}: auth.user!.id,
     @endif
     @if(parentTableIndex !== 0)~
       @if(input.camelCaseStrategy)
