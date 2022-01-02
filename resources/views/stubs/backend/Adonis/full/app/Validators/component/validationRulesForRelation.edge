@@ -6,7 +6,9 @@
 )
 @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
   {{
-    input.camelCaseStrategy ? relation.names.camelCase + 'Id': relation.names.snakeCase + '_id'
+    input.camelCaseStrategy ?
+      relation.names.camelCase + 'Id':
+      relation.names.snakeCase + '_id'
   }}: schema.number{{
     relation.required ? '' : '.optional'
   }}([
@@ -17,14 +19,16 @@
           relation.modelNames.snakeCasePlural
       }}',
       column: 'id',
-      @if(relationModel.relations.find(
-        r => r.type === 'BelongsTo' && ['$auth', '$nonAuth'].includes(r.withModel))
+      @set(
+        'relationModelBelongsToAuth',
+        relationModel.relations.find(r => r.type === 'BelongsTo' && '$auth' === r.withModel)
       )
+      @if(relationModelBelongsToAuth)
         where: {
           {{
             input.camelCaseStrategy ?
-              `${input.auth.table.names.camelCase}Id` :
-              `${input.auth.table.names.snakeCase}_id`
+              `${relationModelBelongsToAuth.names.camelCase}Id` :
+              `${relationModelBelongsToAuth.names.snakeCase}_id`
           }}: this.ctx.auth.user!.id,
         },
       @endif
