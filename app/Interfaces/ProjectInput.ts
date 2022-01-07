@@ -1,5 +1,11 @@
 import { Database, Mailer, ProjectType, RelationType, RequestMethod } from './Enums'
 
+export interface Hosting {
+  databaseName: string
+  databaseUser: string
+  databasePassword: string
+}
+
 export interface Names {
   camelCase: string
   pascalCase: string
@@ -150,8 +156,8 @@ export default interface ProjectInput {
   name: string // should be camelcase
   names: ExtendedNames
   projectsPath: string // Folder where all prjoects are stored
-  path: string // project folder full path
-  spaPath: string // project folder full path
+  path: string // API folder full path
+  spaPath: string // SPA folder full path
   basePath: string // Project folder name
   mailEnabled: boolean
   mailers: Mailer[]
@@ -208,4 +214,5 @@ export default interface ProjectInput {
     names?: ExtendedNames // Table names in all cases
   }
   rbac: RBAC
+  hosting: Hosting
 }

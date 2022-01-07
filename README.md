@@ -8,6 +8,12 @@ A Code Generator
 - Create a folder named `Projects` parallel to UI and API folder (Can be configured using .env if you want another location)
 - Install Vue CLI `npm install -g @vue/cli`
 
+### Hosting Requirements
+
+- Ensure `pm2` is installed globally
+- Ensure MySQL is installed and credentials are set in .env file
+- Ensure Nginx server is installed
+
 ## Glossary
 
 Meaning of common words

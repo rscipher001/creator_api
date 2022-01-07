@@ -27,6 +27,8 @@ import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
 import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
 
+import HostingService from 'App/Services/HostingService'
+
 class BackendProjectService {
   private input: any
   private projectId: number
@@ -390,7 +392,18 @@ class BackendProjectService {
     this.projectInput = projectInput as ProjectInput
     this.prepareTenantSettings()
     this.prepareRouteParentTables()
+
+    // Hosting related preparation
+    this.prepareHosting()
     return this.projectInput
+  }
+
+  protected prepareHosting() {
+    this.projectInput.hosting = {
+      databaseName: `${this.projectInput.names.snakeCase}-${this.projectInput.id}`,
+      databaseUser: `${this.projectInput.names.camelCase}`,
+      databasePassword: `${this.projectInput.names.pascalCase}`,
+    }
   }
 
   protected prepareTenantSettings() {
@@ -770,6 +783,9 @@ class BackendProjectService {
           await crud.init()
         }
       }
+
+      const hostingService = new HostingService(this.projectInput)
+      await hostingService.init()
       console.log('Project Generated Successfully')
     } catch (e) {
       console.error(e)

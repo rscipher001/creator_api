@@ -1,9 +1,9 @@
 import os from 'os'
+import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
+import { Database } from 'App/Interfaces/Enums'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
-import mkdirp from 'mkdirp'
-import { Database } from 'App/Interfaces/Enums'
 
 export default class DatabaseGenerator {
   private input: ProjectInput
@@ -309,7 +309,10 @@ export default class DatabaseGenerator {
     // The following code can be improved
     const part = await View.render(
       `stubs/backend/${this.input.tech.backend}/partials/databaseGenerator/dotEnv`,
-      { database }
+      {
+        database,
+        input: this.input,
+      }
     )
     switch (database) {
       case Database.MySQL:
