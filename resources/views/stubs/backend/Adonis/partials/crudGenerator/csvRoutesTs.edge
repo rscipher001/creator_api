@@ -1,6 +1,6 @@
 @if(table.operations.storeMany)
   Route.get('{{
-    table.routeParentTables?.length ? table.routeParentTables.map(
+    table.routeParentTables.length ? table.routeParentTables.map(
       parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
     ).join('') : ''
   }}/{{

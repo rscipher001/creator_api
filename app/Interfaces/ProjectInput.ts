@@ -116,9 +116,9 @@ export interface Table {
   generateUI: boolean //Generate CRUD if true
   generateRoute: boolean // Route only generated if true
   singleton: boolean // Singleton means only one instace per parent.
-  routeParents: string[] // Route parents are parent models for routing
+  routeParents: string[] // Route parents are parent relations for routing
   indexColumns: string[] // Only these items will be used on listing page
-  routeParentTables: Table[] // Route parents table for use in controller
+  routeParentRelations: Relation[] // Route parents relations for use in controller
   operations: Operations // Basic CRUD operations
   customOperations: CustomOperation[] // Basic CRUD operations
   columns: Column[]

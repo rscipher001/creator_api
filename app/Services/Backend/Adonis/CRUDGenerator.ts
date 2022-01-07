@@ -243,7 +243,7 @@ export default class CRUDGenerator {
           singleton: false,
           routeParents: [],
           indexColumns: [],
-          routeParentTables: [],
+          routeParentRelations: [],
           operations: {
             index: false,
             create: false,

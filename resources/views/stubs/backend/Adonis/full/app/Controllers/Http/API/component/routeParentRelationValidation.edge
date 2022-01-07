@@ -1,0 +1,29 @@
+@each((parentRelation, parentRelationIndex) in table.routeParentRelations)
+  const {{ parentRelation.names.camelCase }}Id = request.param('{{ parentRelation.names.camelCase }}Id');
+  await {{ parentRelation.names.pascalCase }}.query().where({
+    id: {{ parentRelation.names.camelCase }}Id,
+    @set('parentRelationModel', findRelationModel(input, parentRelation))
+    @set(
+      'belongsToAuth',
+      parentRelationModel.relations.find(
+        relation => relation.type === 'BelongsTo' && relation.withModel === '$auth'
+      )
+    )
+    @if(belongsToAuth)
+      {{
+        input.camelCaseStrategy ?
+          `${belongsToAuth.names.camelCase}Id` :
+          `${belongsToAuth.names.snakeCase}_id`
+      }}: auth.user!.id,
+    @endif
+    @if(parentRelationIndex !== 0)~
+      @if(input.camelCaseStrategy)
+        {{ table.routeParentRelation[parentRelationIndex - 1].names.camelCase }}Id,
+      @else
+      {{ table.routeParentRelation[parentRelationIndex - 1].names.snakeCase }}_id: {{
+        table.routeParentRelation[parentRelationIndex - 1].names.camelCase
+      }}Id,
+      @endif
+    @endif
+  }).firstOrFail()
+@endeach

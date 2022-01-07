@@ -3,12 +3,13 @@
 @set('hasM2MRelationOnCreatePage', table.relations.find(
   r => r.type === 'ManyToMany' && r.showInputOnCreatePage
 ))
+@set('routeParentTables', new Set(table.routeParentRelations.map(
+  (routeParentRelation) => findRelationModel(input, routeParentRelation)
+)))
 import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}';
-@if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)~
-  @each(parentTable in table.routeParentTables)
-    import {{ parentTable.names.pascalCase }} from 'App/Models/{{ parentTable.names.pascalCase }}';
-  @endeach
-@endif
+@each(parentTable in table.routeParentTables)
+  import {{ parentTable.names.pascalCase }} from 'App/Models/{{ parentTable.names.pascalCase }}';
+@endeach
 @if((table.operations.index || table.operations.show) && hasRelations)
   import { ExtractModelRelations } from '@ioc:Adonis/Lucid/Orm'
 @endif
@@ -68,7 +69,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       const sortType = request.input('sortType', 'asc')
       @!component(`stubs/backend/${
         input.tech.backend
-      }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+      }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
         input, table
       })
       const queryBuilder = {{ table.names.pascalCase }}.query().orderBy(sortBy, sortType)
@@ -80,11 +81,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${belongsToAuth.names.snakeCase}_id`
         }}', auth.user!.id)
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-        @set('lastIndex', table.routeParentTables?.length - 1)
+      @if(table.routeParentRelations.length)
+        @set('lastRouteParent', table.routeParentRelations(table.routeParentRelations.length - 1))
         queryBuilder.where('{{
-          table.routeParentTables[lastIndex].names.camelCase
-        }}Id', {{ table.routeParentTables[lastIndex].names.camelCase }}Id)
+          input.camelCaseStrategy ?
+            `${lastRouteParent.names.camelCase}Id` :
+            `${lastRouteParent.names.snakeCase}_id` :
+        }}Id', {{ lastRouteParent.names.camelCase }}Id)
       @endif
 
       @each(column in table.columns.filter(c => c.meta.filterable))
@@ -174,14 +177,16 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @endeach
       @!component(`stubs/backend/${
         input.tech.backend
-      }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+      }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
         input, table
       })
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-        @set('lastIndex', table.routeParentTables?.length - 1)
-        input.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
-          table.routeParentTables[lastIndex].names.camelCase
-        }}Id;
+      @if(table.routeParentRelations.length)
+        @set('lastRouteParent', table.routeParentRelations(table.routeParentRelations.length - 1))
+        queryBuilder.where('{{
+          input.camelCaseStrategy ?
+            `${lastRouteParent.names.camelCase}Id` :
+            `${lastRouteParent.names.snakeCase}_id` :
+        }}Id', {{ lastRouteParent.names.camelCase }}Id)
       @endif
       @if(table.singleton)
         const condition: { [key: string]: any } = {};
@@ -192,11 +197,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
               `${belongsToAuth.names.snakeCase}_id`
           }} = auth.user!.id;
         @endif
-        @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-          @set('lastIndex', table.routeParentTables?.length - 1)
-          condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
-            table.routeParentTables[lastIndex].names.camelCase
-          }}Id
+        @if(table.routeParentRelations.length)
+          @set('lastRouteParent', table.routeParentRelations(table.routeParentRelations.length - 1))
+          queryBuilder.where('{{
+            input.camelCaseStrategy ?
+              `${lastRouteParent.names.camelCase}Id` :
+              `${lastRouteParent.names.snakeCase}_id` :
+          }}Id', {{ lastRouteParent.names.camelCase }}Id)
         @endif
         const {{ table.names.camelCase }} = await {{
           table.names.pascalCase
@@ -293,7 +300,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       }}Validator)
       @!component(`stubs/backend/${
         input.tech.backend
-      }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+      }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
         input, table
       })
       return {{ table.names.pascalCase }}.createMany(
@@ -310,11 +317,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
               input.camelCaseStrategy ? fileColumn.names.camelCase : fileColumn.names.snakeCase
             }}
           @endeach
-          @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-            @set('lastIndex', table.routeParentTables?.length - 1)
-            input.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
-              table.routeParentTables[lastIndex].names.camelCase
-            }}Id
+          @if(table.routeParentRelations.length)
+            @set('lastRouteParent', table.routeParentRelations(table.routeParentRelations.length - 1))
+            queryBuilder.where('{{
+              input.camelCaseStrategy ?
+                `${lastRouteParent.names.camelCase}Id` :
+                `${lastRouteParent.names.snakeCase}_id` :
+            }}Id', {{ lastRouteParent.names.camelCase }}Id)
           @endif
           return input
         })
@@ -343,7 +352,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @endif
       @!component(`stubs/backend/${
         input.tech.backend
-      }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+      }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
         input, table
       })
       const condition: { [key: string]: any } = {}
@@ -354,11 +363,13 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${belongsToAuth.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-        @set('lastIndex', table.routeParentTables?.length - 1)
-        condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
-          table.routeParentTables[lastIndex].names.camelCase
-        }}Id
+      @if(table.routeParentRelations.length)
+        @set('lastRouteParent', table.routeParentRelations(table.routeParentRelations.length - 1))
+        queryBuilder.where('{{
+          input.camelCaseStrategy ?
+            `${lastRouteParent.names.camelCase}Id` :
+            `${lastRouteParent.names.snakeCase}_id` :
+        }}Id', {{ lastRouteParent.names.camelCase }}Id)
       @endif
       @if(!table.singleton)
         const id = request.param('id')
@@ -409,7 +420,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       }}Validator)
       @!component(`stubs/backend/${
         input.tech.backend
-      }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+      }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
         input, table
       })
       const id = request.param('id')
@@ -421,8 +432,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${belongsToAuth.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-        @set('lastIndex', table.routeParentTables?.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+        @set('lastIndex', table.routeParentTables.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -510,7 +521,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @endif
       @!component(`stubs/backend/${
         input.tech.backend
-      }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+      }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
         input, table
       })
       const condition: { [key: string]: any } = {}
@@ -521,8 +532,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${belongsToAuth.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-        @set('lastIndex', table.routeParentTables?.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+        @set('lastIndex', table.routeParentTables.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -560,7 +571,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @endif
       @!component(`stubs/backend/${
         input.tech.backend
-      }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+      }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
         input, table
       })
       const condition: { [key: string]: any } = {}
@@ -571,8 +582,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${belongsToAuth.names.snakeCase}_id`
         }} = auth.user!.id
       @endif
-      @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-        @set('lastIndex', table.routeParentTables?.length - 1)
+      @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+        @set('lastIndex', table.routeParentTables.length - 1)
         condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
           table.routeParentTables[lastIndex].names.camelCase
         }}Id
@@ -648,7 +659,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @endif
         @!component(`stubs/backend/${
           input.tech.backend
-        }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
           input, table
         })
         const condition: { [key: string]: any } = {};
@@ -661,8 +672,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
               `${belongsToAuth.names.snakeCase}_id`
           }} = auth.user!.id;
         @endif
-        @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-          @set('lastIndex', table.routeParentTables?.length - 1)
+        @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+          @set('lastIndex', table.routeParentTables.length - 1)
           condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
             table.routeParentTables[lastIndex].names.camelCase
           }}Id
@@ -706,7 +717,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         @endif
         @!component(`stubs/backend/${
           input.tech.backend
-        }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
           input, table
         })
         const condition: { [key: string]: any } = {};
@@ -719,8 +730,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
               `${belongsToAuth.names.snakeCase}_id`
           }} = auth.user!.id;
         @endif
-        @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-          @set('lastIndex', table.routeParentTables?.length - 1)
+        @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+          @set('lastIndex', table.routeParentTables.length - 1)
           condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
             table.routeParentTables[lastIndex].names.camelCase
           }}Id
@@ -765,7 +776,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         const ids: number[] = request.input('ids');
         @!component(`stubs/backend/${
           input.tech.backend
-        }/full/app/Controllers/Http/API/component/routeParentTableValidation`, {
+        }/full/app/Controllers/Http/API/component/routeParentRelationValidation`, {
           input, table
         })
         const condition: { [key: string]: any } = {};
@@ -778,8 +789,8 @@ export default class {{ table.names.pascalCasePlural }}Controller {
               `${belongsToAuth.names.snakeCase}_id`
           }} = auth.user!.id
         @endif
-        @if(Array.isArray(table.routeParentTables) && table.routeParentTables?.length)
-          @set('lastIndex', table.routeParentTables?.length - 1)
+        @if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+          @set('lastIndex', table.routeParentTables.length - 1)
           condition.{{ table.routeParentTables[lastIndex].names.camelCase }}Id = {{
             table.routeParentTables[lastIndex].names.camelCase
           }}Id

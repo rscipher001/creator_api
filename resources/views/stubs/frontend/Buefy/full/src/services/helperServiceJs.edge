@@ -1,4 +1,12 @@
 class HelperService {
+  prepareRouteParent(object) {
+    if (!object) return "";
+    return Object.keys(object).reduce((acc, current) => {
+      acc += `/${current.slice(0, current.length - 2)}/${object[current]}`;
+      return acc;
+    }, "");
+  }
+
   camelizeKeys(obj) {
     if (typeof obj !== "object") return obj;
     return Object.keys(obj).reduce((acc, key) => {

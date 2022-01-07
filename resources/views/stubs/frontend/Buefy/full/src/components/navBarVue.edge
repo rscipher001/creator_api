@@ -22,7 +22,7 @@
       </b-navbar-item>
       <b-navbar-dropdown label="Pages">
         @if(!auth)
-          @each(table in input.tables.concat([input.auth.table]))
+          @each(table in input.tables.concat([input.auth.table]).filter(t => t.routeParentTables.length === 0))
             @if(table.operations.index)
               <b-navbar-item
                 @if(input.rbac.enabled)
