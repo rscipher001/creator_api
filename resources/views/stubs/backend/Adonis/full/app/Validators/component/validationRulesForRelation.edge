@@ -4,36 +4,51 @@
     input.auth.table :
     input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
 )
+@set('effectiveRouteParent', null)
+@set('effectiveRouteParentColumn', null)
+@if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
+  @set('effectiveRouteParent', table.routeParentTables[table.routeParentTables.length - 1])
+  @set('effectiveRouteParentColumn', input.camelCaseStrategy ?
+    `${effectiveRouteParent.names.camelCase}Id` :
+    `${effectiveRouteParent.names.snakeCase}_id`
+  )
+@endif
 @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-  {{
-    input.camelCaseStrategy ?
+  @if(!(
+    effectiveRouteParentColumn && effectiveRouteParentColumn === (input.camelCaseStrategy ?
       relation.names.camelCase + 'Id':
-      relation.names.snakeCase + '_id'
-  }}: schema.number{{
-    relation.required ? '' : '.optional'
-  }}([
-    rules.exists({
-      table: '{{
-        input.camelCaseStrategy ?
-          relation.modelNames.camelCasePlural :
-          relation.modelNames.snakeCasePlural
-      }}',
-      column: 'id',
-      @set(
-        'relationModelBelongsToAuth',
-        relationModel.relations.find(r => r.type === 'BelongsTo' && '$auth' === r.withModel)
-      )
-      @if(relationModelBelongsToAuth)
-        where: {
-          {{
-            input.camelCaseStrategy ?
-              `${relationModelBelongsToAuth.names.camelCase}Id` :
-              `${relationModelBelongsToAuth.names.snakeCase}_id`
-          }}: this.ctx.auth.user!.id,
-        },
-      @endif
-    })
-  ]),
+      relation.names.snakeCase + '_id')
+  ))
+    {{
+      input.camelCaseStrategy ?
+        relation.names.camelCase + 'Id':
+        relation.names.snakeCase + '_id'
+    }}: schema.number{{
+      relation.required ? '' : '.optional'
+    }}([
+      rules.exists({
+        table: '{{
+          input.camelCaseStrategy ?
+            relation.modelNames.camelCasePlural :
+            relation.modelNames.snakeCasePlural
+        }}',
+        column: 'id',
+        @set(
+          'relationModelBelongsToAuth',
+          relationModel.relations.find(r => r.type === 'BelongsTo' && '$auth' === r.withModel)
+        )
+        @if(relationModelBelongsToAuth)
+          where: {
+            {{
+              input.camelCaseStrategy ?
+                `${relationModelBelongsToAuth.names.camelCase}Id` :
+                `${relationModelBelongsToAuth.names.snakeCase}_id`
+            }}: this.ctx.auth.user!.id,
+          },
+        @endif
+      })
+    ]),
+  @endif
 @elseif(relation.type === 'ManyToMany' && relation.showInputOnCreatePage)
   {{
     input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids'
