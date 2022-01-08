@@ -1,6 +1,6 @@
 @set('routeParentPart', '')
-@if(table.routeParentTables.length)
-  @set('routeParentPart', table.routeParentTables
+@if(table.routeParentRelations.length)
+  @set('routeParentPart', table.routeParentRelations
     .map(r => r.names.camelCase)
     .reduce((acc, current) => {
       acc += `/${current}/${current}Id`;

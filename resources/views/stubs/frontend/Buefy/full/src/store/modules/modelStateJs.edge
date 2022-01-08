@@ -1,4 +1,4 @@
-@set('hasRouteParents', table.routeParentTables.length)
+@set('hasRouteParents', table.routeParentRelations.length)
 @if(!input.camelCaseStrategy)
   import camelCase from "lodash/camelCase";
   import snakeCase from "lodash/snakeCase";

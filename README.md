@@ -22,9 +22,9 @@ Meaning of common words
 
 This item can only have one entry in the database, There are two types of singleton, Singleon being single doesn't support all 7 methods, Only the folowing api methods are supported by singleton
 
-- GET /resource - for getting it
-- POST /resource - for creating or updating it
-- DELETE /resource - for deleting it
+- GET /resource - Show: for getting it
+- POST /resource - Store: for creating or updating it
+- DELETE /resource - Destroy: for deleting it
 
 #### Global Singleton
 

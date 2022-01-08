@@ -1,21 +1,22 @@
-@set(
-  'relationModel',
-  ['$auth', '$nonAuth'].includes(relation.withModel) ?
-    input.auth.table :
-    input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
-)
-@set('effectiveRouteParent', null)
-@set('effectiveRouteParentColumn', null)
-@if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-  @set('effectiveRouteParent', table.routeParentTables[table.routeParentTables.length - 1])
-  @set('effectiveRouteParentColumn', input.camelCaseStrategy ?
-    `${effectiveRouteParent.names.camelCase}Id` :
-    `${effectiveRouteParent.names.snakeCase}_id`
+{{--
+  Here, we have input, relation and table
+  Here we are generating relation validation unless it is route parent
+--}}
+@set('relationModel', findRelationModel(input, relation))
+@set('parentRelation', null)
+@set('parentRelationColumn', null)
+{{--  If table has parent relation then prepare variable for it  --}}
+@if(table.routeParentRelations.length)
+  @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+  @set('parentRelationColumn', input.camelCaseStrategy ?
+    `${parentRelation.names.camelCase}Id` :
+    `${parentRelation.names.snakeCase}_id`
   )
 @endif
+{{--  Generate logic only for non auth relation  --}}
 @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
   @if(!(
-    effectiveRouteParentColumn && effectiveRouteParentColumn === (input.camelCaseStrategy ?
+    parentRelationColumn && parentRelationColumn === (input.camelCaseStrategy ?
       relation.names.camelCase + 'Id':
       relation.names.snakeCase + '_id')
   ))

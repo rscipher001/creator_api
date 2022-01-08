@@ -386,7 +386,6 @@ class BackendProjectService {
 
     // Do it twice to ensure relation setting is in place
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
-    projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
     if (!this.input.git) {
       projectInput.git = {
         email: '22148496+SecureSnowball@users.noreply.github.com',

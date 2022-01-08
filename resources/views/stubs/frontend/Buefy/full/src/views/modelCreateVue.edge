@@ -1,4 +1,4 @@
-@set('hasRouteParents', table.routeParentTables.length)
+@set('hasRouteParents', table.routeParentRelations.length)
 @set('fileColumns', table.columns.filter(c => c.type === 'File'))
 @set('fileColumnsLastIndex', fileColumns.length - 1)
 @set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
@@ -12,8 +12,8 @@
 )
 @set('effectiveRouteParent', null)
 @set('effectiveRouteParentColumn', null)
-@if(Array.isArray(table.routeParentTables) && table.routeParentTables.length)
-  @set('effectiveRouteParent', table.routeParentTables[table.routeParentTables.length - 1])
+@if(Array.isArray(table.routeParentRelations) && table.routeParentRelations.length)
+  @set('effectiveRouteParent', table.routeParentRelations[table.routeParentRelations.length - 1])
   @set('effectiveRouteParentColumn', `${effectiveRouteParent.names.camelCase}Id`)
 @endif
 <template>

@@ -1,7 +1,38 @@
+{{--
+  Part file: Used in controller
+  This file is used for import (great) (grand) parent relations
+  In the following line product is parent of image
+  and image is parent of current model
+  /product/:productId/image/:imageId/comment
+
+  table.routeParentRelations array contains data like
+  [product, image] // Grand parent first, parent later
+
+  We want to ensure
+  - Product belongs to current user/tenant
+  - Image belongs to current product & user/tenant
+  - It exists in the database
+
+  Here is how code is supposed to look after generation
+
+  const productId = request.param('productId')
+  await Product.query().where({
+    id: productId,
+    userId: auth.user!.id,
+  }).firstOrFail()
+
+  const imageId = request.param('imageId')
+  await Image.query().where({
+    id: imageId,
+    userId: auth.user!.id,
+    productId, // Because this image should belong to product
+  }).firstOrFail()
+--}}
 @each((parentRelation, parentRelationIndex) in table.routeParentRelations)
   const {{ parentRelation.names.camelCase }}Id = request.param('{{ parentRelation.names.camelCase }}Id');
-  await {{ parentRelation.names.pascalCase }}.query().where({
+  await {{ parentRelation.modelNames.pascalCase }}.query().where({
     id: {{ parentRelation.names.camelCase }}Id,
+    {{--  Find model for this relation and check it belongs to user/tenant  --}}
     @set('parentRelationModel', findRelationModel(input, parentRelation))
     @set(
       'belongsToAuth',
@@ -16,6 +47,7 @@
           `${belongsToAuth.names.snakeCase}_id`
       }}: auth.user!.id,
     @endif
+    {{--  Put parentId check for all intermediate parent models  --}}
     @if(parentRelationIndex !== 0)~
       @if(input.camelCaseStrategy)
         {{ table.routeParentRelation[parentRelationIndex - 1].names.camelCase }}Id,
