@@ -1,7 +1,7 @@
 @set('hasFilterableColumn', !!table.columns.find(c => c.meta.filterable))
 <template>
   <section class="container">
-    <b-loading is-full-page v-model="isLoading"></b-loading>
+    <b-loading v-model="isLoading" is-full-page></b-loading>
     <div class="section py-4">
       <div class="columns">
         <div class="column px-0">
@@ -54,7 +54,9 @@
                     <b-dropdown-item
                       @click="$router.push('/{{ table.names.camelCase }}/import/csv')"
                       aria-role="listitem"
-                    >CSV</b-dropdown-item>
+                    >
+                      CSV
+                    </b-dropdown-item>
                   </b-dropdown>
                 @endif
                 <b-button @click="toggleMultiselect" type="is-white">
@@ -62,8 +64,10 @@
                 </b-button>
                 @if(table.operations.create)
                   <b-button
-                    tag="router-link"
-                    to="/{{ table.names.camelCase }}/create"
+                    @if(input.rbac.enabled)
+                      v-if="authorize('{{ table.names.camelCase }}:create')"
+                    @endif
+                    @click="create"
                     type="is-primary"
                   >
                     New
@@ -275,7 +279,7 @@
             </b-dropdown>
           </b-table-column>
         </b-table>
-        <div class="hero is-medium column" v-else>
+        <div v-else class="hero is-medium column">
           <div class="hero-body container is-flex has-text-centered">
             <div class="is-flex-direction-colomn">
               @if(table.operations.create)
@@ -287,9 +291,8 @@
                   @if(input.rbac.enabled)
                     v-if="authorize('{{ table.names.camelCase }}:create')"
                   @endif
+                  @click="create"
                   type="is-primary block mt-5"
-                  tag="router-link"
-                  to="/{{ table.names.camelCase }}/create"
                 >
                   New
                 </b-button>
@@ -328,12 +331,20 @@
 <script>
 import debounce from "lodash/debounce";
 import { mapActions, mapState } from 'vuex';
+@if(routeParentRelations.length)
+  import HelperService from "../services/helper.service";
+@endif
 
 export default {
   name: '{{ table.names.pascalCase }}List',
 
   data() {
     return {
+      parent: {
+        @each(routeParent in routeParentRelations)
+          {{ routeParent.names.camelCase }}Id = null,
+        @endeach
+      },
       currentPageNo: 1,
       currentPageSize: 10,
       sortBy: "id",
@@ -353,6 +364,11 @@ export default {
   },
 
   created() {
+    @each(routeParent in routeParentRelations)
+      if (this.$route.params.{{ routeParent.names.camelCase }}Id) {
+        this.parent.{{ routeParent.names.camelCase }}Id = this.$route.params.{{ routeParent.names.camelCase }}Id;
+      }
+    @endeach
     this.index();
   },
 
@@ -383,7 +399,7 @@ export default {
     },
 
     index() {
-      const indexQueryParams = {
+      const filter = {
         size: this.currentPageSize,
         page: this.currentPageNo,
         sortBy: this.sortBy,
@@ -392,18 +408,31 @@ export default {
       @if(hasFilterableColumn)
         @each(column in table.columns.filter(c => c.meta.filterable))
           if (this.filter.{{ column.names.camelCase }}) {
-            indexQueryParams.{{ column.names.camelCase }} = this.filter.{{
+            filter.{{ column.names.camelCase }} = this.filter.{{
               column.names.camelCase
             }}{{ column.type === 'Date' ? '.toISOString()' : ''}};
           }
         @endeach
       @endif
-      this.indexAction(indexQueryParams);
+      this.indexAction({
+        parent: this.parent,
+        filter,
+      });
+    },
+
+    create() {
+      const url = `${HelperService.prepareRouteParent(
+        this.parent
+      )}/{{ table.names.camelCase }}/create`;
+      console.log({ url });
+      this.$router.push(url);
     },
 
     @if(table.operations.edit)
       edit(id) {
-        this.$router.push(`/{{ table.names.camelCase }}/${id}/edit`);
+        this.$router.push(
+          `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}/${id}/edit`
+        );
       },
     @endif
 
