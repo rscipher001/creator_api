@@ -331,7 +331,7 @@
 <script>
 import debounce from "lodash/debounce";
 import { mapActions, mapState } from 'vuex';
-@if(routeParentRelations.length)
+@if(table.routeParentRelations.length)
   import HelperService from "../services/helper.service";
 @endif
 
@@ -341,8 +341,8 @@ export default {
   data() {
     return {
       parent: {
-        @each(routeParent in routeParentRelations)
-          {{ routeParent.names.camelCase }}Id = null,
+        @each(routeParent in table.routeParentRelations)
+          {{ routeParent.names.camelCase }}Id: null,
         @endeach
       },
       currentPageNo: 1,
@@ -364,7 +364,7 @@ export default {
   },
 
   created() {
-    @each(routeParent in routeParentRelations)
+    @each(routeParent in table.routeParentRelations)
       if (this.$route.params.{{ routeParent.names.camelCase }}Id) {
         this.parent.{{ routeParent.names.camelCase }}Id = this.$route.params.{{ routeParent.names.camelCase }}Id;
       }
@@ -421,17 +421,24 @@ export default {
     },
 
     create() {
-      const url = `${HelperService.prepareRouteParent(
-        this.parent
-      )}/{{ table.names.camelCase }}/create`;
-      console.log({ url });
+      @if(hasRouteParents)
+        const url = `${HelperService.prepareRouteParent(
+          this.parent
+        )}/{{ table.names.camelCase }}/create`;
+      @else
+        const url = `/{{ table.names.camelCase }}/create`;
+      @endif
       this.$router.push(url);
     },
 
     @if(table.operations.edit)
       edit(id) {
         this.$router.push(
-          `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}/${id}/edit`
+          @if(hasRouteParents)
+            `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}/${id}/edit`
+          @else
+            `/{{ table.names.camelCase }}/${id}/edit`
+          @endif
         );
       },
     @endif

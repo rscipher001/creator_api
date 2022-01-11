@@ -619,7 +619,11 @@ export default {
     @endif
 
     list() {
-      const url = `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}`;
+      @if(hasRouteParents)
+        const url = `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}`;
+      @else
+        const url = `/{{ table.names.camelCase }}`;
+      @endif
       this.$router.push(url);
     },
 

@@ -772,7 +772,6 @@ class BackendProjectService {
 
       // const hostingService = new HostingService(this.projectInput)
       // await hostingService.init()
-      console.log('Project Generated Successfully')
     } catch (e) {
       console.error(e)
       throw e

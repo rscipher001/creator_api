@@ -35,7 +35,7 @@ const toSnakeCase = (obj) => {
 export default {
   namespaced: true,
   state: () => ({
-    resource: '{{ table.names.camelCase }}';
+    resource: '{{ table.names.camelCase }}',
     @if(table.relations.find((relation) => relation.type === 'ManyToMany'))
       relations: {
         @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
