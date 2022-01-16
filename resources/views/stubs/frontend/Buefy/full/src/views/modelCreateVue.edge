@@ -28,9 +28,7 @@
               capitalCase(table.names.pascalCase)
             }}</div>
             <div class="level-right">
-              <b-button @click="create" type="is-white">
-                Back
-              </b-button>
+              <b-button @click="list" type="is-white">Back</b-button>
             </div>
           </div>
         </div>
@@ -322,7 +320,7 @@ import ValidationException from '../exceptions/ValidationException';
 export default {
   name: '{{ table.names.pascalCase }}Create',
   created() {
-    @each(routeParent in routeParentRelations)
+    @each(routeParent in table.routeParentRelations)
       if (this.$route.params.{{ routeParent.names.camelCase }}Id) {
         this.parent.{{ routeParent.names.camelCase }}Id = this.$route.params.{{ routeParent.names.camelCase }}Id;
       }
@@ -375,8 +373,8 @@ export default {
   data() {
     return {
       parent: {
-        @each(routeParent in routeParentRelations)
-          {{ routeParent.names.camelCase }}Id = null,
+        @each(routeParent in table.routeParentRelations)
+          {{ routeParent.names.camelCase }}Id: null,
         @endeach
       },
       editMode: {
@@ -440,8 +438,8 @@ export default {
             }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
           @endeach
           @each(relation in nonAuthBelongsToRelations.filter(
-            r => !routeParentColumns.includes('{{ r.names.camelCase }}Id'))
-          )
+            (r) => !routeParentColumns.includes(`${r.names.camelCase}Id`)
+          ))
             {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
           @endeach
           @each(relation in table.relations.filter(

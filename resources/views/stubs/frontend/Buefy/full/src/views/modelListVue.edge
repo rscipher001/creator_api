@@ -1,5 +1,10 @@
 @set('hasFilterableColumn', !!table.columns.find(c => c.meta.filterable))
 @set('hasRouteParents', table.routeParentRelations.length)
+@set('routeChildren', input.tables.filter(
+  t => t.routeParentRelations.length &&
+    findRelationModel(input, t.routeParentRelations[t.routeParentRelations.length - 1])
+    .names.camelCase === table.names.camelCase
+))
 <template>
   <section class="container">
     <b-loading v-model="isLoading" is-full-page></b-loading>
@@ -247,36 +252,47 @@
             @endif
           >
             <b-dropdown aria-role="list">
-                <template #trigger="{ active }">
-                  <b-button
-                    label="More"
-                    type="is-primary"
-                    outlined
-                    :icon-right="active ? 'menu-up' : 'menu-down'"
-                  />
-                </template>
-                @if(table.operations.edit)
-                  <b-dropdown-item
-                    @if(input.rbac.enabled)
-                      v-if="authorize('{{ table.names.camelCase }}:edit')"
-                    @endif
-                    @click="edit(props.row.id)"
-                    aria-role="edititem"
-                  >
-                    Edit
-                  </b-dropdown-item>
-                @endif
-                @if(table.operations.destroy)
-                  <b-dropdown-item
-                    @if(input.rbac.enabled)
-                      v-if="authorize('{{ table.names.camelCase }}:destroy')"
-                    @endif
-                    @click="destroy(props.row.id)"
-                    aria-role="listitem"
-                  >
-                    Delete
-                  </b-dropdown-item>
-                @endif
+              <template #trigger="{ active }">
+                <b-button
+                  label="More"
+                  type="is-primary"
+                  outlined
+                  :icon-right="active ? 'menu-up' : 'menu-down'"
+                />
+              </template>
+              @if(table.operations.edit)
+                <b-dropdown-item
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ table.names.camelCase }}:edit')"
+                  @endif
+                  @click="edit(props.row.id)"
+                  aria-role="edititem"
+                >
+                  Edit
+                </b-dropdown-item>
+              @endif
+              @if(table.operations.destroy)
+                <b-dropdown-item
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ table.names.camelCase }}:destroy')"
+                  @endif
+                  @click="destroy(props.row.id)"
+                  aria-role="listitem"
+                >
+                  Delete
+                </b-dropdown-item>
+              @endif
+              @each(childTable in routeChildren)
+                <b-dropdown-item
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ childTable.names.camelCase }}:index')"
+                  @endif
+                  aria-role="listitem"
+                  @click="list{{ childTable.names.pascalCasePlural }}(props.row.id)"
+                >
+                  List {{ noCase(childTable.names.camelCase) }}
+                </b-dropdown-item>
+              @endeach
             </b-dropdown>
           </b-table-column>
         </b-table>
@@ -332,7 +348,7 @@
 <script>
 import debounce from "lodash/debounce";
 import { mapActions, mapState } from 'vuex';
-@if(hasRouteParents)
+@if(hasRouteParents || routeChildren.length)
   import HelperService from "../services/helper.service";
 @endif
 
@@ -514,6 +530,16 @@ export default {
         this.selectedItems = [];
       },
     @endif
+
+    @each(childTable in routeChildren)
+      list{{ childTable.names.pascalCasePlural }}({{ table.names.camelCase }}Id) {
+        const parent = {
+          {{ table.names.camelCase }}Id,
+        };
+        const url = `${HelperService.prepareRouteParent(parent)}/{{ childTable.names.camelCase }}`;
+        this.$router.push(url);
+      },
+    @endeach
   },
 
   watch: {

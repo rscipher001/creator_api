@@ -404,9 +404,9 @@ class BackendProjectService {
 
   protected prepareHosting() {
     this.projectInput.hosting = {
-      databaseName: `${this.projectInput.names.snakeCase}-${this.projectInput.id}`,
+      databaseName: `${this.projectInput.names.camelCase}${this.projectInput.id}`,
       databaseUser: `${this.projectInput.names.camelCase}`,
-      databasePassword: `${this.projectInput.names.pascalCase}`,
+      databasePassword: `${this.projectInput.names.camelCase}`,
     }
   }
 

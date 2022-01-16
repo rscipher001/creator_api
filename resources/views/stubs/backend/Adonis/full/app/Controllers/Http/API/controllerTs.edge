@@ -99,7 +99,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           input.camelCaseStrategy ?
             `${parentRelation.names.camelCase}Id` :
             `${parentRelation.names.snakeCase}_id`
-        }}Id', {{ parentRelation.names.camelCase }}Id)
+        }}', {{ parentRelation.names.camelCase }}Id)
       @endif
 
       {{--  Create filters for filterable columns  --}}
@@ -407,7 +407,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           input.camelCaseStrategy ?
             `${parentRelation.names.camelCase}Id` :
             `${parentRelation.names.snakeCase}_id`
-        }}Id = {{ parentRelation.names.camelCase }}Id;
+        }} = {{ parentRelation.names.camelCase }}Id;
       @endif
       
       @if(!table.singleton)

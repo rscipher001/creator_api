@@ -5,5 +5,6 @@ View.global('findRelationModel', function (input: ProjectInput, relation: Relati
   if (['$auth', '$nonAuth'].includes(relation.withModel)) {
     return input.auth.table
   }
+  // TODO: Write logic to find tenant table when required
   return input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
 })
