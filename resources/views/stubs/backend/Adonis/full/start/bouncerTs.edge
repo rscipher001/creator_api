@@ -35,26 +35,28 @@ import Bouncer from '@ioc:Adonis/Addons/Bouncer'
 | NOTE: Always export the "actions" const from this file
 |****************************************************************
 */
-const checkPermission = async (user: User, permission: string) => {
-  await user.load((loader) => {
+@if(Array.isArray(input.rbac.permissions) && input.rbac.permissions.length)
+  const checkPermission = async (user: User, permission: string) => {
+    await user.load((loader) => {
+      @if(hasManyRoles)
+        loader.load('roles', (rolesQueryBuilder) => {
+          rolesQueryBuilder.preload('permissions')
+        })
+      @else
+        loader.load('role', (roleQueryBuilder) => {
+          roleQueryBuilder.preload('permissions')
+        })
+      @endif
+    })
+    const permissions: string[] = [];
     @if(hasManyRoles)
-      loader.load('roles', (rolesQueryBuilder) => {
-        rolesQueryBuilder.preload('permissions')
-      })
+      user.roles.forEach((r) => r.permissions.forEach((p) => permissions.push(p.name)));
     @else
-      loader.load('role', (roleQueryBuilder) => {
-        roleQueryBuilder.preload('permissions')
-      })
+      user.role.permissions.forEach((p) => permissions.push(p.name));
     @endif
-  })
-  const permissions: string[] = [];
-  @if(hasManyRoles)
-    user.roles.forEach((r) => r.permissions.forEach((p) => permissions.push(p.name)));
-  @else
-    user.role.permissions.forEach((p) => permissions.push(p.name));
-  @endif
-  return permissions.includes(permission)
-}
+    return permissions.includes(permission)
+  }
+@endif
 
 export const { actions } = Bouncer
 @each(permission in input.rbac.permissions)

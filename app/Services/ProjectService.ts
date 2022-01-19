@@ -105,6 +105,7 @@ class BackendProjectService {
         .map((relationName: string) =>
           table.relations.find((relation) => relation.names.camelCase === relationName)
         )
+        .filter(Boolean)
     } else {
       table.routeParentRelations = []
     }

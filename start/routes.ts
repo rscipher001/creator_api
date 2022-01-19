@@ -4,6 +4,10 @@ Route.get('/', async () => {
   return { hello: 'world' }
 })
 
+Route.get('/status', async () => {
+  return { hello: 'world' }
+})
+
 Route.group(() => {
   Route.post('/login', 'API/AuthController.login')
   Route.post('/register', 'API/AuthController.register')

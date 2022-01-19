@@ -22,7 +22,7 @@ import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }
   import {{ model }} from 'App/Models/{{ model }}';
 @endeach
 {{--  Required for loading relations  --}}
-@if((table.operations.index || table.operations.show) && hasRelations)
+@if((table.operations.index || table.operations.show ) && hasRelations && !table.singleton)
   import { ExtractModelRelations } from '@ioc:Adonis/Lucid/Orm'
 @endif
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
@@ -414,7 +414,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
         const id = request.param('id')
         condition.id = id
       @endif
-      @if(table.relations.length)
+      @if(hasRelations)
         const queryBuilder = {{ table.names.pascalCase }}.query()
         const relationsString: string = request.input('relations')
         let preLoadRelation: string[] = []
@@ -547,7 +547,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.destroy)
     public async destroy({
-      request,
+      @if (!table.singleton && table.routeParentRelations.length)
+        request,
+      @endif
       response,
       @if(belongsToAuth || routeParentBelongsToAuth)
         auth,

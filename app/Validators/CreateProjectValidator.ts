@@ -155,12 +155,14 @@ export default class CreateProjectValidator {
           default: schema.boolean.optional(),
         })
       ),
-      permissions: schema.array.optional([rules.requiredWhen('rbac.enabled', '=', true)]).members(
-        schema.object().members({
-          name: schema.string({ trim: true }),
-          description: schema.string.optional({ trim: true }),
-        })
-      ),
+      permissions: schema.array
+        .optional([rules.requiredWhen('rbac.enabled', '=', true), rules.minLength(1)])
+        .members(
+          schema.object().members({
+            name: schema.string({ trim: true }),
+            description: schema.string.optional({ trim: true }),
+          })
+        ),
       matrix: schema.array.optional([rules.requiredWhen('rbac.enabled', '=', true)]).members(
         schema.object().members({
           role: schema.string({ trim: true }),
