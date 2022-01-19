@@ -778,8 +778,10 @@ class BackendProjectService {
         }
       }
 
-      const hostingService = new HostingService(this.projectInput)
-      await hostingService.init()
+      if (Env.get('ENABLE_HOSTING')) {
+        const hostingService = new HostingService(this.projectInput)
+        await hostingService.init()
+      }
     } catch (e) {
       console.error(e)
       throw e
