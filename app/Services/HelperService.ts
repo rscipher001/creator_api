@@ -1,6 +1,6 @@
 import { promisify } from 'util'
 import fs from 'fs'
-import { spawn } from 'child_process'
+import { spawn, SpawnOptions } from 'child_process'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import { Names, ExtendedNames } from 'App/Interfaces/ProjectInput'
 
@@ -46,7 +46,7 @@ class HelperService {
       if (options) {
         options.stdio = 'inherit'
       }
-      const stream = spawn(command, args, options as any)
+      const stream = spawn(command, args, options as SpawnOptions)
       stream.on('error', (e) => reject(e))
       stream.on('close', (code) => resolve(code))
     })
