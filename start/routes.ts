@@ -4,7 +4,6 @@ Route.get('/', async () => {
   return { hello: 'world' }
 })
 
-Route.get('/test', 'PagesController.test')
 Route.get('/status', 'PagesController.status')
 
 Route.group(() => {

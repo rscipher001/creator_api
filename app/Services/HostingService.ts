@@ -95,7 +95,7 @@ export default class HostingService {
    * Create Nginx config file
    */
   protected async start() {
-    // await this.createDatabaseAndUser()
+    await this.createDatabaseAndUser()
     await this.buildAndHost()
   }
 
