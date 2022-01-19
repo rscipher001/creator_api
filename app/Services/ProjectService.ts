@@ -27,6 +27,8 @@ import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
 import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
 
+// import HostingService from 'App/Services/HostingService'
+
 class BackendProjectService {
   private input: any
   private projectId: number
@@ -70,13 +72,7 @@ class BackendProjectService {
     if (Array.isArray(table.indexColumns)) {
       table.indexColumns = table.indexColumns.map((columnName) => string.pascalCase(columnName))
     }
-    if (Array.isArray(table.routeParents)) {
-      table.routeParents = table.routeParents
-        .reverse()
-        .map((modelName: string) => string.camelCase(modelName))
-    } else {
-      table.routeParents = []
-    }
+
     if (Array.isArray(table.relations)) {
       table.relations = table.relations.map((relation: Relation): Relation => {
         if (['$auth', '$nonAuth'].includes(relation.withModel)) {
@@ -101,6 +97,19 @@ class BackendProjectService {
     } else {
       table.relations = []
     }
+
+    if (Array.isArray(table.routeParents) && table.routeParents.length) {
+      table.routeParentRelations = table.routeParents
+        .reverse()
+        .map((relationName: string) => HelperService.toSingularCameCase(relationName))
+        .map((relationName: string) =>
+          table.relations.find((relation) => relation.names.camelCase === relationName)
+        )
+        .filter(Boolean)
+    } else {
+      table.routeParentRelations = []
+    }
+
     if (Array.isArray(table.customOperations) && table.customOperations.length) {
       table.customOperations.map((op) => {
         return {
@@ -378,7 +387,6 @@ class BackendProjectService {
 
     // Do it twice to ensure relation setting is in place
     projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
-    projectInput.tables = this.input.tables.map((table) => this.prepareTable(table))
     if (!this.input.git) {
       projectInput.git = {
         email: '22148496+SecureSnowball@users.noreply.github.com',
@@ -389,8 +397,18 @@ class BackendProjectService {
     }
     this.projectInput = projectInput as ProjectInput
     this.prepareTenantSettings()
-    this.prepareRouteParentTables()
+
+    // Hosting related preparation
+    this.prepareHosting()
     return this.projectInput
+  }
+
+  protected prepareHosting() {
+    this.projectInput.hosting = {
+      databaseName: `${this.projectInput.names.camelCase}${this.projectInput.id}`,
+      databaseUser: `${this.projectInput.names.camelCase}`,
+      databasePassword: `${this.projectInput.names.camelCase}`,
+    }
   }
 
   protected prepareTenantSettings() {
@@ -518,24 +536,6 @@ class BackendProjectService {
         })
       }
     }
-  }
-
-  protected prepareRouteParentTables() {
-    this.projectInput.tables.forEach((table: Table) => {
-      table.routeParentTables = []
-      if (Array.isArray(table.routeParents) && table.routeParents.length) {
-        table.routeParents.forEach((routeParent: string) => {
-          // Find the table and push it into routeParentTables array
-          const routeParentTable = this.projectInput.tables.find(
-            (table) => table.names.camelCase === routeParent
-          )
-          if (!routeParentTable) {
-            throw new Error('Table data is not correct')
-          }
-          table.routeParentTables.push(routeParentTable)
-        })
-      }
-    })
   }
 
   /**
@@ -770,7 +770,9 @@ class BackendProjectService {
           await crud.init()
         }
       }
-      console.log('Project Generated Successfully')
+
+      // const hostingService = new HostingService(this.projectInput)
+      // await hostingService.init()
     } catch (e) {
       console.error(e)
       throw e

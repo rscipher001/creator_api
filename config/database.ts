@@ -33,6 +33,21 @@ const databaseConfig: DatabaseConfig = {
     | npm i mysql
     |
     */
+    admin: {
+      client: 'mysql',
+      connection: {
+        host: Env.get('ADMIN_MYSQL_HOST'),
+        port: Env.get('ADMIN_MYSQL_PORT'),
+        user: Env.get('ADMIN_MYSQL_USER'),
+        password: Env.get('ADMIN_MYSQL_PASSWORD', ''),
+        database: Env.get('MYSQL_DB_NAME'),
+      },
+      migrations: {
+        naturalSort: true,
+      },
+      healthCheck: false,
+      debug: false,
+    },
     mysql: {
       client: 'mysql',
       connection: {

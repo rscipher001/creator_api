@@ -705,7 +705,11 @@ const fulProjectInput = {
         default: false,
       },
     ],
-    permissions: [],
+    permissions: [
+      {
+        name: 'user:index',
+      },
+    ],
     matrix: [
       {
         role: 'Admin',

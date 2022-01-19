@@ -6,17 +6,17 @@ DB_DEBUG=false
 
 MYSQL_HOST=localhost
 MYSQL_PORT=3306
-MYSQL_USER=placeholder
-MYSQL_PASSWORD=placeholder
-MYSQL_DB_NAME=placeholder
+MYSQL_USER={{ input.hosting.databaseName }}
+MYSQL_DB_NAME={{ input.hosting.databaseUser }}
+MYSQL_PASSWORD={{ input.hosting.databasePassword }}
 
 @endif
 @if(database === 'PostgreSQL')
 
 PG_HOST=localhost
 PG_PORT=5432
-PG_USER=placeholder
-PG_PASSWORD=placeholder
-PG_DB_NAME=placeholder
+PG_USER={{ input.hosting.databaseName }}
+PG_PASSWORD={{ input.hosting.databaseUser }}
+PG_DB_NAME={{ input.hosting.databaseName }}
 
 @endif

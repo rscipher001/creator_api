@@ -8,6 +8,12 @@ A Code Generator
 - Create a folder named `Projects` parallel to UI and API folder (Can be configured using .env if you want another location)
 - Install Vue CLI `npm install -g @vue/cli`
 
+### Hosting Requirements
+
+- Ensure `pm2` is installed globally
+- Ensure MySQL is installed and credentials are set in .env file
+- Ensure Nginx server is installed
+
 ## Glossary
 
 Meaning of common words
@@ -16,9 +22,9 @@ Meaning of common words
 
 This item can only have one entry in the database, There are two types of singleton, Singleon being single doesn't support all 7 methods, Only the folowing api methods are supported by singleton
 
-- GET /resource - for getting it
-- POST /resource - for creating or updating it
-- DELETE /resource - for deleting it
+- GET /resource - Show: for getting it
+- POST /resource - Store: for creating or updating it
+- DELETE /resource - Destroy: for deleting it
 
 #### Global Singleton
 

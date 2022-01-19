@@ -1,39 +1,55 @@
-@set(
-  'relationModel',
-  ['$auth', '$nonAuth'].includes(relation.withModel) ?
-    input.auth.table :
-    input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
-)
+{{--
+  Here, we have input, relation and table
+  Here we are generating relation validation unless it is route parent
+--}}
+@set('relationModel', findRelationModel(input, relation))
+@set('parentRelation', null)
+@set('parentRelationColumn', null)
+{{--  If table has parent relation then prepare variable for it  --}}
+@if(table.routeParentRelations.length)
+  @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+  @set('parentRelationColumn', input.camelCaseStrategy ?
+    `${parentRelation.names.camelCase}Id` :
+    `${parentRelation.names.snakeCase}_id`
+  )
+@endif
+{{--  Generate logic only for non auth relation  --}}
 @if(relation.type === 'BelongsTo' && relation.withModel !== '$auth')
-  {{
-    input.camelCaseStrategy ?
+  @if(!(
+    parentRelationColumn && parentRelationColumn === (input.camelCaseStrategy ?
       relation.names.camelCase + 'Id':
-      relation.names.snakeCase + '_id'
-  }}: schema.number{{
-    relation.required ? '' : '.optional'
-  }}([
-    rules.exists({
-      table: '{{
-        input.camelCaseStrategy ?
-          relation.modelNames.camelCasePlural :
-          relation.modelNames.snakeCasePlural
-      }}',
-      column: 'id',
-      @set(
-        'relationModelBelongsToAuth',
-        relationModel.relations.find(r => r.type === 'BelongsTo' && '$auth' === r.withModel)
-      )
-      @if(relationModelBelongsToAuth)
-        where: {
-          {{
-            input.camelCaseStrategy ?
-              `${relationModelBelongsToAuth.names.camelCase}Id` :
-              `${relationModelBelongsToAuth.names.snakeCase}_id`
-          }}: this.ctx.auth.user!.id,
-        },
-      @endif
-    })
-  ]),
+      relation.names.snakeCase + '_id')
+  ))
+    {{
+      input.camelCaseStrategy ?
+        relation.names.camelCase + 'Id':
+        relation.names.snakeCase + '_id'
+    }}: schema.number{{
+      relation.required ? '' : '.optional'
+    }}([
+      rules.exists({
+        table: '{{
+          input.camelCaseStrategy ?
+            relation.modelNames.camelCasePlural :
+            relation.modelNames.snakeCasePlural
+        }}',
+        column: 'id',
+        @set(
+          'relationModelBelongsToAuth',
+          relationModel.relations.find(r => r.type === 'BelongsTo' && '$auth' === r.withModel)
+        )
+        @if(relationModelBelongsToAuth)
+          where: {
+            {{
+              input.camelCaseStrategy ?
+                `${relationModelBelongsToAuth.names.camelCase}Id` :
+                `${relationModelBelongsToAuth.names.snakeCase}_id`
+            }}: this.ctx.auth.user!.id,
+          },
+        @endif
+      })
+    ]),
+  @endif
 @elseif(relation.type === 'ManyToMany' && relation.showInputOnCreatePage)
   {{
     input.camelCaseStrategy ? relation.names.camelCase + 'Ids': relation.names.snakeCase + '_ids'

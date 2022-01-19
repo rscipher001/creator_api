@@ -1,7 +1,13 @@
 @set('hasFilterableColumn', !!table.columns.find(c => c.meta.filterable))
+@set('hasRouteParents', table.routeParentRelations.length)
+@set('routeChildren', input.tables.filter(
+  t => t.routeParentRelations.length &&
+    findRelationModel(input, t.routeParentRelations[t.routeParentRelations.length - 1])
+    .names.camelCase === table.names.camelCase
+))
 <template>
   <section class="container">
-    <b-loading is-full-page v-model="isLoading"></b-loading>
+    <b-loading v-model="isLoading" is-full-page></b-loading>
     <div class="section py-4">
       <div class="columns">
         <div class="column px-0">
@@ -54,7 +60,9 @@
                     <b-dropdown-item
                       @click="$router.push('/{{ table.names.camelCase }}/import/csv')"
                       aria-role="listitem"
-                    >CSV</b-dropdown-item>
+                    >
+                      CSV
+                    </b-dropdown-item>
                   </b-dropdown>
                 @endif
                 <b-button @click="toggleMultiselect" type="is-white">
@@ -62,8 +70,10 @@
                 </b-button>
                 @if(table.operations.create)
                   <b-button
-                    tag="router-link"
-                    to="/{{ table.names.camelCase }}/create"
+                    @if(input.rbac.enabled)
+                      v-if="authorize('{{ table.names.camelCase }}:create')"
+                    @endif
+                    @click="create"
                     type="is-primary"
                   >
                     New
@@ -242,40 +252,51 @@
             @endif
           >
             <b-dropdown aria-role="list">
-                <template #trigger="{ active }">
-                  <b-button
-                    label="More"
-                    type="is-primary"
-                    outlined
-                    :icon-right="active ? 'menu-up' : 'menu-down'"
-                  />
-                </template>
-                @if(table.operations.edit)
-                  <b-dropdown-item
-                    @if(input.rbac.enabled)
-                      v-if="authorize('{{ table.names.camelCase }}:edit')"
-                    @endif
-                    @click="edit(props.row.id)"
-                    aria-role="edititem"
-                  >
-                    Edit
-                  </b-dropdown-item>
-                @endif
-                @if(table.operations.destroy)
-                  <b-dropdown-item
-                    @if(input.rbac.enabled)
-                      v-if="authorize('{{ table.names.camelCase }}:destroy')"
-                    @endif
-                    @click="destroy(props.row.id)"
-                    aria-role="listitem"
-                  >
-                    Delete
-                  </b-dropdown-item>
-                @endif
+              <template #trigger="{ active }">
+                <b-button
+                  label="More"
+                  type="is-primary"
+                  outlined
+                  :icon-right="active ? 'menu-up' : 'menu-down'"
+                />
+              </template>
+              @if(table.operations.edit)
+                <b-dropdown-item
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ table.names.camelCase }}:edit')"
+                  @endif
+                  @click="edit(props.row.id)"
+                  aria-role="edititem"
+                >
+                  Edit
+                </b-dropdown-item>
+              @endif
+              @if(table.operations.destroy)
+                <b-dropdown-item
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ table.names.camelCase }}:destroy')"
+                  @endif
+                  @click="destroy(props.row.id)"
+                  aria-role="listitem"
+                >
+                  Delete
+                </b-dropdown-item>
+              @endif
+              @each(childTable in routeChildren)
+                <b-dropdown-item
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ childTable.names.camelCase }}:index')"
+                  @endif
+                  aria-role="listitem"
+                  @click="list{{ childTable.names.pascalCasePlural }}(props.row.id)"
+                >
+                  List {{ noCase(childTable.names.camelCase) }}
+                </b-dropdown-item>
+              @endeach
             </b-dropdown>
           </b-table-column>
         </b-table>
-        <div class="hero is-medium column" v-else>
+        <div v-else class="hero is-medium column">
           <div class="hero-body container is-flex has-text-centered">
             <div class="is-flex-direction-colomn">
               @if(table.operations.create)
@@ -287,9 +308,8 @@
                   @if(input.rbac.enabled)
                     v-if="authorize('{{ table.names.camelCase }}:create')"
                   @endif
+                  @click="create"
                   type="is-primary block mt-5"
-                  tag="router-link"
-                  to="/{{ table.names.camelCase }}/create"
                 >
                   New
                 </b-button>
@@ -328,12 +348,20 @@
 <script>
 import debounce from "lodash/debounce";
 import { mapActions, mapState } from 'vuex';
+@if(hasRouteParents || routeChildren.length)
+  import HelperService from "../services/helper.service";
+@endif
 
 export default {
   name: '{{ table.names.pascalCase }}List',
 
   data() {
     return {
+      parent: {
+        @each(routeParent in table.routeParentRelations)
+          {{ routeParent.names.camelCase }}Id: null,
+        @endeach
+      },
       currentPageNo: 1,
       currentPageSize: 10,
       sortBy: "id",
@@ -353,6 +381,11 @@ export default {
   },
 
   created() {
+    @each(routeParent in table.routeParentRelations)
+      if (this.$route.params.{{ routeParent.names.camelCase }}Id) {
+        this.parent.{{ routeParent.names.camelCase }}Id = this.$route.params.{{ routeParent.names.camelCase }}Id;
+      }
+    @endeach
     this.index();
   },
 
@@ -383,7 +416,7 @@ export default {
     },
 
     index() {
-      const indexQueryParams = {
+      const filter = {
         size: this.currentPageSize,
         page: this.currentPageNo,
         sortBy: this.sortBy,
@@ -392,18 +425,38 @@ export default {
       @if(hasFilterableColumn)
         @each(column in table.columns.filter(c => c.meta.filterable))
           if (this.filter.{{ column.names.camelCase }}) {
-            indexQueryParams.{{ column.names.camelCase }} = this.filter.{{
+            filter.{{ column.names.camelCase }} = this.filter.{{
               column.names.camelCase
             }}{{ column.type === 'Date' ? '.toISOString()' : ''}};
           }
         @endeach
       @endif
-      this.indexAction(indexQueryParams);
+      this.indexAction({
+        parent: this.parent,
+        filter,
+      });
+    },
+
+    create() {
+      @if(hasRouteParents)
+        const url = `${HelperService.prepareRouteParent(
+          this.parent
+        )}/{{ table.names.camelCase }}/create`;
+      @else
+        const url = `/{{ table.names.camelCase }}/create`;
+      @endif
+      this.$router.push(url);
     },
 
     @if(table.operations.edit)
       edit(id) {
-        this.$router.push(`/{{ table.names.camelCase }}/${id}/edit`);
+        this.$router.push(
+          @if(hasRouteParents)
+            `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}/${id}/edit`
+          @else
+            `/{{ table.names.camelCase }}/${id}/edit`
+          @endif
+        );
       },
     @endif
 
@@ -477,6 +530,16 @@ export default {
         this.selectedItems = [];
       },
     @endif
+
+    @each(childTable in routeChildren)
+      list{{ childTable.names.pascalCasePlural }}({{ table.names.camelCase }}Id) {
+        const parent = {
+          {{ table.names.camelCase }}Id,
+        };
+        const url = `${HelperService.prepareRouteParent(parent)}/{{ childTable.names.camelCase }}`;
+        this.$router.push(url);
+      },
+    @endeach
   },
 
   watch: {

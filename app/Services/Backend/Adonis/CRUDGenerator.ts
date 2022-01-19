@@ -222,7 +222,7 @@ export default class CRUDGenerator {
           combos.push([table.name, relation.modelNames.pascalCase].sort().join(':'))
         })
     })
-    await Promise.all([
+    await Promise.all(
       // Remove duplicates and process combos
       Array.from(new Set(combos)).map(async (combo) => {
         const [tableOne, tableTwo] = combo.split(':')
@@ -243,7 +243,7 @@ export default class CRUDGenerator {
           singleton: false,
           routeParents: [],
           indexColumns: [],
-          routeParentTables: [],
+          routeParentRelations: [],
           operations: {
             index: false,
             create: false,
@@ -296,8 +296,8 @@ export default class CRUDGenerator {
           const filePath = `${this.input.path}/database/migrations/${timestamp}_${namePart}`
           await HelperService.writeFile(filePath, content)
         }
-      }),
-    ])
+      })
+    )
   }
 
   /**

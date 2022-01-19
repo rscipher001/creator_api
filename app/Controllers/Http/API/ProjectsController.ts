@@ -49,6 +49,21 @@ export default class ProjectsController {
         error: 'Tenant table should be selected when tenant option is enabled',
       })
     }
+    if (!prepareInput.storageEnabled) {
+      let isFileColumnExists = false
+      for (let i = 0; i < prepareInput.tables.length; i++) {
+        const table = prepareInput.tables[i]
+        if (table.columns.find((column) => column.type === 'File')) {
+          isFileColumnExists = true
+          break
+        }
+      }
+      if (isFileColumnExists) {
+        return response.badRequest({
+          error: 'Enable storage to supoort file upload',
+        })
+      }
+    }
     // Ensure roles have permission and there is a default role
     // Ensure there are no duplicate relations on auth model
     // Ensure there are no duplicate relations on other models

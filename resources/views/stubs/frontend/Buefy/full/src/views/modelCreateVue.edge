@@ -1,3 +1,4 @@
+@set('hasRouteParents', table.routeParentRelations.length)
 @set('fileColumns', table.columns.filter(c => c.type === 'File'))
 @set('fileColumnsLastIndex', fileColumns.length - 1)
 @set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
@@ -9,6 +10,13 @@
   'hasM2MRelationOnCreatePage',
   table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage)
 )
+@set('routeParentColumns', table.routeParentRelations.map(r => `${r.names.camelCase}Id`))
+@set('effectiveRouteParent', null)
+@set('effectiveRouteParentColumn', null)
+@if(Array.isArray(table.routeParentRelations) && table.routeParentRelations.length)
+  @set('effectiveRouteParent', table.routeParentRelations[table.routeParentRelations.length - 1])
+  @set('effectiveRouteParentColumn', `${effectiveRouteParent.names.camelCase}Id`)
+@endif
 <template>
   <section class="container">
     <b-loading is-full-page v-model="loading.show"></b-loading>
@@ -19,14 +27,14 @@
             <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{
               capitalCase(table.names.pascalCase)
             }}</div>
-            <div class="level-right"><b-button tag="router-link" to="/{{
-              table.names.camelCase
-            }}" type="is-white">Back</b-button></div>
+            <div class="level-right">
+              <b-button @click="list" type="is-white">Back</b-button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    
+
     <div class="section py-4">
       <div class="columns box">
         <div class="column">
@@ -214,14 +222,15 @@
             @endeach
 
             @each(relation in nonAuthBelongsToRelations)
-            @set(
-              'relationModel',
-              ['$auth', '$nonAuth'].includes(relation.withModel) ?
-                input.auth.table :
-                input.tables.find(
-                  (table) => table.names.camelCase === relation.modelNames.camelCase
-                )
-            )
+              @set('relationModel', findRelationModel(input, relation))
+              @set('parentRelation', null)
+              @set('parentRelationColumn', null)
+              {{--  If table has parent relation then prepare variable for it  --}}
+              @if(table.routeParentRelations.length)
+                @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+                @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+              @endif
+              @if(parentRelationColumn !== `${relation.modelNames.camelCase}Id`)
               <b-field
                 label="{{ capitalCase(relation.names.pascalCase) }}"
                 :type="errors.{{ relation.names.camelCase }} ? 'is-danger' : ''"
@@ -250,6 +259,7 @@
                   </option>
                 </b-select>
               </b-field>
+              @endif
             @endeach
 
             @each(relation in table.relations.filter(
@@ -302,11 +312,19 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
+@if(hasRouteParents)
+  import HelperService from "../services/helper.service";
+@endif
 import ValidationException from '../exceptions/ValidationException';
 
 export default {
   name: '{{ table.names.pascalCase }}Create',
   created() {
+    @each(routeParent in table.routeParentRelations)
+      if (this.$route.params.{{ routeParent.names.camelCase }}Id) {
+        this.parent.{{ routeParent.names.camelCase }}Id = this.$route.params.{{ routeParent.names.camelCase }}Id;
+      }
+    @endeach
     @each(relation in nonAuthBelongsToRelations)
       this.{{ relation.modelNames.camelCase }}IndexAction();
     @endeach
@@ -340,7 +358,9 @@ export default {
               }}.{{ column.names.camelCase }};
             @endif
           @endeach
-          @each(relation in nonAuthBelongsToRelations)
+          @each(relation in nonAuthBelongsToRelations.filter(
+            r => !routeParentColumns.includes('{{ r.names.camelCase }}Id'))
+          )
             this.form.{{ relation.names.camelCase }}Id = {{
               table.names.camelCase
             }}.{{ relation.names.camelCase }}Id;
@@ -352,6 +372,11 @@ export default {
 
   data() {
     return {
+      parent: {
+        @each(routeParent in table.routeParentRelations)
+          {{ routeParent.names.camelCase }}Id: null,
+        @endeach
+      },
       editMode: {
         enabled: false,
         id: null,
@@ -366,7 +391,9 @@ export default {
         @each(column in exposedColumns)
           {{ column.names.camelCase }}: {{ column.type === 'Boolean' ? false : null }},
         @endeach
-        @each(relation in nonAuthBelongsToRelations)
+        @each(relation in nonAuthBelongsToRelations.filter(
+          r => !routeParentColumns.includes('{{ r.names.camelCase }}Id'))
+        )
           {{ relation.names.camelCase }}Id: null,
         @endeach
         @if(hasM2MRelationOnCreatePage)~
@@ -402,15 +429,17 @@ export default {
     async store() {
       try {
         @if(table.columns.find(column => column.type === 'File'))
-          const payload = this.prepareRequestBody();
+          const input = this.prepareRequestBody();
         @else
-        const payload = {
+        const input = {
           @each(column in exposedColumns)
             {{ column.names.camelCase }}: this.form.{{
               column.names.camelCase
             }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
           @endeach
-          @each(relation in nonAuthBelongsToRelations)
+          @each(relation in nonAuthBelongsToRelations.filter(
+            (r) => !routeParentColumns.includes(`${r.names.camelCase}Id`)
+          ))
             {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
           @endeach
           @each(relation in table.relations.filter(
@@ -422,8 +451,8 @@ export default {
           @endeach
         }
         @endif
-        await this.storeAction(payload);
-        this.$router.push('/{{ table.names.camelCase }}');
+        await this.storeAction({ parent: this.parent, input });
+        this.list();
         this.$buefy.toast.open({
           message: '{{ capitalCase(table.names.pascalCase) }} created',
           position: 'is-bottom-right',
@@ -464,7 +493,9 @@ export default {
           this.form.{{ column.names.camelCase }} = item.{{ column.names.camelCase }};
         @endif
       @endeach
-      @each(relation in nonAuthBelongsToRelations)
+      @each(relation in nonAuthBelongsToRelations.filter(
+        r => !routeParentColumns.includes('{{ r.names.camelCase }}Id'))
+      )
         this.form.{{ relation.names.camelCase }}Id = item.{{ relation.names.camelCase }}Id;
       @endeach
       @if(hasM2MRelationOnCreatePage)
@@ -481,9 +512,9 @@ export default {
     async update() {
       try {
         @if(table.columns.find(column => column.type === 'File'))
-          const payload = this.prepareRequestBody();
+          const input = this.prepareRequestBody();
         @else
-        const payload = {
+        const input = {
           @each(column in exposedColumns)
             {{ column.names.camelCase }}: this.form.{{
               column.names.camelCase
@@ -502,10 +533,11 @@ export default {
         }
         @endif
         await this.updateAction({
+          parent: this.parent,
           id: this.editMode.id,
-          input: payload,
+          input: input,
         });
-        this.$router.push('/{{ table.names.camelCase }}');
+        this.list();
         this.$buefy.toast.open({
           message: '{{ sentenceCase(table.names.pascalCase) }} updated',
           position: 'is-bottom-right',
@@ -529,7 +561,7 @@ export default {
 
     @if(table.columns.find(column => column.type === 'File'))
       prepareRequestBody (){
-        let payload;
+        let input;
         if (
           @each((column, index) in fileColumns)
             this.form.{{ column.names.camelCase }} !== null{{{
@@ -537,28 +569,28 @@ export default {
             }}}
           @endeach
         ) {
-          payload = new FormData();
+          input = new FormData();
           @each(column in exposedColumns)
-            if (this.form.{{ column.names.camelCase }} !== null) payload.append("{{
+            if (this.form.{{ column.names.camelCase }} !== null) input.append("{{
               column.names.camelCase
             }}", this.form.{{ column.names.camelCase }}{{
               column.type === 'Date' ? '.toISOString()' : ''
             }});
           @endeach
           @each(relation in nonAuthBelongsToRelations)
-            payload.append("{{ relation.names.camelCase }}Id", this.form.{{
+            input.append("{{ relation.names.camelCase }}Id", this.form.{{
               relation.names.camelCase
             }}Id);
           @endeach
           @each(relation in table.relations.filter(
             r => r.type === 'ManyToMany' && r.showInputOnCreatePage
           ))
-            payload.append("{{ relation.names.camelCase }}Ids", this.form.{{
+            input.append("{{ relation.names.camelCase }}Ids", this.form.{{
               relation.names.camelCasePlural
             }}.map(({ id }) => id));
           @endeach
         } else {
-          payload = {
+          input = {
             @each(column in exposedColumns)
               {{ column.names.camelCase }}: this.form.{{
                 column.names.camelCase
@@ -576,7 +608,7 @@ export default {
             @endeach
           }
         }
-        return payload;
+        return input;
       },
 
       onFileAdd(file, field) {
@@ -584,15 +616,19 @@ export default {
       },
     @endif
 
+    list() {
+      @if(hasRouteParents)
+        const url = `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}`;
+      @else
+        const url = `/{{ table.names.camelCase }}`;
+      @endif
+      this.$router.push(url);
+    },
+
     @each(relation in table.relations.filter(
       r => r.type === 'ManyToMany' && r.showInputOnCreatePage
     ))
-    @set(
-      'relationModel',
-      ['$auth', '$nonAuth'].includes(relation.withModel) ?
-        input.auth.table :
-        input.tables.find((table) => table.names.camelCase === relation.modelNames.camelCase)
-    )
+      @set('relationModel', findRelationModel(input, relation))
       async {{ relation.modelNames.camelCase }}Index() {
         await this.{{ relation.modelNames.camelCase }}IndexAction({
           pageSize: 999,
