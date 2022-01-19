@@ -28,7 +28,7 @@ import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
 import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
 
-// import HostingService from 'App/Services/HostingService'
+import HostingService from 'App/Services/HostingService'
 
 class BackendProjectService {
   private input: any
@@ -778,8 +778,8 @@ class BackendProjectService {
         }
       }
 
-      // const hostingService = new HostingService(this.projectInput)
-      // await hostingService.init()
+      const hostingService = new HostingService(this.projectInput)
+      await hostingService.init()
     } catch (e) {
       console.error(e)
       throw e

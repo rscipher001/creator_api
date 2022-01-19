@@ -1,9 +1,10 @@
+import mkdirp from 'mkdirp'
+import Env from '@ioc:Adonis/Core/Env'
 import View from '@ioc:Adonis/Core/View'
 import Logger from '@ioc:Adonis/Core/Logger'
-import Database from '@ioc:Adonis/Lucid/Database'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import HelperService from 'App/Services/HelperService'
-
+const HOME = process.env.HOME
 export default class HostingService {
   private input: ProjectInput
 
@@ -17,39 +18,45 @@ export default class HostingService {
       databaseUser: user,
       databasePassword: password,
     } = this.input.hosting
-    const adminClient = Database.connection('admin')
-    await adminClient.raw(`CREATE DATABASE IF NOT EXISTS ${database}`)
-    try {
-      await adminClient.raw(
-        `CREATE USER IF NOT EXISTS '${user}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${password}'`
-      )
-    } catch (_) {
-      await adminClient.raw(
-        `CREATE USER IF NOT EXISTS '${user}'@'localhost' IDENTIFIED BY '${password}'`
-      )
-    }
-    await adminClient.raw(`GRANT ALL PRIVILEGES ON ${database}.* TO '${user}'@'localhost'`)
-    await adminClient.raw(`FLUSH PRIVILEGES`)
+    await this.executeMySqlQuery(`FLUSH PRIVILEGES`)
+    await this.executeMySqlQuery(`CREATE DATABASE IF NOT EXISTS ${database}`)
+    await this.executeMySqlQuery(
+      `CREATE USER IF NOT EXISTS '${user}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${password}'`
+    )
+    await this.executeMySqlQuery(
+      `CREATE USER IF NOT EXISTS '${user}'@'localhost' IDENTIFIED BY '${password}'`
+    )
+    await this.executeMySqlQuery(`GRANT ALL PRIVILEGES ON ${database}.* TO '${user}'@'localhost'`)
+    await this.executeMySqlQuery(`FLUSH PRIVILEGES`)
+  }
+
+  protected async executeMySqlQuery(query) {
+    const createDatabaseCommand = `mysql -uroot -p${Env.get('ROOT_MYSQL_PASSWORD')} -e`
+    const [command, ...args] = createDatabaseCommand.split(' ')
+    args.push(`${query}`)
+    console.log(command, args)
+    await HelperService.execute(command, args)
   }
 
   protected async prepareNginxConfig() {
+    await mkdirp(`${HOME}/nginx`)
     const api = await View.render(`stubs/hosting/nginx/api`, { input: this.input })
     const ui = await View.render(`stubs/hosting/nginx/ui`, { input: this.input })
-    await HelperService.writeFile(`~/nginx/api-${this.input.id}`, api)
-    await HelperService.writeFile(`~/nginx/ui-${this.input.id}`, ui)
+    await HelperService.writeFile(`${HOME}/nginx/api-${this.input.id}`, api)
+    await HelperService.writeFile(`${HOME}/nginx/ui-${this.input.id}`, ui)
 
     await HelperService.execute('sudo', [
       'ln',
       '-s',
-      `~/nginx/api-${this.input.id}`,
-      `/etc/nginx-sites-enabled/${this.input.id}-api`,
+      `${HOME}/nginx/api-${this.input.id}`,
+      `/etc/nginx/sites-enabled/${this.input.id}-api`,
     ])
 
     await HelperService.execute('sudo', [
       'ln',
       '-s',
-      `~/nginx/ui-${this.input.id}`,
-      `/etc/nginx-sites-enabled/${this.input.id}-ui`,
+      `${HOME}/nginx/ui-${this.input.id}`,
+      `/etc/nginx/sites-enabled/${this.input.id}-ui`,
     ])
     await HelperService.execute('sudo', ['nginx', '-s', 'reload'])
   }
@@ -88,7 +95,7 @@ export default class HostingService {
    * Create Nginx config file
    */
   protected async start() {
-    await this.createDatabaseAndUser()
+    // await this.createDatabaseAndUser()
     await this.buildAndHost()
   }
 

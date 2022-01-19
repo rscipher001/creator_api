@@ -1,7 +1,7 @@
-import { promisify } from 'util'
 import fs from 'fs'
-import { spawn, SpawnOptions } from 'child_process'
+import { promisify } from 'util'
 import { string } from '@ioc:Adonis/Core/Helpers'
+import { spawn, SpawnOptions } from 'child_process'
 import { Names, ExtendedNames } from 'App/Interfaces/ProjectInput'
 
 const readFile = promisify(fs.readFile)
