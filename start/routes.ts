@@ -47,6 +47,9 @@ Route.group(() => {
   Route.get('/project/:id', 'API/ProjectsController.show')
   Route.delete('/project/:id', 'API/ProjectsController.destroy')
 
+  Route.post('/project/:id/hosting', 'API/ProjectsController.enableHosting')
+  Route.delete('/project/:id/hosting', 'API/ProjectsController.disableHosting')
+
   Route.post('/draft/project', 'API/ProjectsController.storeDraft')
   Route.put('/draft/project/:id', 'API/ProjectsController.updateDraft')
   Route.post('/draft/project/:id/generate', 'API/ProjectsController.generateDraft')

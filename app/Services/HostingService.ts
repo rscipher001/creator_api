@@ -137,6 +137,7 @@ export default class HostingService {
     await this.executeMySqlQuery(`FLUSH PRIVILEGES`)
     await this.executeMySqlQuery(`DROP DATABASE IF EXISTS ${database}`)
     await this.executeMySqlQuery(`DROP USER IF EXISTS '${user}'@'localhost'`)
+    await this.executeMySqlQuery(`FLUSH PRIVILEGES`)
 
     await HelperService.execute('rm', ['-rf', `${this.input.path}/build`])
     await HelperService.execute('rm', ['-rf', `${this.input.spaPath}/dist`])
