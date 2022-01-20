@@ -400,7 +400,7 @@ class BackendProjectService {
     this.prepareTenantSettings()
 
     // Hosting related preparation
-    // this.prepareHosting()
+    this.prepareHosting()
     return this.projectInput
   }
 

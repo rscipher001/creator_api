@@ -104,11 +104,13 @@ export default class HostingService {
     })
   }
 
-  /**
-   * Create MySQL user & database
-   * Create Nginx config file
-   */
+  protected async installDependencies() {
+    await HelperService.execute('npm', ['ci'], { cwd: this.input.path })
+    await HelperService.execute('npm', ['ci'], { cwd: this.input.spaPath })
+  }
+
   protected async start() {
+    await this.installDependencies()
     await this.createDatabaseAndUser()
     await this.buildAndHost()
   }
@@ -140,6 +142,8 @@ export default class HostingService {
     await this.executeMySqlQuery(`FLUSH PRIVILEGES`)
 
     await HelperService.execute('rm', ['-rf', `${this.input.path}/build`])
+    await HelperService.execute('rm', ['-rf', `${this.input.path}/node_modules`])
     await HelperService.execute('rm', ['-rf', `${this.input.spaPath}/dist`])
+    await HelperService.execute('rm', ['-rf', `${this.input.spaPath}/node_modules`])
   }
 }

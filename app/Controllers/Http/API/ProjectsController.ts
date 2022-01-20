@@ -252,16 +252,12 @@ export default class ProjectsController {
         })
       } catch (e) {}
       project.status = 'failed'
+      project.isCleaned = false
       await project.save()
       console.error(e)
     }
   }
 
-  /**
-   * Generate nginx config
-   * Generate MySQL user
-   * Host UI & API
-   */
   protected async enableHosting({ auth, request }: HttpContextContract) {
     const projectId = request.param('id')
     const project = await Project.query()
@@ -279,8 +275,11 @@ export default class ProjectsController {
     if (prepareInput.generate.api && prepareInput.generate.spa) {
       const hostingService = new HostingService(prepareInput)
       await hostingService.init()
+      project.isHosted = true
+      project.isCleaned = false
+      await project.save()
     }
-    return 'Hosting process started'
+    return project
   }
 
   protected async disableHosting({ auth, request }: HttpContextContract) {
@@ -301,6 +300,9 @@ export default class ProjectsController {
       const hostingService = new HostingService(prepareInput)
       await hostingService.stop()
     }
-    return 'Hosting process started'
+    project.isHosted = false
+    project.isCleaned = true
+    await project.save()
+    return project
   }
 }
