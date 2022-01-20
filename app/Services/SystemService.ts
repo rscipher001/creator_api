@@ -1,22 +1,28 @@
-import HelperService from 'App/Services/HelperService'
+import execa from 'execa'
 
 class SystemService {
-  protected async ensureNginxIsInstalled() {}
-  protected async ensureVueCliIsInstalled() {}
-  protected async ensureNodeJsIsInstalled() {
-    await HelperService.execute('command', ['-v', 'node'])
+  protected async runCommand(command, args: string[] = []) {
+    try {
+      const output = await execa(command, args)
+      return output.stdout + output.stderr
+    } catch (_) {
+      return false
+    }
   }
-  protected async ensurePm2IsInstalled() {}
-
-  public async ensureGeneratorToolsAreInstalled() {
-    await this.ensureNodeJsIsInstalled()
-    await this.ensureVueCliIsInstalled()
-    return true
-  }
-
-  public async ensureHostingToolsAreInstalled() {
-    await this.ensurePm2IsInstalled()
-    await this.ensureNginxIsInstalled()
+  public async systemStatus() {
+    try {
+      return {
+        nginx: await this.runCommand('nginx', ['-v']),
+        node: await this.runCommand('node', ['-v']),
+        mysql: await this.runCommand('mysql', ['--version']),
+        vue: await this.runCommand('vue', ['--version']),
+        pm2: await this.runCommand('pm2', ['--version']),
+      }
+    } catch (_) {
+      return {
+        status: 'failed',
+      }
+    }
   }
 }
 

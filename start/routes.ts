@@ -4,9 +4,7 @@ Route.get('/', async () => {
   return { hello: 'world' }
 })
 
-Route.get('/status', async () => {
-  return { hello: 'world' }
-})
+Route.get('/status', 'PagesController.status')
 
 Route.group(() => {
   Route.post('/login', 'API/AuthController.login')
@@ -48,6 +46,9 @@ Route.group(() => {
   Route.post('/project', 'API/ProjectsController.store')
   Route.get('/project/:id', 'API/ProjectsController.show')
   Route.delete('/project/:id', 'API/ProjectsController.destroy')
+
+  Route.post('/project/:id/hosting', 'API/ProjectsController.enableHosting')
+  Route.delete('/project/:id/hosting', 'API/ProjectsController.disableHosting')
 
   Route.post('/draft/project', 'API/ProjectsController.storeDraft')
   Route.put('/draft/project/:id', 'API/ProjectsController.updateDraft')

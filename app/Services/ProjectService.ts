@@ -2,6 +2,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
+import SystemService from 'App/Services/SystemService'
 import { RelationType, RequestMethod } from 'App/Interfaces/Enums'
 import ProjectInput, {
   Table,
@@ -688,6 +689,12 @@ class BackendProjectService {
    */
   public async start() {
     try {
+      if (this.projectInput.generate.spa.generate) {
+        const status = await SystemService.systemStatus()
+        if (!status['vue']) {
+          throw new Error('Vue CLI is not installed on this server yet')
+        }
+      }
       // Generate Project
       if (this.projectInput.generate.api.generate) {
         const init = new AdonisInit(this.projectInput)
@@ -771,8 +778,10 @@ class BackendProjectService {
         }
       }
 
-      // const hostingService = new HostingService(this.projectInput)
-      // await hostingService.init()
+      if (Env.get('ENABLE_HOSTING')) {
+        // const hostingService = new HostingService(this.projectInput)
+        // await hostingService.init()
+      }
     } catch (e) {
       console.error(e)
       throw e

@@ -50,3 +50,9 @@ Route.get('/project/:projectId/workers/:workerId', 'API/WorkersController.show')
 ```
 
 In the above snippet you can see the routes for workers are nested inside project routes, it is adviced to avoid routes this but you can still create it to if you want.
+
+## Port selection
+
+- UI runs at 10K + projectId
+- API proxy runs at 20K + projectId
+- API runs at 30K + projectId

@@ -25,6 +25,7 @@ export default Env.rules({
   UI_URL: Env.schema.string(), // Used in mail
 
   DB_CONNECTION: Env.schema.enum(['mysql'] as const),
+  DB_DEBUG: Env.schema.boolean.optional(),
   MYSQL_HOST: Env.schema.string({ format: 'host' }),
   MYSQL_PORT: Env.schema.number(),
   MYSQL_USER: Env.schema.string(),
@@ -45,8 +46,9 @@ export default Env.rules({
   REDIS_PASSWORD: Env.schema.string.optional(),
 
   ENABLE_HOSTING: Env.schema.boolean.optional(),
-  ADMIN_MYSQL_HOST: Env.schema.string.optional(),
-  ADMIN_MYSQL_PORT: Env.schema.number.optional(),
-  ADMIN_MYSQL_USER: Env.schema.string.optional(),
-  ADMIN_MYSQL_PASSWORD: Env.schema.string.optional(),
+  HOSTING_UI_DOMAIN: Env.schema.string.optional({ format: 'host' }),
+  HOSTING_API_DOMAIN: Env.schema.string.optional({ format: 'host' }),
+  ROOT_MYSQL_HOST: Env.schema.string.optional(),
+  ROOT_MYSQL_PORT: Env.schema.number.optional(),
+  ROOT_MYSQL_PASSWORD: Env.schema.string.optional(),
 })

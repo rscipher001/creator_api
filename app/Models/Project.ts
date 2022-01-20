@@ -18,6 +18,15 @@ export default class Project extends BaseModel {
   @column()
   public status: string
 
+  @column()
+  public isHosted: boolean
+
+  @column()
+  public isDeleted: boolean
+
+  @column()
+  public isCleaned: boolean
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

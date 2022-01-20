@@ -1,12 +1,12 @@
 server {
-    server_name api.brahma.rmstechinfo.com;
+    server_name {{ apiDomain }};
     location / {
-        proxy_pass http://localhost:3333;
+        proxy_pass http://localhost:{{ 30000 + input.id }};
     }
-    listen [::]:{{ 10000 + input.id }} ssl http2 ipv6only=on; # managed by Certbot
-    listen {{ 10000 + input.id }} ssl http2; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/api.brahma.rmstechinfo.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/api.brahma.rmstechinfo.com/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    listen [::]:{{ 20000 + input.id }} ssl http2 ipv6only=on;
+    listen {{ 20000 + input.id }} ssl http2;
+    ssl_certificate /etc/letsencrypt/live/{{ apiDomain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ apiDomain }}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 }
