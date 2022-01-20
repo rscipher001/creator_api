@@ -1,5 +1,5 @@
 DB_CONNECTION: Env.schema.enum(['mysql', 'sqlite', 'pg'] as const),
-DB_DEBUG: Env.schema.boolean(),
+DB_DEBUG: Env.schema.boolean.optional(),
 
 @if(database === 'MySQL')
 MYSQL_HOST: Env.schema.string(),

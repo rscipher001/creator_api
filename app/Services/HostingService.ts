@@ -40,8 +40,16 @@ export default class HostingService {
 
   protected async prepareNginxConfig() {
     await mkdirp(`${HOME}/nginx`)
-    const api = await View.render(`stubs/hosting/nginx/api`, { input: this.input })
-    const ui = await View.render(`stubs/hosting/nginx/ui`, { input: this.input })
+    const api = await View.render(`stubs/hosting/nginx/api`, {
+      input: this.input,
+      uiDomain: Env.get('HOSTING_UI_DOMAIN'),
+      apiDomain: Env.get('HOSTING_API_DOMAIN'),
+    })
+    const ui = await View.render(`stubs/hosting/nginx/ui`, {
+      input: this.input,
+      uiDomain: Env.get('HOSTING_UI_DOMAIN'),
+      apiDomain: Env.get('HOSTING_API_DOMAIN'),
+    })
     await HelperService.writeFile(`${HOME}/nginx/api-${this.input.id}`, api)
     await HelperService.writeFile(`${HOME}/nginx/ui-${this.input.id}`, ui)
 
