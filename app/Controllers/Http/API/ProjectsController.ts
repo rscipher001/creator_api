@@ -4,8 +4,10 @@ import Route from '@ioc:Adonis/Core/Route'
 import Generator from 'App/Services/ProjectService'
 import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
+import HostingService from 'App/Services/HostingService'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import CreateProjectValidator from 'App/Validators/CreateProjectValidator'
+import ProjectInput from 'App/Interfaces/ProjectInput'
 
 export default class ProjectsController {
   public async index({ request, auth }: HttpContextContract) {
@@ -253,5 +255,52 @@ export default class ProjectsController {
       await project.save()
       console.error(e)
     }
+  }
+
+  /**
+   * Generate nginx config
+   * Generate MySQL user
+   * Host UI & API
+   */
+  protected async enableHosting({ auth, request }: HttpContextContract) {
+    const projectId = request.param('id')
+    const project = await Project.query()
+      .where({
+        userId: auth.user!.id,
+        id: projectId,
+      })
+      .firstOrFail()
+    if (!project) throw new Error('Project not found')
+    if (project.status === 'queued') throw new Error('Build is in progress')
+    if (project.status === 'failed') throw new Error('Build failed')
+    const input = JSON.parse(project.rawInput)
+    const generator = new Generator(JSON.parse(JSON.stringify(input)), 0)
+    const prepareInput: ProjectInput = generator.prepare()
+    if (prepareInput.generate.api && prepareInput.generate.spa) {
+      const hostingService = new HostingService(prepareInput)
+      await hostingService.init()
+    }
+    return 'Hosting process started'
+  }
+
+  protected async disableHosting({ auth, request }: HttpContextContract) {
+    const projectId = request.param('id')
+    const project = await Project.query()
+      .where({
+        userId: auth.user!.id,
+        id: projectId,
+      })
+      .firstOrFail()
+    if (!project) throw new Error('Project not found')
+    if (project.status === 'queued') throw new Error('Build is in progress')
+    if (project.status === 'failed') throw new Error('Build failed')
+    const input = JSON.parse(project.rawInput)
+    const generator = new Generator(JSON.parse(JSON.stringify(input)), 0)
+    const prepareInput: ProjectInput = generator.prepare()
+    if (prepareInput.generate.api && prepareInput.generate.spa) {
+      const hostingService = new HostingService(prepareInput)
+      await hostingService.stop()
+    }
+    return 'Hosting process started'
   }
 }

@@ -77,6 +77,12 @@ export default class HostingService {
       console.error(e)
     }
 
+    // Update API port in .env to ensure it runs on a unique port
+    const filePath = `${this.input.path}/.env`
+    let content = await HelperService.readFile(filePath)
+    content.replace('PORT=3333', `PORT=${3000 + this.input.id}`)
+    await HelperService.writeFile(filePath, content)
+
     // Run migration
     await HelperService.execute('node', ['ace', 'migration:run', '--env=production', '--force'], {
       cwd: this.input.path,
@@ -109,5 +115,30 @@ export default class HostingService {
 
   public async init() {
     await this.start()
+  }
+
+  public async stop() {
+    /**
+     * 1. Stop and remove PM2 entry
+     * 2. Remove Nginx config, symlinks and restart
+     * 3. Remove MySQL user & database
+     * 4. Remove build folders
+     */
+    await HelperService.execute('pm2', ['stop', 'server.js', '--name', `api-${this.input.id}`])
+    await HelperService.execute('pm2', ['delete', 'server.js', '--name', `api-${this.input.id}`])
+
+    await HelperService.execute(`sudo`, ['rm', `${HOME}/nginx/api-${this.input.id}`])
+    await HelperService.execute(`sudo`, ['rm', `${HOME}/nginx/ui-${this.input.id}`])
+    await HelperService.execute('sudo', ['rm', `/etc/nginx/sites-enabled/${this.input.id}-api`])
+    await HelperService.execute('sudo', ['rm', `/etc/nginx/sites-enabled/${this.input.id}-ui`])
+    await HelperService.execute('sudo', ['nginx', '-s', 'reload'])
+
+    const { databaseName: database, databaseUser: user } = this.input.hosting
+    await this.executeMySqlQuery(`FLUSH PRIVILEGES`)
+    await this.executeMySqlQuery(`DROP DATABASE IF EXISTS ${database}`)
+    await this.executeMySqlQuery(`DROP USER IF EXISTS '${user}'@'localhost'`)
+
+    await HelperService.execute('rm', ['-rf', `${this.input.path}/build`])
+    await HelperService.execute('rm', ['-rf', `${this.input.spaPath}/dist`])
   }
 }
