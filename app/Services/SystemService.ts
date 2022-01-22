@@ -14,6 +14,7 @@ class SystemService {
       return {
         nginx: await this.runCommand('nginx', ['-v']),
         node: await this.runCommand('node', ['-v']),
+        npm: await this.runCommand('npm', ['-v']),
         mysql: await this.runCommand('mysql', ['--version']),
         vue: await this.runCommand('vue', ['--version']),
         pm2: await this.runCommand('pm2', ['--version']),
