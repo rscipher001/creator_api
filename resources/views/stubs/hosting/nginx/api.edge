@@ -1,10 +1,10 @@
 server {
     server_name {{ apiDomain }};
     location / {
-        proxy_pass http://localhost:{{ 30000 + input.id }};
+        proxy_pass http://localhost:{{ nodeApiPort + input.id }};
     }
-    listen [::]:{{ 20000 + input.id }} ssl http2 ipv6only=on;
-    listen {{ 20000 + input.id }} ssl http2;
+    listen [::]:{{ nginxApiPort + input.id }} ssl http2 ipv6only=on;
+    listen {{ nginxApiPort + input.id }} ssl http2;
     ssl_certificate /etc/letsencrypt/live/{{ apiDomain }}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/{{ apiDomain }}/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
