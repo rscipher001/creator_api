@@ -2,9 +2,12 @@ import mkdirp from 'mkdirp'
 import Env from '@ioc:Adonis/Core/Env'
 import View from '@ioc:Adonis/Core/View'
 import Logger from '@ioc:Adonis/Core/Logger'
+import { HostingPorts } from 'App/Interfaces/Enums'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import HelperService from 'App/Services/HelperService'
+
 const HOME = process.env.HOME
+
 export default class HostingService {
   private input: ProjectInput
 
@@ -44,11 +47,14 @@ export default class HostingService {
       input: this.input,
       uiDomain: Env.get('HOSTING_UI_DOMAIN'),
       apiDomain: Env.get('HOSTING_API_DOMAIN'),
+      nginxApiPort: HostingPorts.nginxApi,
+      nodeApiPort: HostingPorts.nodeApi,
     })
     const ui = await View.render(`stubs/hosting/nginx/ui`, {
       input: this.input,
       uiDomain: Env.get('HOSTING_UI_DOMAIN'),
       apiDomain: Env.get('HOSTING_API_DOMAIN'),
+      nodeUiPort: HostingPorts.nodeApi,
     })
     await HelperService.writeFile(`${HOME}/nginx/api-${this.input.id}`, api)
     await HelperService.writeFile(`${HOME}/nginx/ui-${this.input.id}`, ui)

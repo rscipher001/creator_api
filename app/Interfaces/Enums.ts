@@ -3,6 +3,12 @@ export enum Database {
   PostgreSQL = 'PostgreSQL',
 }
 
+export enum HostingPorts {
+  nginxApi = 30000, // Node BE files server by Nginx
+  nginxUi = 10000, // Static FE files server by Nginx
+  nodeApi = 20000, // Node BE files server by PM2
+}
+
 export enum Mailer {
   SMTP = 'SMTP',
   SES = 'SES',
