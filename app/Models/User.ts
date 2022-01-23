@@ -4,6 +4,8 @@ import Project from 'App/Models/Project'
 import Hash from '@ioc:Adonis/Core/Hash'
 import Mail from '@ioc:Adonis/Addons/Mail'
 import Encryption from '@ioc:Adonis/Core/Encryption'
+import StripeService from 'App/Services/StripeService'
+import { StripeCustomer } from 'App/Interfaces/ProjectInput'
 import VerificationToken, { Reason } from 'App/Models/VerificationToken'
 import { attachment, AttachmentContract } from '@ioc:Adonis/Addons/AttachmentLite'
 import { column, beforeSave, BaseModel, hasMany, HasMany, afterCreate } from '@ioc:Adonis/Lucid/Orm'
@@ -39,6 +41,12 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @column({
+    prepare: (v) => JSON.stringify(v),
+    consume: (v) => JSON.parse(v),
+  })
+  public stripe: StripeCustomer
 
   @hasMany(() => Project)
   public projects: HasMany<typeof Project>
@@ -79,5 +87,19 @@ export default class User extends BaseModel {
   @afterCreate()
   public static async sendRegistrationEmail(user: User) {
     return User.sendEmailVerificationMail(user)
+  }
+
+  public async getOrCreateStripeId() {
+    if (this.stripe && this.stripe.id) {
+      return this.stripe.id
+    }
+
+    const customer = await StripeService.createCustomer(this)
+    this.stripe = {
+      id: customer.id,
+    }
+
+    await this.save()
+    return this.stripe.id
   }
 }

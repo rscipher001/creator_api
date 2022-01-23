@@ -33,7 +33,7 @@ export default class ProjectsController {
         userId: auth.user!.id,
         id: request.param('id'),
       })
-      .first()
+      .firstOrFail()
   }
 
   public async store({ request, response, auth }: HttpContextContract) {
@@ -239,6 +239,7 @@ export default class ProjectsController {
       const generator = new Generator(input, project.id)
       await generator.init()
       project.status = 'done'
+      project.projectInput = generator.projectInput
       await project.save()
       // Send an email or something
     } catch (e) {

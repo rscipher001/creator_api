@@ -1,5 +1,9 @@
 import { Database, Mailer, ProjectType, RelationType, RequestMethod } from './Enums'
 
+export interface StripePaymentIntent {
+  id: string
+}
+
 export interface Hosting {
   databaseName: string
   databaseUser: string
@@ -149,6 +153,10 @@ export interface RBAC {
 export interface RBACMatrix {
   role: string
   permissions: string[]
+}
+
+export interface StripeCustomer {
+  id: string
 }
 
 export default interface ProjectInput {

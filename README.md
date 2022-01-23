@@ -56,3 +56,22 @@ In the above snippet you can see the routes for workers are nested inside projec
 - UI runs at 10K + projectId
 - API proxy runs at 20K + projectId
 - API runs at 30K + projectId
+
+## How Payment works
+
+- Every payment system have a prepare stage
+- A webhook for verification
+- Middle steps based on payment platform
+
+## How Stripe Payment Works
+
+- Create a payment intent
+- Send payment intent to frontend and generate UI
+- Complete payment from frontend and wait from webhook on backend
+- On webhook, verify payment intent and complete payment
+
+## How to test stripe payments locally
+
+- Install stripe CLI: https://stripe.com/docs/stripe-cli
+- Stripe login: `stripe login`
+- Listen to webhooks in local: `stripe listen --forward-to localhost:3000/api/webhook/stripe`

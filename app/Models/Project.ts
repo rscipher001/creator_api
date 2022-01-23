@@ -4,6 +4,8 @@ import Env from '@ioc:Adonis/Core/Env'
 import { HostingPorts } from 'App/Interfaces/Enums'
 import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
+import ProjectInput from 'App/Interfaces/ProjectInput'
+import BackendProjectService from 'App/Services/ProjectService'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 
 export default class Project extends BaseModel {
@@ -12,6 +14,12 @@ export default class Project extends BaseModel {
 
   @column()
   public rawInput: string
+
+  @column({
+    prepare: (v) => JSON.stringify(v),
+    consume: (v) => JSON.parse(v),
+  })
+  public projectInput: ProjectInput
 
   @column()
   public name: string
@@ -61,5 +69,13 @@ export default class Project extends BaseModel {
         cwd: basePath,
       })
     } catch (e) {}
+  }
+
+  public async getProjectInput() {
+    if (this.projectInput) return this.projectInput
+    const generator = new BackendProjectService(JSON.parse(this.rawInput), this.id)
+    this.projectInput = generator.prepare()
+    await this.save()
+    return this.projectInput
   }
 }

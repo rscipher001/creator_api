@@ -19,6 +19,9 @@ Route.group(() => {
   Route.post('/password/forget/request', 'API/PasswordResetController.sendResetEmail')
   Route.post('/password/forget/verify', 'API/PasswordResetController.verifyToken')
   Route.post('/password/forget/update', 'API/PasswordResetController.updatePassword')
+
+  // Webhooks
+  Route.post('/webhook/stripe', 'API/PaymentsController.stripeWebhook')
 }).prefix('/api')
 
 Route.group(() => {
@@ -56,6 +59,9 @@ Route.group(() => {
   Route.get('/project/:id/generate/:type', 'API/ProjectsController.generateSignedUrl').as(
     'generateSignedUrl'
   )
+
+  // Stripe payment related URLs
+  Route.get('/project/:id/payment/prepare/stripe', 'API/PaymentsController.prepareStripePayment')
 })
   .middleware(['auth', 'ensureEmailIsVerified'])
   .prefix('/api')

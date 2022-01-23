@@ -51,4 +51,6 @@ export default Env.rules({
   ROOT_MYSQL_HOST: Env.schema.string.optional(),
   ROOT_MYSQL_PORT: Env.schema.number.optional(),
   ROOT_MYSQL_PASSWORD: Env.schema.string.optional(),
+
+  STRIPE_SECRET_KEY: Env.schema.string(),
 })
