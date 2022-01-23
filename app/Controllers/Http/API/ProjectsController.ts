@@ -294,7 +294,7 @@ export default class ProjectsController {
     if (project.status === 'queued') throw new Error('Build is in progress')
     if (project.status === 'failed') throw new Error('Build failed')
     const input = JSON.parse(project.rawInput)
-    const generator = new Generator(JSON.parse(JSON.stringify(input)), 0)
+    const generator = new Generator(JSON.parse(JSON.stringify(input)), projectId)
     const prepareInput: ProjectInput = generator.prepare()
     if (prepareInput.generate.api && prepareInput.generate.spa) {
       const hostingService = new HostingService(prepareInput)
