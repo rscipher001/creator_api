@@ -137,8 +137,8 @@ export default class HostingService {
      * 3. Remove MySQL user & database
      * 4. Remove build folders
      */
-    await HelperService.execute('pm2', ['stop', 'server.js', '--name', `api-${this.input.id}`])
-    await HelperService.execute('pm2', ['delete', 'server.js', '--name', `api-${this.input.id}`])
+    await HelperService.execute('pm2', ['stop', `api-${this.input.id}`])
+    await HelperService.execute('pm2', ['delete', `api-${this.input.id}`])
 
     await HelperService.execute(`sudo`, ['rm', `${HOME}/nginx/api-${this.input.id}`])
     await HelperService.execute(`sudo`, ['rm', `${HOME}/nginx/ui-${this.input.id}`])
