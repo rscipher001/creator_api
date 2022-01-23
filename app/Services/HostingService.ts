@@ -34,10 +34,9 @@ export default class HostingService {
   }
 
   protected async executeMySqlQuery(query) {
-    const createDatabaseCommand = `mysql -uroot -p${Env.get('ROOT_MYSQL_PASSWORD')} -e`
+    const createDatabaseCommand = `sudo mysql -uroot -p${Env.get('ROOT_MYSQL_PASSWORD')} -e`
     const [command, ...args] = createDatabaseCommand.split(' ')
     args.push(`${query}`)
-    console.log(command, args)
     await HelperService.execute(command, args)
   }
 
@@ -54,7 +53,7 @@ export default class HostingService {
       input: this.input,
       uiDomain: Env.get('HOSTING_UI_DOMAIN'),
       apiDomain: Env.get('HOSTING_API_DOMAIN'),
-      nodeUiPort: HostingPorts.nodeApi,
+      nginxUiPort: HostingPorts.nodeApi,
     })
     await HelperService.writeFile(`${HOME}/nginx/api-${this.input.id}`, api)
     await HelperService.writeFile(`${HOME}/nginx/ui-${this.input.id}`, ui)
@@ -83,11 +82,7 @@ export default class HostingService {
       console.error(e)
     }
 
-    // Update API port in .env to ensure it runs on a unique port
-    const filePath = `${this.input.path}/.env`
-    let content = await HelperService.readFile(filePath)
-    content.replace('PORT=3333', `PORT=${3000 + this.input.id}`)
-    await HelperService.writeFile(filePath, content)
+    await this.updateApiDotEnvPort()
 
     // Run migration
     await HelperService.execute('node', ['ace', 'migration:run', '--env=production', '--force'], {
@@ -108,6 +103,16 @@ export default class HostingService {
     await HelperService.execute('pm2', ['start', 'server.js', '--name', `api-${this.input.id}`], {
       cwd: `${this.input.path}/build`,
     })
+  }
+
+  protected async updateApiDotEnvPort() {
+    // Update API port in .env to ensure it runs on a unique port
+    const filePath = `${this.input.path}/.env`
+    let content = await HelperService.readFile(filePath)
+    await HelperService.writeFile(
+      filePath,
+      content.replace('PORT=3333', `PORT=${HostingPorts.nodeApi + this.input.id}`)
+    )
   }
 
   protected async installDependencies() {

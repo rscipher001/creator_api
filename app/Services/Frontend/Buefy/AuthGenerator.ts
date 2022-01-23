@@ -1,5 +1,7 @@
 import mkdirp from 'mkdirp'
+import Env from '@ioc:Adonis/Core/Env'
 import View from '@ioc:Adonis/Core/View'
+import { HostingPorts } from 'App/Interfaces/Enums'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 
@@ -224,12 +226,15 @@ export default class AuthGenerator {
    * Copies .env and .env.example files
    */
   protected async copyEnv() {
-    const envApiUrlLine = 'VUE_APP_API_URL=http://localhost:3333'
+    const envApiUrlLine = `VUE_APP_API_URL=http://localhost:3333`
+    const envApiUrlLineLocal = `VUE_APP_API_URL=http://${Env.get('HOSTING_UI_DOMAIN')}:${
+      HostingPorts.nginxApi
+    }`
 
     const localEnvPath = `${this.input.spaPath}/.env.local`
     const localEnvExists = await HelperService.fileExists(localEnvPath)
     if (!localEnvExists) {
-      await HelperService.writeFile(localEnvPath, envApiUrlLine)
+      await HelperService.writeFile(localEnvPath, envApiUrlLineLocal)
     }
 
     const exampleEnvPath = `${this.input.spaPath}/.env.example`
