@@ -17,6 +17,11 @@ class StripeService {
     return this.stripe.customers.create({
       email: user.email,
       name: user.name,
+      address: {
+        line1: 'Bhopal',
+        state: 'MP',
+        country: 'IN',
+      },
       metadata: {
         id: user.id,
       },
@@ -33,11 +38,8 @@ class StripeService {
     }
 
     return this.stripe.paymentIntents.create({
-      amount,
+      amount: amount * 100,
       currency: 'INR',
-      automatic_payment_methods: {
-        enabled: true,
-      },
       description: 'Payment for service',
       customer: await user.getOrCreateStripeId(),
     })
