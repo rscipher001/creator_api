@@ -53,7 +53,7 @@ export default class HostingService {
       input: this.input,
       uiDomain: Env.get('HOSTING_UI_DOMAIN'),
       apiDomain: Env.get('HOSTING_API_DOMAIN'),
-      nginxUiPort: HostingPorts.nodeApi,
+      nginxUiPort: HostingPorts.nginxUi,
     })
     await HelperService.writeFile(`${HOME}/nginx/api-${this.input.id}`, api)
     await HelperService.writeFile(`${HOME}/nginx/ui-${this.input.id}`, ui)
@@ -89,10 +89,11 @@ export default class HostingService {
       cwd: this.input.path,
     })
 
-    // Build Backend
+    // Build Backend and copy .env to build folder
     await HelperService.execute('npm', ['run', 'build'], {
       cwd: this.input.path,
     })
+    await HelperService.copyFile(`${this.input.path}/.env`, `${this.input.path}/build/.env`)
 
     // Build Frontend
     await HelperService.execute('npm', ['run', 'build'], {
