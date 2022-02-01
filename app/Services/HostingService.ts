@@ -93,6 +93,7 @@ export default class HostingService {
     await HelperService.execute('npm', ['run', 'build'], {
       cwd: this.input.path,
     })
+    Logger.info(`Copying ${this.input.path}/.env to ${this.input.path}/build/.env`)
     await HelperService.copyFile(`${this.input.path}/.env`, `${this.input.path}/build/.env`)
 
     // Build Frontend
