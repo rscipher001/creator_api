@@ -33,7 +33,7 @@ import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
 class BackendProjectService {
   private input: any
   private projectId: number
-  private projectInput: ProjectInput
+  public projectInput: ProjectInput
 
   constructor(input, projectId) {
     this.input = input

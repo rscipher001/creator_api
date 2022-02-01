@@ -65,3 +65,17 @@ export enum UIInput {
   RADIO = 'Radio',
   CHECKBOX = 'Checkbox',
 }
+
+// Prices in dollar
+export enum Price {
+  api = 5,
+  app = 5,
+  spa = 5,
+}
+
+export enum PaymentStatus {
+  started = 'started',
+  processing = 'processing',
+  done = 'done',
+  failed = 'failed',
+}
