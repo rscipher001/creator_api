@@ -15,6 +15,50 @@ export default class HostingService {
     this.input = input
   }
 
+  protected prepareEnv() {
+    const keysToRemove = [
+      'HOST',
+      'PORT',
+      'NODE_ENV',
+      'APP_KEY',
+      'CACHE_VIEWS',
+      'DRIVE_DISK',
+      'UI_URL',
+      'DB_CONNECTION',
+      'DB_DEBUG',
+      'MYSQL_HOST',
+      'MYSQL_PORT',
+      'MYSQL_USER',
+      'MYSQL_PASSWORD',
+      'MYSQL_DB_NAME',
+      'PROJECT_PATH',
+      'MAIL_FROM_ADDRESS',
+      'SMTP_HOST',
+      'SMTP_PORT',
+      'SMTP_USERNAME',
+      'SMTP_PASSWORD',
+      'REDIS_CONNECTION',
+      'REDIS_HOST',
+      'REDIS_PORT',
+      'REDIS_PASSWORD',
+      'ENABLE_HOSTING',
+      'HOSTING_UI_DOMAIN',
+      'HOSTING_API_DOMAIN',
+      'ROOT_MYSQL_HOST',
+      'ROOT_MYSQL_PORT',
+      'ROOT_MYSQL_PASSWORD',
+      'STRIPE_SECRET_KEY',
+    ]
+    const env = JSON.parse(JSON.stringify(process.env))
+    keysToRemove.forEach((key) => delete env[key])
+    return {
+      env: {
+        ...process.env,
+        NODE_ENV: 'development',
+      },
+    }
+  }
+
   protected async createDatabaseAndUser() {
     const {
       databaseName: database,
@@ -87,11 +131,13 @@ export default class HostingService {
     // Run migration
     await HelperService.execute('node', ['ace', 'migration:run', '--env=production', '--force'], {
       cwd: this.input.path,
+      env: this.prepareEnv(),
     })
 
     // Build Backend and copy .env to build folder
     await HelperService.execute('npm', ['run', 'build'], {
       cwd: this.input.path,
+      env: this.prepareEnv(),
     })
     Logger.info(`Copying ${this.input.path}/.env to ${this.input.path}/build/.env`)
     await HelperService.copyFile(`${this.input.path}/.env`, `${this.input.path}/build/.env`)
@@ -99,11 +145,13 @@ export default class HostingService {
     // Build Frontend
     await HelperService.execute('npm', ['run', 'build'], {
       cwd: this.input.spaPath,
+      env: this.prepareEnv(),
     })
 
     // Run PM2
     await HelperService.execute('pm2', ['start', 'server.js', '--name', `api-${this.input.id}`], {
       cwd: `${this.input.path}/build`,
+      env: this.prepareEnv(),
     })
   }
 
@@ -118,8 +166,8 @@ export default class HostingService {
   }
 
   protected async installDependencies() {
-    await HelperService.execute('npm', ['ci'], { cwd: this.input.path })
-    await HelperService.execute('npm', ['ci'], { cwd: this.input.spaPath })
+    await HelperService.execute('npm', ['ci'], { cwd: this.input.path, env: this.prepareEnv() })
+    await HelperService.execute('npm', ['ci'], { cwd: this.input.spaPath, env: this.prepareEnv() })
   }
 
   protected async start() {
@@ -139,8 +187,10 @@ export default class HostingService {
      * 3. Remove MySQL user & database
      * 4. Remove build folders
      */
-    await HelperService.execute('pm2', ['stop', `api-${this.input.id}`])
-    await HelperService.execute('pm2', ['delete', `api-${this.input.id}`])
+    await HelperService.execute('pm2', ['stop', `api-${this.input.id}`], { env: this.prepareEnv() })
+    await HelperService.execute('pm2', ['delete', `api-${this.input.id}`], {
+      env: this.prepareEnv(),
+    })
 
     await HelperService.execute(`sudo`, ['rm', `${HOME}/nginx/api-${this.input.id}`])
     await HelperService.execute(`sudo`, ['rm', `${HOME}/nginx/ui-${this.input.id}`])

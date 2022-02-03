@@ -13,6 +13,7 @@ const access = promisify(fs.access)
 interface Options {
   cwd?: string
   stdio?: string
+  env?: any
 }
 
 class HelperService {
@@ -40,7 +41,9 @@ class HelperService {
   public execute = (
     command: string,
     args: string[] = [],
-    options: Options = { stdio: 'inherit' }
+    options: Options = {
+      stdio: 'inherit',
+    }
   ) =>
     new Promise((resolve, reject) => {
       if (options) {
