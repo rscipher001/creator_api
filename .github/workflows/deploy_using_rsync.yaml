@@ -26,9 +26,7 @@ jobs:
           ssh-keyscan -p $PORT $HOST >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           rsync -az -e "ssh -p $PORT" ./build/ $USER@$HOST:~/Projects/creator_api
-          ssh $USER@$HOST -p $PORT 'cd ~/Projects/creator_api && npm ci --ignore-scripts'
-          node ace migration:run
-          pm2 restart creator_api -a
+          ssh $USER@$HOST -p $PORT 'cd ~/Projects/creator_api && npm ci --ignore-scripts && node ace migration:run && pm2 restart creator_api -a'
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           HOST: ${{ secrets.HOST }}
