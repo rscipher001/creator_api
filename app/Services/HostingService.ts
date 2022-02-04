@@ -52,8 +52,8 @@ export default class HostingService {
     const env = JSON.parse(JSON.stringify(process.env))
     keysToRemove.forEach((key) => delete env[key])
     return {
-      env: {
-        ...process.env,
+      ...env,
+      ...{
         NODE_ENV: 'development',
       },
     }
