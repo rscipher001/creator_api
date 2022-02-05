@@ -40,9 +40,9 @@ export default class Project extends BaseModel {
 
   // Frontend URL when hosted
   @column({
-    serialize: (value) =>
+    serialize: (_) =>
       Env.get('HOSTING_UI_DOMAIN')
-        ? `https://${Env.get('HOSTING_UI_DOMAIN')}:${HostingPorts.nginxUi}/${value}`
+        ? `https://${Env.get('HOSTING_UI_DOMAIN')}:${HostingPorts.nginxUi}`
         : null,
   })
   public url: string

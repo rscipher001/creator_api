@@ -1,7 +1,7 @@
+import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
-import mkdirp from 'mkdirp'
 
 export default class SPAGenerator {
   private input: ProjectInput
