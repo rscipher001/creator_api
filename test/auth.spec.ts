@@ -161,7 +161,10 @@ test.group('Auth', (group) => {
       if (body.status === 'failed') throw new Error('Project creation failed')
       if (body.status === 'done') {
         shouldCheckAgain = false
-        const generator = new Generator(JSON.parse(JSON.stringify(oneTableMin)), projectId)
+        const generator = new Generator(
+          JSON.parse(JSON.stringify(oneTableMin)),
+          oneTableMinProjectId
+        )
         const prepareInput: ProjectInput = generator.prepare()
         await HelperService.execute('npm', ['run', 'build'], {
           cwd: prepareInput.path,
@@ -181,7 +184,10 @@ test.group('Auth', (group) => {
       if (body.status === 'failed') throw new Error('Project creation failed')
       if (body.status === 'done') {
         shouldCheckAgain = false
-        const generator = new Generator(JSON.parse(JSON.stringify(nestedRoutes)), projectId)
+        const generator = new Generator(
+          JSON.parse(JSON.stringify(nestedRoutes)),
+          nestedRoutesProjectId
+        )
         const prepareInput: ProjectInput = generator.prepare()
         await HelperService.execute('npm', ['run', 'build'], {
           cwd: prepareInput.path,
