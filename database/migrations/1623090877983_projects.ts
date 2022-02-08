@@ -10,6 +10,10 @@ export default class Projects extends BaseSchema {
       table.string('name')
       table.string('status')
       table.integer('userId').unsigned().references('id').inTable('users')
+      table.json('projectInput')
+      table.boolean('isHosted')
+      table.boolean('isDeleted')
+      table.boolean('isCleaned')
 
       /**
        * Uses timestampz for PostgreSQL and DATETIME2 for MSSQL
