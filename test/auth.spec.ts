@@ -3,7 +3,10 @@ import faker from 'faker'
 import supertest from 'supertest'
 import Env from '@ioc:Adonis/Core/Env'
 import Database from '@ioc:Adonis/Lucid/Database'
+import Generator from 'App/Services/ProjectService'
 import Encryption from '@ioc:Adonis/Core/Encryption'
+import ProjectInput from 'App/Interfaces/ProjectInput'
+import HelperService from 'App/Services/HelperService'
 
 import fullProjectInput from './input/full'
 import oneTableMin from './input/oneTableMin'
@@ -138,6 +141,11 @@ test.group('Auth', (group) => {
       if (body.status === 'failed') throw new Error('Project creation failed')
       if (body.status === 'done') {
         shouldCheckAgain = false
+        const generator = new Generator(JSON.parse(JSON.stringify(fullProjectInput)), projectId)
+        const prepareInput: ProjectInput = generator.prepare()
+        await HelperService.execute('npm', ['run', 'build'], {
+          cwd: prepareInput.path,
+        })
         assert.isObject(body)
       }
     }
@@ -153,6 +161,11 @@ test.group('Auth', (group) => {
       if (body.status === 'failed') throw new Error('Project creation failed')
       if (body.status === 'done') {
         shouldCheckAgain = false
+        const generator = new Generator(JSON.parse(JSON.stringify(oneTableMin)), projectId)
+        const prepareInput: ProjectInput = generator.prepare()
+        await HelperService.execute('npm', ['run', 'build'], {
+          cwd: prepareInput.path,
+        })
         assert.isObject(body)
       }
     }
@@ -168,6 +181,11 @@ test.group('Auth', (group) => {
       if (body.status === 'failed') throw new Error('Project creation failed')
       if (body.status === 'done') {
         shouldCheckAgain = false
+        const generator = new Generator(JSON.parse(JSON.stringify(nestedRoutes)), projectId)
+        const prepareInput: ProjectInput = generator.prepare()
+        await HelperService.execute('npm', ['run', 'build'], {
+          cwd: prepareInput.path,
+        })
         assert.isObject(body)
       }
     }

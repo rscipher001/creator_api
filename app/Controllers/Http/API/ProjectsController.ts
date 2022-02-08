@@ -2,12 +2,12 @@ import Env from '@ioc:Adonis/Core/Env'
 import Project from 'App/Models/Project'
 import Route from '@ioc:Adonis/Core/Route'
 import Generator from 'App/Services/ProjectService'
+import ProjectInput from 'App/Interfaces/ProjectInput'
 import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
 import HostingService from 'App/Services/HostingService'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import CreateProjectValidator from 'App/Validators/CreateProjectValidator'
-import ProjectInput from 'App/Interfaces/ProjectInput'
 
 export default class ProjectsController {
   public async index({ request, auth }: HttpContextContract) {
