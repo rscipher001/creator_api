@@ -7,10 +7,12 @@ import Encryption from '@ioc:Adonis/Core/Encryption'
 
 import fullProjectInput from './input/full'
 import oneTableMin from './input/oneTableMin'
+import nestedRoutes from './input/nestedRoutes'
 
 const BASE_URL = `http://${Env.get('HOST')}:${Env.get('PORT')}`
 let projectId = 1
 let oneTableMinProjectId = 1
+let nestedRoutesProjectId = 1
 
 test.group('Auth', (group) => {
   group.before(async () => {
@@ -116,6 +118,16 @@ test.group('Auth', (group) => {
     oneTableMinProjectId = body.id
   })
 
+  test('Nested Routes API - 1', async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .post('/api/project')
+      .send(nestedRoutes)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200)
+    assert.isObject(body)
+    nestedRoutesProjectId = body.id
+  })
+
   test('Full Project API - 2', async (assert) => {
     let shouldCheckAgain = true
     while (shouldCheckAgain) {
@@ -136,6 +148,21 @@ test.group('Auth', (group) => {
     while (shouldCheckAgain) {
       const { body } = await supertest(BASE_URL)
         .get(`/api/project/${oneTableMinProjectId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200)
+      if (body.status === 'failed') throw new Error('Project creation failed')
+      if (body.status === 'done') {
+        shouldCheckAgain = false
+        assert.isObject(body)
+      }
+    }
+  }).timeout(600000)
+
+  test('Nested Routes API - 2', async (assert) => {
+    let shouldCheckAgain = true
+    while (shouldCheckAgain) {
+      const { body } = await supertest(BASE_URL)
+        .get(`/api/project/${nestedRoutesProjectId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
       if (body.status === 'failed') throw new Error('Project creation failed')
