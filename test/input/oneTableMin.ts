@@ -16,7 +16,7 @@ const oneTableMin = {
   tech: { backend: 'Adonis', frontend: 'Buefy' },
   generate: {
     api: { generate: true, crud: true, test: true },
-    spa: { generate: true, crud: true },
+    spa: { generate: false, crud: true },
     app: { generate: false },
     website: { generate: false },
   },
