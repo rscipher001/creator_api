@@ -1,4 +1,4 @@
 {
   "editor.renderWhitespace": "boundary",
-  "workbench.sideBar.location": "left"
+  "workbench.sideBar.location": "right"
 }

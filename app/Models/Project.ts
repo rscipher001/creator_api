@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon'
 import User from 'App/Models/User'
 import Env from '@ioc:Adonis/Core/Env'
-import { HostingPorts } from 'App/Interfaces/Enums'
 import Application from '@ioc:Adonis/Core/Application'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
@@ -37,15 +36,6 @@ export default class Project extends BaseModel {
   // node_modules deleted
   @column()
   public isCleaned: boolean
-
-  // Frontend URL when hosted
-  @column({
-    serialize: (_) =>
-      Env.get('HOSTING_UI_DOMAIN')
-        ? `https://${Env.get('HOSTING_UI_DOMAIN')}:${HostingPorts.nginxUi}`
-        : null,
-  })
-  public url: string
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
