@@ -1,5 +1,6 @@
 import { string } from '@ioc:Adonis/Core/Helpers'
-import ProjectInput, { Column } from 'App/Interfaces/ProjectInput'
+import { RelationType } from 'App/Interfaces/Enums'
+import ProjectInput, { Column, Relation } from 'App/Interfaces/ProjectInput'
 
 export default class SwaggerGenerator {
   private input: ProjectInput
@@ -47,7 +48,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}`].get = {
-          tags: [table.names.camelCase],
+          tags: [table.names.pascalCase],
           summary: `Returns list of ${table.names.camelCasePlural}`,
           operationId: `${table.names.camelCase}Index`,
           parameters: routeParentInPathSchema,
@@ -71,7 +72,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}`].post = {
-          tags: [table.names.camelCase],
+          tags: [table.names.pascalCase],
           summary: `Create new ${table.names.camelCase}`,
           operationId: `${table.names.camelCase}Store`,
           parameters: routeParentInPathSchema,
@@ -95,7 +96,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`].get = {
-          tags: [table.names.camelCase],
+          tags: [table.names.pascalCase],
           summary: `Get ${table.names.camelCase}`,
           parameters: [
             {
@@ -132,7 +133,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`].put = {
-          tags: [table.names.camelCase],
+          tags: [table.names.pascalCase],
           summary: `Update existing ${table.names.camelCase}`,
           parameters: [
             {
@@ -169,7 +170,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`].delete = {
-          tags: [table.names.camelCase],
+          tags: [table.names.pascalCase],
           summary: `Delete ${table.names.camelCase}`,
           parameters: [
             {
@@ -204,7 +205,7 @@ export default class SwaggerGenerator {
     const paths = {}
     const registerPathSchema = {
       post: {
-        tags: ['auth'],
+        tags: ['Auth'],
         summary: 'Register user and get auth token',
         operationId: 'register',
         requestBody: {
@@ -242,7 +243,7 @@ export default class SwaggerGenerator {
     }
     const loginPathSchema = {
       post: {
-        tags: ['auth'],
+        tags: ['Auth'],
         summary: 'Login user and get auth token',
         operationId: 'login',
         requestBody: {
@@ -280,7 +281,7 @@ export default class SwaggerGenerator {
     }
     const logoutPathSchema = {
       post: {
-        tags: ['auth'],
+        tags: ['Auth'],
         summary: 'Logout',
         operationId: 'logout',
         security: [
@@ -325,16 +326,16 @@ export default class SwaggerGenerator {
   protected prepareTags() {
     const tags = [
       {
-        name: 'auth',
+        name: 'Auth',
         description:
           'Everything related to authentication like login, register, forget password, etc.',
       },
       {
-        name: 'me',
+        name: 'Me',
         description: 'Everything related to loggged in user like profile, update profile, etc.',
       },
       {
-        name: 'user',
+        name: 'User',
         description: 'Everything related to user model',
       },
     ]
@@ -342,13 +343,13 @@ export default class SwaggerGenerator {
     // Conditionally add rbac if required
     if (this.input.rbac.enabled) {
       tags.push({
-        name: 'rbac',
+        name: 'RBAC',
         description: 'Role & permission management system',
       })
     }
     this.input.tables.forEach((table) => {
       tags.push({
-        name: table.names.camelCase,
+        name: table.names.pascalCase,
         description: `Everything related to ${table.names.camelCase} model`,
       })
     })
@@ -449,9 +450,9 @@ export default class SwaggerGenerator {
     }
   }
 
-  protected getSwaggerColumnType(column: Column) {
+  protected getColumnDetails(column: Column) {
     const columnMetaData = {
-      nullable: column.meta.required,
+      nullable: !column.meta.required,
     }
     console.log(`${column.names.pascalCase}`, column.type)
     switch (column.type) {
@@ -485,6 +486,27 @@ export default class SwaggerGenerator {
     return columnMetaData
   }
 
+  protected getRelationDetails(relation: Relation) {
+    switch (relation.type) {
+      case RelationType.BelongsTo:
+      case RelationType.HasOne:
+        return {
+          [relation.names!.camelCase]: {
+            $ref: `#/components/schemas/${relation.modelNames.pascalCase}`,
+          },
+        }
+      default:
+        return {
+          [relation.names!.camelCasePlural]: {
+            type: 'array',
+            items: {
+              $ref: `#/components/schemas/${relation.modelNames.pascalCase}`,
+            },
+          },
+        }
+    }
+  }
+
   protected prepareModelSchema() {
     const integerSchema = {
       type: 'integer',
@@ -514,8 +536,15 @@ export default class SwaggerGenerator {
 
     this.input.tables.forEach((table) => {
       const columnsSchema = {}
+      let relationsSchema = {}
       table.columns.map((column) => {
-        columnsSchema[column.columnName] = this.getSwaggerColumnType(column)
+        columnsSchema[column.columnName] = this.getColumnDetails(column)
+      })
+      table.relations.map((relation) => {
+        relationsSchema = {
+          ...relationsSchema,
+          ...this.getRelationDetails(relation),
+        }
       })
       modelsScheam[table.names.pascalCase] = {
         type: 'object',
@@ -524,8 +553,10 @@ export default class SwaggerGenerator {
             type: 'integer',
             format: 'int64',
             example: 1,
+            nullable: false,
           },
           ...columnsSchema,
+          ...relationsSchema,
         },
       }
       modelsScheam[`${table.names.pascalCase}List`] = {
