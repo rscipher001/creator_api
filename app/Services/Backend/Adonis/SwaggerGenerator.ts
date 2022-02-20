@@ -49,6 +49,19 @@ export default class SwaggerGenerator {
         : ''
 
       if (table.operations.index) {
+        const queryParams: unknown[] = []
+        table.columns
+          .filter((c) => c.meta.filterable)
+          .forEach((column) => {
+            queryParams.push({
+              in: 'query',
+              name: column.columnName,
+              schema: {
+                type: 'string',
+              },
+              description: `Filter data by ${column.columnName}`,
+            })
+          })
         if (!paths[`${routeParentPart}/${table.names.camelCase}`]) {
           paths[`${routeParentPart}/${table.names.camelCase}`] = {}
         }
@@ -57,7 +70,7 @@ export default class SwaggerGenerator {
           tags: [table.names.pascalCase],
           summary: `Returns list of ${table.names.camelCasePlural}`,
           operationId: `${table.names.camelCase}Index`,
-          parameters: routeParentInPathSchema,
+          parameters: [...routeParentInPathSchema, ...queryParams],
           responses: {
             '200': {
               description: `List of ${table.names.camelCasePlural}`,
