@@ -13,6 +13,9 @@ export default class AppProvider {
 
   public async ready() {
     await import('App/NamingStrategy/CamelCaseStrategy')
+    if (this.app.environment === 'web') {
+      await import('../start/socket')
+    }
   }
 
   public async shutdown() {

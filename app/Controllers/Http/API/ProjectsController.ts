@@ -8,6 +8,7 @@ import HelperService from 'App/Services/HelperService'
 import HostingService from 'App/Services/HostingService'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import CreateProjectValidator from 'App/Validators/CreateProjectValidator'
+import SwaggerGenerator from 'App/Services/Backend/Adonis/SwaggerGenerator'
 
 export default class ProjectsController {
   public async index({ request, auth }: HttpContextContract) {
@@ -305,5 +306,19 @@ export default class ProjectsController {
     project.isCleaned = true
     await project.save()
     return project
+  }
+
+  public async openAPI({ auth, request }: HttpContextContract) {
+    const projectId = request.param('id')
+    const project = await Project.query()
+      .where({
+        userId: auth.user!.id,
+        id: projectId,
+      })
+      .firstOrFail()
+    const generator = new Generator(JSON.parse(project.rawInput), 0)
+    const prepareInput = generator.prepare()
+    const swaggerGenerator = new SwaggerGenerator(prepareInput)
+    return swaggerGenerator.init()
   }
 }

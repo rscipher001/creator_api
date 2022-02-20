@@ -196,10 +196,9 @@ export default interface ProjectInput {
     }
   }
   auth: {
-    login: boolean
-    register: boolean
-    passwordReset: boolean
-    passwordChange: boolean
+    register: boolean // Enable register
+    passwordReset: boolean // Enable password reset
+    passwordChange: boolean // Enable password change
     table: Table
   }
   git: {
