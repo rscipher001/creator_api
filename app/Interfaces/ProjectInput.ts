@@ -196,7 +196,6 @@ export default interface ProjectInput {
     }
   }
   auth: {
-    login: boolean // Enable login
     register: boolean // Enable register
     passwordReset: boolean // Enable password reset
     passwordChange: boolean // Enable password change

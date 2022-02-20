@@ -22,14 +22,35 @@ export default class SwaggerGenerator {
 
   protected prepareModelPath(paths) {
     this.input.tables.forEach((table) => {
+      const routeParentInPathSchema: unknown[] = []
+      const routeParentPart = table.routeParentRelations.length
+        ? table.routeParentRelations
+            .map((parentTable) => {
+              routeParentInPathSchema.push({
+                in: 'path',
+                name: `${parentTable.names?.camelCase}Id`,
+                schema: {
+                  type: 'integer',
+                  format: 'int64',
+                  example: 1,
+                },
+                required: true,
+                description: `ID of the ${parentTable.names?.camelCase}`,
+              })
+              return `/${parentTable.names?.camelCase}/{${parentTable.names?.camelCase}Id}`
+            })
+            .join('')
+        : ''
+
       if (table.operations.index) {
-        if (!paths[`/${table.names.camelCase}`]) {
-          paths[`/${table.names.camelCase}`] = {}
+        if (!paths[`${routeParentPart}/${table.names.camelCase}`]) {
+          paths[`${routeParentPart}/${table.names.camelCase}`] = {}
         }
-        paths[`/${table.names.camelCase}`].get = {
+        paths[`${routeParentPart}/${table.names.camelCase}`].get = {
           tags: [table.names.camelCase],
           summary: `Returns list of ${table.names.camelCasePlural}`,
           operationId: `${table.names.camelCase}Index`,
+          parameters: routeParentInPathSchema,
           responses: {
             '200': {
               description: `List of ${table.names.camelCasePlural}`,
@@ -46,13 +67,14 @@ export default class SwaggerGenerator {
       }
 
       if (table.operations.store) {
-        if (!paths[`/${table.names.camelCase}`]) {
-          paths[`/${table.names.camelCase}`] = {}
+        if (!paths[`${routeParentPart}/${table.names.camelCase}`]) {
+          paths[`${routeParentPart}/${table.names.camelCase}`] = {}
         }
-        paths[`/${table.names.camelCase}`].post = {
+        paths[`${routeParentPart}/${table.names.camelCase}`].post = {
           tags: [table.names.camelCase],
           summary: `Create new ${table.names.camelCase}`,
           operationId: `${table.names.camelCase}Store`,
+          parameters: routeParentInPathSchema,
           responses: {
             '200': {
               description: `Newly created ${table.names.camelCase}`,
@@ -69,10 +91,10 @@ export default class SwaggerGenerator {
       }
 
       if (table.operations.show) {
-        if (!paths[`/${table.names.camelCase}/{${table.names.camelCase}Id}`]) {
-          paths[`/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
+        if (!paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`]) {
+          paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
         }
-        paths[`/${table.names.camelCase}/{${table.names.camelCase}Id}`].get = {
+        paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`].get = {
           tags: [table.names.camelCase],
           summary: `Get ${table.names.camelCase}`,
           parameters: [
@@ -85,8 +107,9 @@ export default class SwaggerGenerator {
                 example: 1,
               },
               required: true,
-              description: `Numeric ID of the ${table.names.camelCase} to get`,
+              description: `ID of the ${table.names.camelCase} to get`,
             },
+            ...routeParentInPathSchema,
           ],
           operationId: `${table.names.camelCase}Show`,
           responses: {
@@ -105,10 +128,10 @@ export default class SwaggerGenerator {
       }
 
       if (table.operations.update) {
-        if (!paths[`/${table.names.camelCase}/{${table.names.camelCase}Id}`]) {
-          paths[`/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
+        if (!paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`]) {
+          paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
         }
-        paths[`/${table.names.camelCase}/{${table.names.camelCase}Id}`].put = {
+        paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`].put = {
           tags: [table.names.camelCase],
           summary: `Update existing ${table.names.camelCase}`,
           parameters: [
@@ -121,8 +144,9 @@ export default class SwaggerGenerator {
                 example: 1,
               },
               required: true,
-              description: `Numeric ID of the ${table.names.camelCase} to update`,
+              description: `ID of the ${table.names.camelCase} to update`,
             },
+            ...routeParentInPathSchema,
           ],
           operationId: `${table.names.camelCase}Destroy`,
           responses: {
@@ -141,10 +165,10 @@ export default class SwaggerGenerator {
       }
 
       if (table.operations.destroy) {
-        if (!paths[`/${table.names.camelCase}/{${table.names.camelCase}Id}`]) {
-          paths[`/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
+        if (!paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`]) {
+          paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
         }
-        paths[`/${table.names.camelCase}/{${table.names.camelCase}Id}`].delete = {
+        paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`].delete = {
           tags: [table.names.camelCase],
           summary: `Delete ${table.names.camelCase}`,
           parameters: [
@@ -157,8 +181,9 @@ export default class SwaggerGenerator {
                 example: 1,
               },
               required: true,
-              description: `Numeric ID of the ${table.names.camelCase} to update`,
+              description: `ID of the ${table.names.camelCase} to update`,
             },
+            ...routeParentInPathSchema,
           ],
           operationId: `${table.names.camelCase}Update`,
           responses: {
@@ -284,7 +309,7 @@ export default class SwaggerGenerator {
 
     // Auth routes
     if (this.input.auth.register) paths['/register'] = registerPathSchema
-    if (this.input.auth.login) paths['/login'] = loginPathSchema
+    paths['/login'] = loginPathSchema
     paths['/logout'] = logoutPathSchema
 
     // Prepare model paths
