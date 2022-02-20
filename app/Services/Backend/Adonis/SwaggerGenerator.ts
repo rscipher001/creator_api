@@ -22,6 +22,11 @@ export default class SwaggerGenerator {
   }
 
   protected prepareModelPath(paths) {
+    const security = [
+      {
+        bearerAuth: [],
+      },
+    ]
     this.input.tables.forEach((table) => {
       const routeParentInPathSchema: unknown[] = []
       const routeParentPart = table.routeParentRelations.length
@@ -48,6 +53,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}`].get = {
+          security,
           tags: [table.names.pascalCase],
           summary: `Returns list of ${table.names.camelCasePlural}`,
           operationId: `${table.names.camelCase}Index`,
@@ -72,6 +78,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}`].post = {
+          security,
           tags: [table.names.pascalCase],
           summary: `Create new ${table.names.camelCase}`,
           operationId: `${table.names.camelCase}Store`,
@@ -96,6 +103,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`].get = {
+          security,
           tags: [table.names.pascalCase],
           summary: `Get ${table.names.camelCase}`,
           parameters: [
@@ -133,6 +141,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`].put = {
+          security,
           tags: [table.names.pascalCase],
           summary: `Update existing ${table.names.camelCase}`,
           parameters: [
@@ -170,6 +179,7 @@ export default class SwaggerGenerator {
           paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`] = {}
         }
         paths[`${routeParentPart}/${table.names.camelCase}/{${table.names.camelCase}Id}`].delete = {
+          security,
           tags: [table.names.pascalCase],
           summary: `Delete ${table.names.camelCase}`,
           parameters: [
