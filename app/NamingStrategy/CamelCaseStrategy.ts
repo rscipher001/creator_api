@@ -1,6 +1,6 @@
-import { NamingStrategyContract } from '@ioc:Adonis/Lucid/Orm'
-import { BaseModel } from '@ioc:Adonis/Lucid/Orm'
 import { string } from '@ioc:Adonis/Core/Helpers'
+import { BaseModel } from '@ioc:Adonis/Lucid/Orm'
+import { NamingStrategyContract } from '@ioc:Adonis/Lucid/Orm'
 
 class CamelCaseNamingStrategy implements NamingStrategyContract {
   public tableName(model: typeof BaseModel) {

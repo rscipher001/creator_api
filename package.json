@@ -12,24 +12,23 @@
     "test": "node -r @adonisjs/assembler/build/register japaFile.ts"
   },
   "devDependencies": {
-    "@adonisjs/assembler": "^5.3.8",
-    "@types/bull": "^3.15.7",
+    "@adonisjs/assembler": "^5.4.1",
     "@types/supertest": "^2.0.11",
     "adonis-preset-ts": "^2.1.0",
-    "eslint": "^8.4.1",
-    "eslint-config-prettier": "^8.3.0",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.4.0",
     "eslint-plugin-adonis": "^2.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "execa": "^5.1.1",
     "get-port": "^5.1.1",
     "husky": "^7.0.4",
     "japa": "^4.0.0",
-    "pino-pretty": "^7.2.0",
+    "pino-pretty": "^7.5.1",
     "prettier": "^2.5.1",
-    "supertest": "^6.1.6",
-    "typescript": "^4.5.3",
-    "youch": "^2.2.2",
-    "youch-terminal": "^1.1.1"
+    "supertest": "^6.2.2",
+    "typescript": "^4.5.5",
+    "youch": "^3.1.0",
+    "youch-terminal": "^2.1.2"
   },
   "dependencies": {
     "@adonisjs/attachment-lite": "^1.0.1",
@@ -38,17 +37,16 @@
     "@adonisjs/lucid": "^16.3.2",
     "@adonisjs/mail": "^7.2.4",
     "@adonisjs/redis": "^7.1.0",
-    "@adonisjs/repl": "^3.1.7",
+    "@adonisjs/repl": "^3.1.8",
     "@adonisjs/view": "^6.1.1",
     "@types/socket.io": "^3.0.2",
-    "bull": "^4.5.0",
-    "luxon": "^2.2.0",
+    "luxon": "^2.3.0",
     "mysql": "^2.18.1",
     "phc-argon2": "^1.1.2",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
     "socket.io": "^4.4.1",
     "source-map-support": "^0.5.21",
-    "stripe": "^8.199.0"
+    "stripe": "^8.203.0"
   }
 }

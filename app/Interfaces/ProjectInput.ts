@@ -160,6 +160,8 @@ export interface StripeCustomer {
 }
 
 export default interface ProjectInput {
+  ownerId: number // Owner of this proejct
+  channel: string // Output for this project will be streated to this channel
   id: number
   name: string // should be camelcase
   names: ExtendedNames
@@ -204,6 +206,10 @@ export default interface ProjectInput {
   git: {
     name: string
     email: string
+  }
+  app?: {
+    appName?: string
+    packageName?: string
   }
   database: Database
   types: ProjectType[] // should be smallcaps, can be api or web

@@ -30,7 +30,9 @@ export default class User extends BaseModel {
   })
   public avatar?: AttachmentContract | null
 
-  @column()
+  @column({
+    serializeAs: null,
+  })
   public rememberMeToken?: string | null
 
   @column.dateTime()
@@ -45,6 +47,7 @@ export default class User extends BaseModel {
   @column({
     prepare: (v) => JSON.stringify(v),
     consume: (v) => JSON.parse(v),
+    serializeAs: null,
   })
   public stripe: StripeCustomer
 

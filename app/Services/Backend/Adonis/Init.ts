@@ -5,7 +5,6 @@ import HelperService from 'App/Services/HelperService'
 
 export default class Init {
   private input: ProjectInput
-
   constructor(input: ProjectInput) {
     this.input = input
   }
@@ -40,12 +39,22 @@ export default class Init {
   }
 
   protected async addPreCommitHook() {
-    await HelperService.execute('npx', ['husky-init'], {
-      cwd: this.input.path,
-    })
-    await HelperService.execute('npm', ['install'], {
-      cwd: this.input.path,
-    })
+    await HelperService.execute(
+      'npx',
+      ['husky-init'],
+      {
+        cwd: this.input.path,
+      },
+      this.input.channel
+    )
+    await HelperService.execute(
+      'npm',
+      ['install'],
+      {
+        cwd: this.input.path,
+      },
+      this.input.channel
+    )
     const filePath = `${this.input.path}/.husky/pre-commit`
     const fileExists = await HelperService.fileExists(filePath)
     if (fileExists) {
@@ -102,7 +111,8 @@ export default class Init {
       ],
       {
         cwd: this.input.projectsPath,
-      }
+      },
+      this.input.channel
     )
 
     // 2. Add .vscode folder
@@ -111,16 +121,31 @@ export default class Init {
     await this.createReadmeMd()
 
     // 3. Initiate git repo
-    await HelperService.execute('git', ['init'], {
-      cwd: this.input.path,
-    })
+    await HelperService.execute(
+      'git',
+      ['init'],
+      {
+        cwd: this.input.path,
+      },
+      this.input.channel
+    )
 
-    await HelperService.execute('git', ['config', '--local', 'user.name', this.input.git.name], {
-      cwd: this.input.path,
-    })
-    await HelperService.execute('git', ['config', '--local', 'user.email', this.input.git.email], {
-      cwd: this.input.path,
-    })
+    await HelperService.execute(
+      'git',
+      ['config', '--local', 'user.name', this.input.git.name],
+      {
+        cwd: this.input.path,
+      },
+      this.input.channel
+    )
+    await HelperService.execute(
+      'git',
+      ['config', '--local', 'user.email', this.input.git.email],
+      {
+        cwd: this.input.path,
+      },
+      this.input.channel
+    )
 
     // 4. Initial commit
     await HelperService.commit('Initial Commit', this.input.path)

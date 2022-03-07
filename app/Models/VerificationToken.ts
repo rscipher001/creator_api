@@ -10,6 +10,8 @@ export enum Reason {
 }
 
 export default class VerificationToken extends BaseModel {
+  public static table = 'verificationTokens'
+
   @column({ isPrimary: true })
   public id: number
 

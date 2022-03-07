@@ -1,4 +1,5 @@
 import fs from 'fs'
+import Ws from 'App/Services/Ws'
 import { promisify } from 'util'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import { spawn, SpawnOptions } from 'child_process'
@@ -43,13 +44,22 @@ class HelperService {
     args: string[] = [],
     options: Options = {
       stdio: 'inherit',
-    }
+    },
+    channel?: string // Broadcast output to this channel
   ) =>
     new Promise((resolve, reject) => {
       if (options) {
         options.stdio = 'inherit'
       }
       const stream = spawn(command, args, options as SpawnOptions)
+
+      if (channel) {
+        delete options.stdio
+        stream.stdout?.on('data', (data) => {
+          Ws.io.emit(channel, data.toString())
+        })
+      }
+
       stream.on('error', (e) => reject(e))
       stream.on('close', (code) => resolve(code))
     })
