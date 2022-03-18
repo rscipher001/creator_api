@@ -1,7 +1,7 @@
 import test from 'japa'
 import supertest from 'supertest'
 import Database from '@ioc:Adonis/Lucid/Database'
-import faker from 'faker'
+import faker from '@faker-js/faker'
 import Env from '@ioc:Adonis/Core/Env'
 
 const BASE_URL = `http://${Env.get('HOST')}:${Env.get('PORT')}`
