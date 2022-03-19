@@ -9,9 +9,9 @@ import 'package:{{ input.app.appName }}/exceptions/auth.exception.dart';
 import 'package:{{ input.app.appName }}/exceptions/server.exception.dart';
 import 'package:{{ input.app.appName }}/exceptions/validation.exception.dart';
 
-Future checkExceptions({
+Future checkExceptions(
+  final BuildContext context, {
   required final http.Response response,
-  required final BuildContext context,
 }) async {
   if (response.statusCode == 422) {
     final responseBody = json.decode(response.body);
@@ -96,16 +96,16 @@ Map<String, String> _flattenMapList(
   return result;
 }
 
-Future<http.Response?> get({
+Future<http.Response?> get(
+  final BuildContext context, {
   required final String url,
-  required final BuildContext context,
 }) async {
   try {
     final headers = {
       HttpHeaders.acceptHeader: 'application/json',
     };
     final response = await http.get(Uri.parse(url), headers: headers);
-    await checkExceptions(response: response, context: context);
+    await checkExceptions(context, response: response);
     return response;
   } catch (e) {
     if (e is SocketException) {
@@ -122,8 +122,8 @@ Future<http.Response?> get({
   return null;
 }
 
-Future<http.Response?> authorizedGet({
-  required final BuildContext context,
+Future<http.Response?> authorizedGet(
+  final BuildContext context, {
   required final String url,
 }) async {
   try {
@@ -134,7 +134,7 @@ Future<http.Response?> authorizedGet({
     headers[HttpHeaders.authorizationHeader] = "Bearer $token";
 
     final response = await http.get(Uri.parse(url), headers: headers);
-    await checkExceptions(response: response, context: context);
+    await checkExceptions(context, response: response);
     return response;
   } catch (e) {
     if (e is SocketException) {
@@ -151,11 +151,11 @@ Future<http.Response?> authorizedGet({
   return null;
 }
 
-Future<http.Response?> post({
+Future<http.Response?> post(
+  final BuildContext context, {
   required final String url,
-  required final BuildContext context,
-  final Map? body,
   final bool jsonContent = false,
+  final Map? body,
 }) async {
   try {
     final headers = {
@@ -167,7 +167,7 @@ Future<http.Response?> post({
     final response = body == null
         ? await http.post(Uri.parse(url), headers: headers)
         : await http.post(Uri.parse(url), headers: headers, body: body);
-    await checkExceptions(response: response, context: context);
+    await checkExceptions(context, response: response);
     return response;
   } catch (e) {
     if (e is SocketException) {
@@ -206,7 +206,7 @@ Future<http.Response?> authorizedPost({
             headers: headers,
             body: jsonContent ? json.encode(body) : body,
           );
-    await checkExceptions(response: response, context: context);
+    await checkExceptions(context, response: response);
     return response;
   } catch (e) {
     if (e is SocketException) {
@@ -223,9 +223,9 @@ Future<http.Response?> authorizedPost({
   return null;
 }
 
-Future<http.Response?> authorizedDelete({
+Future<http.Response?> authorizedDelete(
+  final BuildContext context, {
   required final String url,
-  required final BuildContext context,
 }) async {
   try {
     final headers = {
@@ -235,7 +235,7 @@ Future<http.Response?> authorizedDelete({
     headers[HttpHeaders.authorizationHeader] = "Bearer $token";
     final response = await http.delete(Uri.parse(url), headers: headers);
 
-    await checkExceptions(response: response, context: context);
+    await checkExceptions(context, response: response);
     return response;
   } catch (e) {
     if (e is SocketException) {
@@ -252,9 +252,9 @@ Future<http.Response?> authorizedDelete({
   return null;
 }
 
-Future<http.Response?> authorizedMultipart({
+Future<http.Response?> authorizedMultipart(
+  final BuildContext context, {
   required final String url,
-  required final BuildContext context,
   required final Map body,
   final Map<String, String>? filePath,
   final Map<String, List<String>>? filesPath,
@@ -289,7 +289,7 @@ Future<http.Response?> authorizedMultipart({
     request.fields.addAll(_flattenMap(body));
     request.headers.addAll(headers);
     final response = await http.Response.fromStream(await request.send());
-    await checkExceptions(response: response, context: context);
+    await checkExceptions(context, response: response);
     return response;
   } catch (e) {
     if (e is SocketException) {
