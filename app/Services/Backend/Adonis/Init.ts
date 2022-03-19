@@ -94,9 +94,9 @@ export default class Init {
       [
         'init',
         'adonis-ts-app@latest',
-        this.input.basePath, // ProjectPath
+        'api', // ProjectPath
         `--boilerplate=${type.toLocaleLowerCase()}`, // api/web
-        `--name=${this.input.name}`, // Project name
+        `--name=api`, // Project name
         '--eslint', // Enable ESLint
         '--prettier', // Enable prettiter
       ],

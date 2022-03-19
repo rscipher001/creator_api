@@ -13,6 +13,11 @@ import {
 export default class CreateProjectValidator {
   constructor(protected ctx: HttpContextContract) {}
 
+  protected appSchema = schema.object().members({
+    appName: schema.string({ trim: true }),
+    packageName: schema.string({ trim: true }, [rules.url()]),
+  })
+
   protected relationSchema = schema.object().members({
     type: schema.string({ trim: true }),
     withModel: schema.string({ trim: true }),
@@ -97,6 +102,7 @@ export default class CreateProjectValidator {
     database: schema.enum([Database.MySQL, Database.PostgreSQL] as const),
     types: schema.array().members(schema.enum([ProjectType.API, ProjectType.SSR] as const)),
     camelCaseStrategy: schema.boolean(),
+    app: this.appSchema,
     mailEnabled: schema.boolean(),
     mailers: schema.array
       .optional([rules.requiredWhen('mailEnabled', '=', true)])

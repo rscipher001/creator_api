@@ -17,6 +17,7 @@ class SystemService {
         npm: await this.runCommand('npm', ['-v']),
         mysql: await this.runCommand('mysql', ['--version']),
         vue: await this.runCommand('vue', ['--version']),
+        flutter: await this.runCommand('flutter', ['--version']),
         pm2: await this.runCommand('pm2', ['--version']),
       }
     } catch (_) {

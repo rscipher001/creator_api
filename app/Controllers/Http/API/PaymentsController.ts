@@ -10,7 +10,7 @@ export default class PaymentsController {
         id: request.param('id'),
       })
       .firstOrFail()
-    const projectInput = await project.getProjectInput()
+    const projectInput = await project.projectInput
     const paymentIntent = await StripeService.createPaymentIntent(auth.user!, projectInput)
     return paymentIntent
   }

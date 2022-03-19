@@ -37,25 +37,36 @@ export default class ProjectsController {
       .firstOrFail()
   }
 
+  /**
+   * 1. Prepare data according to ProjectInput interface
+   * 2. Run validations to ensure the data is valid
+   * 3. Save data to database
+   */
   public async store({ request, response, auth }: HttpContextContract) {
     const input = await request.validate(CreateProjectValidator)
-    const generator = new Generator(JSON.parse(JSON.stringify(input)), 0)
-    const prepareInput = generator.prepare()
+    const project = new Project()
+    project.status = 'queued'
+    project.name = input.name
+    project.rawInput = input
+    project.userId = auth.user!.id
+    project.projectInput = project.prepare()
+    const projectInput = project.projectInput
+
     // Pre checks to ensure there is no contracitory settings
-    if (prepareInput.auth.passwordReset && !prepareInput.mailEnabled) {
+    if (projectInput.auth.passwordReset && !projectInput.mailEnabled) {
       return response.badRequest({
         error: 'Password reset requires mailing feature',
       })
     }
-    if (prepareInput.tenantSettings.tenant && !prepareInput.tenantSettings.table) {
+    if (projectInput.tenantSettings.tenant && !projectInput.tenantSettings.table) {
       return response.badRequest({
         error: 'Tenant table should be selected when tenant option is enabled',
       })
     }
-    if (!prepareInput.storageEnabled) {
+    if (!projectInput.storageEnabled) {
       let isFileColumnExists = false
-      for (let i = 0; i < prepareInput.tables.length; i++) {
-        const table = prepareInput.tables[i]
+      for (let i = 0; i < projectInput.tables.length; i++) {
+        const table = projectInput.tables[i]
         if (table.columns.find((column) => column.type === 'File')) {
           isFileColumnExists = true
           break
@@ -70,7 +81,7 @@ export default class ProjectsController {
     // Ensure roles have permission and there is a default role
     // Ensure there are no duplicate relations on auth model
     // Ensure there are no duplicate relations on other models
-    const authTable = prepareInput.auth.table
+    const authTable = projectInput.auth.table
     // Put all relations in array, unique that array
     // If size reduces after unique then there are duplicate relations
     // Store table name and relation name in table:relation format
@@ -84,8 +95,8 @@ export default class ProjectsController {
       })
     }
 
-    for (let i = 0; i < prepareInput.tables.length; i++) {
-      const table = prepareInput.tables[i]
+    for (let i = 0; i < projectInput.tables.length; i++) {
+      const table = projectInput.tables[i]
       const relations: string[] = []
       table.relations.forEach((relation) => {
         relations.push(`${relation.modelNames.pascalCase}:${relation.names?.pascalCase}`)
@@ -96,12 +107,8 @@ export default class ProjectsController {
         })
       }
     }
-    const project = await Project.create({
-      status: 'queued',
-      name: input.name,
-      rawInput: JSON.stringify(input),
-      userId: auth.user!.id,
-    })
+    await project.save()
+
     this.generateProject(input, project)
     return project
   }
@@ -115,7 +122,7 @@ export default class ProjectsController {
         status: 'draft',
       })
       .firstOrFail()
-    this.generateProject(JSON.parse(project.rawInput), project)
+    this.generateProject(project.rawInput, project)
     return project
   }
 
@@ -135,7 +142,7 @@ export default class ProjectsController {
     const project = await Project.create({
       status: 'draft',
       name: input.name,
-      rawInput: JSON.stringify(input),
+      rawInput: input,
       userId: auth.user!.id,
     })
     return project
@@ -164,7 +171,7 @@ export default class ProjectsController {
       })
     }
 
-    project.rawInput = JSON.stringify(input)
+    project.rawInput = input
     await project.save()
     return project
   }
@@ -207,7 +214,7 @@ export default class ProjectsController {
     const id = request.param('id')
     const type = request.param('type')
     const project = await Project.findOrFail(id)
-    const input = JSON.parse(project.rawInput)
+    const input = project.rawInput
     const basePath = Application.makePath(Env.get('PROJECT_PATH'))
     const names = HelperService.generateExtendedNames(input.name)
     const apiPath = `${basePath}/${id}-${names.dashCase}`
@@ -237,7 +244,7 @@ export default class ProjectsController {
 
   protected async generateProject(input, project: Project) {
     try {
-      const generator = new Generator(input, project.id)
+      const generator = new Generator(project.projectInput)
       await generator.init()
       project.status = 'done'
       project.projectInput = generator.projectInput
@@ -271,9 +278,8 @@ export default class ProjectsController {
     if (!project) throw new Error('Project not found')
     if (project.status === 'queued') throw new Error('Build is in progress')
     if (project.status === 'failed') throw new Error('Build failed')
-    const input = JSON.parse(project.rawInput)
-    const generator = new Generator(JSON.parse(JSON.stringify(input)), project.id)
-    const prepareInput: ProjectInput = generator.prepare()
+
+    const prepareInput: ProjectInput = project.projectInput
     if (prepareInput.generate.api && prepareInput.generate.spa) {
       const hostingService = new HostingService(prepareInput)
       await hostingService.init()
@@ -295,9 +301,8 @@ export default class ProjectsController {
     if (!project) throw new Error('Project not found')
     if (project.status === 'queued') throw new Error('Build is in progress')
     if (project.status === 'failed') throw new Error('Build failed')
-    const input = JSON.parse(project.rawInput)
-    const generator = new Generator(JSON.parse(JSON.stringify(input)), projectId)
-    const prepareInput: ProjectInput = generator.prepare()
+
+    const prepareInput: ProjectInput = project.projectInput
     if (prepareInput.generate.api && prepareInput.generate.spa) {
       const hostingService = new HostingService(prepareInput)
       await hostingService.stop()
@@ -316,8 +321,8 @@ export default class ProjectsController {
         id: projectId,
       })
       .firstOrFail()
-    const generator = new Generator(JSON.parse(project.rawInput), 0)
-    const prepareInput = generator.prepare()
+
+    const prepareInput = project.projectInput
     const swaggerGenerator = new SwaggerGenerator(prepareInput)
     return swaggerGenerator.init()
   }

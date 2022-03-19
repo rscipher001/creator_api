@@ -1,9 +1,8 @@
 import test from 'japa'
-import faker from 'faker'
+import faker from '@faker-js/faker'
 import supertest from 'supertest'
 import Env from '@ioc:Adonis/Core/Env'
 import Database from '@ioc:Adonis/Lucid/Database'
-import Generator from 'App/Services/ProjectService'
 import Encryption from '@ioc:Adonis/Core/Encryption'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import HelperService from 'App/Services/HelperService'
@@ -11,6 +10,7 @@ import HelperService from 'App/Services/HelperService'
 import fullProjectInput from './input/full'
 import oneTableMin from './input/oneTableMin'
 import nestedRoutes from './input/nestedRoutes'
+import Project from 'App/Models/Project'
 
 const BASE_URL = `http://${Env.get('HOST')}:${Env.get('PORT')}`
 let projectId = 1
@@ -134,17 +134,15 @@ test.group('Auth', (group) => {
   test('Full Project API - 2', async (assert) => {
     let shouldCheckAgain = true
     while (shouldCheckAgain) {
-      const { body } = await supertest(BASE_URL)
+      const { body }: { body: Project } = await supertest(BASE_URL)
         .get(`/api/project/${projectId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
       if (body.status === 'failed') throw new Error('Project creation failed')
       if (body.status === 'done') {
         shouldCheckAgain = false
-        const generator = new Generator(JSON.parse(JSON.stringify(fullProjectInput)), projectId)
-        const prepareInput: ProjectInput = generator.prepare()
         await HelperService.execute('npm', ['run', 'build'], {
-          cwd: prepareInput.path,
+          cwd: body.projectInput.path,
         })
         assert.isObject(body)
       }
@@ -154,18 +152,14 @@ test.group('Auth', (group) => {
   test('One Table Min API - 2', async (assert) => {
     let shouldCheckAgain = true
     while (shouldCheckAgain) {
-      const { body } = await supertest(BASE_URL)
+      const { body }: { body: Project } = await supertest(BASE_URL)
         .get(`/api/project/${oneTableMinProjectId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
       if (body.status === 'failed') throw new Error('Project creation failed')
       if (body.status === 'done') {
         shouldCheckAgain = false
-        const generator = new Generator(
-          JSON.parse(JSON.stringify(oneTableMin)),
-          oneTableMinProjectId
-        )
-        const prepareInput: ProjectInput = generator.prepare()
+        const prepareInput: ProjectInput = body.projectInput
         await HelperService.execute('npm', ['run', 'build'], {
           cwd: prepareInput.path,
         })
@@ -177,20 +171,15 @@ test.group('Auth', (group) => {
   test('Nested Routes API - 2', async (assert) => {
     let shouldCheckAgain = true
     while (shouldCheckAgain) {
-      const { body } = await supertest(BASE_URL)
+      const { body }: { body: Project } = await supertest(BASE_URL)
         .get(`/api/project/${nestedRoutesProjectId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
       if (body.status === 'failed') throw new Error('Project creation failed')
       if (body.status === 'done') {
         shouldCheckAgain = false
-        const generator = new Generator(
-          JSON.parse(JSON.stringify(nestedRoutes)),
-          nestedRoutesProjectId
-        )
-        const prepareInput: ProjectInput = generator.prepare()
         await HelperService.execute('npm', ['run', 'build'], {
-          cwd: prepareInput.path,
+          cwd: body.projectInput.path,
         })
         assert.isObject(body)
       }
