@@ -316,7 +316,10 @@ export default class AppGenerator {
    */
   public async start() {
     const cwd = this.input.appPath!
-    const commit = HelperService.commit
+    const commit = async (message: string, projectPath: string) => {
+      await await execute('flutter', ['format', 'lib'], { cwd })
+      await HelperService.commit(message, projectPath)
+    }
     const execute = HelperService.execute
     await execute('rm', ['-rf', cwd])
     await this.createProject()
@@ -366,7 +369,6 @@ export default class AppGenerator {
 
     await this.addTests()
     await execute('flutter', ['pub', 'get'], { cwd })
-    await execute('flutter', ['format', 'lib'], { cwd })
     await commit('Tests added', cwd)
   }
 
