@@ -4,10 +4,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:{{ input.appName }}/state/auth.state.dart';
-import 'package:{{ input.appName }}/exceptions/auth.exception.dart';
-import 'package:{{ input.appName }}/exceptions/server.exception.dart';
-import 'package:{{ input.appName }}/exceptions/validation.exception.dart';
+import 'package:{{ input.app.appName }}/state/auth.state.dart';
+import 'package:{{ input.app.appName }}/exceptions/auth.exception.dart';
+import 'package:{{ input.app.appName }}/exceptions/server.exception.dart';
+import 'package:{{ input.app.appName }}/exceptions/validation.exception.dart';
 
 Future checkExceptions({
   required final http.Response response,
