@@ -167,6 +167,7 @@ export default interface ProjectInput {
   path: string // API folder full path
   spaPath: string // SPA folder full path
   basePath: string // Project folder name
+  appPath?: string // App Path
   mailEnabled: boolean
   mailers: Mailer[]
   defaultMailer: string
@@ -222,4 +223,8 @@ export default interface ProjectInput {
   }
   rbac: RBAC
   hosting: Hosting
+  app?: {
+    appName: string
+    packageName: string
+  }
 }

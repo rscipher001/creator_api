@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { promisify } from 'util'
+import View from '@ioc:Adonis/Core/View'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import { spawn, SpawnOptions } from 'child_process'
 import { Names, ExtendedNames } from 'App/Interfaces/ProjectInput'
@@ -112,6 +113,71 @@ class HelperService {
 
   public toSingularSnakeCase(input: string) {
     return string.snakeCase(string.singularize(input))
+  }
+
+  // Handle dotFile naming
+  public replaceDotWithDotKeyword(input: string) {
+    if (input[0] === '.') {
+      return `dot${input.slice(1, 2).toUpperCase()}${input.slice(2)}`
+    }
+    return input
+  }
+
+  /**
+   * Copy generic files that doesn't need logical manupulation
+   * @param path File path
+   * @param cwd Project Directory
+   * @param options Options to pass to views
+   */
+  public async writeGenericFile(path: string, cwd: string, options?: unknown) {
+    const viewPath = `stubs/app/Flutter/full/${this.replaceDotWithDotKeyword(path)
+      .split('.')
+      .map((inputString, index) => {
+        if (index > 0) return string.pascalCase(inputString)
+        else return inputString
+      })
+      .join('')}.edge`
+    const destinationPath = `${cwd}/${path}`
+    const content = await View.render(viewPath, options)
+    await this.writeFile(destinationPath, content)
+  }
+
+  /**
+   * Inserts lines in file
+   * @param searchInput Searches given string and inserts lines after the line where string exists
+   * @param linesToInsert Lines that needs to be insert
+   * @param filePath File in context
+   */
+  public async insertLinesAfter(searchInput, linesToInsert, filePath) {
+    const content = await this.readFile(filePath)
+    let searchInputEnd = content.indexOf(searchInput) + searchInput.length
+    let insertAtEndOfFile = false
+
+    /**
+     * Searching where search input line ends
+     * New lines will be insert after line end
+     * If search input line doesn't end then new lines will be insert
+     * At the end of the file
+     */
+    let shouldStillLookForLineEnding = true
+    while (shouldStillLookForLineEnding) {
+      if (content[searchInputEnd] === '\n') {
+        shouldStillLookForLineEnding = false
+      } else if (searchInputEnd === content.length) {
+        insertAtEndOfFile = true
+        shouldStillLookForLineEnding = false
+      }
+      // One increment is required after matching
+      searchInputEnd++
+    }
+
+    if (insertAtEndOfFile) {
+      const newContent = content + '\n' + linesToInsert
+      await this.writeFile(filePath, newContent)
+    } else {
+      const newContent = this.insertLines(content, searchInputEnd, linesToInsert)
+      await this.writeFile(filePath, newContent)
+    }
   }
 }
 

@@ -135,7 +135,7 @@ export default class SPAGenerator {
         'create',
         '-i',
         '{"useConfigFiles": true,"plugins": {"@vue/cli-plugin-babel": {},"@vue/cli-plugin-pwa": {},"@vue/cli-plugin-router": {"historyMode": true},"@vue/cli-plugin-vuex": {},"@vue/cli-plugin-eslint": {"config": "prettier","lintOn": ["save","commit"]}},"vueVersion":"2"}',
-        `${this.input.basePath}-spa`,
+        `spa`,
       ],
       {
         cwd: this.input.projectsPath,

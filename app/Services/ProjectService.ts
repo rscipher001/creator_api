@@ -1,3 +1,4 @@
+import mkdirp from 'mkdirp'
 import Env from '@ioc:Adonis/Core/Env'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import SystemService from 'App/Services/SystemService'
@@ -18,6 +19,8 @@ import BuefyInit from 'App/Services//Frontend/Buefy/Init'
 import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
 import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
 
+import FlutterInit from 'App/Services//App/Flutter/Init'
+
 // import HostingService from 'App/Services/HostingService'
 
 class BackendProjectService {
@@ -32,6 +35,7 @@ class BackendProjectService {
    */
   public async start() {
     try {
+      await mkdirp(this.projectInput.projectsPath)
       if (this.projectInput.generate.spa.generate) {
         const status = await SystemService.systemStatus()
         if (!status['vue']) {
@@ -119,6 +123,11 @@ class BackendProjectService {
           const crud = new BuefyCRUDGenerator(this.projectInput)
           await crud.init()
         }
+      }
+
+      if (this.projectInput.generate.app.generate) {
+        const app = new FlutterInit(this.projectInput)
+        await app.init()
       }
 
       if (Env.get('ENABLE_HOSTING')) {

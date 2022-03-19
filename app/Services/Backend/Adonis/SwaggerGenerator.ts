@@ -477,7 +477,6 @@ export default class SwaggerGenerator {
     const columnMetaData = {
       nullable: !column.meta.required,
     }
-    console.log(`${column.names.pascalCase}`, column.type)
     switch (column.type) {
       case 'String':
         columnMetaData['type'] = 'string'

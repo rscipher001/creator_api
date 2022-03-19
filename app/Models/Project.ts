@@ -417,9 +417,22 @@ export default class Project extends BaseModel {
     projectInput.name = projectInput.names.pascalCase
 
     projectInput.projectsPath = Application.makePath(Env.get('PROJECT_PATH'))
-    projectInput.basePath = `${this.id}-${projectInput.names.dashCase}`
-    projectInput.path = `${projectInput.projectsPath}/${projectInput.basePath}`
-    projectInput.spaPath = `${projectInput.projectsPath}/${projectInput.basePath}-spa`
+    if (this.id) {
+      projectInput.projectsPath = `${projectInput.projectsPath}/${this.id}`
+    }
+
+    // Process app data
+    if (this.input.app) {
+      projectInput.app = {
+        packageName: this.input.app.packageName,
+        appName: HelperService.toSingularSnakeCase(this.input.app.appName),
+      }
+      projectInput.appPath = `${projectInput.projectsPath}/app`
+    }
+
+    projectInput.basePath = `${projectInput.names.dashCase}`
+    projectInput.path = `${projectInput.projectsPath}/api`
+    projectInput.spaPath = `${projectInput.projectsPath}/spa`
     projectInput.defaultMailer = this.input.defaultMailer.toLowerCase()
     projectInput.auth.table = this.prepareTable(this.input.auth.table)
 
