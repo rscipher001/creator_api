@@ -1,0 +1,17 @@
+import 'package:flutter/foundation.dart';
+import 'package:app/models/country.model.dart';
+
+class {{ table.names.pascalCase }}ShowState extends ChangeNotifier {
+  {{ table.names.pascalCase }}? _{{ table.names.camelCase }};
+  {{ table.names.pascalCase }}? get {{ table.names.camelCase }} => _{{ table.names.camelCase }};
+
+  loadState({{ table.names.pascalCase }} {{ table.names.camelCase }}) {
+    _{{ table.names.camelCase }} = {{ table.names.camelCase }};
+    notifyListeners();
+  }
+
+  clearState() {
+    _{{ table.names.camelCase }} = null;
+    notifyListeners();
+  }
+}

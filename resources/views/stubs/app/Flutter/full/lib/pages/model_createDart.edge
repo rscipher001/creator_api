@@ -1,0 +1,28 @@
+import 'package:flutter/material.dart';
+import 'package:app/components/global/my_drawer.dart';
+
+class {{ table.names.pascalCase }}Create extends StatefulWidget {
+  const {{ table.names.pascalCase }}Create({Key? key}) : super(key: key);
+
+  @override
+  _{{ table.names.pascalCase }}CreateState createState() => _{{ table.names.pascalCase }}CreateState();
+}
+
+class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pascalCase }}Create> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      drawer: const MyDrawer(),
+      extendBody: true,
+      appBar: AppBar(
+        title: const Text('Add new {{ table.names.pascalCase }}'),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+      body: const SafeArea(
+        child: Center(
+          child: Text('Add new {{ table.names.camelCase }}'),
+        ),
+      ),
+    );
+  }
+}

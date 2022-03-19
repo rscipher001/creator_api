@@ -2,14 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:{{ input.app.appName }}/config/constants.dart';
-import 'package:{{ input.app.appName }}/state/auth.state.dart';
-import 'package:{{ input.app.appName }}/models/user.model.dart';
-import 'package:{{ input.app.appName }}/exceptions/unknown.exception.dart';
-import 'package:{{ input.app.appName }}/interfaces/auth/login.interface.dart';
-import 'package:{{ input.app.appName }}/interfaces/auth/register.interface.dart';
-import 'package:{{ input.app.appName }}/services/http.service.dart' as http_service;
-import 'package:{{ input.app.appName }}/services/sharedPreference.service.dart'
+import 'package:app/config/constants.dart';
+import 'package:app/state/auth.state.dart';
+import 'package:app/models/user.model.dart';
+import 'package:app/exceptions/unknown.exception.dart';
+import 'package:app/interfaces/auth/login.interface.dart';
+import 'package:app/interfaces/auth/register.interface.dart';
+import 'package:app/services/http.service.dart' as http_service;
+import 'package:app/services/sharedPreference.service.dart'
     as persist_service;
 
 // Loads status from share preferences

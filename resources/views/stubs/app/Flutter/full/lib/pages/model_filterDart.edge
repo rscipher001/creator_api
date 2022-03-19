@@ -1,0 +1,138 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:app/state/{{ table.names.camelCase }}_filter.state.dart';
+import 'package:app/services/{{ table.names.camelCase }}.service.dart' as {{ table.names.camelCase }}_service;
+
+class {{ table.names.pascalCase }}Filter extends StatefulWidget {
+  const {{ table.names.pascalCase }}Filter({final Key? key}) : super(key: key);
+
+  @override
+  _{{ table.names.pascalCase }}FilterState createState() => _{{ table.names.pascalCase }}FilterState();
+}
+
+class _{{ table.names.pascalCase }}FilterState extends State<{{ table.names.pascalCase }}Filter> {
+  var _submitButtonLoading = false;
+  var _clearButtonLoading = false;
+  @each(column in table.columns.filter(c => c.meta.filterable))
+    final _{{ column.names.camelCase }}Controller = TextEditingController();
+  @endeach
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    @each(column in table.columns.filter(c => c.meta.filterable))
+      _{{ column.names.camelCase }}Controller.dispose();
+    @endeach
+    super.dispose();
+  }
+
+  Future clearFilter() async {
+    setState(() {
+      _clearButtonLoading = true;
+      @each(column in table.columns.filter(c => c.meta.filterable))
+        _{{ column.names.camelCase }}Controller.text = '';
+      @endeach
+    });
+    @each(column in table.columns.filter(c => c.meta.filterable))
+      context.read<{{ table.names.pascalCase }}FilterState>().reset{{ column.names.pascalCase }}();
+    @endeach
+    context.read<{{ table.names.pascalCase }}FilterState>().resetPageNo();
+    context.read<{{ table.names.pascalCase }}FilterState>().resetPageSize();
+    await {{ table.names.camelCase }}_service.index(context);
+    Navigator.pop(context);
+  }
+
+  Future filter() async {
+    setState(() {
+      _submitButtonLoading = true;
+    });
+    await {{ table.names.camelCase }}_service.index(context);
+    setState(() {
+      _submitButtonLoading = false;
+    });
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> children = [
+      const SizedBox(height: 16),
+    ];
+
+    children.addAll([
+      @each(column in table.columns.filter(c => c.meta.filterable))
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TextFormField(
+            controller: _{{ column.names.camelCase }}Controller,
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search_outlined),
+              labelText: '{{ column.names.pascalCase }}',
+            ),
+            @if(column.meta.maxLength)
+              maxLength: {{ column.meta.maxLength }},
+            @endif
+            onChanged: (newValue) {
+              Provider.of<{{ table.names.pascalCase }}FilterState>(context, listen: false)
+                  .set{{ column.names.pascalCase }}(newValue);
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: 0,
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              child: Text(
+                _clearButtonLoading ? 'Loading...' : 'Clear Filter',
+              ),
+              onPressed: clearFilter,
+            ),
+          ),
+        ),
+      @endeach
+      const Flexible(flex: 1, child: SizedBox(height: double.infinity)),
+      Padding(
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 0,
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            child: Text(_submitButtonLoading ? 'Loading...' : 'Filter'),
+            onPressed: filter,
+          ),
+        ),
+      ),
+      const SizedBox(height: 20),
+    ]);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('{{ table.names.pascalCase }} Filters'),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: children,
+        ),
+      ),
+    );
+  }
+}

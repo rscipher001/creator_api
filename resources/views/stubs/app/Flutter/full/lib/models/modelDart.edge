@@ -1,0 +1,60 @@
+import 'package:app/models/pagination_meta.model.dart';
+
+class {{ table.names.pascalCase }} {
+  final int id;
+  @each(column in table.columns)
+    {{ column.meta.required ? 'final': '' }}
+    @if (column.type === 'File')
+      Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @elseif(column.type === 'Date')
+      DateTime{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @elseif(column.type === 'Decimal')  
+      double{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @elseif(column.type === 'Integer')  
+      int{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @elseif(column.type === 'String')  
+      String{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @else
+      {{
+        column.type === 'Boolean' ? 'boolean' : column.type.toLowerCase()
+      }}{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @endif
+  @endeach
+
+  {{ table.names.pascalCase }}({
+    required this.id,
+    @each(column in table.columns)
+      {{ column.meta.required ? 'required': '' }} this.{{ column.names.camelCase }},
+    @endeach
+  });
+
+  factory {{ table.names.pascalCase }}.fromJson(Map<String, dynamic> json) {
+    return {{ table.names.pascalCase }}(
+      id: json['id'],
+      @each(column in table.columns)
+        {{ column.names.camelCase }}: json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'],
+      @endeach
+    );
+  }
+}
+
+class {{ table.names.pascalCase }}Page {
+  final List<{{ table.names.pascalCase }}> {{ table.names.camelCasePlural }};
+  final PaginationMeta meta;
+
+  {{ table.names.pascalCase }}Page({
+    required this.{{ table.names.camelCasePlural }},
+    required this.meta,
+  });
+
+  factory {{ table.names.pascalCase }}Page.fromJson(Map<String, dynamic> json) {
+    final List<{{ table.names.pascalCase }}> {{ table.names.camelCasePlural }} = [];
+    for (final {{ table.names.camelCase }}Map in json["data"]) {
+      {{ table.names.camelCasePlural }}.add({{ table.names.pascalCase }}.fromJson({{ table.names.camelCase }}Map));
+    }
+    return {{ table.names.pascalCase }}Page(
+      {{ table.names.camelCasePlural }}: {{ table.names.camelCasePlural }},
+      meta: PaginationMeta.fromJson(json),
+    );
+  }
+}

@@ -1,0 +1,47 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:app/config/constants.dart';
+import 'package:app/models/{{ table.names.camelCase }}.model.dart';
+import 'package:app/state/{{ table.names.camelCase }}_filter.state.dart';
+import 'package:app/state/{{ table.names.camelCase }}_show.state.dart';
+import 'package:app/state/{{ table.names.camelCase }}_index.state.dart';
+import 'package:app/exceptions/unknown.exception.dart';
+import 'package:app/services/http.service.dart' as http_service;
+
+Future<{{ table.names.pascalCase }}Page> index(final BuildContext context) async {
+  final filter = context.read<{{ table.names.pascalCase }}FilterState>();
+  final pageNo = filter.pageNo;
+  final pageSize = filter.pageSize;
+  var url = baseUrl + '/api/{{ table.names.camelCase }}?page_no=$pageNo&page_size=$pageSize';
+  @if(table.columns.find(c => c.meta.filterable))
+    @each(column in table.columns.filter(c => c.meta.filterable))
+      if (filter.{{ column.names.camelCase }} != null && filter.{{ column.names.camelCase }} != '') {
+        url += '&{{ column.names.camelCase }}=${filter.{{ column.names.camelCase }}}';
+      }
+    @endeach
+  @endif
+  final response = await http_service.authorizedGet(
+    context,
+    url: url,
+  );
+  if (response!.statusCode != 200) {
+    throw UnknownException();
+  }
+  final {{ table.names.camelCase }}Page = {{ table.names.pascalCase }}Page.fromJson(json.decode(response.body));
+  Provider.of<{{ table.names.pascalCase }}IndexState>(context, listen: false).loadState({{ table.names.camelCase }}Page);
+  return {{ table.names.camelCase }}Page;
+}
+
+Future<{{ table.names.pascalCase }}> show(final BuildContext context, final int {{ table.names.camelCase }}Id) async {
+  final response = await http_service.authorizedGet(
+    context,
+    url: baseUrl + '/api/{{ table.names.camelCase }}/${{ table.names.camelCase }}Id',
+  );
+  if (response!.statusCode != 200) {
+    throw UnknownException();
+  }
+  final {{ table.names.camelCase }} = {{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+  Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
+  return {{ table.names.camelCase }};
+}

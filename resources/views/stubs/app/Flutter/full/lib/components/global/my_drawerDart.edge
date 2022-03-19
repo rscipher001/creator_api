@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:{{ input.app.appName }}/state/auth.state.dart';
-import 'package:{{ input.app.appName }}/services/auth.service.dart' as auth_service;
+import 'package:app/state/auth.state.dart';
+import 'package:app/services/auth.service.dart' as auth_service;
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({Key? key}) : super(key: key);
@@ -31,6 +31,31 @@ class _MyDrawerState extends State<MyDrawer> {
                 Navigator.pushNamed(context, 'dashboard');
               },
             ),
+            const Divider(),
+            @each(table in input.tables)
+              @if(table.operations.index)
+                ListTile(
+                  leading: const Icon(Icons.dashboard),
+                  title: const Text('{{ table.names.pascalCasePlural }}'),
+                  selected: currentRoute == '{{ table.names.snakeCase }}_index',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '{{ table.names.snakeCase }}_index');
+                  },
+                ),
+              @endif
+              @if(table.operations.create)
+                ListTile(
+                  leading: const Icon(Icons.dashboard),
+                  title: const Text('Add New {{ table.names.pascalCase }}'),
+                  selected: currentRoute == '{{ table.names.snakeCase }}_create',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '{{ table.names.snakeCase }}_create');
+                  },
+                ),
+              @endif
+            @endeach
             const Divider(),
             ListTile(
               leading: const Icon(Icons.delete_forever),
