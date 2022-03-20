@@ -3,11 +3,18 @@ import 'package:app/models/{{ table.names.camelCase }}.model.dart';
 
 class {{ table.names.pascalCase }}IndexState extends ChangeNotifier {
   List<{{ table.names.pascalCase }}> _{{ table.names.camelCasePlural }} = [];
-  List<{{ table.names.pascalCase }}> get {{ table.names.camelCasePlural }} => _{{ table.names.camelCasePlural }};
+  bool _loading = false;
 
-  loadState({{ table.names.pascalCase }}Page {{ table.names.camelCase }}Page) {
+  List<{{ table.names.pascalCase }}> get {{ table.names.camelCasePlural }} => _{{ table.names.camelCasePlural }};
+  bool get loading => _loading;
+
+  loadState(final {{ table.names.pascalCase }}Page {{ table.names.camelCase }}Page) {
     _{{ table.names.camelCasePlural }} = {{ table.names.camelCase }}Page.{{ table.names.camelCasePlural }};
     notifyListeners();
+  }
+
+  setLoading(final bool loaading) {
+    _loading = loaading;
   }
 
   clearState() {

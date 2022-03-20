@@ -45,3 +45,17 @@ Future<{{ table.names.pascalCase }}> show(final BuildContext context, final int 
   Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
   return {{ table.names.camelCase }};
 }
+
+Future<{{ table.names.pascalCase }}> store(final BuildContext context, final {{ table.names.pascalCase }} input) async {
+  final response = await http_service.authorizedPost(
+    context,
+    baseUrl + '/api/{{ table.names.camelCase }}',
+    body: input.toJson(),
+  );
+  if (response!.statusCode != 200) {
+    throw UnknownException();
+  }
+  final {{ table.names.camelCase }} = {{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+  Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
+  return {{ table.names.camelCase }};
+}

@@ -152,8 +152,8 @@ Future<http.Response?> authorizedGet(
 }
 
 Future<http.Response?> post(
-  final BuildContext context, {
-  required final String url,
+  final BuildContext context,
+  final String url, {
   final bool jsonContent = false,
   final Map? body,
 }) async {
@@ -184,9 +184,9 @@ Future<http.Response?> post(
   return null;
 }
 
-Future<http.Response?> authorizedPost({
-  required final String url,
-  required final BuildContext context,
+Future<http.Response?> authorizedPost(
+  final BuildContext context,
+  final String url, {
   final Map? body,
   final bool jsonContent = false,
 }) async {

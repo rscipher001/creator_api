@@ -1,5 +1,29 @@
+@set('hasRouteParents', table.routeParentRelations.length)
+@set('fileColumns', table.columns.filter(c => c.type === 'File'))
+@set('fileColumnsLastIndex', fileColumns.length - 1)
+@set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
+@set(
+  'nonAuthBelongsToRelations',
+  table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth')
+)
+@set(
+  'hasM2MRelationOnCreatePage',
+  table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage)
+)
+@set('routeParentColumns', table.routeParentRelations.map(r => `${r.names.camelCase}Id`))
+@set('effectiveRouteParent', null)
+@set('effectiveRouteParentColumn', null)
+@if(Array.isArray(table.routeParentRelations) && table.routeParentRelations.length)
+  @set('effectiveRouteParent', table.routeParentRelations[table.routeParentRelations.length - 1])
+  @set('effectiveRouteParentColumn', `${effectiveRouteParent.names.camelCase}Id`)
+@endif
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:app/components/global/my_drawer.dart';
+import 'package:app/exceptions/validation.exception.dart';
+import 'package:app/models/{{ table.names.snakeCase }}.model.dart';
+import 'package:app/state/{{ table.names.snakeCase }}_edit.state.dart';
+import 'package:app/services/{{ table.names.snakeCase }}.service.dart' as {{ table.names.snakeCase }}_service;
 
 class {{ table.names.pascalCase }}Create extends StatefulWidget {
   const {{ table.names.pascalCase }}Create({Key? key}) : super(key: key);
@@ -9,6 +33,118 @@ class {{ table.names.pascalCase }}Create extends StatefulWidget {
 }
 
 class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pascalCase }}Create> {
+  bool editMode = false;
+  var _autoValidateMode = AutovalidateMode.disabled;
+  var _isLoading = false;
+  final _{{ table.names.camelCase }}CreateKey = GlobalKey<FormState>();
+  Map _validationErrors = {};
+
+  {{--  Dropdown value holders  --}}
+  @each(column in exposedColumns)
+    @if(column.type === 'String')
+      @if(column.input?.type === 'Input')
+        String? selected{{ column.names.pascalCase }};
+        final {{ column.names.camelCasePlural }} = [
+        @each(option in column.input?.select.options)
+          @if(option.value)
+            {
+              label: {{ option.label }},
+              value: {{ option.value }},
+            },
+          @else
+            {{ option }},
+          @endif
+        @endeach
+        ];
+      @endif
+    @endif
+  @endeach
+
+  @each(column in exposedColumns)
+    @if(column.type === 'String' && column.input?.type === 'Input')
+      FocusNode? _{{ column.names.camelCase }}Focus;
+    @elseif(['Integer', 'Decimal'].includes(column.type))
+      FocusNode? _{{ column.names.camelCase }}Focus;
+    @endif
+  @endeach
+
+  @each(column in exposedColumns)
+    @if(column.type === 'String' && column.input?.type === 'Input')
+      final _{{ column.names.camelCase }}Controller = TextEditingController();
+    @elseif(['Integer', 'Decimal'].includes(column.type))
+      final _{{ column.names.camelCase }}Controller = TextEditingController();
+    @endif
+  @endeach
+
+  @override
+  void initState() {
+    editMode = context.read<{{ table.names.pascalCase }}EditState>().editMode;
+    @each(column in exposedColumns)
+      @if(column.type === 'String' && column.input?.type === 'Input')
+        _{{ column.names.camelCase }}Focus = FocusNode();
+      @elseif(['Integer', 'Decimal'].includes(column.type))
+        _{{ column.names.camelCase }}Focus = FocusNode();
+      @endif
+    @endeach
+    super.initState();
+  }
+
+  Future store{{ table.names.pascalCase }}() async {
+    try {
+      if (!_{{ table.names.camelCase }}CreateKey.currentState!.validate()) {
+        return setState(() {
+          _isLoading = false;
+          _autoValidateMode = AutovalidateMode.always;
+        });
+      }
+
+      setState(() {
+        _isLoading = true;
+        _validationErrors = {};
+      });
+
+      await {{ table.names.snakeCase }}_service.store(
+        context,
+        {{ table.names.pascalCase }}(
+          @each(column in exposedColumns)
+            @if (column.type === 'File')
+              {{--  Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
+            @elseif(column.type === 'Date')
+              {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text),
+            @elseif(column.type === 'Decimal')
+              {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text.toDouble(),
+            @elseif(column.type === 'Integer')
+              {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text,
+            @elseif(column.type === 'String')
+              {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text,
+            @else
+              {{--  {{
+                column.type === 'Boolean' ? 'boolean' : column.type.toLowerCase()
+              }}{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
+            @endif
+          @endeach
+        ),
+      );
+      Navigator.pushReplacementNamed(context, '{{ table.names.snakeCase }}_index');
+    } on ValidationException catch (e) {
+      setState(() {
+        _validationErrors = e.errors;
+        _isLoading = false;
+        _autoValidateMode = AutovalidateMode.always;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("${editMode ? 'Update' : 'Save'} failed"),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,9 +154,83 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
         title: const Text('Add new {{ table.names.pascalCase }}'),
         backgroundColor: Theme.of(context).primaryColor,
       ),
-      body: const SafeArea(
-        child: Center(
-          child: Text('Add new {{ table.names.camelCase }}'),
+      body: SafeArea(
+        child: Form(
+          autovalidateMode: _autoValidateMode,
+          key: _{{ table.names.camelCase }}CreateKey,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16),
+            child: ListView(children: [
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                child: Text(_isLoading ? 'Loading...' : 'Submit'),
+                onPressed: _isLoading ? null : store{{ table.names.pascalCase }},
+              ),
+              @each(column in exposedColumns)
+                @if(column.type === 'String')
+                  @if(column.input?.type === 'Input')
+                    TextFormField(
+                      controller: _{{ column.names.camelCase }}Controller,
+                      focusNode: _{{ column.names.camelCase }}Focus,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        @if(column.meta.required)
+                          if (value!.isEmpty) {
+                            return 'Please enter {{ noCase(column.names.camelCase) }}';
+                          }
+                        @endif
+                        if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
+                          return _validationErrors['{{ column.names.camelCase }}'][0];
+                        }
+                        return null;
+                      },
+                      {{--  decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.person),
+                        labelText: '{{ capitalCase(noCase(column.names.camelCase)) }}{{ column.meta.required ? ' *' : '' }}',
+                      ),  --}}
+                      @if(column.meta.maxLength)
+                        maxLength: 128,
+                      @endif
+                    ),
+                    const SizedBox(height: 16.0),
+                  @elseif(column.input?.type === 'Select')
+                    DropdownButtonFormField(
+                      value: selectedCityId,
+                      items: {{column.names.camelCasePlural }}.map<DropdownMenuItem<int>>(
+                        ({{ column.names.camelCase }}) {
+                          return DropdownMenuItem<String>(
+                            @if(column.input?.select.options[0].value === null)
+                              value: {{ column.names.camelCase }},
+                              child: Text({{ column.names.camelCase }}),
+                            @else
+                              value: {{ column.names.camelCase }}.value,
+                              child: Text({{ column.names.camelCase }}.label),
+                            @endif
+                          );
+                        },
+                      ).toList(),
+                      onChanged: (dynamic newValue) {
+                        setState(() {
+                          selected{{ column.names.pascalCase }} = newValue;
+                        });
+                      },
+                      validator: (value) {
+                        @if(column.meta.required)
+                          if (value!.isEmpty) {
+                            return 'Please enter {{ noCase(column.names.camelCase) }}';
+                          }
+                        @endif
+                        if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
+                          return _validationErrors['{{ column.names.camelCase }}'][0];
+                        }
+                        return null;
+                      },
+                    ),
+                  @endif
+                @endif
+              @endeach
+            ]),
+          ),
         ),
       ),
     );

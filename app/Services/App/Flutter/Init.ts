@@ -232,11 +232,12 @@ export default class AppGenerator {
    * - show
    */
   protected async addModelStates(table: Table) {
-    const types = ['index', 'filter', 'show']
+    const types = ['index', 'filter', 'show', 'edit']
     for (const index in types) {
       const type = types[index]
       if (['index', 'filter'].includes(type) && !table.operations.index) return
       if (type === 'show' && !table.operations.show) return
+      if (type === 'edit' && !table.operations.edit) return
       const filePath = `${this.input.appPath}/lib/state/${table.names.snakeCase}_${type}.state.dart`
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {

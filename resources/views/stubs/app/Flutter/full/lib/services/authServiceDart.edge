@@ -28,7 +28,7 @@ Future register(
   const url = baseUrl + '/api/register';
   final response = await http_service.post(
     context,
-    url: url,
+    url,
     body: input.toJson(),
   );
   if (response!.statusCode != 200) throw UnknownException();
@@ -46,7 +46,7 @@ Future login(
   const url = baseUrl + '/api/login';
   final response = await http_service.post(
     context,
-    url: url,
+    url,
     body: input.toJson(),
   );
   if (response!.statusCode != 200) throw UnknownException();
@@ -62,7 +62,7 @@ Future logout(final BuildContext context) async {
     const url = baseUrl + '/api/logout';
     await http_service.post(
       context,
-      url: url,
+      url,
     );
   } catch (_) {}
   await persist_service.clearTokenAndUser(context);

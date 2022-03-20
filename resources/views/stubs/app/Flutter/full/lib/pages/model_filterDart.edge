@@ -14,6 +14,7 @@ class _{{ table.names.pascalCase }}FilterState extends State<{{ table.names.pasc
   var _submitButtonLoading = false;
   var _clearButtonLoading = false;
   @each(column in table.columns.filter(c => c.meta.filterable))
+    String {{ column.names.camelCase }} = '';
     final _{{ column.names.camelCase }}Controller = TextEditingController();
   @endeach
 
@@ -27,6 +28,12 @@ class _{{ table.names.pascalCase }}FilterState extends State<{{ table.names.pasc
   @override
   void initState() {
     super.initState();
+    final {{ table.names.camelCase }}FilterState = context.read<{{ table.names.pascalCase }}FilterState>();
+    @each(column in table.columns.filter(c => c.meta.filterable))
+      if ({{ table.names.camelCase }}FilterState.name != null) {
+        _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}FilterState.{{ column.names.camelCase }}!;
+      }
+    @endeach
   }
 
   @override
@@ -44,11 +51,12 @@ class _{{ table.names.pascalCase }}FilterState extends State<{{ table.names.pasc
         _{{ column.names.camelCase }}Controller.text = '';
       @endeach
     });
+    final {{ table.names.camelCase }}FilterState = context.read<{{ table.names.pascalCase }}FilterState>();
     @each(column in table.columns.filter(c => c.meta.filterable))
-      context.read<{{ table.names.pascalCase }}FilterState>().reset{{ column.names.pascalCase }}();
+      {{ table.names.camelCase }}FilterState.reset{{ column.names.pascalCase }}();
     @endeach
-    context.read<{{ table.names.pascalCase }}FilterState>().resetPageNo();
-    context.read<{{ table.names.pascalCase }}FilterState>().resetPageSize();
+    {{ table.names.camelCase }}FilterState.resetPageNo();
+    {{ table.names.camelCase }}FilterState.resetPageSize();
     await {{ table.names.camelCase }}_service.index(context);
     Navigator.pop(context);
   }
@@ -57,6 +65,9 @@ class _{{ table.names.pascalCase }}FilterState extends State<{{ table.names.pasc
     setState(() {
       _submitButtonLoading = true;
     });
+    @each(column in table.columns.filter(c => c.meta.filterable))
+      context.read<{{ table.names.pascalCase }}FilterState>().set{{ column.names.pascalCase }}({{ column.names.camelCase }});
+    @endeach
     await {{ table.names.camelCase }}_service.index(context);
     setState(() {
       _submitButtonLoading = false;
@@ -84,8 +95,7 @@ class _{{ table.names.pascalCase }}FilterState extends State<{{ table.names.pasc
               maxLength: {{ column.meta.maxLength }},
             @endif
             onChanged: (newValue) {
-              Provider.of<{{ table.names.pascalCase }}FilterState>(context, listen: false)
-                  .set{{ column.names.pascalCase }}(newValue);
+              {{ column.names.camelCase }} = newValue;
             },
           ),
         ),

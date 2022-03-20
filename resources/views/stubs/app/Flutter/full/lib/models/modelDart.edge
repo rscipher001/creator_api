@@ -1,7 +1,7 @@
 import 'package:app/models/pagination_meta.model.dart';
 
 class {{ table.names.pascalCase }} {
-  final int id;
+  final int? id;
   @each(column in table.columns)
     {{ column.meta.required ? 'final': '' }}
     @if (column.type === 'File')
@@ -22,7 +22,7 @@ class {{ table.names.pascalCase }} {
   @endeach
 
   {{ table.names.pascalCase }}({
-    required this.id,
+    this.id,
     @each(column in table.columns)
       {{ column.meta.required ? 'required': '' }} this.{{ column.names.camelCase }},
     @endeach
@@ -35,6 +35,20 @@ class {{ table.names.pascalCase }} {
         {{ column.names.camelCase }}: json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'],
       @endeach
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = {
+      @each(column in table.columns.filter(c => c.meta.required))
+        '{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}': {{ column.names.camelCase }},
+      @endeach
+    };
+    @each(column in table.columns.filter(c => !c.meta.required))
+      if ({{ column.names.camelCase }} != null) {
+        json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }};
+      }
+    @endeach
+    return json;
   }
 }
 
