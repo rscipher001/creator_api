@@ -1,0 +1,58 @@
+@set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:app/state/{{ table.names.snakeCase }}_show.state.dart';
+import 'package:app/components/global/my_drawer.dart';
+
+class {{ table.names.pascalCase }}Show extends StatefulWidget {
+  const {{ table.names.pascalCase }}Show({Key? key}) : super(key: key);
+
+  @override
+  _{{ table.names.pascalCase }}ShowState createState() => _{{ table.names.pascalCase }}ShowState();
+}
+
+class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascalCase }}Show> {
+  List<Widget> labelValue(String label, String? value) {
+    const boldFont = TextStyle(fontWeight: FontWeight.bold);
+    if (value == null) return [];
+    final children = [
+      Text(
+        label,
+        style: boldFont,
+      ),
+      Text(value),
+      const SizedBox(height: 8),
+    ];
+    return children;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final {{ table.names.camelCase }} = context.read<{{ table.names.pascalCase }}ShowState>().{{ table.names.camelCase }}!;
+    return Scaffold(
+      drawer: const MyDrawer(),
+      extendBody: true,
+      appBar: AppBar(
+        title: const Text('{{ noCase(table.names.pascalCase) }} Detail'),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+      body: SizedBox(
+        width: double.infinity,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                @each(column in exposedColumns)
+                  ...labelValue("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}),
+                @endeach
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

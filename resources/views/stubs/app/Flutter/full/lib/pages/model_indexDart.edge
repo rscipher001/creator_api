@@ -4,6 +4,9 @@ import 'package:app/state/{{ table.names.camelCase }}_index.state.dart';
 import 'package:app/state/{{ table.names.camelCase }}_filter.state.dart';
 import 'package:app/components/global/my_drawer.dart';
 import 'package:app/services/{{ table.names.camelCase }}.service.dart' as {{ table.names.snakeCase }}_service;
+@if(table.operations.show)
+  import 'package:app/state/{{ table.names.snakeCase }}_show.state.dart';
+@endif
 
 class {{ table.names.pascalCase }}Index extends StatefulWidget {
   const {{ table.names.pascalCase }}Index({Key? key}) : super(key: key);
@@ -82,6 +85,14 @@ class _{{ table.names.pascalCase }}IndexState extends State<{{ table.names.pasca
                           child: ListTile(
                             title: Text({{ table.names.camelCase }}.{{ table.defaultColumn }}),
                             {{--  subtitle: Text({{ table.names.camelCase }}.description),  --}}
+                            @if(table.operations.show)
+                              onTap: () {
+                                context
+                                    .read<{{ table.names.pascalCase }}ShowState>()
+                                    .loadState({{ table.names.camelCase }});
+                                Navigator.pushNamed(context, '{{ table.names.snakeCase }}_show');
+                              },
+                            @endif
                           ),
                         ),
                       );

@@ -251,11 +251,12 @@ export default class AppGenerator {
   }
 
   protected async addModelViews(table: Table) {
-    const types = ['index', 'filter', 'create']
+    const types = ['index', 'filter', 'create', 'show']
     for (const index in types) {
       const type = types[index]
       if (['index', 'filter'].includes(type) && !table.operations.index) return
       if (type === 'create' && !table.operations.create) return
+      if (type === 'show' && !table.operations.show) return
       const filePath = `${this.input.appPath}/lib/pages/${table.names.snakeCase}_${type}.dart`
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {
