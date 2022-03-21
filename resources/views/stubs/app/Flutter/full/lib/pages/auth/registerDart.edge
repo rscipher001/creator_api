@@ -135,7 +135,7 @@ class _RegisterState extends State<Register> {
                       return 'Please enter name';
                     }
                     if (_validationErrors.containsKey('email')) {
-                      return _validationErrors['email'][0];
+                      return _validationErrors['name']?[0];
                     }
                     return null;
                   },
@@ -164,7 +164,7 @@ class _RegisterState extends State<Register> {
                       return 'Please enter valid email';
                     }
                     if (_validationErrors.containsKey('email')) {
-                      return _validationErrors['email'][0];
+                      return _validationErrors['email']?[0];
                     }
                     return null;
                   },
@@ -188,7 +188,7 @@ class _RegisterState extends State<Register> {
                       return 'Please enter password';
                     }
                     if (_validationErrors.containsKey('password')) {
-                      return _validationErrors['password'][0];
+                      return _validationErrors['password']?[0];
                     }
                     return null;
                   },
@@ -219,7 +219,7 @@ class _RegisterState extends State<Register> {
                     return 'Please enter password';
                   }
                   if (_validationErrors.containsKey('passwordConfirmation')) {
-                    return _validationErrors['passwordConfirmation'][0];
+                    return _validationErrors['passwordConfirmation']?[0];
                   }
                   return null;
                 },
