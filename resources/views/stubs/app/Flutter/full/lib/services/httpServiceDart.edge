@@ -22,7 +22,7 @@ Future checkExceptions(
         content: Text('Please check your input'),
       ),
     );
-    throw ValidationException(errors: responseBody['errors']);
+    throw ValidationException(errors: responseBody['errors'] as List);
   }
 
   if (response.statusCode == 413) {

@@ -33,7 +33,7 @@ class _{{ table.names.pascalCase }}IndexState extends State<{{ table.names.pasca
           future: {{ table.names.snakeCase }}_service.index(context),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
+              return const Center(child: CircularProgressIndicator());
             }
             final List<Widget> filterWidgets = [];
             final filters = context.watch<{{ table.names.pascalCase }}FilterState>();

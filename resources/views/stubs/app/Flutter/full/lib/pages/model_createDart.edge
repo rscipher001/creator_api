@@ -37,7 +37,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
   var _autoValidateMode = AutovalidateMode.disabled;
   var _isLoading = false;
   final _{{ table.names.camelCase }}CreateKey = GlobalKey<FormState>();
-  Map _validationErrors = {};
+  Map<String, List<String>> _validationErrors = {};
 
   {{--  Dropdown value holders  --}}
   @each(column in exposedColumns)
@@ -91,17 +91,17 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
 
   Future store{{ table.names.pascalCase }}() async {
     try {
+      setState(() {
+        _isLoading = true;
+        _validationErrors = {};
+      });
+
       if (!_{{ table.names.camelCase }}CreateKey.currentState!.validate()) {
         return setState(() {
           _isLoading = false;
           _autoValidateMode = AutovalidateMode.always;
         });
       }
-
-      setState(() {
-        _isLoading = true;
-        _validationErrors = {};
-      });
 
       await {{ table.names.snakeCase }}_service.store(
         context,
@@ -128,7 +128,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
       Navigator.pushReplacementNamed(context, '{{ table.names.snakeCase }}_index');
     } on ValidationException catch (e) {
       setState(() {
-        _validationErrors = e.errors;
+        _validationErrors = e.getFormattedMessages();
         _isLoading = false;
         _autoValidateMode = AutovalidateMode.always;
       });
@@ -162,10 +162,6 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
             padding: const EdgeInsets.only(left: 16, right: 16),
             child: ListView(children: [
               const SizedBox(height: 16.0),
-              ElevatedButton(
-                child: Text(_isLoading ? 'Loading...' : 'Submit'),
-                onPressed: _isLoading ? null : store{{ table.names.pascalCase }},
-              ),
               @each(column in exposedColumns)
                 @if(column.type === 'String')
                   @if(column.input?.type === 'Input')
@@ -180,16 +176,16 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                           }
                         @endif
                         if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
-                          return _validationErrors['{{ column.names.camelCase }}'][0];
+                          return _validationErrors['{{ column.names.camelCase }}']?[0];
                         }
                         return null;
                       },
-                      {{--  decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.person),
+                      decoration: const InputDecoration(
+                        {{--  prefixIcon: Icon(Icons.person),  --}}
                         labelText: '{{ capitalCase(noCase(column.names.camelCase)) }}{{ column.meta.required ? ' *' : '' }}',
-                      ),  --}}
+                      ),
                       @if(column.meta.maxLength)
-                        maxLength: 128,
+                        maxLength: {{ column.meta.maxLength }},
                       @endif
                     ),
                     const SizedBox(height: 16.0),
@@ -229,6 +225,10 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                   @endif
                 @endif
               @endeach
+              ElevatedButton(
+                child: Text(_isLoading ? 'Loading...' : 'Submit'),
+                onPressed: _isLoading ? null : store{{ table.names.pascalCase }},
+              ),
             ]),
           ),
         ),

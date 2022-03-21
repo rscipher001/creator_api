@@ -23,7 +23,7 @@ class _RegisterState extends State<Register> {
   var _showPasswordConfirmation = false;
   var _isLoading = false;
   FocusNode? _passwordFocus, _passwordConfirmationFocus, _emailFocus;
-  Map _validationErrors = {};
+  Map<String, List<String>> _validationErrors = {};
   bool _termsAccepted = false;
 
   @override
@@ -94,7 +94,7 @@ class _RegisterState extends State<Register> {
       Navigator.pushNamed(context, 'dashboard');
     } on ValidationException catch (e) {
       setState(() {
-        _validationErrors = e.errors;
+        _validationErrors = e.getFormattedMessages();
         _isLoading = false;
         _autoValidateMode = AutovalidateMode.always;
       });
