@@ -110,7 +110,7 @@ export default class Init {
         cwd: this.input.path,
       })
     }
-    if (dependencies.length) {
+    if (devDependencies.length) {
       await HelperService.execute('npm', ['i', '-D', ...devDependencies], {
         cwd: this.input.path,
       })

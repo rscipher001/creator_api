@@ -69,24 +69,6 @@ export default class SPAGenerator {
     await this.createSrcRouterMiddlewaresGuestMiddlewareJs()
   }
 
-  public async installBuefy() {
-    await HelperService.execute(
-      'npm',
-      ['install', 'buefy', 'axios', 'vuex-persistedstate', 'lodash'],
-      {
-        cwd: this.input.spaPath,
-      }
-    )
-  }
-
-  protected async installCsvParse() {
-    if (this.input.tables.find((table) => table.operations.storeMany)) {
-      await HelperService.execute('npm', ['install', 'csv-parse'], {
-        cwd: this.input.spaPath,
-      })
-    }
-  }
-
   /**
    * Adds buefy imports
    */
@@ -124,6 +106,22 @@ export default class SPAGenerator {
     }
   }
 
+  protected async installAllDependencies() {
+    const dependencies: string[] = ['buefy', 'axios', 'vuex-persistedstate', 'lodash', 'csv-parse']
+    let devDependencies: string[] = []
+
+    if (dependencies.length) {
+      await HelperService.execute('npm', ['i', ...dependencies], {
+        cwd: this.input.spaPath,
+      })
+    }
+    if (devDependencies.length) {
+      await HelperService.execute('npm', ['i', '-D', ...devDependencies], {
+        cwd: this.input.spaPath,
+      })
+    }
+  }
+
   /**
    * Creates project
    * Configures git
@@ -141,6 +139,8 @@ export default class SPAGenerator {
         cwd: this.input.projectsPath,
       }
     )
+    // 2. Install all dependencies
+    await this.installAllDependencies()
     await HelperService.execute('git', ['config', '--local', 'user.name', this.input.git.name], {
       cwd: this.input.spaPath,
     })
@@ -148,8 +148,6 @@ export default class SPAGenerator {
       cwd: this.input.spaPath,
     })
     await this.replacePublicIndexHtml()
-    await this.installBuefy()
-    await this.installCsvParse()
   }
 
   // Replace public/index.html with file that contains material design icons
