@@ -166,6 +166,9 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                 @if(column.type === 'String')
                   @if(column.input?.type === 'Input')
                     TextFormField(
+                      @if(column.meta.multiline)
+                        maxLines: 3,
+                      @endif
                       controller: _{{ column.names.camelCase }}Controller,
                       focusNode: _{{ column.names.camelCase }}Focus,
                       textInputAction: TextInputAction.next,
