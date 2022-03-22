@@ -166,10 +166,9 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
+import { parse } from "csv-parse/browser/esm/sync";
 import ValidationException from "../exceptions/ValidationException";
 import { API_URL } from "../constants";
-
-const { parse } = require("csv-parse/lib/sync");
 
 export default {
   name: "{{ table.names.pascalCase }}ImportCSV",
