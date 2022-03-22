@@ -16,7 +16,7 @@ class {{ table.names.pascalCase }} {
       String{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
     @else
       {{
-        column.type === 'Boolean' ? 'boolean' : column.type.toLowerCase()
+        column.type === 'Boolean' ? 'bool' : column.type.toLowerCase()
       }}{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
     @endif
   @endeach

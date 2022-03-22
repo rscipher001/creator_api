@@ -16,6 +16,8 @@ import { BaseModel, BelongsTo, belongsTo, column, afterSave } from '@ioc:Adonis/
 
 export default class Project extends BaseModel {
   public input: { [key: string]: any }
+  public static blacklistedClassNames: string[] = ['Form', 'Input']
+  public static blacklistedInputNames: string[] = []
 
   @column({ isPrimary: true })
   public id: number

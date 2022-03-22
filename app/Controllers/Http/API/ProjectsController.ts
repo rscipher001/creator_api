@@ -72,6 +72,14 @@ export default class ProjectsController {
           break
         }
       }
+      for (let i = 0; i < projectInput.tables.length; i++) {
+        const table = projectInput.tables[i]
+        if (Project.blacklistedClassNames.includes(table.names.pascalCase)) {
+          return response.badRequest({
+            error: `Class name ${table.names.pascalCase} is not allowed`,
+          })
+        }
+      }
       if (isFileColumnExists) {
         return response.badRequest({
           error: 'Enable storage to supoort file upload',
