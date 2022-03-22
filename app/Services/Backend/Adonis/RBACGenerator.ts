@@ -179,11 +179,6 @@ export default class RBACGenerator {
     const rbac = this.input.rbac
     if (!rbac.enabled) return
 
-    // Install auth module
-    await HelperService.execute('npm', ['install', '@adonisjs/bouncer'], {
-      cwd: this.input.path,
-    })
-
     // Update common files related to bouncer
     // 1. .adonisrc.json
     // 2. tsconfig.json

@@ -320,17 +320,11 @@ export default class AuthGenerator {
 
   /**
    * Steps
-   * 1. Install auth module
    * 2. Update common files
    * 3. Copy & update auth module related files
    * 3. Update migration, model, controller and routes
    */
   protected async start() {
-    // Install auth module
-    await HelperService.execute('npm', ['install', '@adonisjs/auth'], {
-      cwd: this.input.path,
-    })
-
     // Update common files related to database
     // 1. .adonisrc.json
     // 2. tsconfig.json

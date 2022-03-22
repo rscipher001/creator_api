@@ -406,7 +406,6 @@ export default class DatabaseGenerator {
    * 3. Update env.ts
    * 4. Update config/database.ts
    * 5. Copy database/factories/index.ts
-   * 6. Install mysql and luxon
    */
   protected async initMysql() {
     if (this.input.camelCaseStrategy) {
@@ -421,25 +420,14 @@ export default class DatabaseGenerator {
 
     // Copy database/factories/index.ts
     await this.createDatabaseFactoryIndex()
-
-    // Install MySQL
-    await HelperService.execute('npm', ['install', 'mysql', 'luxon'], {
-      cwd: this.input.path,
-    })
   }
 
   /**
    * Steps
-   * 1. Install lucid
    * 2. Update common files related to database
    * 3. Install db specifc packabe and update files
    */
   protected async start() {
-    // Install Lucid
-    await HelperService.execute('npm', ['install', '@adonisjs/lucid'], {
-      cwd: this.input.path,
-    })
-
     // Update common files related to database
     // 1. .adonisrc.json
     // 2. ace-manifest.json

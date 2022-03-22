@@ -1,5 +1,6 @@
 import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
+import { Storage, Mailer } from 'App/Interfaces/Enums'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import HelperService from 'App/Services/HelperService'
 
@@ -71,10 +72,56 @@ export default class Init {
     await HelperService.commit('Pre commit hook updated', this.input.path)
   }
 
+  protected async installAllDependencies() {
+    const dependencies: string[] = ['@adonisjs/auth', '@adonisjs/lucid', 'mysql', 'luxon']
+    let devDependencies: string[] = []
+    if (this.input.generate.api.test) {
+      devDependencies = [
+        'japa',
+        'execa@5.1.1',
+        'get-port@5.1.1',
+        'supertest',
+        '@types/supertest',
+        '@faker-js/faker',
+      ]
+    }
+
+    if (this.input.storageEnabled) {
+      dependencies.push('@adonisjs/attachment-lite')
+      if (this.input.storageDrivers.includes(Storage.S3)) {
+        dependencies.push('@adonisjs/drive-s3')
+      }
+      if (this.input.storageDrivers.includes(Storage.GCS)) {
+        dependencies.push('@adonisjs/drive-gcs')
+      }
+    }
+    if (this.input.rbac.enabled) {
+      dependencies.push('@adonisjs/bouncer')
+    }
+    if (this.input.mailEnabled) {
+      dependencies.push('@adonisjs/mail')
+      dependencies.push('@adonisjs/view')
+      if (this.input.mailers.includes(Mailer.SES)) {
+        dependencies.push('aws-sdk')
+      }
+    }
+    if (dependencies.length) {
+      await HelperService.execute('npm', ['i', ...dependencies], {
+        cwd: this.input.path,
+      })
+    }
+    if (dependencies.length) {
+      await HelperService.execute('npm', ['i', '-D', ...devDependencies], {
+        cwd: this.input.path,
+      })
+    }
+  }
+
   /**
    * Steps
    * 0. Determine project type
    * 1. Create Project
+   * 2. Install all dependencies
    * 2. Add .vscode folder
    * 3. Setup git repo
    * 4. Initial commit
@@ -104,6 +151,9 @@ export default class Init {
         cwd: this.input.projectsPath,
       }
     )
+
+    // 2. Install all dependencies
+    await this.installAllDependencies()
 
     // 2. Add .vscode folder
     await this.createVscodeExtenstionsJson()
