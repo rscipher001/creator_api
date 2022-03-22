@@ -106,7 +106,8 @@ test.group('Auth', (group) => {
       .post('/api/project')
       .send(fullProjectInput)
       .set('Authorization', `Bearer ${token}`)
-      .expect(200)
+    // .expect(200)
+    console.log({ body })
     assert.isObject(body)
     projectId = body.id
   })
