@@ -46,7 +46,11 @@ class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascal
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 @each(column in exposedColumns)
-                  ...labelValue("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}),
+                  ...labelValue("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}
+                    @if (column.type !== 'string')
+                      {{ column.meta.required ? '' : '?' }}.toString()
+                    @endif
+                  ),
                 @endeach
               ],
             ),

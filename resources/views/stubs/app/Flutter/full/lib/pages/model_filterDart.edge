@@ -28,7 +28,9 @@ class _{{ table.names.pascalCase }}FilterState extends State<{{ table.names.pasc
   @override
   void initState() {
     super.initState();
-    final {{ table.names.camelCase }}FilterState = context.read<{{ table.names.pascalCase }}FilterState>();
+    @if(table.columns.find(c => c.meta.filterable))
+      final {{ table.names.camelCase }}FilterState = context.read<{{ table.names.pascalCase }}FilterState>();
+    @endif
     @each(column in table.columns.filter(c => c.meta.filterable))
       if ({{ table.names.camelCase }}FilterState.name != null) {
         _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}FilterState.{{ column.names.camelCase }}!;
@@ -99,23 +101,23 @@ class _{{ table.names.pascalCase }}FilterState extends State<{{ table.names.pasc
             },
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: 0,
-          ),
-          child: SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              child: Text(
-                _clearButtonLoading ? 'Loading...' : 'Clear Filter',
-              ),
-              onPressed: clearFilter,
+      @endeach
+      Padding(
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 0,
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            child: Text(
+              _clearButtonLoading ? 'Loading...' : 'Clear Filter',
             ),
+            onPressed: clearFilter,
           ),
         ),
-      @endeach
+      ),
       const Flexible(flex: 1, child: SizedBox(height: double.infinity)),
       Padding(
         padding: const EdgeInsets.only(

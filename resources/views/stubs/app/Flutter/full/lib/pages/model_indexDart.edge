@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app/state/{{ table.names.camelCase }}_index.state.dart';
-import 'package:app/state/{{ table.names.camelCase }}_filter.state.dart';
+@if(table.columns.find(c => c.meta.filterable))
+  import 'package:app/state/{{ table.names.camelCase }}_filter.state.dart';
+@endif
 import 'package:app/components/global/my_drawer.dart';
 import 'package:app/services/{{ table.names.camelCase }}.service.dart' as {{ table.names.snakeCase }}_service;
 @if(table.operations.show)
@@ -39,7 +41,9 @@ class _{{ table.names.pascalCase }}IndexState extends State<{{ table.names.pasca
               return const Center(child: CircularProgressIndicator());
             }
             final List<Widget> filterWidgets = [];
-            final filters = context.watch<{{ table.names.pascalCase }}FilterState>();
+            @if(table.columns.find(c => c.meta.filterable))
+              final filters = context.watch<{{ table.names.pascalCase }}FilterState>();
+            @endif
             @each(column in table.columns.filter(c => c.meta.filterable))
               if (filters.name != null && filters.name != '') {
                 filterWidgets.add(Padding(

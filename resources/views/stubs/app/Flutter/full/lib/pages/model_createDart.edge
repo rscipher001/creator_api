@@ -1,4 +1,4 @@
-@set('hasRouteParents', table.routeParentRelations.length)
+  @set('hasRouteParents', table.routeParentRelations.length)
 @set('fileColumns', table.columns.filter(c => c.type === 'File'))
 @set('fileColumnsLastIndex', fileColumns.length - 1)
 @set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
@@ -57,6 +57,8 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
         @endeach
         ];
       @endif
+    @elseif(column.type === 'Boolean')
+      bool {{ column.names.camelCase }} = false;
     @endif
   @endeach
 
@@ -64,6 +66,8 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
     @if(column.type === 'String' && column.input?.type === 'Input')
       FocusNode? _{{ column.names.camelCase }}Focus;
     @elseif(['Integer', 'Decimal'].includes(column.type))
+      FocusNode? _{{ column.names.camelCase }}Focus;
+    @elseif(column.type === 'Date')
       FocusNode? _{{ column.names.camelCase }}Focus;
     @endif
   @endeach
@@ -72,6 +76,8 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
     @if(column.type === 'String' && column.input?.type === 'Input')
       final _{{ column.names.camelCase }}Controller = TextEditingController();
     @elseif(['Integer', 'Decimal'].includes(column.type))
+      final _{{ column.names.camelCase }}Controller = TextEditingController();
+    @elseif(column.type === 'Date')
       final _{{ column.names.camelCase }}Controller = TextEditingController();
     @endif
   @endeach
@@ -83,6 +89,8 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
       @if(column.type === 'String' && column.input?.type === 'Input')
         _{{ column.names.camelCase }}Focus = FocusNode();
       @elseif(['Integer', 'Decimal'].includes(column.type))
+        _{{ column.names.camelCase }}Focus = FocusNode();
+      @elseif(column.type === 'Date')
         _{{ column.names.camelCase }}Focus = FocusNode();
       @endif
     @endeach
@@ -112,11 +120,13 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
             @elseif(column.type === 'Date')
               {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text),
             @elseif(column.type === 'Decimal')
-              {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text.toDouble(),
+              {{ column.names.camelCase }}: double.parse(_{{ column.names.camelCase }}Controller.text),
             @elseif(column.type === 'Integer')
-              {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text,
+              {{ column.names.camelCase }}: int.parse(_{{ column.names.camelCase }}Controller.text),
             @elseif(column.type === 'String')
               {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text,
+            @elseif(column.type === 'Boolean')
+              {{ column.names.camelCase }}: {{ column.names.camelCase }},
             @else
               {{--  {{
                 column.type === 'Boolean' ? 'boolean' : column.type.toLowerCase()
@@ -226,6 +236,97 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                       },
                     ),
                   @endif
+                @elseif(['Integer', 'Decimal'].includes(column.type))
+                  TextFormField(
+                    controller: _{{ column.names.camelCase }}Controller,
+                    focusNode: _{{ column.names.camelCase }}Focus,
+                    @if(column.type === 'Integer')
+                      keyboardType: TextInputType.number,
+                    @else
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                    @endif
+                    textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      @if(column.meta.required)
+                        if (value!.isEmpty) {
+                          return 'Please enter {{ noCase(column.names.camelCase) }}';
+                        }
+                      @endif
+                      @if(column.meta.min)
+                        if ({{ column.type === 'Decimal' ? 'double' : 'int' }}.parse(value) < {{ column.meta.min }}) {
+                          return 'Please enter {{ noCase(column.names.camelCase) }} more than {{ column.meta.min }}';
+                        }
+                      @endif
+                      @if(column.meta.max)
+                        if ({{ column.type === 'Decimal' ? 'double' : 'int' }}.parse(value) > {{ column.meta.max }}) {
+                          return 'Please enter {{ noCase(column.names.camelCase) }} less than {{ column.meta.min }}';
+                        }
+                      @endif
+                      if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
+                        return _validationErrors['{{ column.names.camelCase }}']?[0];
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      {{--  prefixIcon: Icon(Icons.person),  --}}
+                      labelText: '{{ capitalCase(noCase(column.names.camelCase)) }}{{ column.meta.required ? ' *' : '' }}',
+                    ),
+                    @if(column.meta.maxLength)
+                      maxLength: {{ column.meta.maxLength }},
+                    @endif
+                  ),
+                  const SizedBox(height: 16.0),
+                @elseif(column.type === 'Date')
+                  TextFormField(
+                    controller: _{{ column.names.camelCase }}Controller,
+                    focusNode: _{{ column.names.camelCase }}Focus,
+                    textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      @if(column.meta.required)
+                        if (value!.isEmpty) {
+                          return 'Please enter {{ noCase(column.names.camelCase) }}';
+                        }
+                      @endif
+                      if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
+                        return _validationErrors['{{ column.names.camelCase }}']?[0];
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      labelText: '{{ capitalCase(noCase(column.names.camelCase)) }}{{ column.meta.required ? ' *' : '' }}',
+                      suffix: IconButton(
+                        onPressed: () async {
+                          final DateTime? newDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime(0),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(DateTime.now().year + 100),
+                          );
+                          if (newDate != null) {
+                            setState(() {
+                              _{{ column.names.camelCase }}Controller.text = newDate.toString();
+                            });
+                          }
+                        },
+                        icon: const Icon(Icons.calendar_month),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                @elseif(column.type === 'Boolean')
+                  ListTile(
+                    title: const Text('{{ noCase(column.names.camelCase) }}'),
+                    leading: Switch(
+                      value: {{ noCase(column.names.camelCase) }},
+                      onChanged: (bool value) {
+                        setState(() {
+                          {{ noCase(column.names.camelCase) }} = value;
+                        });
+                      },
+                    ),
+                  ),
                 @endif
               @endeach
               ElevatedButton(
