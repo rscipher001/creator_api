@@ -1,4 +1,4 @@
-  @set('hasRouteParents', table.routeParentRelations.length)
+@set('hasRouteParents', table.routeParentRelations.length)
 @set('fileColumns', table.columns.filter(c => c.type === 'File'))
 @set('fileColumnsLastIndex', fileColumns.length - 1)
 @set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
@@ -24,6 +24,9 @@ import 'package:app/exceptions/validation.exception.dart';
 import 'package:app/models/{{ table.names.snakeCase }}.model.dart';
 import 'package:app/state/{{ table.names.snakeCase }}_edit.state.dart';
 import 'package:app/services/{{ table.names.snakeCase }}.service.dart' as {{ table.names.snakeCase }}_service;
+@if(table.columns.find(c => c.type === 'Date'))
+  import 'package:validators/validators.dart';
+@endif
 
 class {{ table.names.pascalCase }}Create extends StatefulWidget {
   const {{ table.names.pascalCase }}Create({Key? key}) : super(key: key);
@@ -118,7 +121,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
             @if (column.type === 'File')
               {{--  Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
             @elseif(column.type === 'Date')
-              {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text),
+              {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text.split('/').reversed.join()),
             @elseif(column.type === 'Decimal')
               {{ column.names.camelCase }}: double.parse(_{{ column.names.camelCase }}Controller.text),
             @elseif(column.type === 'Integer')
@@ -152,6 +155,23 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
           title: Text("${editMode ? 'Update' : 'Save'} failed"),
         ),
       );
+    }
+  }
+
+  onDateSelect(
+    final BuildContext context,
+    final TextEditingController controller,
+  ) async {
+    final DateTime? newDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(0),
+      lastDate: DateTime(DateTime.now().year + 100),
+    );
+    if (newDate != null) {
+      setState(() {
+        controller.text = "${newDate.day}/${newDate.month}/${newDate.year}";
+      });
     }
   }
 
@@ -243,6 +263,9 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                     @if(column.type === 'Integer')
                       keyboardType: TextInputType.number,
                     @else
+                      inputFormatters: [
+                        WhitelistingTextInputFormatter.digitsOnly,
+                      ],
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
@@ -281,6 +304,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                 @elseif(column.type === 'Date')
                   TextFormField(
                     controller: _{{ column.names.camelCase }}Controller,
+                    keyboardType: TextInputType.datetime,
                     focusNode: _{{ column.names.camelCase }}Focus,
                     textInputAction: TextInputAction.next,
                     validator: (value) {
@@ -289,6 +313,9 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                           return 'Please enter {{ noCase(column.names.camelCase) }}';
                         }
                       @endif
+                      if (isDate(value.split('/').reversed.join())) {
+                        return 'Please enter valid date';
+                      }
                       if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
                         return _validationErrors['{{ column.names.camelCase }}']?[0];
                       }
@@ -296,21 +323,10 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                     },
                     decoration: InputDecoration(
                       labelText: '{{ capitalCase(noCase(column.names.camelCase)) }}{{ column.meta.required ? ' *' : '' }}',
-                      suffix: IconButton(
-                        onPressed: () async {
-                          final DateTime? newDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(0),
-                            lastDate: DateTime(DateTime.now().year + 100),
-                          );
-                          if (newDate != null) {
-                            setState(() {
-                              _{{ column.names.camelCase }}Controller.text = "${newDate.year}/${newDate.month}/${newDate.day}";
-                            });
-                          }
-                        },
-                        icon: const Icon(Icons.calendar_month),
+                      hintText: 'DD/MM/YYYY',
+                      suffixIcon: GestureDetector(
+                        onTap: onDateSelect(context, _dateController),
+                        child: const Icon(Icons.calendar_month),
                       ),
                     ),
                   ),
@@ -318,14 +334,27 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                 @elseif(column.type === 'Boolean')
                   ListTile(
                     title: const Text('{{ noCase(column.names.camelCase) }}'),
-                    leading: Switch(
+                    trailing: Switch(
                       value: {{ noCase(column.names.camelCase) }},
-                      onChanged: (bool value) {
+                      onChanged: (final bool value) {
                         setState(() {
                           {{ noCase(column.names.camelCase) }} = value;
                         });
                       },
                     ),
+                  ),
+                  CheckboxListTile(
+                    dense: true,
+                    contentPadding: const EdgeInsets.all(0),
+                    value: {{ noCase(column.names.camelCase) }},
+                    controlAffinity: ListTileControlAffinity.leading,
+                    activeColor: Theme.of(context).primaryColor,
+                    onChanged: (final bool value) {
+                      setState(() {
+                        {{ noCase(column.names.camelCase) }} = value;
+                      });
+                    },
+                    title: const Text('{{ noCase(column.names.camelCase) }}'),
                   ),
                 @endif
               @endeach
