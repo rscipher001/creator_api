@@ -300,13 +300,13 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                         onPressed: () async {
                           final DateTime? newDate = await showDatePicker(
                             context: context,
-                            initialDate: DateTime(0),
-                            firstDate: DateTime.now(),
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(0),
                             lastDate: DateTime(DateTime.now().year + 100),
                           );
                           if (newDate != null) {
                             setState(() {
-                              _{{ column.names.camelCase }}Controller.text = newDate.toString();
+                              _{{ column.names.camelCase }}Controller.text = "${newDate.year}/${newDate.month}/${newDate.day}";
                             });
                           }
                         },
