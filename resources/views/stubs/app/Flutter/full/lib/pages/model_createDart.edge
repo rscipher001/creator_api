@@ -121,7 +121,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
             @if (column.type === 'File')
               {{--  Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
             @elseif(column.type === 'Date')
-              {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text.split('/').reversed.join()),
+              {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text.split('-').reversed.join('-')),
             @elseif(column.type === 'Decimal')
               {{ column.names.camelCase }}: double.parse(_{{ column.names.camelCase }}Controller.text),
             @elseif(column.type === 'Integer')
@@ -170,7 +170,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
     );
     if (newDate != null) {
       setState(() {
-        controller.text = "${newDate.day}/${newDate.month}/${newDate.year}";
+        controller.text = "${newDate.day}-${newDate.month}-${newDate.year}";
       });
     }
   }
@@ -313,7 +313,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                           return 'Please enter {{ noCase(column.names.camelCase) }}';
                         }
                       @endif
-                      if (isDate(value.split('/').reversed.join())) {
+                      if (isDate(value.split('-').reversed.join('-'))) {
                         return 'Please enter valid date';
                       }
                       if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
@@ -323,9 +323,11 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                     },
                     decoration: InputDecoration(
                       labelText: '{{ capitalCase(noCase(column.names.camelCase)) }}{{ column.meta.required ? ' *' : '' }}',
-                      hintText: 'DD/MM/YYYY',
+                      hintText: 'DD-MM-YYYY',
                       suffixIcon: GestureDetector(
-                        onTap: onDateSelect(context, _dateController),
+                        onTap: () {
+                          onDateSelect(context, _dateController);
+                        },
                         child: const Icon(Icons.calendar_month),
                       ),
                     ),
