@@ -215,7 +215,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                       },
                       decoration: const InputDecoration(
                         {{--  prefixIcon: Icon(Icons.person),  --}}
-                        labelText: '{{ capitalCase(noCase(column.names.camelCase)) }}{{ column.meta.required ? ' *' : '' }}',
+                        labelText: '{{ noCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
                       ),
                       @if(column.meta.maxLength)
                         maxLength: {{ column.meta.maxLength }},
@@ -294,7 +294,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                     },
                     decoration: const InputDecoration(
                       {{--  prefixIcon: Icon(Icons.person),  --}}
-                      labelText: '{{ capitalCase(noCase(column.names.camelCase)) }}{{ column.meta.required ? ' *' : '' }}',
+                      labelText: '{{ noCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
                     ),
                     @if(column.meta.maxLength)
                       maxLength: {{ column.meta.maxLength }},
@@ -322,7 +322,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                       return null;
                     },
                     decoration: InputDecoration(
-                      labelText: '{{ capitalCase(noCase(column.names.camelCase)) }}{{ column.meta.required ? ' *' : '' }}',
+                      labelText: '{{ noCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
                       hintText: 'DD/MM/YYYY',
                       suffixIcon: GestureDetector(
                         onTap: () {
@@ -335,7 +335,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                   const SizedBox(height: 16.0),
                 @elseif(column.type === 'Boolean')
                   ListTile(
-                    title: const Text('{{ noCase(column.names.camelCase) }}'),
+                    title: const Text('{{ noCase(column.names.pascalCase) }}'),
                     trailing: Switch(
                       value: {{ noCase(column.names.camelCase) }},
                       onChanged: (final bool value) {

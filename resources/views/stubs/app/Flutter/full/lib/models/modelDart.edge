@@ -32,7 +32,15 @@ class {{ table.names.pascalCase }} {
     return {{ table.names.pascalCase }}(
       id: json['id'],
       @each(column in table.columns)
-        {{ column.names.camelCase }}: json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'],
+        @if(column.type === 'Decimal')
+          {{ column.names.camelCase }}: json['decimal'] is double
+              ? json['decimal']
+              : double.parse(json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'].toString()),
+        @elseif(column.type === 'Date')
+          {{ column.names.camelCase }}: DateTime.parse(json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}']),
+        @else
+          {{ column.names.camelCase }}: json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'],
+        @endif
       @endeach
     );
   }
@@ -40,12 +48,20 @@ class {{ table.names.pascalCase }} {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = {
       @each(column in table.columns.filter(c => c.meta.required))
-        '{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}': {{ column.names.camelCase }},
+        @if(column.type === 'Date')
+          '{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}': {{ column.names.camelCase }}.toIso8601String(),
+        @else
+          '{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}': {{ column.names.camelCase }},
+        @endif
       @endeach
     };
     @each(column in table.columns.filter(c => !c.meta.required))
       if ({{ column.names.camelCase }} != null) {
-        json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }};
+        @if(column.type === 'Date')
+          json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }}.toIso8601String();
+         @else
+          json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }};
+        @endif
       }
     @endeach
     return json;

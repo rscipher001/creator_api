@@ -49,7 +49,7 @@ class _{{ table.names.pascalCase }}IndexState extends State<{{ table.names.pasca
                 filterWidgets.add(Padding(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: Chip(
-                    label: Text('{{ capitalCase(noCase(column.names.camelCase)) }}: ${filters.{{ column.names.camelCase }}}'),
+                    label: Text('{{ noCase(column.names.pascalCase) }}: ${filters.{{ column.names.camelCase }}}'),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),

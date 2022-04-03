@@ -51,6 +51,7 @@ Future<{{ table.names.pascalCase }}> store(final BuildContext context, final {{ 
     context,
     baseUrl + '/api/{{ table.names.camelCase }}',
     body: input.toJson(),
+    jsonContent: true,
   );
   if (response!.statusCode != 200) {
     throw UnknownException();
