@@ -334,32 +334,35 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                   ),
                   const SizedBox(height: 16.0),
                 @elseif(column.type === 'Boolean')
-                  ListTile(
-                    title: const Text('{{ noCase(column.names.pascalCase) }}'),
-                    trailing: Switch(
-                      value: {{ noCase(column.names.camelCase) }},
-                      onChanged: (final bool value) {
-                        setState(() {
-                          {{ noCase(column.names.camelCase) }} = value;
-                        });
-                      },
+                  @if(column.input.type === 'Swtich')
+                    ListTile(
+                      title: const Text('{{ noCase(column.names.pascalCase) }}'),
+                      trailing: Switch(
+                        value: {{ noCase(column.names.camelCase) }},
+                        onChanged: (final bool value) {
+                          setState(() {
+                            {{ noCase(column.names.camelCase) }} = value;
+                          });
+                        },
+                      ),
                     ),
-                  ),
-                  CheckboxListTile(
-                    dense: true,
-                    contentPadding: const EdgeInsets.all(0),
-                    value: {{ noCase(column.names.camelCase) }},
-                    controlAffinity: ListTileControlAffinity.leading,
-                    activeColor: Theme.of(context).primaryColor,
-                    onChanged: (final bool? value) {
-                      if (value != null) {
-                        setState(() {
-                          {{ noCase(column.names.camelCase) }} = value;
-                        });
-                      }
-                    },
-                    title: const Text('{{ noCase(column.names.camelCase) }}'),
-                  ),
+                  @else
+                    CheckboxListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.all(0),
+                      value: {{ noCase(column.names.camelCase) }},
+                      controlAffinity: ListTileControlAffinity.leading,
+                      activeColor: Theme.of(context).primaryColor,
+                      onChanged: (final bool? value) {
+                        if (value != null) {
+                          setState(() {
+                            {{ noCase(column.names.camelCase) }} = value;
+                          });
+                        }
+                      },
+                      title: const Text('{{ noCase(column.names.camelCase) }}'),
+                    ),
+                  @endif
                 @endif
               @endeach
               ElevatedButton(

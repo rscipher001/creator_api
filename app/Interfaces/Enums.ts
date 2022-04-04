@@ -62,8 +62,6 @@ export enum APIInput {
 export enum UIInput {
   INPUT = 'Input',
   SELECT = 'Select',
-  RADIO = 'Radio',
-  CHECKBOX = 'Checkbox',
 }
 
 // Prices in dollar

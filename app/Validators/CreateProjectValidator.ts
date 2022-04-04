@@ -51,8 +51,6 @@ export default class CreateProjectValidator {
       type: schema.string({ trim: true }),
       decimal: schema.object.optional().anyMembers(),
       select: schema.object.optional().anyMembers(),
-      radio: schema.object.optional().anyMembers(),
-      checkbox: schema.object.optional().anyMembers(),
     }),
   })
 

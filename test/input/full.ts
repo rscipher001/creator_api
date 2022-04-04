@@ -113,14 +113,6 @@ const fulProjectInput = {
               type: 'String',
               options: [],
             },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
-              options: [],
-            },
           },
           name: 'name',
           type: 'String',
@@ -142,14 +134,6 @@ const fulProjectInput = {
             select: {
               types: ['object', 'string', 'number'],
               type: 'String',
-              options: [],
-            },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
               options: [],
             },
           },
@@ -198,14 +182,6 @@ const fulProjectInput = {
               type: 'String',
               options: [],
             },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
-              options: [],
-            },
           },
           name: 'name',
           type: 'String',
@@ -226,14 +202,6 @@ const fulProjectInput = {
             select: {
               types: ['object', 'string', 'number'],
               type: 'String',
-              options: [],
-            },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
               options: [],
             },
           },
@@ -290,14 +258,6 @@ const fulProjectInput = {
               type: 'String',
               options: [],
             },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
-              options: [],
-            },
           },
           name: 'address',
           type: 'String',
@@ -349,14 +309,6 @@ const fulProjectInput = {
             select: {
               types: ['object', 'string', 'number'],
               type: 'String',
-              options: [],
-            },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
               options: [],
             },
           },
@@ -412,14 +364,6 @@ const fulProjectInput = {
               type: 'String',
               options: [],
             },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
-              options: [],
-            },
           },
           name: 'name',
           type: 'String',
@@ -471,14 +415,6 @@ const fulProjectInput = {
             select: {
               types: ['object', 'string', 'number'],
               type: 'String',
-              options: [],
-            },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
               options: [],
             },
           },
@@ -534,14 +470,6 @@ const fulProjectInput = {
               type: 'String',
               options: [],
             },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
-              options: [],
-            },
           },
           name: 'address',
           type: 'String',
@@ -593,14 +521,6 @@ const fulProjectInput = {
             select: {
               types: ['object', 'string', 'number'],
               type: 'String',
-              options: [],
-            },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
               options: [],
             },
           },
@@ -655,14 +575,6 @@ const fulProjectInput = {
             select: {
               types: ['object', 'string', 'number'],
               type: 'String',
-              options: [],
-            },
-            radio: {
-              types: ['object', 'string', 'number'],
-              type: 'String',
-              options: [],
-            },
-            checkbox: {
               options: [],
             },
           },
