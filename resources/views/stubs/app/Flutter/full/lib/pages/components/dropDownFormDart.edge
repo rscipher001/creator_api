@@ -7,6 +7,9 @@
 DropdownButtonFormField(
   focusNode: _{{ column.names.camelCase }}Focus,
   value: selected{{ column.names.pascalCase }},
+  decoration: const InputDecoration(
+    labelText: '{{ capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
+  ),
   items: {{ column.names.camelCasePlural }}.map<DropdownMenuItem<{{ columnDataType }}>>(
     ({{ column.names.camelCase }}) {
       return DropdownMenuItem<{{ columnDataType }}>(
@@ -25,9 +28,14 @@ DropdownButtonFormField(
       selected{{ column.names.pascalCase }} = newValue;
     });
   },
-  validator: (dynamic value) {
+  validator: ({{ columnDataType }}? value) {
     @if(column.meta.required)
-      if (value!.isEmpty) {
+      if (
+        @if(columnDataType === 'String')
+          value == '' ||
+        @endif
+        value == null
+      ) {
         return 'Please enter {{ noCase(column.names.camelCase) }}';
       }
     @endif
@@ -37,3 +45,4 @@ DropdownButtonFormField(
     return null;
   },
 ),
+const SizedBox(height: 16.0),
