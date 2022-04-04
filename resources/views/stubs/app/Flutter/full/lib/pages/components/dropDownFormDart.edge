@@ -1,0 +1,39 @@
+@set(
+  'columnDataType',
+  column.type === 'String'
+    ? 'String'
+    : column.type === 'Integer' ? 'int' : 'double'
+)
+DropdownButtonFormField(
+  focusNode: _{{ column.names.camelCase }}Focus,
+  value: selected{{ column.names.pascalCase }},
+  items: {{ column.names.camelCasePlural }}.map<DropdownMenuItem<{{ columnDataType }}>>(
+    ({{ column.names.camelCase }}) {
+      return DropdownMenuItem<{{ columnDataType }}>(
+        @if(column.input?.select.options[0].value)
+          value: {{ column.names.camelCase }}['value'] as {{ columnDataType }},
+          child: Text({{ column.names.camelCase }}['label'] as String),
+        @else
+          value: {{ column.names.camelCase }},
+          child: Text({{ column.names.camelCase }} {{ columnDataType !== 'String' ? '.toString()' : '' }}),
+        @endif
+      );
+    },
+  ).toList(),
+  onChanged: (dynamic newValue) {
+    setState(() {
+      selected{{ column.names.pascalCase }} = newValue;
+    });
+  },
+  validator: (dynamic value) {
+    @if(column.meta.required)
+      if (value!.isEmpty) {
+        return 'Please enter {{ noCase(column.names.camelCase) }}';
+      }
+    @endif
+    if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
+      return _validationErrors['{{ column.names.camelCase }}']?[0];
+    }
+    return null;
+  },
+),

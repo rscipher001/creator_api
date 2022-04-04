@@ -44,18 +44,25 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
 
   {{--  Dropdown value holders  --}}
   @each(column in exposedColumns)
-    @if(column.type === 'String')
-      @if(column.input?.type === 'Input')
-        String? selected{{ column.names.pascalCase }};
+    @if(['String', 'Integer', 'Decimal'].includes(column.type))
+      @if(column.input?.type === 'Select')
+        {{
+          column.type === 'String'
+              ? 'String'
+              : column.type === 'Integer'
+                  ? 'int'
+                  : 'double'
+         }}? selected{{ column.names.pascalCase }};
         final {{ column.names.camelCasePlural }} = [
+        @set('quote', column.type === 'String' ? "'" : '')
         @each(option in column.input?.select.options)
           @if(option.value)
             {
-              label: {{ option.label }},
-              value: {{ option.value }},
+              'label': '{{ option.label }}',
+              'value': {{{ quote }}}{{ option.value }}{{{ quote }}},
             },
           @else
-            {{ option }},
+            {{{ quote }}}{{ option }}{{{ quote }}},
           @endif
         @endeach
         ];
@@ -65,8 +72,8 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
     @endif
   @endeach
 
-  @each(column in exposedColumns)
-    @if(column.type === 'String' && column.input?.type === 'Input')
+  @each(column in exposedColumns)~
+    @if(column.type === 'String' && ['Input', 'Select'].includes(column.input?.type))
       FocusNode? _{{ column.names.camelCase }}Focus;
     @elseif(['Integer', 'Decimal'].includes(column.type))
       FocusNode? _{{ column.names.camelCase }}Focus;
@@ -75,10 +82,8 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
     @endif
   @endeach
 
-  @each(column in exposedColumns)
-    @if(column.type === 'String' && column.input?.type === 'Input')
-      final _{{ column.names.camelCase }}Controller = TextEditingController();
-    @elseif(['Integer', 'Decimal'].includes(column.type))
+  @each(column in exposedColumns)~
+    @if(['String', 'Integer', 'Decimal'].includes(column.type) && column.input?.type === 'Input')
       final _{{ column.names.camelCase }}Controller = TextEditingController();
     @elseif(column.type === 'Date')
       final _{{ column.names.camelCase }}Controller = TextEditingController();
@@ -88,7 +93,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
   @override
   void initState() {
     editMode = context.read<{{ table.names.pascalCase }}EditState>().editMode;
-    @each(column in exposedColumns)
+    @each(column in exposedColumns)~
       @if(column.type === 'String' && column.input?.type === 'Input')
         _{{ column.names.camelCase }}Focus = FocusNode();
       @elseif(['Integer', 'Decimal'].includes(column.type))
@@ -123,11 +128,23 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
             @elseif(column.type === 'Date')
               {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text.split('/').reversed.join('-')),
             @elseif(column.type === 'Decimal')
-              {{ column.names.camelCase }}: double.parse(_{{ column.names.camelCase }}Controller.text),
+              @if(column.input?.type === 'Select')
+                {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
+              @else
+                {{ column.names.camelCase }}: double.parse(_{{ column.names.camelCase }}Controller.text),
+              @endif
             @elseif(column.type === 'Integer')
-              {{ column.names.camelCase }}: int.parse(_{{ column.names.camelCase }}Controller.text),
+              @if(column.input?.type === 'Select')
+                {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
+              @else
+                {{ column.names.camelCase }}: int.parse(_{{ column.names.camelCase }}Controller.text),
+              @endif
             @elseif(column.type === 'String')
-              {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text,
+              @if(column.input?.type === 'Select')
+                {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
+              @else
+                {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text,
+              @endif
             @elseif(column.type === 'Boolean')
               {{ column.names.camelCase }}: {{ column.names.camelCase }},
             @else
@@ -202,7 +219,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                       controller: _{{ column.names.camelCase }}Controller,
                       focusNode: _{{ column.names.camelCase }}Focus,
                       textInputAction: TextInputAction.next,
-                      validator: (value) {
+                      validator: (dynamic value) {
                         @if(column.meta.required)
                           if (value!.isEmpty) {
                             return 'Please enter {{ noCase(column.names.camelCase) }}';
@@ -223,91 +240,73 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                     ),
                     const SizedBox(height: 16.0),
                   @elseif(column.input?.type === 'Select')
-                    DropdownButtonFormField(
-                      value: selectedCityId,
-                      items: {{column.names.camelCasePlural }}.map<DropdownMenuItem<int>>(
-                        ({{ column.names.camelCase }}) {
-                          return DropdownMenuItem<String>(
-                            @if(column.input?.select.options[0].value === null)
-                              value: {{ column.names.camelCase }},
-                              child: Text({{ column.names.camelCase }}),
-                            @else
-                              value: {{ column.names.camelCase }}.value,
-                              child: Text({{ column.names.camelCase }}.label),
-                            @endif
-                          );
-                        },
-                      ).toList(),
-                      onChanged: (dynamic newValue) {
-                        setState(() {
-                          selected{{ column.names.pascalCase }} = newValue;
-                        });
-                      },
-                      validator: (value) {
+                    @!component('stubs/app/Flutter/full/lib/pages/components/dropDownFormDart', {
+                      table,
+                      column,
+                      input
+                    })~
+                  @endif
+                @elseif(['Integer', 'Decimal'].includes(column.type))
+                  @if(column.input?.type === 'Select')
+                    @!component('stubs/app/Flutter/full/lib/pages/components/dropDownFormDart', {
+                      table,
+                      column,
+                      input
+                    })~
+                    const SizedBox(height: 16.0),
+                  @else
+                    TextFormField(
+                      controller: _{{ column.names.camelCase }}Controller,
+                      focusNode: _{{ column.names.camelCase }}Focus,
+                      @if(column.type === 'Integer')
+                        keyboardType: TextInputType.number,
+                      @else
+                        inputFormatters: [
+                          WhitelistingTextInputFormatter.digitsOnly,
+                        ],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      @endif
+                      textInputAction: TextInputAction.next,
+                      validator: (dynamic value) {
                         @if(column.meta.required)
                           if (value!.isEmpty) {
                             return 'Please enter {{ noCase(column.names.camelCase) }}';
                           }
                         @endif
+                        @if(column.meta.min)
+                          if ({{ column.type === 'Decimal' ? 'double' : 'int' }}.parse(value) < {{ column.meta.min }}) {
+                            return 'Please enter {{ noCase(column.names.camelCase) }} more than {{ column.meta.min }}';
+                          }
+                        @endif
+                        @if(column.meta.max)
+                          if ({{ column.type === 'Decimal' ? 'double' : 'int' }}.parse(value) > {{ column.meta.max }}) {
+                            return 'Please enter {{ noCase(column.names.camelCase) }} less than {{ column.meta.min }}';
+                          }
+                        @endif
                         if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
-                          return _validationErrors['{{ column.names.camelCase }}'][0];
+                          return _validationErrors['{{ column.names.camelCase }}']?[0];
                         }
                         return null;
                       },
-                    ),
-                  @endif
-                @elseif(['Integer', 'Decimal'].includes(column.type))
-                  TextFormField(
-                    controller: _{{ column.names.camelCase }}Controller,
-                    focusNode: _{{ column.names.camelCase }}Focus,
-                    @if(column.type === 'Integer')
-                      keyboardType: TextInputType.number,
-                    @else
-                      inputFormatters: [
-                        WhitelistingTextInputFormatter.digitsOnly,
-                      ],
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
+                      decoration: const InputDecoration(
+                        {{--  prefixIcon: Icon(Icons.person),  --}}
+                        labelText: '{{ noCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
                       ),
-                    @endif
-                    textInputAction: TextInputAction.next,
-                    validator: (value) {
-                      @if(column.meta.required)
-                        if (value!.isEmpty) {
-                          return 'Please enter {{ noCase(column.names.camelCase) }}';
-                        }
+                      @if(column.meta.maxLength)
+                        maxLength: {{ column.meta.maxLength }},
                       @endif
-                      @if(column.meta.min)
-                        if ({{ column.type === 'Decimal' ? 'double' : 'int' }}.parse(value) < {{ column.meta.min }}) {
-                          return 'Please enter {{ noCase(column.names.camelCase) }} more than {{ column.meta.min }}';
-                        }
-                      @endif
-                      @if(column.meta.max)
-                        if ({{ column.type === 'Decimal' ? 'double' : 'int' }}.parse(value) > {{ column.meta.max }}) {
-                          return 'Please enter {{ noCase(column.names.camelCase) }} less than {{ column.meta.min }}';
-                        }
-                      @endif
-                      if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
-                        return _validationErrors['{{ column.names.camelCase }}']?[0];
-                      }
-                      return null;
-                    },
-                    decoration: const InputDecoration(
-                      {{--  prefixIcon: Icon(Icons.person),  --}}
-                      labelText: '{{ noCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
                     ),
-                    @if(column.meta.maxLength)
-                      maxLength: {{ column.meta.maxLength }},
-                    @endif
-                  ),
-                  const SizedBox(height: 16.0),
+                    const SizedBox(height: 16.0),
+                  @endif
                 @elseif(column.type === 'Date')
                   TextFormField(
                     controller: _{{ column.names.camelCase }}Controller,
                     keyboardType: TextInputType.datetime,
                     focusNode: _{{ column.names.camelCase }}Focus,
                     textInputAction: TextInputAction.next,
-                    validator: (value) {
+                    validator: (dynamic value) {
                       @if(column.meta.required)
                         if (value!.isEmpty) {
                           return 'Please enter {{ noCase(column.names.camelCase) }}';
