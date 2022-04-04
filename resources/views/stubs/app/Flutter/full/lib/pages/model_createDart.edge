@@ -351,10 +351,12 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                     value: {{ noCase(column.names.camelCase) }},
                     controlAffinity: ListTileControlAffinity.leading,
                     activeColor: Theme.of(context).primaryColor,
-                    onChanged: (final bool value) {
-                      setState(() {
-                        {{ noCase(column.names.camelCase) }} = value;
-                      });
+                    onChanged: (final bool? value) {
+                      if (value != null) {
+                        setState(() {
+                          {{ noCase(column.names.camelCase) }} = value;
+                        });
+                      }
                     },
                     title: const Text('{{ noCase(column.names.camelCase) }}'),
                   ),

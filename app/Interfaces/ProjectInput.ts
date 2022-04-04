@@ -68,7 +68,7 @@ export interface Meta {
  */
 export interface Input {
   displayName?: string // Display name will be used as label when displaying a field
-  type?: string // input, select, radio, checkbox, file(String only)
+  type?: string // input, select, radio, checkbox, switch, file(String only)
   decimal?: {
     step: number | string // Only allowed for decimal inputs
   }
