@@ -232,7 +232,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                       },
                       decoration: const InputDecoration(
                         {{--  prefixIcon: Icon(Icons.person),  --}}
-                        labelText: '{{ noCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
+                        labelText: '{{ capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
                       ),
                       @if(column.meta.maxLength)
                         maxLength: {{ column.meta.maxLength }},
@@ -292,7 +292,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                       },
                       decoration: const InputDecoration(
                         {{--  prefixIcon: Icon(Icons.person),  --}}
-                        labelText: '{{ noCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
+                        labelText: '{{ capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
                       ),
                       @if(column.meta.maxLength)
                         maxLength: {{ column.meta.maxLength }},
@@ -321,7 +321,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                       return null;
                     },
                     decoration: InputDecoration(
-                      labelText: '{{ noCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
+                      labelText: '{{ capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
                       hintText: 'DD/MM/YYYY',
                       suffixIcon: GestureDetector(
                         onTap: () {

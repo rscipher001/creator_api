@@ -91,7 +91,7 @@ class _{{ table.names.pascalCase }}FilterState extends State<{{ table.names.pasc
             controller: _{{ column.names.camelCase }}Controller,
             decoration: const InputDecoration(
               prefixIcon: Icon(Icons.search_outlined),
-              labelText: '{{ column.names.pascalCase }}',
+              labelText: '{{ capitalCase(column.names.pascalCase) }}',
             ),
             @if(column.meta.maxLength)
               maxLength: {{ column.meta.maxLength }},
