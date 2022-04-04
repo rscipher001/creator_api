@@ -73,6 +73,7 @@ export interface Input {
     step: number | string // Only allowed for decimal inputs
   }
   select?: {
+    type: string
     options: any[]
   }
 }

@@ -103,6 +103,9 @@ export default class ProjectsController {
       })
     }
 
+    // Ensure there is no duplicate relatiosn
+    // Ensure default value has correct data type
+    // Ensure select drodown have correct data type
     for (let i = 0; i < projectInput.tables.length; i++) {
       const table = projectInput.tables[i]
       const relations: string[] = []
@@ -114,7 +117,55 @@ export default class ProjectsController {
           error: `On ${table.names.pascalCase} table you have duplicate relations`,
         })
       }
+
+      table.columns.forEach((column) => {
+        // If column is not string then default should be same as column type
+        if (column.meta?.defaultTo) {
+          const defaultValue = column.meta?.defaultTo
+          switch (column.type) {
+            case 'Integer':
+              if (!Number.isInteger(defaultValue)) {
+                return response.badRequest({
+                  error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
+                })
+              }
+              break
+            case 'Decimal':
+              if (Number.isNaN(defaultValue)) {
+                return response.badRequest({
+                  error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
+                })
+              }
+              break
+            case 'Date':
+              try {
+                new Date(defaultValue as string)
+              } catch (_) {
+                return response.badRequest({
+                  error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
+                })
+              }
+              break
+          }
+        }
+
+        // If column is select dropdown then default should be same as column type
+        // if (column.input?.select) {
+        // if (column.input?.select.type === 'String') {
+        // if (column.type === 'Integer') {
+        // column.input?.select.options.forEach(option => {
+        // if (!Number.isInteger(option)) {
+        // return response.badRequest({
+        // error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
+        // })
+        // }
+        // })
+        // }
+        // ]}
+        // }
+      })
     }
+
     await project.save()
 
     this.generateProject(input, project)
