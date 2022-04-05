@@ -68,21 +68,9 @@
                 @endif
               ></b-input>
               @elseif(column.input?.type === 'Select')
-              <b-select
-                v-model="form.{{ column.names.camelCase }}"
-                expanded
-                @if(column.meta.required)
-                  required
-                @endif
-              >
-                @each(option in column.input?.select.options)
-                  @if(option.value)
-                    <option value="{{ option.value }}">{{ option.label }}</option>
-                  @else
-                    <option value="{{ option }}">{{ option }}</option>
-                  @endif
-                @endeach
-              </b-select>
+                @!component(`stubs/frontend/${input.tech.frontend}/full/src/views/components/selectVue`, {
+                  column,
+                })~
               @endif
             </b-field>
 
@@ -95,6 +83,7 @@
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
             >
+            @if(column.input?.type === 'Input')
               <b-input
                 v-model="form.{{ column.names.camelCase }}"
                 type="number"
@@ -108,8 +97,12 @@
                 required
                 @endif
               ></b-input>
+            @elseif(column.input?.type === 'Select')
+            @!component(`stubs/frontend/${input.tech.frontend}/full/src/views/components/selectVue`, {
+                column,
+              })~
+            @endif
             </b-field>
-
             @elseif(column.type === 'Decimal')
             <b-field
               horizontal
@@ -119,24 +112,30 @@
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
             >
-              <b-input
-                v-model="form.{{ column.names.camelCase }}"
-                type="number"
-                @if(column.input?.decimal.step !== undefined)
-                step="{{ column.input?.decimal.step }}"
-                @else
-                step="any"
-                @endif
-                @if(column.meta.max !== undefined)
-                max="{{ column.meta.max }}"
-                @endif
-                @if(column.meta.min !== undefined)
-                min="{{ column.meta.min }}"
-                @endif
-                @if(column.meta.required)
-                required
-                @endif
-              ></b-input>
+              @if(column.input?.type === 'Input')
+                <b-input
+                  v-model="form.{{ column.names.camelCase }}"
+                  type="number"
+                  @if(column.input?.decimal.step !== undefined)
+                  step="{{ column.input?.decimal.step }}"
+                  @else
+                  step="any"
+                  @endif
+                  @if(column.meta.max !== undefined)
+                  max="{{ column.meta.max }}"
+                  @endif
+                  @if(column.meta.min !== undefined)
+                  min="{{ column.meta.min }}"
+                  @endif
+                  @if(column.meta.required)
+                  required
+                  @endif
+                ></b-input>
+              @elseif(column.input?.type === 'Select')
+                @!component(`stubs/frontend/${input.tech.frontend}/full/src/views/components/selectVue`, {
+                  column,
+                })~
+              @endif
             </b-field>
 
             @elseif(column.type === 'Boolean')
