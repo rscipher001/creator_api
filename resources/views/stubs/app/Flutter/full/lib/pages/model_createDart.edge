@@ -27,6 +27,17 @@ import 'package:app/services/{{ table.names.snakeCase }}.service.dart' as {{ tab
 @if(table.columns.find(c => c.type === 'Date'))
   import 'package:validators/validators.dart';
 @endif
+@each(relation in nonAuthBelongsToRelations)
+  @set('relationModel', findRelationModel(input, relation))
+  @set('parentRelation', null)
+  @set('parentRelationColumn', null)
+  {{--  If table has parent relation then prepare variable for it  --}}
+  @if(table.routeParentRelations.length)
+    @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+    @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+  @endif
+  import 'package:app/state/{{ relationModel.names.snakeCase }}_index.state.dart';
+@endeach
 
 class {{ table.names.pascalCase }}Create extends StatefulWidget {
   const {{ table.names.pascalCase }}Create({Key? key}) : super(key: key);
@@ -71,6 +82,17 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
       bool {{ column.names.camelCase }} = false;
     @endif
   @endeach
+  @each(relation in nonAuthBelongsToRelations)
+    @set('relationModel', findRelationModel(input, relation))
+    @set('parentRelation', null)
+    @set('parentRelationColumn', null)
+    {{--  If table has parent relation then prepare variable for it  --}}
+    @if(table.routeParentRelations.length)
+      @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+      @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+    @endif
+    int? selected{{ relation.names.pascalCase }}Id;
+  @endeach
 
   @each(column in exposedColumns)~
     @if(column.type === 'String' && ['Input', 'Select'].includes(column.input?.type))
@@ -80,6 +102,17 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
     @elseif(column.type === 'Date')
       FocusNode? _{{ column.names.camelCase }}Focus;
     @endif
+  @endeach
+  @each(relation in nonAuthBelongsToRelations)
+    @set('relationModel', findRelationModel(input, relation))
+    @set('parentRelation', null)
+    @set('parentRelationColumn', null)
+    {{--  If table has parent relation then prepare variable for it  --}}
+    @if(table.routeParentRelations.length)
+      @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+      @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+    @endif
+    FocusNode? _{{ relation.names.camelCase }}Focus;
   @endeach
 
   @each(column in exposedColumns)~
@@ -101,6 +134,17 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
       @elseif(column.type === 'Date')
         _{{ column.names.camelCase }}Focus = FocusNode();
       @endif
+    @endeach
+    @each(relation in nonAuthBelongsToRelations)
+      @set('relationModel', findRelationModel(input, relation))
+      @set('parentRelation', null)
+      @set('parentRelationColumn', null)
+      {{--  If table has parent relation then prepare variable for it  --}}
+      @if(table.routeParentRelations.length)
+        @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+        @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+      @endif
+      _{{ relation.names.camelCase }}Focus = FocusNode();
     @endeach
     super.initState();
   }
@@ -153,6 +197,17 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
               }}{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
             @endif
           @endeach
+          @each(relation in nonAuthBelongsToRelations)
+            @set('relationModel', findRelationModel(input, relation))
+            @set('parentRelation', null)
+            @set('parentRelationColumn', null)
+            {{--  If table has parent relation then prepare variable for it  --}}
+            @if(table.routeParentRelations.length)
+              @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+              @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+            @endif
+            {{ relation.names.camelCase }}Id: selected{{ relation.names.pascalCase }}Id{{ relation.required ? '!' : '' }},
+          @endeach
         ),
       );
       Navigator.pushReplacementNamed(context, '{{ table.names.snakeCase }}_index');
@@ -194,6 +249,17 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
 
   @override
   Widget build(BuildContext context) {
+    @each(relation in nonAuthBelongsToRelations)
+      @set('relationModel', findRelationModel(input, relation))
+      @set('parentRelation', null)
+      @set('parentRelationColumn', null)
+      {{--  If table has parent relation then prepare variable for it  --}}
+      @if(table.routeParentRelations.length)
+        @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+        @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+      @endif
+      final {{ relation.names.camelCasePlural }} = context.read<{{ relationModel.names.pascalCase }}IndexState>().{{ relation.names.camelCasePlural }};
+    @endeach
     return Scaffold(
       drawer: const MyDrawer(),
       extendBody: true,
@@ -362,6 +428,89 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                       title: const Text('{{ noCase(column.names.camelCase) }}'),
                     ),
                   @endif
+                @endif
+              @endeach
+
+              @each(relation in nonAuthBelongsToRelations)
+                @set('relationModel', findRelationModel(input, relation))
+                @set('parentRelation', null)
+                @set('parentRelationColumn', null)
+                {{--  If table has parent relation then prepare variable for it  --}}
+                @if(table.routeParentRelations.length)
+                  @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+                  @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+                @endif
+                @if(parentRelationColumn !== `${relation.modelNames.camelCase}Id`)
+                  @set('columnDataType', 'int')
+                  DropdownButtonFormField(
+                    focusNode: _{{ relation.names.camelCase }}Focus,
+                    value: selected{{ relation.names.pascalCase }}Id,
+                    decoration: const InputDecoration(
+                      labelText: '{{ capitalCase(relation.names.pascalCase) }}{{ relation.required ? ' *' : '' }}',
+                    ),
+                    items: {{ relation.names.camelCasePlural }}.map<DropdownMenuItem<{{ columnDataType }}>>(
+                      ({{ relationModel.names.camelCase }}) {
+                        return DropdownMenuItem<{{ columnDataType }}>(
+                          value: {{ relationModel.names.camelCase }}.id,
+                          child: Text({{ relationModel.names.camelCase }}.{{ relationModel.defaultColumn }}),
+                        );
+                      },
+                    ).toList(),
+                    onChanged: (dynamic newValue) {
+                      setState(() {
+                        selected{{ relation.names.pascalCase }}Id = newValue;
+                      });
+                    },
+                    validator: ({{ columnDataType }}? value) {
+                      @if(relation.required)
+                        if (
+                          @if(columnDataType === 'String')
+                            value == '' ||
+                          @endif
+                          value == null
+                        ) {
+                          return 'Please select {{ noCase(relationModel.names.camelCase) }}';
+                        }
+                      @endif
+                      if (_validationErrors.containsKey('{{ relation.names.camelCase }}Id')) {
+                        return _validationErrors['{{ relation.names.camelCase }}Id']?[0];
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                @endif
+              @endeach
+
+              @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+                @set(
+                  'relationModel',
+                  ['$auth', '$nonAuth'].includes(relation.withModel) ?
+                    input.auth.table :
+                    input.tables.find(
+                      (table) => table.names.camelCase === relation.modelNames.camelCase
+                    )
+                )
+                @if(relationModel)
+                  <b-field
+                    label="{{ capitalCase(relation.names.pascalCasePlural) }}"
+                    :type="errors.{{ relation.names.camelCasePlural }} ? 'is-danger' : ''"
+                    :message="errors.{{ relation.names.camelCasePlural }}"
+                    horizontal
+                  >
+                    <b-taginput
+                      v-model="form.{{ relation.names.camelCasePlural }}"
+                      field="{{ relationModel.defaultColumn }}"
+                      :data="filtered{{ relationModel.names.pascalCasePlural }}"
+                      expanded
+                      autocomplete
+                      open-on-focus
+                      @typing="getFiltered{{ relationModel.names.pascalCasePlural }}"
+                    >
+                    </b-taginput>
+                  </b-field>
+                @else
+                  // Debug: Relation: {{ relation.modelNames.camelCase }}. Table: {{ table.name }}
                 @endif
               @endeach
               ElevatedButton(
