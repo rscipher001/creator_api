@@ -166,7 +166,7 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
-import { parse } from "csv-parse/browser/esm/sync";
+const { parse } = require("csv-parse/lib/sync");
 import ValidationException from "../exceptions/ValidationException";
 import { API_URL } from "../constants";
 
