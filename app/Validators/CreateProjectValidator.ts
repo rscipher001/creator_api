@@ -13,10 +13,12 @@ import {
 export default class CreateProjectValidator {
   constructor(protected ctx: HttpContextContract) {}
 
-  protected appSchema = schema.object().members({
-    appName: schema.string({ trim: true }),
-    packageName: schema.string({ trim: true }, [rules.url()]),
-  })
+  protected appSchema = schema.object
+    .optional([rules.requiredWhen('generate.app.generate', '=', true)])
+    .members({
+      appName: schema.string({ trim: true }),
+      packageName: schema.string({ trim: true }, [rules.url()]),
+    })
 
   protected relationSchema = schema.object().members({
     type: schema.string({ trim: true }),

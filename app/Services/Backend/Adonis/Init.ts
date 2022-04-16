@@ -96,8 +96,13 @@ export default class Init {
       cwd: this.input.projectsPath,
     })
 
+    // Install dependencies
+    await HelperService.execute('git', ['remote', 'remove', 'origin'], { cwd: this.input.path })
+    await HelperService.execute('npm', ['ci'], { cwd: this.input.path })
+
     // 2. Install all dependencies
     await this.installAllDependencies()
+    await HelperService.copyFile(`${this.input.path}/.env.example`, `${this.input.path}/.env`)
 
     await HelperService.execute('git', ['config', '--local', 'user.name', this.input.git.name], {
       cwd: this.input.path,
