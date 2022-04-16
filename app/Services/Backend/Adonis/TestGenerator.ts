@@ -1,37 +1,17 @@
 import View from '@ioc:Adonis/Core/View'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
-import mkdirp from 'mkdirp'
 
-export default class CRUDGenerator {
+export default class TestGenerator {
   private input: ProjectInput
 
   constructor(input: ProjectInput) {
     this.input = input
   }
 
-  // Create japaFile.ts
-  protected async createJapaFile() {
-    const filePath = `${this.input.path}/japaFile.ts`
-    const fileExists = await HelperService.fileExists(filePath)
-    if (!fileExists) {
-      const content = await View.render(`stubs/backend/${this.input.tech.backend}/full/japaFileTs`)
-      await HelperService.writeFile(filePath, content)
-    }
-  }
-
-  // Update package.json
-  protected async updatePackageJson() {
-    const command = 'node -r @adonisjs/assembler/build/register japaFile.ts'
-    const filePath = `${this.input.path}/package.json`
-    const content = await HelperService.readJson(filePath)
-    content.scripts.test = command
-    await HelperService.writeJson(filePath, content)
-  }
-
   // Create auth tests file
   protected async copyAuthTests() {
-    const filePath = `${this.input.path}/test/auth.spec.ts`
+    const filePath = `${this.input.path}/tests/auth.spec.ts`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
@@ -55,12 +35,7 @@ export default class CRUDGenerator {
    * Steps
    */
   protected async start() {
-    await this.updatePackageJson()
     await this.copyTestEnv()
-    await this.createJapaFile()
-    await HelperService.commit('Test dependencies added', this.input.path)
-
-    await Promise.all([await mkdirp(`${this.input.path}/test`)])
     await this.copyAuthTests()
     await HelperService.commit('First Test added', this.input.path)
   }
