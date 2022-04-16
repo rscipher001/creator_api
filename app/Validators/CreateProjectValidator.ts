@@ -97,7 +97,13 @@ export default class CreateProjectValidator {
 
   public schema = schema.create({
     name: schema.string({ trim: true }, [rules.minLength(2), rules.maxLength(256)]),
-    database: schema.enum([Database.MySQL, Database.PostgreSQL] as const),
+    database: schema.enum([
+      Database.MSSQL,
+      Database.MySQL,
+      Database.OracleDB,
+      Database.PostgreSQL,
+      Database.SQLite,
+    ] as const),
     types: schema.array().members(schema.enum([ProjectType.API, ProjectType.SSR] as const)),
     camelCaseStrategy: schema.boolean(),
     app: this.appSchema,

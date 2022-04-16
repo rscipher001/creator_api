@@ -1,6 +1,9 @@
 export enum Database {
   MySQL = 'MySQL',
   PostgreSQL = 'PostgreSQL',
+  SQLite = 'SQLite',
+  MSSQL = 'MSSQL',
+  OracleDB = 'OracleDB',
 }
 
 export enum HostingPorts {

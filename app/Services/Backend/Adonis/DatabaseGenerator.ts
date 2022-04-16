@@ -307,28 +307,37 @@ export default class DatabaseGenerator {
     let content = await HelperService.readFile(filePath)
 
     // The following code can be improved
+    let connectName = 'mysql'
+    switch (database) {
+      case Database.MSSQL:
+        connectName = 'mssql'
+        break
+      case Database.SQLite:
+        connectName = 'sqlite'
+        break
+      case Database.PostgreSQL:
+        connectName = 'pg'
+        break
+      case Database.MySQL:
+        connectName = 'mysql'
+        break
+      case Database.OracleDB:
+        connectName = 'oracledb'
+        break
+      default:
+        connectName = 'mysql'
+    }
     const part = await View.render(
       `stubs/backend/${this.input.tech.backend}/partials/databaseGenerator/dotEnv`,
       {
         database,
+        connectName,
         input: this.input,
       }
     )
-    switch (database) {
-      case Database.MySQL:
-        if (content.indexOf('MYSQL_HOST') === -1) {
-          content += part
-          content += '\n'
-          await HelperService.writeFile(filePath, content)
-        }
-        break
-      case Database.PostgreSQL:
-        if (content.indexOf('PG_HOST') === -1) {
-          content += part
-          content += '\n'
-          await HelperService.writeFile(filePath, content)
-        }
-    }
+    content += part
+    content += '\n'
+    await HelperService.writeFile(filePath, content)
   }
 
   // Update env.ts

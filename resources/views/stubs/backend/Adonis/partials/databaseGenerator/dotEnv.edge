@@ -1,5 +1,5 @@
 
-DB_CONNECTION=mysql
+DB_CONNECTION={{ connectName }}
 DB_DEBUG=false
 
 @if(database === 'MySQL')
@@ -19,4 +19,20 @@ PG_USER={{ input.hosting.databaseName }}
 PG_PASSWORD={{ input.hosting.databaseUser }}
 PG_DB_NAME={{ input.hosting.databaseName }}
 
+@endif
+@if(database === 'OracleDB')
+
+ORACLE_HOST=localhost
+ORACLE_PORT=
+ORACLE_USER=
+ORACLE_PASSWORD=
+ORACLE_DB_NAME=
+
+@endif
+@if(database === 'MSSQL')
+MSSQL_USER=
+MSSQL_PORT=
+MSSQL_SERVER=localhost
+MSSQL_PASSWORD=
+MSSQL_DB_NAME=
 @endif
