@@ -415,7 +415,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                     CheckboxListTile(
                       dense: true,
                       contentPadding: const EdgeInsets.all(0),
-                      value: {{ noCase(column.names.camelCase) }},
+                      value: {{ capitalCase(noCase(column.names.camelCase)) }},
                       controlAffinity: ListTileControlAffinity.leading,
                       activeColor: Theme.of(context).primaryColor,
                       onChanged: (final bool? value) {
