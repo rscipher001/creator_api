@@ -11,13 +11,13 @@ import CreateProjectValidator from 'App/Validators/CreateProjectValidator'
 import SwaggerGenerator from 'App/Services/Backend/Adonis/SwaggerGenerator'
 
 export default class ProjectsController {
-  public async index({ request, auth }: HttpContextContract) {
+  public async index({ request, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.index')
     const page = request.input('pageNo', 1)
     const limit = request.input('pageSize', 10)
     const sortBy: string = request.input('sortBy', 'id')
     const sortType = request.input('sortType', 'desc')
     const queryBuilder = Project.query().where('userId', auth.user!.id).orderBy(sortBy, sortType)
-
     if (request.input('name')) {
       queryBuilder.where('name', 'like', `%${request.input('name')}%`)
     }
@@ -28,7 +28,8 @@ export default class ProjectsController {
     return queryBuilder.paginate(page, limit)
   }
 
-  public async show({ request, auth }: HttpContextContract) {
+  public async show({ request, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.show')
     return Project.query()
       .where({
         userId: auth.user!.id,
@@ -42,7 +43,8 @@ export default class ProjectsController {
    * 2. Run validations to ensure the data is valid
    * 3. Save data to database
    */
-  public async store({ request, response, auth }: HttpContextContract) {
+  public async store({ request, response, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.store')
     const input = await request.validate(CreateProjectValidator)
     const project = new Project()
     project.status = 'queued'
@@ -52,7 +54,7 @@ export default class ProjectsController {
     project.projectInput = project.prepare()
     const projectInput = project.projectInput
 
-    // Pre checks to ensure there is no contracitory settings
+    // Pre checks to ensure there is no contraditory settings
     if (projectInput.auth.passwordReset && !projectInput.mailEnabled) {
       return response.badRequest({
         error: 'Password reset requires mailing feature',
@@ -172,7 +174,8 @@ export default class ProjectsController {
     return project
   }
 
-  public async generateDraft({ request, auth }: HttpContextContract) {
+  public async generateDraft({ request, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.generateDraft')
     const projectId: number = request.param('id')
     const project = await Project.query()
       .where({
@@ -185,7 +188,8 @@ export default class ProjectsController {
     return project
   }
 
-  public async storeDraft({ request, response, auth }: HttpContextContract) {
+  public async storeDraft({ request, response, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.storeDraft')
     const input = await request.validate(CreateProjectValidator)
     // Pre checks to ensure there is no contracitory settings
     if (input.auth.passwordReset && !input.mailEnabled) {

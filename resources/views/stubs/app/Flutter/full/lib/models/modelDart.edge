@@ -27,11 +27,11 @@ class {{ table.names.pascalCase }} {
       Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
     @elseif(column.type === 'Date')
       DateTime{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
-    @elseif(column.type === 'Decimal')  
+    @elseif(column.type === 'Decimal')
       double{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
-    @elseif(column.type === 'Integer')  
+    @elseif(column.type === 'Integer')
       int{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
-    @elseif(column.type === 'String')  
+    @elseif(column.type === 'String')
       String{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
     @else
       {{
@@ -116,33 +116,33 @@ class {{ table.names.pascalCase }} {
           '{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}': {{ column.names.camelCase }},
         @endif
       @endeach
-      @each(column in table.columns.filter(c => !c.meta.required))
-        if ({{ column.names.camelCase }} != null) {
-          @if(column.type === 'Date')
-            json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }}.toIso8601String();
-          @else
-            json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }};
-          @endif
-        }
-      @endeach
-      @each(relation in nonAuthBelongsToRelations)
-        @set('relationModel', findRelationModel(input, relation))
-        @set('parentRelation', null)
-        @set('parentRelationColumn', null)
-        {{--  If table has parent relation then prepare variable for it  --}}
-        @if(table.routeParentRelations.length)
-          @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
-          @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
-        @endif
-        @if(parentRelationColumn !== `${relation.modelNames.camelCase}Id`)
-          '{{
-            input.camelCaseStrategy
-                ? `${relation.names.camelCase}Id`
-                : `{relation.names..snakeCase}_id`
-          }}': {{ relation.names.camelCase }}Id,
-        @endif
-      @endeach
     };
+    @each(column in table.columns.filter(c => !c.meta.required))
+      if ({{ column.names.camelCase }} != null) {
+        @if(column.type === 'Date')
+          json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }}.toIso8601String();
+        @else
+          json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }};
+        @endif
+      }
+    @endeach
+    @each(relation in nonAuthBelongsToRelations)
+      @set('relationModel', findRelationModel(input, relation))
+      @set('parentRelation', null)
+      @set('parentRelationColumn', null)
+      {{--  If table has parent relation then prepare variable for it  --}}
+      @if(table.routeParentRelations.length)
+        @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+        @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+      @endif
+      @if(parentRelationColumn !== `${relation.modelNames.camelCase}Id`)
+        '{{
+          input.camelCaseStrategy
+              ? `${relation.names.camelCase}Id`
+              : `{relation.names..snakeCase}_id`
+        }}': {{ relation.names.camelCase }}Id,
+      @endif
+    @endeach
     return json;
   }
 }
