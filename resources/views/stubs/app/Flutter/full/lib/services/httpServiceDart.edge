@@ -223,6 +223,46 @@ Future<http.Response?> authorizedPost(
   return null;
 }
 
+Future<http.Response?> authorizedPut(
+  final BuildContext context,
+  final String url, {
+  final Map? body,
+  final bool jsonContent = false,
+}) async {
+  try {
+    final headers = {
+      HttpHeaders.acceptHeader: 'application/json',
+    };
+    if (jsonContent) {
+      headers[HttpHeaders.contentTypeHeader] = 'application/json';
+    }
+    final token = Provider.of<AuthState>(context, listen: false).token;
+    headers[HttpHeaders.authorizationHeader] = "Bearer $token";
+    final response = body == null
+        ? await http.put(Uri.parse(url), headers: headers)
+        : await http.put(
+            Uri.parse(url),
+            headers: headers,
+            body: jsonContent ? json.encode(body) : body,
+          );
+    await checkExceptions(context, response: response);
+    return response;
+  } catch (e) {
+    if (e is SocketException) {
+      showDialog(
+        context: context,
+        builder: (context) => const AlertDialog(
+          title: Text('Something went wrong'),
+        ),
+      );
+    } else {
+      rethrow;
+    }
+  }
+  return null;
+}
+
+
 Future<http.Response?> authorizedDelete(
   final BuildContext context, {
   required final String url,

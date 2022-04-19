@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:app/config/constants.dart';
 import 'package:app/models/{{ table.names.camelCase }}.model.dart';
 import 'package:app/state/{{ table.names.camelCase }}_filter.state.dart';
-import 'package:app/state/{{ table.names.camelCase }}_show.state.dart';
+@if(table.operations.show)
+  import 'package:app/state/{{ table.names.camelCase }}_show.state.dart';
+@endif
 import 'package:app/state/{{ table.names.camelCase }}_index.state.dart';
 import 'package:app/exceptions/unknown.exception.dart';
 import 'package:app/services/http.service.dart' as http_service;
@@ -33,18 +35,20 @@ Future<{{ table.names.pascalCase }}Page> index(final BuildContext context) async
   return {{ table.names.camelCase }}Page;
 }
 
-Future<{{ table.names.pascalCase }}> show(final BuildContext context, final int {{ table.names.camelCase }}Id) async {
-  final response = await http_service.authorizedGet(
-    context,
-    url: baseUrl + '/api/{{ table.names.camelCase }}/${{ table.names.camelCase }}Id',
-  );
-  if (response!.statusCode != 200) {
-    throw UnknownException();
+@if(table.operations.show)
+  Future<{{ table.names.pascalCase }}> show(final BuildContext context, final int {{ table.names.camelCase }}Id) async {
+    final response = await http_service.authorizedGet(
+      context,
+      url: baseUrl + '/api/{{ table.names.camelCase }}/${{ table.names.camelCase }}Id',
+    );
+    if (response!.statusCode != 200) {
+      throw UnknownException();
+    }
+    final {{ table.names.camelCase }} = {{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+    Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
+    return {{ table.names.camelCase }};
   }
-  final {{ table.names.camelCase }} = {{ table.names.pascalCase }}.fromJson(json.decode(response.body));
-  Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
-  return {{ table.names.camelCase }};
-}
+@endif
 
 Future<{{ table.names.pascalCase }}> store(final BuildContext context, final {{ table.names.pascalCase }} input) async {
   final response = await http_service.authorizedPost(
@@ -60,3 +64,36 @@ Future<{{ table.names.pascalCase }}> store(final BuildContext context, final {{ 
   Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
   return {{ table.names.camelCase }};
 }
+
+@if(table.operations.update)
+  Future<{{ table.names.pascalCase }}> update(
+    final BuildContext context,
+    final int id,
+    final {{ table.names.pascalCase }} input
+  ) async {
+    final response = await http_service.authorizedPut(
+      context,
+      baseUrl + '/api/{{ table.names.camelCase }}/$id',
+      body: input.toJson(),
+      jsonContent: true,
+    );
+    if (response!.statusCode != 200) {
+      throw UnknownException();
+    }
+    final {{ table.names.camelCase }} = {{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+    Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
+    return {{ table.names.camelCase }};
+  }
+@endif
+
+@if(table.operations.destroy)
+  Future destroy(final BuildContext context, final int id) async {
+    final response = await http_service.authorizedDelete(
+      context,
+      url: baseUrl + '/api/{{ table.names.camelCase }}/$id',
+    );
+    if (response!.statusCode != 204) {
+      throw UnknownException();
+    }
+  }
+@endif

@@ -126,6 +126,46 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
   @override
   void initState() {
     editMode = context.read<{{ table.names.pascalCase }}EditState>().editMode;
+    if (editMode) {
+      final {{ table.names.camelCase }} = context.read<{{ table.names.pascalCase }}EditState>().{{ table.names.camelCase }}!;
+      @each(column in table.exposedColumns)
+        @if(column.type === 'Boolean')
+          @if(column.required)
+            {{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }};
+          @else
+            if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
+              {{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}!;
+            }
+          @endif
+        @elseif(column.type === 'Date')
+          @if(column.required)
+            _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }};
+          @else
+            if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
+              _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }}!;
+            }
+          @endif
+        @elseif(['String', 'Integer', 'Decimal'].includes(column.type))
+          @if(column.input?.type === 'Select')
+            @if(column.required)
+              selected{{ column.names.pascalCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }};
+            @else
+              if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
+                selected{{ column.names.pascalCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}!;
+              }
+            @endif
+          @else
+            @if(column.required)
+            _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }};
+            @else
+              if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
+                _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }}!;
+               }
+            @endif
+          @endif
+        @endif
+      @endeach
+    }
     @each(column in exposedColumns)~
       @if(column.type === 'String' && column.input?.type === 'Input')
         _{{ column.names.camelCase }}Focus = FocusNode();
@@ -163,53 +203,62 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
         });
       }
 
-      await {{ table.names.snakeCase }}_service.store(
-        context,
-        {{ table.names.pascalCase }}(
-          @each(column in exposedColumns)
-            @if (column.type === 'File')
-              {{--  Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
-            @elseif(column.type === 'Date')
-              {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text.split('/').reversed.join('-')),
-            @elseif(column.type === 'Decimal')
-              @if(column.input?.type === 'Select')
-                {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
-              @else
-                {{ column.names.camelCase }}: double.parse(_{{ column.names.camelCase }}Controller.text),
-              @endif
-            @elseif(column.type === 'Integer')
-              @if(column.input?.type === 'Select')
-                {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
-              @else
-                {{ column.names.camelCase }}: int.parse(_{{ column.names.camelCase }}Controller.text),
-              @endif
-            @elseif(column.type === 'String')
-              @if(column.input?.type === 'Select')
-                {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
-              @else
-                {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text,
-              @endif
-            @elseif(column.type === 'Boolean')
-              {{ column.names.camelCase }}: {{ column.names.camelCase }},
+      final {{ table.names.camelCase }} = {{ table.names.pascalCase }}(
+        @each(column in exposedColumns)
+          @if (column.type === 'File')
+            {{--  Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
+          @elseif(column.type === 'Date')
+            {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text.split('/').reversed.join('-')),
+          @elseif(column.type === 'Decimal')
+            @if(column.input?.type === 'Select')
+              {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
             @else
-              {{--  {{
-                column.type === 'Boolean' ? 'boolean' : column.type.toLowerCase()
-              }}{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
+              {{ column.names.camelCase }}: double.parse(_{{ column.names.camelCase }}Controller.text),
             @endif
-          @endeach
-          @each(relation in nonAuthBelongsToRelations)
-            @set('relationModel', findRelationModel(input, relation))
-            @set('parentRelation', null)
-            @set('parentRelationColumn', null)
-            {{--  If table has parent relation then prepare variable for it  --}}
-            @if(table.routeParentRelations.length)
-              @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
-              @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+          @elseif(column.type === 'Integer')
+            @if(column.input?.type === 'Select')
+              {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
+            @else
+              {{ column.names.camelCase }}: int.parse(_{{ column.names.camelCase }}Controller.text),
             @endif
-            {{ relation.names.camelCase }}Id: selected{{ relation.names.pascalCase }}Id{{ relation.required ? '!' : '' }},
-          @endeach
-        ),
-      );
+          @elseif(column.type === 'String')
+            @if(column.input?.type === 'Select')
+              {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
+            @else
+              {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text,
+            @endif
+          @elseif(column.type === 'Boolean')
+            {{ column.names.camelCase }}: {{ column.names.camelCase }},
+          @else
+            {{--  {{
+              column.type === 'Boolean' ? 'boolean' : column.type.toLowerCase()
+            }}{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
+          @endif
+        @endeach
+        @each(relation in nonAuthBelongsToRelations)
+          @set('relationModel', findRelationModel(input, relation))
+          @set('parentRelation', null)
+          @set('parentRelationColumn', null)
+          {{--  If table has parent relation then prepare variable for it  --}}
+          @if(table.routeParentRelations.length)
+            @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+            @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+          @endif
+          {{ relation.names.camelCase }}Id: selected{{ relation.names.pascalCase }}Id{{ relation.required ? '!' : '' }},
+        @endeach
+      )
+      if (editMode) {
+        await {{ table.names.snakeCase }}_service.update(
+          context,
+          context.read<{{ table.names.pascalCase }}EditState>().{{ table.names.camelCase }}!.id!,
+          {{ table.names.camelCase }},
+        );
+      } else {
+        await {{ table.names.snakeCase }}_service.store(
+          context,
+          {{ table.names.camelCase }},
+        );
+      }
       Navigator.pushReplacementNamed(context, '{{ table.names.snakeCase }}_index');
     } on ValidationException catch (e) {
       setState(() {
