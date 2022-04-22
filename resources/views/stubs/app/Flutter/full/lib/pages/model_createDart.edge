@@ -246,7 +246,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
           @endif
           {{ relation.names.camelCase }}Id: selected{{ relation.names.pascalCase }}Id{{ relation.required ? '!' : '' }},
         @endeach
-      )
+      );
       if (editMode) {
         await {{ table.names.snakeCase }}_service.update(
           context,
