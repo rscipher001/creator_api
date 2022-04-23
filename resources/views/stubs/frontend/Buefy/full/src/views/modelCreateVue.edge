@@ -538,8 +538,8 @@ export default {
         let input;
         if (
           @each((column, index) in fileColumns)
-            this.form.{{ column.names.camelCase }} !== null{{{
-              index && fileColumnsLastIndex !== index ? ' &&': ''
+            this.form.{{ column.names.camelCase }} !== null {{{
+              fileColumnsLastIndex && fileColumnsLastIndex !== index ? '&&': ''
             }}}
           @endeach
         ) {
