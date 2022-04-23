@@ -70,19 +70,31 @@
                     {{{
                       `{{ props.row.${column.names.camelCase}.toFixed(${decimalCount}) }}`
                     }}}
+                    @!component(
+                      `stubs/frontend/${input.tech.frontend}/full/src/views/components/csvRequiredTooltip`, {
+                      column,
+                    })
                   @elseif(column.type === 'Date')
                     {{{
                       `new Date({{ props.row.${column.names.camelCase} }}).toLocaleString()`
                     }}}
+                    @!component(
+                      `stubs/frontend/${input.tech.frontend}/full/src/views/components/csvRequiredTooltip`, {
+                      column,
+                    })
                   @else
                     {{{
                       `{{ props.row.${column.names.camelCase} }}`
                     }}}
+                    @!component(
+                      `stubs/frontend/${input.tech.frontend}/full/src/views/components/csvRequiredTooltip`, {
+                      column,
+                    })
                     @if(column.type === 'String' && column.meta.minLength)
                       <b-tooltip
-                        v-if="props.row.{{ column.names.camelCase }}.length < {{
+                        v-if="isFailingMinLengthValidation(props.row.{{ column.names.camelCase }}, {{
                           column.meta.minLength
-                        }}"
+                        }})"
                         label="Minimum length should be {{ column.meta.minLength }}"
                         type="is-danger"
                       >
@@ -95,9 +107,9 @@
                     @endif
                     @if(column.type === 'String' && column.meta.maxLength)
                       <b-tooltip
-                        v-if="props.row.{{ column.names.camelCase }}.length > {{
+                        v-if="isFailingMaxLengthValidation(props.row.{{ column.names.camelCase }}, {{
                           column.meta.maxLength
-                        }}"
+                        }})"
                         label="Maximim length should be {{ column.meta.maxLength }}"
                         type="is-danger"
                       >
@@ -110,7 +122,7 @@
                     @endif
                     @if(column.type === 'Integer' && column.meta.min !== undefined)
                       <b-tooltip
-                        v-if="props.row.{{ column.names.camelCase }} < {{ column.meta.min }}"
+                        v-if="isFailingMinValidation(props.row.{{ column.names.camelCase }}, {{ column.meta.min }})"
                         label="Minimum allowed value is {{ column.meta.min }}"
                         type="is-danger"
                       >
@@ -123,7 +135,7 @@
                     @endif
                     @if(column.type === 'Integer' && column.meta.max !== undefined)
                       <b-tooltip
-                        v-if="props.row.{{ column.names.camelCase }} > {{ column.meta.max }}"
+                        v-if="isFailingMaxValidation(props.row.{{ column.names.camelCase }}, {{ column.meta.max }})"
                         label="Maximum allowed value is {{ column.meta.max }}"
                         type="is-danger"
                       >
@@ -153,8 +165,9 @@
                 :loading="loading.storeMany"
                 type="is-primary"
                 expanded
+                :disabled=haveValidationErrors
               >
-                Start Importing
+                {{ haveValidationErrors ? 'Please upload a file without errors' : 'Start Importing' }}
               </b-button>
             </div>
           </div>
@@ -179,6 +192,7 @@ export default {
       activeScreen: "upload",
       parseLoading: false,
       file: null,
+      haveValidationErrors: false, // Set to true if there are validation errors in data
       form: {
         items: [],
       },
@@ -269,6 +283,52 @@ export default {
           position: "is-bottom-right",
         });
       }
+    },
+
+    // Validators, returns true if invalid
+    isFailingRequiredValidation(value) {
+      const result = value === null || value === undefined;
+      if (result) {
+        return true;
+      }
+      this.haveValidationErrors = true;
+      return false;
+    },
+
+    isFailingMinLengthValidation(value, minLength) {
+      const result = value.length < minLength;
+      if (result) {
+        return true;
+      }
+      this.haveValidationErrors = true;
+      return false;
+    },
+
+    isFailingMaxLengthValidation(value, maxLength) {
+      const result = value.length > maxLength;
+      if (result) {
+        return true;
+      }
+      this.haveValidationErrors = true;
+      return false;
+    },
+
+    isFailingMinValidation(value, min) {
+      const result = value < min;
+      if (result) {
+        return true;
+      }
+      this.haveValidationErrors = true;
+      return false;
+    },
+
+    isFailingMaxValidation(value, max) {
+      const result = value < max;
+      if (result) {
+        return true;
+      }
+      this.haveValidationErrors = true;
+      return false;
     },
   },
 
