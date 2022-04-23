@@ -167,7 +167,9 @@
                 expanded
                 :disabled=haveValidationErrors
               >
-                {{ haveValidationErrors ? 'Please upload a file without errors' : 'Start Importing' }}
+                {{{
+                  `{{ haveValidationErrors ? 'Please upload a file without errors' : 'Start Importing' }}`
+                }}}
               </b-button>
             </div>
           </div>
