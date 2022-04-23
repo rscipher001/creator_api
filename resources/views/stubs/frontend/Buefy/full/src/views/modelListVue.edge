@@ -452,7 +452,7 @@ export default {
           hasIcon: true,
           onConfirm: async () => {
             try {
-              await this.destroyAction(id);
+              await this.destroyAction({ id });
               this.$buefy.toast.open({
                 message: 'Deleted',
                 type: 'is-success',
@@ -484,7 +484,9 @@ export default {
           hasIcon: true,
           onConfirm: async () => {
             try {
-              await this.destroyManyAction(this.selectedItems.map((i) => i.id));
+              await this.destroyManyAction({
+                ids: this.selectedItems.map((i) => i.id)
+              });
               this.$buefy.toast.open({
                 message: "Deleted",
                 type: "is-success",

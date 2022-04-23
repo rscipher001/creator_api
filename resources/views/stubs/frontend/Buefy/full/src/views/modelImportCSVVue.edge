@@ -248,7 +248,9 @@ export default {
 
     async storeMany() {
       try {
-        await this.storeManyAction(JSON.parse(JSON.stringify(this.form.items)));
+        await this.storeManyAction({
+          inputs: JSON.parse(JSON.stringify(this.form.items)),
+        });
         this.$router.push("/{{ table.names.camelCase }}");
         this.$buefy.toast.open({
           message: "{{ capitalCase(table.names.pascalCasePlural) }} Imported Successfully",
