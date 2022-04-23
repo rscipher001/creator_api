@@ -140,6 +140,9 @@ export default class StorageDriverGenerator {
     await this.updateDotEnv('.env')
     await this.updateDotEnv('.env.example')
     await this.updateEnvTs()
+    await HelperService.execute('node', ['ace', 'generate:manifest'], {
+      cwd: this.input.path,
+    })
 
     // Copy config, contracts, etc
     await this.initModuleFiles()

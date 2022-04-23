@@ -126,49 +126,9 @@ export default class RBACGenerator {
 
   // Update ace-manifest.json
   protected async updateAceManifestJson() {
-    const filePath = `${this.input.path}/ace-manifest.json`
-    const content = await HelperService.readJson(filePath)
-
-    // No need to do any check since all of these are assignment not push in array
-    content.commands['make:model'].settings.loadApp = true
-    content.commands['make:poliicy'] = {
-      settings: {},
-      commandPath: '@adonisjs/bouncer/build/commands/MakePolicy',
-      commandName: 'make:policy',
-      description: 'Make a new bouncer policy',
-      args: [
-        {
-          type: 'string',
-          propertyName: 'name',
-          name: 'name',
-          required: true,
-          description: 'Name of the policy to create',
-        },
-      ],
-      aliases: [],
-      flags: [
-        {
-          name: 'resource-model',
-          propertyName: 'resourceModel',
-          type: 'string',
-          description: 'Name of the resource model to authorize',
-        },
-        {
-          name: 'user-model',
-          propertyName: 'userModel',
-          type: 'string',
-          description: 'Name of the user model to be authorized',
-        },
-        {
-          name: 'actions',
-          propertyName: 'actions',
-          type: 'array',
-          description: 'Actions to implement',
-        },
-      ],
-    }
-
-    await HelperService.writeJson(filePath, content)
+    await HelperService.execute('node', ['ace', 'generate:manifest'], {
+      cwd: this.input.path,
+    })
   }
 
   /**

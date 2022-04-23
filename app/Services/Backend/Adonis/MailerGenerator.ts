@@ -53,29 +53,9 @@ export default class MailerGenerator {
 
   // Update ace-manifest.json
   protected async updateAceManifestJson() {
-    const filePath = `${this.input.path}/ace-manifest.json`
-    const content = await HelperService.readJson(filePath)
-
-    // No need to do any check since all of these are assignment not push in array
-    content.commands['make:mailer'] = {
-      settings: {},
-      commandPath: '@adonisjs/mail/build/commands/MakeMailer',
-      commandName: 'make:mailer',
-      description: 'Make a new mailer class',
-      args: [
-        {
-          type: 'string',
-          propertyName: 'name',
-          name: 'name',
-          required: true,
-          description: 'Name of the mailer class',
-        },
-      ],
-      aliases: [],
-      flags: [],
-    }
-
-    await HelperService.writeJson(filePath, content)
+    await HelperService.execute('node', ['ace', 'generate:manifest'], {
+      cwd: this.input.path,
+    })
   }
 
   // Create contracts/mail.ts
