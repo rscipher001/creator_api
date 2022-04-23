@@ -128,9 +128,9 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
     editMode = context.read<{{ table.names.pascalCase }}EditState>().editMode;
     if (editMode) {
       final {{ table.names.camelCase }} = context.read<{{ table.names.pascalCase }}EditState>().{{ table.names.camelCase }}!;
-      @each(column in table.exposedColumns)
+      @each(column in exposedColumns)
         @if(column.type === 'Boolean')
-          @if(column.required)
+          @if(column.meta.required)
             {{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }};
           @else
             if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
@@ -138,7 +138,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
             }
           @endif
         @elseif(column.type === 'Date')
-          @if(column.required)
+          @if(column.meta.required)
             _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }};
           @else
             if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
@@ -147,7 +147,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
           @endif
         @elseif(['String', 'Integer', 'Decimal'].includes(column.type))
           @if(column.input?.type === 'Select')
-            @if(column.required)
+            @if(column.meta.required)
               selected{{ column.names.pascalCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }};
             @else
               if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
@@ -155,7 +155,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
               }
             @endif
           @else
-            @if(column.required)
+            @if(column.meta.required)
             _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }};
             @else
               if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
@@ -253,6 +253,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
           context.read<{{ table.names.pascalCase }}EditState>().{{ table.names.camelCase }}!.id!,
           {{ table.names.camelCase }},
         );
+        context.read<{{ table.names.pascalCase }}EditState>().clearState();
       } else {
         await {{ table.names.snakeCase }}_service.store(
           context,
