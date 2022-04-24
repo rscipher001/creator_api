@@ -227,9 +227,12 @@ export default class AuthGenerator {
    */
   protected async copyEnv() {
     const envApiUrlLine = `VUE_APP_API_URL=http://localhost:3333`
-    const envApiUrlLineLocal = `VUE_APP_API_URL=https://${Env.get('HOSTING_API_DOMAIN')}:${
-      HostingPorts.nginxApi + this.input.id
-    }`
+    let envApiUrlLineLocal = `VUE_APP_API_URL=http://localhost:3333`
+    if (Env.get('HOSTING_ENABLED')) {
+      envApiUrlLineLocal = `VUE_APP_API_URL=https://${Env.get('HOSTING_API_DOMAIN')}:${
+        HostingPorts.nginxApi + this.input.id
+      }`
+    }
 
     const localEnvPath = `${this.input.spaPath}/.env.local`
     const localEnvExists = await HelperService.fileExists(localEnvPath)
