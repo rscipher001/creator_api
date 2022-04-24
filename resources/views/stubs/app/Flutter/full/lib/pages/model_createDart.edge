@@ -21,7 +21,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app/components/global/my_drawer.dart';
 import 'package:app/exceptions/validation.exception.dart';
-import 'package:app/models/{{ table.names.snakeCase }}.model.dart';
+@set('classPrefix', useAliasForClass ? `${table.names.snakeCase}_models.` : '')
+@if(useAliasForClass)
+  import 'package:app/models/{{ table.names.camelCase }}.model.dart' as {{ table.names.snakeCase }}_models;
+@else
+  import 'package:app/models/{{ table.names.camelCase }}.model.dart';
+@endif
 import 'package:app/state/{{ table.names.snakeCase }}_edit.state.dart';
 import 'package:app/services/{{ table.names.snakeCase }}.service.dart' as {{ table.names.snakeCase }}_service;
 @if(table.columns.find(c => c.type === 'Date'))
@@ -203,7 +208,7 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
         });
       }
 
-      final {{ table.names.camelCase }} = {{ table.names.pascalCase }}(
+      final {{ table.names.camelCase }} = {{ classPrefix }}{{ table.names.pascalCase }}(
         @each(column in exposedColumns)
           @if (column.type === 'File')
             {{--  Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}

@@ -1,6 +1,7 @@
 import YAML from 'yamljs'
 import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
+import Project from 'App/Models/Project'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput, { Table } from 'App/Interfaces/ProjectInput'
 
@@ -263,6 +264,7 @@ export default class AppGenerator {
         const content = await View.render(`stubs/app/Flutter/full/lib/pages/model_${type}Dart`, {
           input: this.input,
           table,
+          useAliasForClass: Project.flutterConflictingClassNames.includes(table.names.pascalCase),
         })
         await HelperService.writeFile(filePath, content)
       }
@@ -276,6 +278,7 @@ export default class AppGenerator {
       const content = await View.render(`stubs/app/Flutter/full/lib/services/model_serviceDart`, {
         input: this.input,
         table,
+        useAliasForClass: Project.flutterConflictingClassNames.includes(table.names.pascalCase),
       })
       await HelperService.writeFile(filePath, content)
     }

@@ -17,12 +17,17 @@ import { BaseModel, BelongsTo, belongsTo, column, afterSave } from '@ioc:Adonis/
 export default class Project extends BaseModel {
   public input: { [key: string]: any }
   public static blacklistedClassNames: string[] = [
-    'Form', // Flutter class
     'Input', // API, input used for holding user input in controller
-    'State', // Flutter class
     'Bool', // Every platform
     'String', // Every platform
-    'Page', // Flutter class
+  ]
+  public static flutterConflictingClassNames: string[] = [
+    'Form',
+    'State',
+    'Bool',
+    'String',
+    'Page',
+    'Feedback',
   ]
   public static blacklistedInputNames: string[] = []
 

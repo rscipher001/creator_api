@@ -2,7 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app/config/constants.dart';
-import 'package:app/models/{{ table.names.camelCase }}.model.dart';
+@set('classPrefix', useAliasForClass ? `${table.names.snakeCase}_models.` : '')
+@if(useAliasForClass)
+  import 'package:app/models/{{ table.names.camelCase }}.model.dart' as {{ table.names.snakeCase }}_models;
+@else
+  import 'package:app/models/{{ table.names.camelCase }}.model.dart';
+@endif
 import 'package:app/state/{{ table.names.camelCase }}_filter.state.dart';
 @if(table.operations.show)
   import 'package:app/state/{{ table.names.camelCase }}_show.state.dart';
@@ -11,7 +16,7 @@ import 'package:app/state/{{ table.names.camelCase }}_index.state.dart';
 import 'package:app/exceptions/unknown.exception.dart';
 import 'package:app/services/http.service.dart' as http_service;
 
-Future<{{ table.names.pascalCase }}Page> index(final BuildContext context) async {
+Future<{{ classPrefix }}{{ table.names.pascalCase }}Page> index(final BuildContext context) async {
   final filter = context.read<{{ table.names.pascalCase }}FilterState>();
   final pageNo = filter.pageNo;
   final pageSize = filter.pageSize;
@@ -30,13 +35,13 @@ Future<{{ table.names.pascalCase }}Page> index(final BuildContext context) async
   if (response!.statusCode != 200) {
     throw UnknownException();
   }
-  final {{ table.names.camelCase }}Page = {{ table.names.pascalCase }}Page.fromJson(json.decode(response.body));
+  final {{ table.names.camelCase }}Page = {{ classPrefix }}{{ table.names.pascalCase }}Page.fromJson(json.decode(response.body));
   Provider.of<{{ table.names.pascalCase }}IndexState>(context, listen: false).loadState({{ table.names.camelCase }}Page);
   return {{ table.names.camelCase }}Page;
 }
 
 @if(table.operations.show)
-  Future<{{ table.names.pascalCase }}> show(final BuildContext context, final int {{ table.names.camelCase }}Id) async {
+  Future<{{ classPrefix }}{{ table.names.pascalCase }}> show(final BuildContext context, final int {{ table.names.camelCase }}Id) async {
     final response = await http_service.authorizedGet(
       context,
       url: baseUrl + '/api/{{ table.names.camelCase }}/${{ table.names.camelCase }}Id',
@@ -44,13 +49,13 @@ Future<{{ table.names.pascalCase }}Page> index(final BuildContext context) async
     if (response!.statusCode != 200) {
       throw UnknownException();
     }
-    final {{ table.names.camelCase }} = {{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+    final {{ table.names.camelCase }} = {{ classPrefix }}{{ table.names.pascalCase }}.fromJson(json.decode(response.body));
     Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
     return {{ table.names.camelCase }};
   }
 @endif
 
-Future<{{ table.names.pascalCase }}> store(final BuildContext context, final {{ table.names.pascalCase }} input) async {
+Future<{{ classPrefix }}{{ table.names.pascalCase }}> store(final BuildContext context, final {{ classPrefix }}{{ table.names.pascalCase }} input) async {
   final response = await http_service.authorizedPost(
     context,
     baseUrl + '/api/{{ table.names.camelCase }}',
@@ -60,16 +65,16 @@ Future<{{ table.names.pascalCase }}> store(final BuildContext context, final {{ 
   if (response!.statusCode != 200) {
     throw UnknownException();
   }
-  final {{ table.names.camelCase }} = {{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+  final {{ table.names.camelCase }} = {{ classPrefix }}{{ table.names.pascalCase }}.fromJson(json.decode(response.body));
   Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
   return {{ table.names.camelCase }};
 }
 
 @if(table.operations.update)
-  Future<{{ table.names.pascalCase }}> update(
+  Future<{{ classPrefix }}{{ table.names.pascalCase }}> update(
     final BuildContext context,
     final int id,
-    final {{ table.names.pascalCase }} input
+    final {{ classPrefix }}{{ table.names.pascalCase }} input
   ) async {
     final response = await http_service.authorizedPut(
       context,
@@ -80,7 +85,7 @@ Future<{{ table.names.pascalCase }}> store(final BuildContext context, final {{ 
     if (response!.statusCode != 200) {
       throw UnknownException();
     }
-    final {{ table.names.camelCase }} = {{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+    final {{ table.names.camelCase }} = {{ classPrefix }}{{ table.names.pascalCase }}.fromJson(json.decode(response.body));
     Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
     return {{ table.names.camelCase }};
   }
