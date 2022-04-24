@@ -38,7 +38,7 @@ export default class AppGenerator {
    */
   protected async addPackages() {
     const dependencies = {
-      connectivity: '3.0.6',
+      connectivity_plus: '2.3.0',
       http: '0.13.4',
       image_picker: '0.8.4+3',
       provider: '6.0.1',
