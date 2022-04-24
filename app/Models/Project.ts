@@ -16,7 +16,14 @@ import { BaseModel, BelongsTo, belongsTo, column, afterSave } from '@ioc:Adonis/
 
 export default class Project extends BaseModel {
   public input: { [key: string]: any }
-  public static blacklistedClassNames: string[] = ['Form', 'Input', 'State', 'Bool', 'String']
+  public static blacklistedClassNames: string[] = [
+    'Form', // Flutter class
+    'Input', // API, input used for holding user input in controller
+    'State', // Flutter class
+    'Bool', // Every platform
+    'String', // Every platform
+    'Page', // Flutter class
+  ]
   public static blacklistedInputNames: string[] = []
 
   @column({ isPrimary: true })
