@@ -17,6 +17,12 @@
   @set('effectiveRouteParent', table.routeParentRelations[table.routeParentRelations.length - 1])
   @set('effectiveRouteParentColumn', `${effectiveRouteParent.names.camelCase}Id`)
 @endif
+@if(fileColumns)
+  import 'dart:io';
+  import 'package:path/path.dart' as path;
+
+  import 'package:file_picker/file_picker.dart';
+@endif
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app/components/global/my_drawer.dart';
@@ -126,6 +132,11 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
     @elseif(column.type === 'Date')
       final _{{ column.names.camelCase }}Controller = TextEditingController();
     @endif
+  @endeach
+
+  @each(column in exposedColumns.filter(c => c.type === 'Files'))
+    File? _{{ column.names.camelCase }};
+    String? _{{ column.names.camelCase }}Path;
   @endeach
 
   @override
@@ -252,6 +263,12 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
           {{ relation.names.camelCase }}Id: selected{{ relation.names.pascalCase }}Id{{ relation.required ? '!' : '' }},
         @endeach
       );
+      final Map<String, String> files = {};
+      @each(column in exposedColumns.filter(c => c.type === 'Files'))
+        if (_{{ column.names.camelCase }}Path != null) {
+          files['{{ column.names.camelCase }}'] = _{{ column.names.camelCase }}Path!;
+        }
+      @endif
       if (editMode) {
         await {{ table.names.snakeCase }}_service.update(
           context,
@@ -568,6 +585,49 @@ class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pasc
                   // Debug: Relation: {{ relation.modelNames.camelCase }}. Table: {{ table.name }}
                 @endif
               @endeach
+              @each(column in exposedColumns.filter(c => c.type === 'Files'))
+              if (_{{ column.names.pascalCase }} == null)
+                OutlinedButton(
+                  onPressed: () async {
+                    if (_{{ column.names.pascalCase }} == null) {
+                      FilePickerResult? result =
+                          await FilePicker.platform.pickFiles();
+                      if (result != null) {
+                        if (result.files.single.path != null) {
+                          setState(() {
+                            _{{ column.names.pascalCase }}Path = result.files.single.path!;
+                            _{{ column.names.pascalCase }} = File(result.files.single.path!);
+                          });
+                        }
+                      }
+                    }
+                  },
+                  child: Text(
+                    _{{ column.names.pascalCase }} != null ? _{{ column.names.pascalCase }}!.path : 'Select file',
+                  ),
+                ),
+              if (_{{ column.names.pascalCase }} != null)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        path.basename(_{{ column.names.pascalCase }}!.path),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _{{ column.names.pascalCase }} = null;
+                        });
+                      },
+                      icon: const Icon(Icons.clear),
+                    )
+                  ],
+                ),
+              const SizedBox(height: 16.0),
+              @endif
               ElevatedButton(
                 child: Text(_isLoading ? 'Loading...' : 'Submit'),
                 onPressed: _isLoading ? null : store{{ table.names.pascalCase }},

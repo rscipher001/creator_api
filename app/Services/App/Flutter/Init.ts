@@ -58,7 +58,8 @@ export default class AppGenerator {
 
   protected async updatePubspecYaml() {
     const dependencies = {
-      connectivity: '3.0.6',
+      connectivity_plus: '2.3.0',
+      file_picker: '^4.5.1',
       http: '0.13.4',
       image_picker: '0.8.4+3',
       provider: '6.0.1',
@@ -335,7 +336,7 @@ export default class AppGenerator {
     await this.addReadme()
     await commit('README.md added', cwd)
 
-    await this.addPackages()
+    await this.updatePubspecYaml()
     await execute('flutter', ['pub', 'get'], { cwd })
     await commit('Packages added', cwd)
 

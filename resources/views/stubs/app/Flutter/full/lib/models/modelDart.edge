@@ -24,7 +24,7 @@ class {{ table.names.pascalCase }} {
   @each(column in table.columns)
     {{ column.meta.required ? 'final': '' }}
     @if (column.type === 'File')
-      Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+      Map<String, dynamic>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
     @elseif(column.type === 'Date')
       DateTime{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
     @elseif(column.type === 'Decimal')

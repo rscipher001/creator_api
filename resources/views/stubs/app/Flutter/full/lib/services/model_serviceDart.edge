@@ -1,3 +1,4 @@
+@set('fileColumns', table.columns.filter(c => c.type === 'File'))
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -55,13 +56,24 @@ Future<{{ classPrefix }}{{ table.names.pascalCase }}Page> index(final BuildConte
   }
 @endif
 
-Future<{{ classPrefix }}{{ table.names.pascalCase }}> store(final BuildContext context, final {{ classPrefix }}{{ table.names.pascalCase }} input) async {
-  final response = await http_service.authorizedPost(
-    context,
-    baseUrl + '/api/{{ table.names.camelCase }}',
-    body: input.toJson(),
-    jsonContent: true,
-  );
+Future<{{ classPrefix }}{{ table.names.pascalCase }}> store(
+  final BuildContext context,
+  final {{ classPrefix }}{{ table.names.pascalCase }} input,
+  final Map<String, String>? files,
+) async {
+  final response = files != null && files.isEmpty
+      ? await http_service.authorizedPost(
+        context,
+        baseUrl + '/api/{{ table.names.camelCase }}',
+        body: input.toJson(),
+        jsonContent: true,
+      )
+    : await http_service.authorizedMultipart(
+        context,
+        url: baseUrl + '/api/{{ table.names.camelCase }}',
+        body: input.toJson(),
+        filePath: files,
+      );
   if (response!.statusCode != 200) {
     throw UnknownException();
   }
