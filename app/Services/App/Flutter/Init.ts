@@ -59,6 +59,7 @@ export default class AppGenerator {
   protected async updatePubspecYaml() {
     const dependencies = {
       connectivity_plus: '2.3.0',
+      cached_network_image: '3.2.0',
       file_picker: '^4.5.1',
       http: '0.13.4',
       image_picker: '0.8.4+3',

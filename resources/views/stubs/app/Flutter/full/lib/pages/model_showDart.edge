@@ -1,4 +1,9 @@
 @set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
+@set('fileColumns', table.columns.filter(c => c.type === 'File'))
+@if(fileColumns.length)
+  import 'package:app/config/constants.dart';
+  import 'package:cached_network_image/cached_network_image.dart';
+@endif
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 @if(table.operations.edit)
@@ -16,6 +21,9 @@ class {{ table.names.pascalCase }}Show extends StatefulWidget {
 }
 
 class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascalCase }}Show> {
+  final imageExtensions = ['jpg', 'png', 'gif', 'jpeg'];
+  final imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
   List<Widget> labelValue(String label, String? value) {
     const boldFont = TextStyle(fontWeight: FontWeight.bold);
     if (value == null) return [];
@@ -25,6 +33,23 @@ class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascal
         style: boldFont,
       ),
       Text(value),
+      const SizedBox(height: 8),
+    ];
+    return children;
+  }
+
+  List<Widget> labelFile(String label, Map<String, dynamic>? value) {
+    const boldFont = TextStyle(fontWeight: FontWeight.bold);
+    if (value == null) return [];
+    final children = [
+      Text(
+        label,
+        style: boldFont,
+      ),
+      (imageExtensions.contains(value['extname']) &&
+              imageMimeTypes.contains(value['mimeType']))
+          ? CachedNetworkImage(imageUrl: baseUrl + value['url'])
+          : Text(value.toString()),
       const SizedBox(height: 8),
     ];
     return children;
@@ -53,14 +78,17 @@ class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascal
         child: Card(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: ListView(
               children: [
                 @each(column in exposedColumns)
-                  ...labelValue("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}
-                    @if (column.type !== 'string')
+                  @if (column.type !== 'File')
+                    ...labelFile("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}
+                  @else
+                    ...labelValue("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}
+                    @if (column.type !== 'String')
                       {{ column.meta.required ? '' : '?' }}.toString()
                     @endif
+                  @endif
                   ),
                 @endeach
                 ButtonBar(
