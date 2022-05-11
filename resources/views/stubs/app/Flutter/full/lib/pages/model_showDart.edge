@@ -24,19 +24,21 @@ class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascal
   final imageExtensions = ['jpg', 'png', 'gif', 'jpeg'];
   final imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
-  List<Widget> labelValue(String label, String? value) {
-    const boldFont = TextStyle(fontWeight: FontWeight.bold);
-    if (value == null) return [];
-    final children = [
-      Text(
-        label,
-        style: boldFont,
-      ),
-      Text(value),
-      const SizedBox(height: 8),
-    ];
-    return children;
-  }
+  @if(fileColumns.length)
+    List<Widget> labelValue(String label, String? value) {
+      const boldFont = TextStyle(fontWeight: FontWeight.bold);
+      if (value == null) return [];
+      final children = [
+        Text(
+          label,
+          style: boldFont,
+        ),
+        Text(value),
+        const SizedBox(height: 8),
+      ];
+      return children;
+    }
+  @endif
 
   List<Widget> labelFile(String label, Map<String, dynamic>? value) {
     const boldFont = TextStyle(fontWeight: FontWeight.bold);
@@ -81,7 +83,7 @@ class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascal
             child: ListView(
               children: [
                 @each(column in exposedColumns)
-                  @if (column.type !== 'File')
+                  @if (column.type === 'File')
                     ...labelFile("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}
                   @else
                     ...labelValue("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}
