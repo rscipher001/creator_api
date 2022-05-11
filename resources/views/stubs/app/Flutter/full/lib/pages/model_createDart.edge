@@ -17,7 +17,7 @@
   @set('effectiveRouteParent', table.routeParentRelations[table.routeParentRelations.length - 1])
   @set('effectiveRouteParentColumn', `${effectiveRouteParent.names.camelCase}Id`)
 @endif
-@if(fileColumns)
+@if(fileColumns.length)
   import 'dart:io';
   import 'package:path/path.dart' as path;
 
