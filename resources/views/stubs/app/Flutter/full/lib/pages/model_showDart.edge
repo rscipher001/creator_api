@@ -24,23 +24,7 @@ class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascal
   final imageExtensions = ['jpg', 'png', 'gif', 'jpeg'];
   final imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
-  @if(fileColumns.length)
-    List<Widget> labelValue(String label, String? value) {
-      const boldFont = TextStyle(fontWeight: FontWeight.bold);
-      if (value == null) return [];
-      final children = [
-        Text(
-          label,
-          style: boldFont,
-        ),
-        Text(value),
-        const SizedBox(height: 8),
-      ];
-      return children;
-    }
-  @endif
-
-  List<Widget> labelFile(String label, Map<String, dynamic>? value) {
+  List<Widget> labelValue(String label, String? value) {
     const boldFont = TextStyle(fontWeight: FontWeight.bold);
     if (value == null) return [];
     final children = [
@@ -48,14 +32,30 @@ class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascal
         label,
         style: boldFont,
       ),
-      (imageExtensions.contains(value['extname']) &&
-              imageMimeTypes.contains(value['mimeType']))
-          ? CachedNetworkImage(imageUrl: baseUrl + value['url'])
-          : Text(value.toString()),
+      Text(value),
       const SizedBox(height: 8),
     ];
     return children;
   }
+
+  @if(fileColumns.length)
+    List<Widget> labelFile(String label, Map<String, dynamic>? value) {
+      const boldFont = TextStyle(fontWeight: FontWeight.bold);
+      if (value == null) return [];
+      final children = [
+        Text(
+          label,
+          style: boldFont,
+        ),
+        (imageExtensions.contains(value['extname']) &&
+                imageMimeTypes.contains(value['mimeType']))
+            ? CachedNetworkImage(imageUrl: baseUrl + value['url'])
+            : Text(value.toString()),
+        const SizedBox(height: 8),
+      ];
+      return children;
+    }
+  @endif
 
   @if(table.operations.destroy)
     Future destroy() async {
