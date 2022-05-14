@@ -2,14 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:{{ input.appName }}/config/constants.dart';
-import 'package:{{ input.appName }}/state/auth.state.dart';
-import 'package:{{ input.appName }}/models/user.model.dart';
-import 'package:{{ input.appName }}/exceptions/unknown.exception.dart';
-import 'package:{{ input.appName }}/interfaces/auth/login.interface.dart';
-import 'package:{{ input.appName }}/interfaces/auth/register.interface.dart';
-import 'package:{{ input.appName }}/services/http.service.dart' as http_service;
-import 'package:{{ input.appName }}/services/sharedPreference.service.dart'
+import 'package:app/config/constants.dart';
+import 'package:app/state/auth.state.dart';
+import 'package:app/models/user.model.dart';
+import 'package:app/exceptions/unknown.exception.dart';
+import 'package:app/interfaces/auth/login.interface.dart';
+import 'package:app/interfaces/auth/register.interface.dart';
+import 'package:app/services/http.service.dart' as http_service;
+import 'package:app/services/sharedPreference.service.dart'
     as persist_service;
 
 // Loads status from share preferences
@@ -27,8 +27,8 @@ Future register(
 ) async {
   const url = baseUrl + '/api/register';
   final response = await http_service.post(
-    url: url,
-    context: context,
+    context,
+    url,
     body: input.toJson(),
   );
   if (response!.statusCode != 200) throw UnknownException();
@@ -45,8 +45,8 @@ Future login(
 ) async {
   const url = baseUrl + '/api/login';
   final response = await http_service.post(
-    url: url,
-    context: context,
+    context,
+    url,
     body: input.toJson(),
   );
   if (response!.statusCode != 200) throw UnknownException();
@@ -61,8 +61,8 @@ Future logout(final BuildContext context) async {
   try {
     const url = baseUrl + '/api/logout';
     await http_service.post(
-      url: url,
-      context: context,
+      context,
+      url,
     );
   } catch (_) {}
   await persist_service.clearTokenAndUser(context);

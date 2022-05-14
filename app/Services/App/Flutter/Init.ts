@@ -1,8 +1,9 @@
 import YAML from 'yamljs'
 import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
+import Project from 'App/Models/Project'
 import HelperService from 'App/Services/HelperService'
-import ProjectInput from 'App/Interfaces/ProjectInput'
+import ProjectInput, { Table } from 'App/Interfaces/ProjectInput'
 
 export default class AppGenerator {
   private input: ProjectInput
@@ -37,7 +38,7 @@ export default class AppGenerator {
    */
   protected async addPackages() {
     const dependencies = {
-      connectivity: '3.0.6',
+      connectivity_plus: '2.3.0',
       http: '0.13.4',
       image_picker: '0.8.4+3',
       provider: '6.0.1',
@@ -57,7 +58,9 @@ export default class AppGenerator {
 
   protected async updatePubspecYaml() {
     const dependencies = {
-      connectivity: '3.0.6',
+      connectivity_plus: '2.3.0',
+      cached_network_image: '3.2.0',
+      file_picker: '^4.5.1',
       http: '0.13.4',
       image_picker: '0.8.4+3',
       provider: '6.0.1',
@@ -111,6 +114,9 @@ export default class AppGenerator {
     const cwd = this.input.appPath!
     await mkdirp(`${cwd}/lib/models`)
     await HelperService.writeGenericFile('lib/models/user.model.dart', cwd, {
+      input: this.input,
+    })
+    await HelperService.writeGenericFile('lib/models/pagination_meta.model.dart', cwd, {
       input: this.input,
     })
   }
@@ -210,6 +216,93 @@ export default class AppGenerator {
     await HelperService.writeFile(targetPath, pubspecYamlObject)
   }
 
+  protected async addModel(table: Table) {
+    const filePath = `${this.input.appPath}/lib/models/${table.names.snakeCase}.model.dart`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(`stubs/app/Flutter/full/lib/models/modelDart`, {
+        input: this.input,
+        table,
+      })
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  /**
+   * Add states
+   * - index
+   * - filter
+   * - show
+   */
+  protected async addModelStates(table: Table) {
+    const types = ['index', 'filter', 'show', 'edit']
+    for (const index in types) {
+      const type = types[index]
+      if (['index', 'filter'].includes(type) && !table.operations.index) return
+      if (type === 'show' && !table.operations.show) return
+      if (type === 'edit' && !table.operations.edit) return
+      const filePath = `${this.input.appPath}/lib/state/${table.names.snakeCase}_${type}.state.dart`
+      const fileExists = await HelperService.fileExists(filePath)
+      if (!fileExists) {
+        const content = await View.render(`stubs/app/Flutter/full/lib/state/model_${type}Dart`, {
+          input: this.input,
+          table,
+        })
+        await HelperService.writeFile(filePath, content)
+      }
+    }
+  }
+
+  protected async addModelViews(table: Table) {
+    const types = ['index', 'filter', 'create', 'show']
+    for (const index in types) {
+      const type = types[index]
+      if (['index', 'filter'].includes(type) && !table.operations.index) return
+      if (type === 'create' && !table.operations.create) return
+      if (type === 'show' && !table.operations.show) return
+      const filePath = `${this.input.appPath}/lib/pages/${table.names.snakeCase}_${type}.dart`
+      const fileExists = await HelperService.fileExists(filePath)
+      if (!fileExists) {
+        const content = await View.render(`stubs/app/Flutter/full/lib/pages/model_${type}Dart`, {
+          input: this.input,
+          table,
+          useAliasForClass: Project.flutterConflictingClassNames.includes(table.names.pascalCase),
+        })
+        await HelperService.writeFile(filePath, content)
+      }
+    }
+  }
+
+  protected async addModelService(table: Table) {
+    const filePath = `${this.input.appPath}/lib/services/${table.names.snakeCase}.service.dart`
+    const fileExists = await HelperService.fileExists(filePath)
+    if (!fileExists) {
+      const content = await View.render(`stubs/app/Flutter/full/lib/services/model_serviceDart`, {
+        input: this.input,
+        table,
+        useAliasForClass: Project.flutterConflictingClassNames.includes(table.names.pascalCase),
+      })
+      await HelperService.writeFile(filePath, content)
+    }
+  }
+
+  /**
+   * Steps
+   * - Add model
+   * - Add state for index, show and filter
+   * - Add view for show and index
+   * - Add service
+   */
+  protected async addCRUD() {
+    for (let i = 0; i < this.input.tables.length; i += 1) {
+      const table = this.input.tables[i]
+      await this.addModel(table)
+      await this.addModelStates(table)
+      await this.addModelViews(table)
+      await this.addModelService(table)
+    }
+  }
+
   /**
    * Steps
    * - Init
@@ -226,10 +319,14 @@ export default class AppGenerator {
    * - Add main file
    * - Add github actions
    * - Add tests
+   * - Add CRUD operations
    */
   public async start() {
     const cwd = this.input.appPath!
-    const commit = HelperService.commit
+    const commit = async (message: string, projectPath: string) => {
+      await await execute('flutter', ['format', 'lib'], { cwd })
+      await HelperService.commit(message, projectPath)
+    }
     const execute = HelperService.execute
     await execute('rm', ['-rf', cwd])
     await this.createProject()
@@ -240,7 +337,7 @@ export default class AppGenerator {
     await this.addReadme()
     await commit('README.md added', cwd)
 
-    await this.addPackages()
+    await this.updatePubspecYaml()
     await execute('flutter', ['pub', 'get'], { cwd })
     await commit('Packages added', cwd)
 
@@ -267,6 +364,9 @@ export default class AppGenerator {
 
     await this.addViews()
     await commit('Views added', cwd)
+
+    await this.addCRUD()
+    await commit('CRUD Added', cwd)
 
     await this.addMain()
     await commit('Main added', cwd)

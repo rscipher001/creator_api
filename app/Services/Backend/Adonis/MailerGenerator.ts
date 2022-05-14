@@ -1,7 +1,6 @@
 import os from 'os'
 import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
-import { Mailer } from 'App/Interfaces/Enums'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 
@@ -54,29 +53,9 @@ export default class MailerGenerator {
 
   // Update ace-manifest.json
   protected async updateAceManifestJson() {
-    const filePath = `${this.input.path}/ace-manifest.json`
-    const content = await HelperService.readJson(filePath)
-
-    // No need to do any check since all of these are assignment not push in array
-    content.commands['make:mailer'] = {
-      settings: {},
-      commandPath: '@adonisjs/mail/build/commands/MakeMailer',
-      commandName: 'make:mailer',
-      description: 'Make a new mailer class',
-      args: [
-        {
-          type: 'string',
-          propertyName: 'name',
-          name: 'name',
-          required: true,
-          description: 'Name of the mailer class',
-        },
-      ],
-      aliases: [],
-      flags: [],
-    }
-
-    await HelperService.writeJson(filePath, content)
+    await HelperService.execute('node', ['ace', 'generate:manifest'], {
+      cwd: this.input.path,
+    })
   }
 
   // Create contracts/mail.ts
@@ -174,21 +153,11 @@ export default class MailerGenerator {
 
   /**
    * Steps
-   * 1. Install mailer module
    * 2. Update common files
    * 3. Copy & update mailer module related files
    */
   protected async start() {
     await mkdirp(`${this.input.path}/resources/views/emails`)
-
-    // Install mail and view module
-    const npmArguments = ['install', '@adonisjs/mail', '@adonisjs/view']
-    if (this.input.mailers.includes(Mailer.SES)) {
-      npmArguments.push('aws-sdk')
-    }
-    await HelperService.execute('npm', npmArguments, {
-      cwd: this.input.path,
-    })
 
     // Update common files related to database
     // 1. .adonisrc.json

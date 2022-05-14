@@ -127,23 +127,10 @@ export default class StorageDriverGenerator {
 
   /**
    * Steps
-   * 1. Install storage drivers if required
    * 2. Configure storage module
    * 3. Update env files
    */
   protected async start() {
-    // Install dependencies
-    const npmArguments = ['install', '@adonisjs/attachment-lite']
-    if (this.input.storageDrivers.includes(Storage.S3)) {
-      npmArguments.push('@adonisjs/drive-s3')
-    }
-    if (this.input.storageDrivers.includes(Storage.GCS)) {
-      npmArguments.push('@adonisjs/drive-gcs')
-    }
-    await HelperService.execute('npm', npmArguments, {
-      cwd: this.input.path,
-    })
-
     // Update common files related to database
     // 1. .adonisrc.json
     // 2. tsconfig.json
@@ -153,6 +140,9 @@ export default class StorageDriverGenerator {
     await this.updateDotEnv('.env')
     await this.updateDotEnv('.env.example')
     await this.updateEnvTs()
+    await HelperService.execute('node', ['ace', 'generate:manifest'], {
+      cwd: this.input.path,
+    })
 
     // Copy config, contracts, etc
     await this.initModuleFiles()

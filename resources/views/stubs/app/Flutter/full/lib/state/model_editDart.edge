@@ -1,0 +1,18 @@
+import 'package:flutter/foundation.dart';
+import 'package:app/models/{{ table.names.camelCase }}.model.dart';
+
+class {{ table.names.pascalCase }}EditState extends ChangeNotifier {
+  {{ table.names.pascalCase }}? _{{ table.names.camelCase }};
+  bool get editMode => _{{ table.names.camelCase }} != null;
+  {{ table.names.pascalCase }}? get {{ table.names.camelCase }} => _{{ table.names.camelCase }};
+
+  loadState({{ table.names.pascalCase }} {{ table.names.camelCase }}) {
+    _{{ table.names.camelCase }} = {{ table.names.camelCase }};
+    notifyListeners();
+  }
+
+  clearState() {
+    _{{ table.names.camelCase }} = null;
+    notifyListeners();
+  }
+}

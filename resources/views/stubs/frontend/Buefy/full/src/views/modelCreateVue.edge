@@ -68,44 +68,11 @@
                 @endif
               ></b-input>
               @elseif(column.input?.type === 'Select')
-              <b-select
-                v-model="form.{{ column.names.camelCase }}"
-                expanded
-                @if(column.meta.required)
-                  required
-                @endif
-              >
-                @each(option in column.input?.select.options)
-                  @if(option.value)
-                    <option value="{{ option.value }}">{{ option.label }}</option>
-                  @else
-                    <option value="{{ option }}">{{ option }}</option>
-                  @endif
-                @endeach
-              </b-select>
-              @elseif(column.input?.type === 'Radio')
-              @each(option in column.input?.radio.options)
-              @if(option.value)
-              <b-radio-button
-                v-model="form.{{ column.names.camelCase }}"
-                native-value="{{ option.value }}"
-                type="is-primary is-outlined is-light"
-              >
-                <span>{{ option.label }}</span>
-              </b-radio-button>
-              @else
-              <b-radio-button
-                v-model="form.{{ column.names.camelCase }}"
-                native-value="{{ option }}"
-                type="is-primary is-outlined is-light"
-              >
-                <span>{{ option }}</span>
-              </b-radio-button>
-              @endif
-              @endeach
+                @!component(`stubs/frontend/${input.tech.frontend}/full/src/views/components/selectVue`, {
+                  column,
+                })~
               @endif
             </b-field>
-
             @elseif(column.type === 'Integer')
             <b-field
               horizontal
@@ -115,6 +82,7 @@
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
             >
+            @if(column.input?.type === 'Input')
               <b-input
                 v-model="form.{{ column.names.camelCase }}"
                 type="number"
@@ -128,8 +96,12 @@
                 required
                 @endif
               ></b-input>
+            @elseif(column.input?.type === 'Select')
+            @!component(`stubs/frontend/${input.tech.frontend}/full/src/views/components/selectVue`, {
+                column,
+              })~
+            @endif
             </b-field>
-
             @elseif(column.type === 'Decimal')
             <b-field
               horizontal
@@ -139,26 +111,31 @@
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
             >
-              <b-input
-                v-model="form.{{ column.names.camelCase }}"
-                type="number"
-                @if(column.input?.decimal.step !== undefined)
-                step="{{ column.input?.decimal.step }}"
-                @else
-                step="any"
-                @endif
-                @if(column.meta.max !== undefined)
-                max="{{ column.meta.max }}"
-                @endif
-                @if(column.meta.min !== undefined)
-                min="{{ column.meta.min }}"
-                @endif
-                @if(column.meta.required)
-                required
-                @endif
-              ></b-input>
+              @if(column.input?.type === 'Input')
+                <b-input
+                  v-model="form.{{ column.names.camelCase }}"
+                  type="number"
+                  @if(column.input?.decimal.step !== undefined)
+                  step="{{ column.input?.decimal.step }}"
+                  @else
+                  step="any"
+                  @endif
+                  @if(column.meta.max !== undefined)
+                  max="{{ column.meta.max }}"
+                  @endif
+                  @if(column.meta.min !== undefined)
+                  min="{{ column.meta.min }}"
+                  @endif
+                  @if(column.meta.required)
+                  required
+                  @endif
+                ></b-input>
+              @elseif(column.input?.type === 'Select')
+                @!component(`stubs/frontend/${input.tech.frontend}/full/src/views/components/selectVue`, {
+                  column,
+                })~
+              @endif
             </b-field>
-
             @elseif(column.type === 'Boolean')
             <b-field
               horizontal
@@ -220,7 +197,6 @@
             </b-field>
             @endif
             @endeach
-
             @each(relation in nonAuthBelongsToRelations)
               @set('relationModel', findRelationModel(input, relation))
               @set('parentRelation', null)
@@ -241,7 +217,7 @@
                   v-model="form.{{ relation.names.camelCase }}Id"
                   expanded
                   @if(relation.required)
-                  required
+                    required
                   @endif
                 >
                   <option v-for="({{
@@ -261,7 +237,6 @@
               </b-field>
               @endif
             @endeach
-
             @each(relation in table.relations.filter(
               r => r.type === 'ManyToMany' && r.showInputOnCreatePage)
             )
@@ -309,7 +284,6 @@
     </div>
   </section>
 </template>
-
 <script>
 import { mapState, mapActions } from 'vuex';
 @if(hasRouteParents)
@@ -564,8 +538,8 @@ export default {
         let input;
         if (
           @each((column, index) in fileColumns)
-            this.form.{{ column.names.camelCase }} !== null{{{
-              lastIndex && fileColumnsLastIndex !== lastIndex ? ' &&': ''
+            this.form.{{ column.names.camelCase }} !== null {{{
+              fileColumnsLastIndex && fileColumnsLastIndex !== index ? '&&': ''
             }}}
           @endeach
         ) {

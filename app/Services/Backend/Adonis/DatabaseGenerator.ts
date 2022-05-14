@@ -61,232 +61,9 @@ export default class DatabaseGenerator {
 
   // Update ace-manifest.json
   protected async updateAceManifestJson() {
-    const filePath = `${this.input.path}/ace-manifest.json`
-    const content = await HelperService.readJson(filePath)
-
-    // No need to do any check since all of these are assignment not push in array
-    content.commands['db:seed'] = {
-      settings: {
-        loadApp: true,
-      },
-      commandPath: '@adonisjs/lucid/build/commands/DbSeed',
-      commandName: 'db:seed',
-      description: 'Execute database seeder files',
-      args: [],
-      aliases: [],
-      flags: [
-        {
-          name: 'connection',
-          propertyName: 'connection',
-          type: 'string',
-          description: 'Define a custom database connection for the seeders',
-          alias: 'c',
-        },
-        {
-          name: 'interactive',
-          propertyName: 'interactive',
-          type: 'boolean',
-          description: 'Run seeders in interactive mode',
-          alias: 'i',
-        },
-        {
-          name: 'files',
-          propertyName: 'files',
-          type: 'array',
-          description: 'Define a custom set of seeders files names to run',
-          alias: 'f',
-        },
-      ],
-    }
-
-    content.commands['make:model'] = {
-      settings: {},
-      commandPath: '@adonisjs/lucid/build/commands/MakeModel',
-      commandName: 'make:model',
-      description: 'Make a new Lucid model',
-      args: [
-        {
-          type: 'string',
-          propertyName: 'name',
-          name: 'name',
-          required: true,
-          description: 'Name of the model class',
-        },
-      ],
-      aliases: [],
-      flags: [
-        {
-          name: 'migration',
-          propertyName: 'migration',
-          type: 'boolean',
-          alias: 'm',
-          description: 'Generate the migration for the model',
-        },
-        {
-          name: 'controller',
-          propertyName: 'controller',
-          type: 'boolean',
-          alias: 'c',
-          description: 'Generate the controller for the model',
-        },
-      ],
-    }
-
-    content.commands['make:migration'] = {
-      settings: {
-        loadApp: true,
-      },
-      commandPath: '@adonisjs/lucid/build/commands/MakeMigration',
-      commandName: 'make:migration',
-      description: 'Make a new migration file',
-      args: [
-        {
-          type: 'string',
-          propertyName: 'name',
-          name: 'name',
-          required: true,
-          description: 'Name of the migration file',
-        },
-      ],
-      aliases: [],
-      flags: [
-        {
-          name: 'connection',
-          propertyName: 'connection',
-          type: 'string',
-          description: 'The connection flag is used to lookup the directory for the migration file',
-        },
-        {
-          name: 'folder',
-          propertyName: 'folder',
-          type: 'string',
-          description: 'Pre-select a migration directory',
-        },
-        {
-          name: 'create',
-          propertyName: 'create',
-          type: 'string',
-          description: 'Define the table name for creating a new table',
-        },
-        {
-          name: 'table',
-          propertyName: 'table',
-          type: 'string',
-          description: 'Define the table name for altering an existing table',
-        },
-      ],
-    }
-
-    content.commands['make:seeder'] = {
-      settings: {},
-      commandPath: '@adonisjs/lucid/build/commands/MakeSeeder',
-      commandName: 'make:seeder',
-      description: 'Make a new Seeder file',
-      args: [
-        {
-          type: 'string',
-          propertyName: 'name',
-          name: 'name',
-          required: true,
-          description: 'Name of the seeder class',
-        },
-      ],
-      aliases: [],
-      flags: [],
-    }
-
-    content.commands['migration:run'] = {
-      settings: {
-        loadApp: true,
-      },
-      commandPath: '@adonisjs/lucid/build/commands/Migration/Run',
-      commandName: 'migration:run',
-      description: 'Run pending migrations',
-      args: [],
-      aliases: [],
-      flags: [
-        {
-          name: 'connection',
-          propertyName: 'connection',
-          type: 'string',
-          description: 'Define a custom database connection',
-          alias: 'c',
-        },
-        {
-          name: 'force',
-          propertyName: 'force',
-          type: 'boolean',
-          description: 'Explicitly force to run migrations in production',
-        },
-        {
-          name: 'dry-run',
-          propertyName: 'dryRun',
-          type: 'boolean',
-          description: 'Print SQL queries, instead of running the migrations',
-        },
-      ],
-    }
-
-    content.commands['migration:rollback'] = {
-      settings: {
-        loadApp: true,
-      },
-      commandPath: '@adonisjs/lucid/build/commands/Migration/Rollback',
-      commandName: 'migration:rollback',
-      description: 'Rollback migrations to a given batch number',
-      args: [],
-      aliases: [],
-      flags: [
-        {
-          name: 'connection',
-          propertyName: 'connection',
-          type: 'string',
-          description: 'Define a custom database connection',
-          alias: 'c',
-        },
-        {
-          name: 'force',
-          propertyName: 'force',
-          type: 'boolean',
-          description: 'Explictly force to run migrations in production',
-        },
-        {
-          name: 'dry-run',
-          propertyName: 'dryRun',
-          type: 'boolean',
-          description: 'Print SQL queries, instead of running the migrations',
-        },
-        {
-          name: 'batch',
-          propertyName: 'batch',
-          type: 'number',
-          description:
-            'Define custom batch number for rollback. Use 0 to rollback to initial state',
-        },
-      ],
-    }
-
-    content.commands['migration:status'] = {
-      settings: {
-        loadApp: true,
-      },
-      commandPath: '@adonisjs/lucid/build/commands/Migration/Status',
-      commandName: 'migration:status',
-      description: 'Check migrations current status.',
-      args: [],
-      aliases: [],
-      flags: [
-        {
-          name: 'connection',
-          propertyName: 'connection',
-          type: 'string',
-          description: 'Define a custom database connection',
-          alias: 'c',
-        },
-      ],
-    }
-
-    await HelperService.writeJson(filePath, content)
+    await HelperService.execute('node', ['ace', 'generate:manifest'], {
+      cwd: this.input.path,
+    })
   }
 
   // Update tsconfig.json
@@ -307,28 +84,37 @@ export default class DatabaseGenerator {
     let content = await HelperService.readFile(filePath)
 
     // The following code can be improved
+    let connectName = 'mysql'
+    switch (database) {
+      case Database.MSSQL:
+        connectName = 'mssql'
+        break
+      case Database.SQLite:
+        connectName = 'sqlite'
+        break
+      case Database.PostgreSQL:
+        connectName = 'pg'
+        break
+      case Database.MySQL:
+        connectName = 'mysql'
+        break
+      case Database.OracleDB:
+        connectName = 'oracledb'
+        break
+      default:
+        connectName = 'mysql'
+    }
     const part = await View.render(
       `stubs/backend/${this.input.tech.backend}/partials/databaseGenerator/dotEnv`,
       {
         database,
+        connectName,
         input: this.input,
       }
     )
-    switch (database) {
-      case Database.MySQL:
-        if (content.indexOf('MYSQL_HOST') === -1) {
-          content += part
-          content += '\n'
-          await HelperService.writeFile(filePath, content)
-        }
-        break
-      case Database.PostgreSQL:
-        if (content.indexOf('PG_HOST') === -1) {
-          content += part
-          content += '\n'
-          await HelperService.writeFile(filePath, content)
-        }
-    }
+    content += part
+    content += '\n'
+    await HelperService.writeFile(filePath, content)
   }
 
   // Update env.ts
@@ -406,7 +192,6 @@ export default class DatabaseGenerator {
    * 3. Update env.ts
    * 4. Update config/database.ts
    * 5. Copy database/factories/index.ts
-   * 6. Install mysql and luxon
    */
   protected async initMysql() {
     if (this.input.camelCaseStrategy) {
@@ -421,25 +206,14 @@ export default class DatabaseGenerator {
 
     // Copy database/factories/index.ts
     await this.createDatabaseFactoryIndex()
-
-    // Install MySQL
-    await HelperService.execute('npm', ['install', 'mysql', 'luxon'], {
-      cwd: this.input.path,
-    })
   }
 
   /**
    * Steps
-   * 1. Install lucid
    * 2. Update common files related to database
    * 3. Install db specifc packabe and update files
    */
   protected async start() {
-    // Install Lucid
-    await HelperService.execute('npm', ['install', '@adonisjs/lucid'], {
-      cwd: this.input.path,
-    })
-
     // Update common files related to database
     // 1. .adonisrc.json
     // 2. ace-manifest.json

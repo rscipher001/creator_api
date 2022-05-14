@@ -20,7 +20,8 @@
       "@adonisjs/view",
       "@adonisjs/mail",
       "@adonisjs/attachment-lite",
-      "@adonisjs/redis"
+      "@adonisjs/redis",
+      "@japa/preset-adonis/build/adonis-typings"
     ]
   }
 }

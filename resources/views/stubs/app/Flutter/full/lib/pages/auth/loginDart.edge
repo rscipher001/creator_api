@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
-import 'package:{{ input.appName }}/components/global/my_drawer.dart';
-import 'package:{{ input.appName }}/exceptions/validation.exception.dart';
-import 'package:{{ input.appName }}/interfaces/auth/login.interface.dart';
-import 'package:{{ input.appName }}/services/auth.service.dart' as auth_service;
+import 'package:app/components/global/my_drawer.dart';
+import 'package:app/exceptions/validation.exception.dart';
+import 'package:app/interfaces/auth/login.interface.dart';
+import 'package:app/services/auth.service.dart' as auth_service;
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -16,7 +16,7 @@ class _LoginState extends State<Login> {
   var _autoValidateMode = AutovalidateMode.disabled;
   var _isLoading = false;
   var _showPassword = false;
-  Map _validationErrors = {};
+  Map<String, List<String>> _validationErrors = {};
 
   final _loginFormKey = GlobalKey<FormState>();
 
@@ -65,7 +65,7 @@ class _LoginState extends State<Login> {
       Navigator.pushReplacementNamed(context, 'dashboard');
     } on ValidationException catch (e) {
       setState(() {
-        _validationErrors = e.errors;
+        _validationErrors = e.getFormattedMessages();
         _isLoading = false;
         _autoValidateMode = AutovalidateMode.always;
       });
@@ -117,7 +117,7 @@ class _LoginState extends State<Login> {
                       return 'Please enter valid email';
                     }
                     if (_validationErrors.containsKey('email')) {
-                      return _validationErrors['email'][0];
+                      return _validationErrors['email']?[0];
                     }
                     return null;
                   },
@@ -142,7 +142,7 @@ class _LoginState extends State<Login> {
                       return 'Please enter password';
                     }
                     if (_validationErrors.containsKey('password')) {
-                      return _validationErrors['password'][0];
+                      return _validationErrors['password']?[0];
                     }
                     return null;
                   },

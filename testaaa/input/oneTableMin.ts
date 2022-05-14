@@ -100,8 +100,6 @@ const oneTableMin = {
             type: 'Input',
             decimal: { step: 'any' },
             select: { types: ['object', 'string', 'number'], type: 'string', options: [] },
-            radio: { types: ['object', 'string', 'number'], type: 'string', options: [] },
-            checkbox: { options: [] },
           },
         },
         {
@@ -121,8 +119,6 @@ const oneTableMin = {
             type: 'Input',
             decimal: { step: 'any' },
             select: { types: ['object', 'string', 'number'], type: 'string', options: [] },
-            radio: { types: ['object', 'string', 'number'], type: 'string', options: [] },
-            checkbox: { options: [] },
           },
         },
         {
@@ -141,8 +137,6 @@ const oneTableMin = {
             type: 'Input',
             decimal: { step: 'any' },
             select: { types: ['object', 'string', 'number'], type: 'string', options: [] },
-            radio: { types: ['object', 'string', 'number'], type: 'string', options: [] },
-            checkbox: { options: [] },
           },
         },
       ],

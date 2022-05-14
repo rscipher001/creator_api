@@ -1,6 +1,5 @@
 import mkdirp from 'mkdirp'
 import View from '@ioc:Adonis/Core/View'
-import Logger from '@ioc:Adonis/Core/Logger'
 import { ProjectType } from 'App/Interfaces/Enums'
 import HelperService from 'App/Services/HelperService'
 import ProjectInput from 'App/Interfaces/ProjectInput'
@@ -320,17 +319,11 @@ export default class AuthGenerator {
 
   /**
    * Steps
-   * 1. Install auth module
    * 2. Update common files
    * 3. Copy & update auth module related files
    * 3. Update migration, model, controller and routes
    */
   protected async start() {
-    // Install auth module
-    await HelperService.execute('npm', ['install', '@adonisjs/auth'], {
-      cwd: this.input.path,
-    })
-
     // Update common files related to database
     // 1. .adonisrc.json
     // 2. tsconfig.json
@@ -348,14 +341,6 @@ export default class AuthGenerator {
     // Copy migration, model, controller and routes
     await this.initModuleFiles()
     await HelperService.commit('Auth added', this.input.path)
-    try {
-      await HelperService.execute('npm', ['install', 'phc-argon2'], {
-        cwd: this.input.path,
-      })
-      await HelperService.commit('Argon Added', this.input.path)
-    } catch (e) {
-      Logger.fatal('Argon installation failed:', e)
-    }
   }
 
   public async init() {

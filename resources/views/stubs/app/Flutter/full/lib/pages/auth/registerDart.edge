@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
-import 'package:{{ input.appName }}/components/global/my_drawer.dart';
-import 'package:{{ input.appName }}/exceptions/validation.exception.dart';
-import 'package:{{ input.appName }}/interfaces/auth/register.interface.dart';
-import 'package:{{ input.appName }}/services/auth.service.dart' as auth_service;
+import 'package:app/components/global/my_drawer.dart';
+import 'package:app/exceptions/validation.exception.dart';
+import 'package:app/interfaces/auth/register.interface.dart';
+import 'package:app/services/auth.service.dart' as auth_service;
 
 class Register extends StatefulWidget {
   const Register({Key? key}) : super(key: key);
@@ -23,7 +23,7 @@ class _RegisterState extends State<Register> {
   var _showPasswordConfirmation = false;
   var _isLoading = false;
   FocusNode? _passwordFocus, _passwordConfirmationFocus, _emailFocus;
-  Map _validationErrors = {};
+  Map<String, List<String>> _validationErrors = {};
   bool _termsAccepted = false;
 
   @override
@@ -94,7 +94,7 @@ class _RegisterState extends State<Register> {
       Navigator.pushNamed(context, 'dashboard');
     } on ValidationException catch (e) {
       setState(() {
-        _validationErrors = e.errors;
+        _validationErrors = e.getFormattedMessages();
         _isLoading = false;
         _autoValidateMode = AutovalidateMode.always;
       });
@@ -135,7 +135,7 @@ class _RegisterState extends State<Register> {
                       return 'Please enter name';
                     }
                     if (_validationErrors.containsKey('email')) {
-                      return _validationErrors['email'][0];
+                      return _validationErrors['name']?[0];
                     }
                     return null;
                   },
@@ -164,7 +164,7 @@ class _RegisterState extends State<Register> {
                       return 'Please enter valid email';
                     }
                     if (_validationErrors.containsKey('email')) {
-                      return _validationErrors['email'][0];
+                      return _validationErrors['email']?[0];
                     }
                     return null;
                   },
@@ -188,7 +188,7 @@ class _RegisterState extends State<Register> {
                       return 'Please enter password';
                     }
                     if (_validationErrors.containsKey('password')) {
-                      return _validationErrors['password'][0];
+                      return _validationErrors['password']?[0];
                     }
                     return null;
                   },
@@ -219,7 +219,7 @@ class _RegisterState extends State<Register> {
                     return 'Please enter password';
                   }
                   if (_validationErrors.containsKey('passwordConfirmation')) {
-                    return _validationErrors['passwordConfirmation'][0];
+                    return _validationErrors['passwordConfirmation']?[0];
                   }
                   return null;
                 },

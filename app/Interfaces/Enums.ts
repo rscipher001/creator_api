@@ -1,6 +1,9 @@
 export enum Database {
   MySQL = 'MySQL',
   PostgreSQL = 'PostgreSQL',
+  SQLite = 'SQLite',
+  MSSQL = 'MSSQL',
+  OracleDB = 'OracleDB',
 }
 
 export enum HostingPorts {
@@ -62,8 +65,6 @@ export enum APIInput {
 export enum UIInput {
   INPUT = 'Input',
   SELECT = 'Select',
-  RADIO = 'Radio',
-  CHECKBOX = 'Checkbox',
 }
 
 // Prices in dollar

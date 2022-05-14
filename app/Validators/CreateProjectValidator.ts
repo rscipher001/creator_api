@@ -13,10 +13,12 @@ import {
 export default class CreateProjectValidator {
   constructor(protected ctx: HttpContextContract) {}
 
-  protected appSchema = schema.object().members({
-    appName: schema.string({ trim: true }),
-    packageName: schema.string({ trim: true }, [rules.url()]),
-  })
+  protected appSchema = schema.object
+    .optional([rules.requiredWhen('generate.app.generate', '=', true)])
+    .members({
+      appName: schema.string({ trim: true }),
+      packageName: schema.string({ trim: true }, [rules.url()]),
+    })
 
   protected relationSchema = schema.object().members({
     type: schema.string({ trim: true }),
@@ -51,8 +53,6 @@ export default class CreateProjectValidator {
       type: schema.string({ trim: true }),
       decimal: schema.object.optional().anyMembers(),
       select: schema.object.optional().anyMembers(),
-      radio: schema.object.optional().anyMembers(),
-      checkbox: schema.object.optional().anyMembers(),
     }),
   })
 
@@ -62,7 +62,7 @@ export default class CreateProjectValidator {
     generateController: schema.boolean(),
     generateModel: schema.boolean(),
     generateMigration: schema.boolean(),
-    defaultColumn: schema.string.optional({ trim: true }),
+    defaultColumn: schema.string({ trim: true }),
     timestamps: schema.boolean.optional(),
     generateRoute: schema.boolean.optional(),
     singleton: schema.boolean.optional(),
@@ -99,7 +99,13 @@ export default class CreateProjectValidator {
 
   public schema = schema.create({
     name: schema.string({ trim: true }, [rules.minLength(2), rules.maxLength(256)]),
-    database: schema.enum([Database.MySQL, Database.PostgreSQL] as const),
+    database: schema.enum([
+      Database.MSSQL,
+      Database.MySQL,
+      Database.OracleDB,
+      Database.PostgreSQL,
+      Database.SQLite,
+    ] as const),
     types: schema.array().members(schema.enum([ProjectType.API, ProjectType.SSR] as const)),
     camelCaseStrategy: schema.boolean(),
     app: this.appSchema,

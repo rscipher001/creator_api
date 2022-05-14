@@ -11,13 +11,13 @@ import CreateProjectValidator from 'App/Validators/CreateProjectValidator'
 import SwaggerGenerator from 'App/Services/Backend/Adonis/SwaggerGenerator'
 
 export default class ProjectsController {
-  public async index({ request, auth }: HttpContextContract) {
+  public async index({ request, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.index')
     const page = request.input('pageNo', 1)
     const limit = request.input('pageSize', 10)
     const sortBy: string = request.input('sortBy', 'id')
     const sortType = request.input('sortType', 'desc')
     const queryBuilder = Project.query().where('userId', auth.user!.id).orderBy(sortBy, sortType)
-
     if (request.input('name')) {
       queryBuilder.where('name', 'like', `%${request.input('name')}%`)
     }
@@ -28,7 +28,8 @@ export default class ProjectsController {
     return queryBuilder.paginate(page, limit)
   }
 
-  public async show({ request, auth }: HttpContextContract) {
+  public async show({ request, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.show')
     return Project.query()
       .where({
         userId: auth.user!.id,
@@ -42,7 +43,8 @@ export default class ProjectsController {
    * 2. Run validations to ensure the data is valid
    * 3. Save data to database
    */
-  public async store({ request, response, auth }: HttpContextContract) {
+  public async store({ request, response, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.store')
     const input = await request.validate(CreateProjectValidator)
     const project = new Project()
     project.status = 'queued'
@@ -52,7 +54,7 @@ export default class ProjectsController {
     project.projectInput = project.prepare()
     const projectInput = project.projectInput
 
-    // Pre checks to ensure there is no contracitory settings
+    // Pre checks to ensure there is no contraditory settings
     if (projectInput.auth.passwordReset && !projectInput.mailEnabled) {
       return response.badRequest({
         error: 'Password reset requires mailing feature',
@@ -70,6 +72,14 @@ export default class ProjectsController {
         if (table.columns.find((column) => column.type === 'File')) {
           isFileColumnExists = true
           break
+        }
+      }
+      for (let i = 0; i < projectInput.tables.length; i++) {
+        const table = projectInput.tables[i]
+        if (Project.blacklistedClassNames.includes(table.names.pascalCase)) {
+          return response.badRequest({
+            error: `Class name ${table.names.pascalCase} is not allowed`,
+          })
         }
       }
       if (isFileColumnExists) {
@@ -95,6 +105,9 @@ export default class ProjectsController {
       })
     }
 
+    // Ensure there is no duplicate relatiosn
+    // Ensure default value has correct data type
+    // Ensure select drodown have correct data type
     for (let i = 0; i < projectInput.tables.length; i++) {
       const table = projectInput.tables[i]
       const relations: string[] = []
@@ -106,14 +119,63 @@ export default class ProjectsController {
           error: `On ${table.names.pascalCase} table you have duplicate relations`,
         })
       }
+
+      table.columns.forEach((column) => {
+        // If column is not string then default should be same as column type
+        if (column.meta?.defaultTo) {
+          const defaultValue = column.meta?.defaultTo
+          switch (column.type) {
+            case 'Integer':
+              if (!Number.isInteger(defaultValue)) {
+                return response.badRequest({
+                  error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
+                })
+              }
+              break
+            case 'Decimal':
+              if (Number.isNaN(defaultValue)) {
+                return response.badRequest({
+                  error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
+                })
+              }
+              break
+            case 'Date':
+              try {
+                new Date(defaultValue as string)
+              } catch (_) {
+                return response.badRequest({
+                  error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
+                })
+              }
+              break
+          }
+        }
+
+        // If column is select dropdown then default should be same as column type
+        // if (column.input?.select) {
+        // if (column.input?.select.type === 'String') {
+        // if (column.type === 'Integer') {
+        // column.input?.select.options.forEach(option => {
+        // if (!Number.isInteger(option)) {
+        // return response.badRequest({
+        // error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
+        // })
+        // }
+        // })
+        // }
+        // ]}
+        // }
+      })
     }
+
     await project.save()
 
     this.generateProject(input, project)
     return project
   }
 
-  public async generateDraft({ request, auth }: HttpContextContract) {
+  public async generateDraft({ request, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.generateDraft')
     const projectId: number = request.param('id')
     const project = await Project.query()
       .where({
@@ -126,7 +188,8 @@ export default class ProjectsController {
     return project
   }
 
-  public async storeDraft({ request, response, auth }: HttpContextContract) {
+  public async storeDraft({ request, response, auth, logger }: HttpContextContract) {
+    logger.debug('ProjectsController.storeDraft')
     const input = await request.validate(CreateProjectValidator)
     // Pre checks to ensure there is no contracitory settings
     if (input.auth.passwordReset && !input.mailEnabled) {

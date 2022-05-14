@@ -227,9 +227,12 @@ export default class AuthGenerator {
    */
   protected async copyEnv() {
     const envApiUrlLine = `VUE_APP_API_URL=http://localhost:3333`
-    const envApiUrlLineLocal = `VUE_APP_API_URL=https://${Env.get('HOSTING_API_DOMAIN')}:${
-      HostingPorts.nginxApi + this.input.id
-    }`
+    let envApiUrlLineLocal = `VUE_APP_API_URL=http://localhost:3333`
+    if (Env.get('HOSTING_ENABLED')) {
+      envApiUrlLineLocal = `VUE_APP_API_URL=https://${Env.get('HOSTING_API_DOMAIN')}:${
+        HostingPorts.nginxApi + this.input.id
+      }`
+    }
 
     const localEnvPath = `${this.input.spaPath}/.env.local`
     const localEnvExists = await HelperService.fileExists(localEnvPath)
@@ -293,20 +296,6 @@ export default class AuthGenerator {
     }
   }
 
-  /**
-   * Update routes file with auth routes
-   */
-  // protected async addRoutes() {
-  //   const path = `${this.input.spaPath}/src/router/index.js`
-  //   const content = await View.render(
-  //     `stubs/frontend/${this.input.tech.frontend}/full/src/router/indexJs`,
-  //     {
-  //       input: this.input,
-  //     }
-  //   )
-  //   await HelperService.writeFile(path, content)
-  // }
-
   protected async copyAsset() {
     const path = `${this.input.spaPath}/src/assets/programming.svg`
     await HelperService.copyFile(
@@ -325,7 +314,6 @@ export default class AuthGenerator {
     await this.copyState()
     await this.importState()
     await this.registerState()
-    // await this.addRoutes()
     await this.copyPages()
     await this.copyAsset()
     await this.copyEnv()

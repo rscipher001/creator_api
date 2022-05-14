@@ -3,6 +3,34 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  PORT: 3333
+  HOST: 0.0.0.0
+  NODE_ENV: development
+  APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
+  DRIVE_DISK: local
+  CACHE_VIEWS: false
+  PROJECT_PATH: ../Projects
+  UI_URL: http://localhost:8080
+  DB_CONNECTION: mysql
+  MYSQL_HOST: localhost
+  MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+  MYSQL_USER: root
+  MYSQL_PASSWORD: snowball
+  MYSQL_DB_NAME: creator
+  MAIL_FROM_ADDRESS: noreply@pcsudhar.com
+  SMTP_HOST: smtp.sendgrid.net
+  SMTP_PORT: 587
+  SMTP_USERNAME: apikey
+  SMTP_PASSWORD: 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
+  REDIS_CONNECTION: local
+  REDIS_HOST: 127.0.0.1
+  REDIS_PORT: 6379
+  REDIS_PASSWORD: placeholder
+  STRIPE_SECRET_KEY: sk_test_51HFZXCDCyFFtQJHuZ2rB1om4CTWAQYjFjgHP2eWCSxj8wJfFcqkHSliUuBBs0sjlrNsdcGBIOjuZ4RgEGq4nZ3gD00VTgewmuI
+  GIT_REPO_API_ADONIS: https://github.com/SecureSnowball/creator_adonis_api_starter
+  GIT_REPO_WEB_ADONIS: https://github.com/SecureSnowball/creator_adonis_web_starter
+  GIT_REPO_SPA_VUE_BUEFY: https://github.com/SecureSnowball/creator_vue_spa_starter
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -24,85 +52,10 @@ jobs:
       - run: npm install -g @vue/cli
       - name: Run Migrations
         run: node ace migration:run
-        env:
-          PORT: 3333
-          HOST: 0.0.0.0
-          NODE_ENV: development
-          APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
-          DRIVE_DISK: local
-          CACHE_VIEWS: false
-          PROJECT_PATH: ../Projects
-          UI_URL: http://localhost:8080
-          DB_CONNECTION: mysql
-          MYSQL_HOST: localhost
-          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
-          MYSQL_USER: root
-          MYSQL_PASSWORD: snowball
-          MYSQL_DB_NAME: creator
-          MAIL_FROM_ADDRESS: noreply@pcsudhar.com
-          SMTP_HOST: smtp.sendgrid.net
-          SMTP_PORT: 587
-          SMTP_USERNAME: apikey
-          SMTP_PASSWORD: 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
-          REDIS_CONNECTION: local
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: 6379
-          REDIS_PASSWORD: placeholder
-          STRIPE_SECRET_KEY: sk_test_51HFZXCDCyFFtQJHuZ2rB1om4CTWAQYjFjgHP2eWCSxj8wJfFcqkHSliUuBBs0sjlrNsdcGBIOjuZ4RgEGq4nZ3gD00VTgewmuI
       - name: Run Tests
         run: |
           npm run format
           npm run build
-        env:
-          PORT: 3333
-          HOST: 0.0.0.0
-          NODE_ENV: development
-          APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
-          DRIVE_DISK: local
-          CACHE_VIEWS: false
-          PROJECT_PATH: ../Projects
-          UI_URL: http://localhost:8080
-          DB_CONNECTION: mysql
-          MYSQL_HOST: localhost
-          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
-          MYSQL_USER: root
-          MYSQL_PASSWORD: snowball
-          MYSQL_DB_NAME: creator
-          MAIL_FROM_ADDRESS: noreply@pcsudhar.com
-          SMTP_HOST: smtp.sendgrid.net
-          SMTP_PORT: 587
-          SMTP_USERNAME: apikey
-          SMTP_PASSWORD: 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
-          REDIS_CONNECTION: local
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: 6379
-          REDIS_PASSWORD: placeholder
-          STRIPE_SECRET_KEY: sk_test_51HFZXCDCyFFtQJHuZ2rB1om4CTWAQYjFjgHP2eWCSxj8wJfFcqkHSliUuBBs0sjlrNsdcGBIOjuZ4RgEGq4nZ3gD00VTgewmuI
       - name: Run project creation test
         run: |
           npm test
-        env:
-          PORT: 3333
-          HOST: 0.0.0.0
-          NODE_ENV: development
-          APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
-          DRIVE_DISK: local
-          CACHE_VIEWS: false
-          PROJECT_PATH: ../Projects
-          UI_URL: http://localhost:8080
-          DB_CONNECTION: mysql
-          MYSQL_HOST: localhost
-          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
-          MYSQL_USER: root
-          MYSQL_PASSWORD: snowball
-          MYSQL_DB_NAME: creator
-          MAIL_FROM_ADDRESS: noreply@pcsudhar.com
-          SMTP_HOST: smtp.sendgrid.net
-          SMTP_PORT: 587
-          SMTP_USERNAME: apikey
-          SMTP_PASSWORD: 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
-          REDIS_CONNECTION: local
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: 6379
-          REDIS_PASSWORD: placeholder
-          STRIPE_SECRET_KEY: sk_test_51HFZXCDCyFFtQJHuZ2rB1om4CTWAQYjFjgHP2eWCSxj8wJfFcqkHSliUuBBs0sjlrNsdcGBIOjuZ4RgEGq4nZ3gD00VTgewmuI

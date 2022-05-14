@@ -62,23 +62,18 @@ export interface Meta {
 
 /**
  * Multiline string is alrady converted to textarea, only available option is WYSIWYG
- * String, Number can be input, select, radio, checkbox, file(String only)
- * Boolean can be radio or select
+ * String, Number can be input, select
+ * Boolean can be switch or checkbox
  * Maxlength and minlengh is already coming from meta
  */
 export interface Input {
   displayName?: string // Display name will be used as label when displaying a field
-  type?: string // input, select, radio, checkbox, file(String only)
+  type?: string // input, select, switch, file(String only)
   decimal?: {
     step: number | string // Only allowed for decimal inputs
   }
   select?: {
-    options: any[]
-  }
-  radio?: {
-    options: any[]
-  }
-  checkbox?: {
+    type: string
     options: any[]
   }
 }

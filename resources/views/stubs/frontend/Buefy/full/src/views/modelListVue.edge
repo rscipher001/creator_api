@@ -129,26 +129,6 @@
                         @endif
                       @endeach
                     </b-select>
-                  @elseif(column.input?.type === 'Radio')
-                    @each(option in column.input?.radio.options)
-                      @if(option.value)
-                        <b-radio-button 
-                          v-model="filter.{{ column.names.camelCase }}"
-                          native-value="{{ option.value }}"
-                          type="is-primary is-outlined is-light"
-                        >
-                          <span>@{{ option.label }}</span>
-                        </b-radio-button>
-                      @else
-                        <b-radio-button
-                          v-model="filter.{{ column.names.camelCase }}"
-                          native-value="{{ option }}"
-                          type="is-primary is-outlined is-light"
-                        >
-                          <span>@{{ option }}</span>
-                        </b-radio-button>
-                      @endif
-                    @endeach
                   @endif
                 @elseif(column.type === 'Number')
                   <b-input
@@ -472,7 +452,7 @@ export default {
           hasIcon: true,
           onConfirm: async () => {
             try {
-              await this.destroyAction(id);
+              await this.destroyAction({ id });
               this.$buefy.toast.open({
                 message: 'Deleted',
                 type: 'is-success',
@@ -504,7 +484,9 @@ export default {
           hasIcon: true,
           onConfirm: async () => {
             try {
-              await this.destroyManyAction(this.selectedItems.map((i) => i.id));
+              await this.destroyManyAction({
+                ids: this.selectedItems.map((i) => i.id)
+              });
               this.$buefy.toast.open({
                 message: "Deleted",
                 type: "is-success",

@@ -18,7 +18,7 @@ export default Env.rules({
   APP_NAME: Env.schema.string(),
   HOST: Env.schema.string({ format: 'host' }),
   PORT: Env.schema.number(),
-  NODE_ENV: Env.schema.enum(['development', 'production', 'testing'] as const),
+  NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
   APP_KEY: Env.schema.string(),
   CACHE_VIEWS: Env.schema.boolean(),
   DRIVE_DISK: Env.schema.enum(['local'] as const),
@@ -53,4 +53,8 @@ export default Env.rules({
   ROOT_MYSQL_PASSWORD: Env.schema.string.optional(),
 
   STRIPE_SECRET_KEY: Env.schema.string(),
+
+  GIT_REPO_API_ADONIS: Env.schema.string(),
+  GIT_REPO_WEB_ADONIS: Env.schema.string(),
+  GIT_REPO_SPA_VUE_BUEFY: Env.schema.string(),
 })
