@@ -51,6 +51,8 @@ jobs:
       - run: npm install -g @vue/cli
       - name: Run Migrations
         run: node ace migration:run
+        env:
+          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
       - name: Run Tests
         run: |
           npm run format
@@ -58,5 +60,5 @@ jobs:
       - name: Run project creation test
         run: |
           npm test
-  env:
-    MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+        env:
+          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
