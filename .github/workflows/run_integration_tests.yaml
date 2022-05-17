@@ -58,5 +58,5 @@ jobs:
       - name: Run project creation test
         run: |
           npm test
-    env:
-      MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+  env:
+    MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
