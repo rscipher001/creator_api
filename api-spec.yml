@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  description: 'API spec for creator'
+  version: v1
+  title: Creator
+tags:
+  - name: 'Project'
+
+paths:
+  /api/project:
+    get:
+      tags:
+        - Project
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: number
+        - in: query
+          name: per_page
+          schema:
+            type: number
+      responses:
+        '200':
+          $ref: '#/components/responses/projects'
+components:
+  schemas:
+    projects:
+      type: object
+      properties:
