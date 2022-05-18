@@ -56,6 +56,7 @@ jobs:
         run: |
           sudo /etc/init.d/mysql start
           mysql -e 'CREATE DATABASE ${{ env.MYSQL_DB_NAME }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
+          mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root'"
       - run: mkdir -p ../Projects
       - run: npm ci
       - run: npm install -g @vue/cli
