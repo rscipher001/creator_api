@@ -52,13 +52,13 @@ jobs:
         with:
           node-version: '16'
           cache: 'npm'
-      - run: mkdir -p ../Projects
-      - run: npm ci
-      - run: npm install -g @vue/cli
       - name: Setup MySQL
         run: |
           sudo /etc/init.d/mysql start
           mysql -e 'CREATE DATABASE ${{ env.MYSQL_DB_NAME }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
+      - run: mkdir -p ../Projects
+      - run: npm ci
+      - run: npm install -g @vue/cli
       - name: Run Migrations
         run: node ace migration:run
         env:
