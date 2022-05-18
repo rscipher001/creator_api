@@ -54,6 +54,7 @@ jobs:
           cache: 'npm'
       - name: Setup MySQL
         run: |
+          which systemctl
           sudo /etc/init.d/mysql start
           sudo mysql -e 'CREATE DATABASE ${{ env.MYSQL_DB_NAME }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
           sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root'"
