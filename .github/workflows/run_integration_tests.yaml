@@ -6,8 +6,8 @@ on:
     branches: [master]
 
 env:
-  # HOST: 0.0.0.0
-  # PORT: 3332
+  HOST: 0.0.0.0
+  PORT: 3332
   NODE_ENV: test
   ASSETS_DRIVER: fake
   SESSION_DRIVER: memory
