@@ -57,13 +57,11 @@ jobs:
           sudo /etc/init.d/mysql start
           mysql -e 'CREATE DATABASE ${{ env.MYSQL_DB_NAME }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
           mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root'"
+      - name: Run Migrations
+        run: node ace migration:run
       - run: mkdir -p ../Projects
       - run: npm ci
       - run: npm install -g @vue/cli
-      - name: Run Migrations
-        run: node ace migration:run
-        env:
-          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
       - name: Run Tests
         run: |
           npm run format
@@ -71,5 +69,3 @@ jobs:
       - name: Run project creation test
         run: |
           npm test
-        env:
-          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
