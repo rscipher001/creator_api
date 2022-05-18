@@ -55,7 +55,7 @@ jobs:
       - name: Setup MySQL
         run: |
           sudo systemctl start mysql
-          sudo mysql -e 'CREATE DATABASE ${{ env.MYSQL_DB_NAME }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
+          sudo mysql -e 'CREATE DATABASE ${{ env.MYSQL_DB_NAME }};' -uroot -proot
           sudo mysql -e "CREATE USER '${{ env.MYSQL_USER }}'@'${{ env.MYSQL_HOST }}' IDENTIFIED WITH mysql_native_password BY '${{ env.MYSQL_PASSWORD }}';" -uroot -proot
       - run: npm ci
       - name: Run Migrations
