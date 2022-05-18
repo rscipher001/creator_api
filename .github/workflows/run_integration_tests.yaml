@@ -1,22 +1,28 @@
 name: Run integration tests
 on:
+  push:
+    branches: [master]
   pull_request:
     branches: [master]
 
 env:
-  PORT: 3333
-  HOST: 0.0.0.0
-  NODE_ENV: testing
-  APP_KEY: yNKZ3IHs98Jq4VDuNsKJNax2vy-DRSGG
-  DRIVE_DISK: local
+  # HOST: 0.0.0.0
+  # PORT: 3332
+  NODE_ENV: test
+  ASSETS_DRIVER: fake
+  SESSION_DRIVER: memory
+  APP_KEY: test_api_key_not_very_secure
   CACHE_VIEWS: false
-  PROJECT_PATH: ../Projects
-  UI_URL: http://localhost:8080
+  DRIVE_DISK: local
+  UI_URL: http://localhost:8081
   DB_CONNECTION: mysql
+  DB_DEBUG: true
   MYSQL_HOST: localhost
+  MYSQL_PORT: 3306
   MYSQL_USER: root
-  MYSQL_PASSWORD: snowball
+  MYSQL_PASSWORD: root
   MYSQL_DB_NAME: creator
+  PROJECT_PATH: ../Projects
   MAIL_FROM_ADDRESS: noreply@pcsudhar.com
   SMTP_HOST: smtp.sendgrid.net
   SMTP_PORT: 587
@@ -25,30 +31,34 @@ env:
   REDIS_CONNECTION: local
   REDIS_HOST: 127.0.0.1
   REDIS_PORT: 6379
-  REDIS_PASSWORD: placeholder
+  REDIS_PASSWORD:
+  ENABLE_HOSTING: false
+  HOSTING_UI_DOMAIN: brahma.rmstechinfo.com
+  HOSTING_API_DOMAIN: api.brahma.rmstechinfo.com
+  ROOT_MYSQL_HOST: localhost
+  ROOT_MYSQL_PORT: 3306
+  ROOT_MYSQL_PASSWORD: ravindra
   STRIPE_SECRET_KEY: sk_test_51HFZXCDCyFFtQJHuZ2rB1om4CTWAQYjFjgHP2eWCSxj8wJfFcqkHSliUuBBs0sjlrNsdcGBIOjuZ4RgEGq4nZ3gD00VTgewmuI
   GIT_REPO_API_ADONIS: https://github.com/SecureSnowball/creator_adonis_api_starter
   GIT_REPO_WEB_ADONIS: https://github.com/SecureSnowball/creator_adonis_web_starter
   GIT_REPO_SPA_VUE_BUEFY: https://github.com/SecureSnowball/creator_vue_spa_starter
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: bitnami/mysql:8.0.20
-        env:
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
-          MYSQL_ROOT_PASSWORD: snowball
-          MYSQL_DATABASE: creator
-        ports: ['3306:3306']
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
       - run: mkdir -p ../Projects
       - run: npm ci
       - run: npm install -g @vue/cli
+      - name: Setup MySQL
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -e 'CREATE DATABASE ${{ env.MYSQL_DB_NAME }};' -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
       - name: Run Migrations
         run: node ace migration:run
         env:
