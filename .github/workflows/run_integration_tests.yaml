@@ -57,6 +57,7 @@ jobs:
           sudo systemctl start mysql
           sudo mysql -e 'CREATE DATABASE ${{ env.MYSQL_DB_NAME }};' -uroot -proot
           sudo mysql -e "CREATE USER '${{ env.MYSQL_USER }}'@'${{ env.MYSQL_HOST }}' IDENTIFIED WITH mysql_native_password BY '${{ env.MYSQL_PASSWORD }}';" -uroot -proot
+          sudo mysql -e "SHOW DATABASES;" -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }}
       - run: npm ci
       - name: Run Migrations
         run: node ace migration:run
