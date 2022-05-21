@@ -36,7 +36,7 @@ export default class TestGenerator {
    */
   protected async start() {
     await this.copyTestEnv()
-    await this.copyAuthTests()
+    // await this.copyAuthTests()
     await HelperService.commit('First Test added', this.input.path)
   }
 
