@@ -15,7 +15,7 @@ export default class CRUDGenerator {
    * Create view for creating and updating resource
    */
   protected async createCreateView(table: Table) {
-    const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}Create.vue`
+    const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}CreateView.vue`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
@@ -33,7 +33,7 @@ export default class CRUDGenerator {
    * Create view for listing resource
    */
   protected async createListView(table: Table) {
-    const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}List.vue`
+    const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}IndexView.vue`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(
@@ -51,7 +51,7 @@ export default class CRUDGenerator {
    * Create view for importing CSV page
    */
   protected async createStoreManyView(table: Table) {
-    const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}ImportCSV.vue`
+    const filePath = `${this.input.spaPath}/src/views/${table.names.pascalCase}ImportCSVView.vue`
     const fileExists = await HelperService.fileExists(filePath)
     if (!fileExists) {
       const content = await View.render(

@@ -36,11 +36,11 @@
 </template>
 
 <script>
-import Profile from "../views/setting/Profile.vue";
+import Profile from "../views/setting/ProfileView.vue";
 @if(input.mailEnabled)
-  import Email from "../views/setting/Account.vue";
+  import Email from "../views/setting/AccountView.vue";
 @endif
-import Password from "../views/setting/Security.vue";
+import Password from "../views/setting/SecurityView.vue";
 
 export default {
   name: 'SettingPage',

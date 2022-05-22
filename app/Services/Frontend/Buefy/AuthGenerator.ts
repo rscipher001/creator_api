@@ -34,7 +34,7 @@ export default class AuthGenerator {
 
   protected async copyRegisterView() {
     if (this.input.auth.register) {
-      const path = `${this.input.spaPath}/src/views/Register.vue`
+      const path = `${this.input.spaPath}/src/views/RegisterView.vue`
       const exists = await HelperService.fileExists(path)
       if (!exists) {
         const table = this.input.auth.table
@@ -54,7 +54,7 @@ export default class AuthGenerator {
   }
 
   protected async copyLoginView() {
-    const path = `${this.input.spaPath}/src/views/Login.vue`
+    const path = `${this.input.spaPath}/src/views/LoginView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const table = this.input.auth.table
@@ -73,7 +73,7 @@ export default class AuthGenerator {
   }
 
   protected async copyDashboardView() {
-    const path = `${this.input.spaPath}/src/views/Dashboard.vue`
+    const path = `${this.input.spaPath}/src/views/DashboardView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
@@ -84,7 +84,7 @@ export default class AuthGenerator {
   }
 
   protected async copyForgotPasswordRequestView() {
-    const path = `${this.input.spaPath}/src/views/ForgotPasswordRequest.vue`
+    const path = `${this.input.spaPath}/src/views/ForgotPasswordRequestView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const email = this.input.auth.table.columns.find((c) => c.name === 'Email')
@@ -99,7 +99,7 @@ export default class AuthGenerator {
   }
 
   protected async copyForgotPasswordUpdateView() {
-    const path = `${this.input.spaPath}/src/views/ForgotPasswordUpdate.vue`
+    const path = `${this.input.spaPath}/src/views/ForgotPasswordUpdateView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
@@ -110,7 +110,7 @@ export default class AuthGenerator {
   }
 
   protected async copyEmailVerificationPendingView() {
-    const path = `${this.input.spaPath}/src/views/EmailVerificationPending.vue`
+    const path = `${this.input.spaPath}/src/views/EmailVerificationPendingView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
@@ -121,7 +121,7 @@ export default class AuthGenerator {
   }
 
   protected async copySettingView() {
-    const path = `${this.input.spaPath}/src/views/Setting.vue`
+    const path = `${this.input.spaPath}/src/views/SettingView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
@@ -136,7 +136,7 @@ export default class AuthGenerator {
 
   protected async copyRbacMatrixView() {
     if (this.input.rbac.enabled) {
-      const path = `${this.input.spaPath}/src/views/RbacMatrix.vue`
+      const path = `${this.input.spaPath}/src/views/RbacMatrixView.vue`
       const exists = await HelperService.fileExists(path)
       if (!exists) {
         const content = await View.render(
@@ -151,7 +151,7 @@ export default class AuthGenerator {
   }
 
   protected async copyVerifyEmailView() {
-    const path = `${this.input.spaPath}/src/views/VerifyEmail.vue`
+    const path = `${this.input.spaPath}/src/views/VerifyEmailView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
@@ -162,7 +162,7 @@ export default class AuthGenerator {
   }
 
   protected async copyUpdateEmailView() {
-    const path = `${this.input.spaPath}/src/views/UpdateEmail.vue`
+    const path = `${this.input.spaPath}/src/views/UpdateEmailView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
@@ -175,7 +175,7 @@ export default class AuthGenerator {
   protected async copySettingAccountView() {
     const table = this.input.auth.table
     const email = table.columns.find((c) => c.name === 'Email')
-    const path = `${this.input.spaPath}/src/views/setting/Account.vue`
+    const path = `${this.input.spaPath}/src/views/setting/AccountView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
@@ -191,7 +191,7 @@ export default class AuthGenerator {
 
   protected async copySettingProfileView() {
     const table = this.input.auth.table
-    const path = `${this.input.spaPath}/src/views/setting/Profile.vue`
+    const path = `${this.input.spaPath}/src/views/setting/ProfileView.vue`
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
@@ -207,7 +207,7 @@ export default class AuthGenerator {
 
   protected async copySettingSecurityView() {
     const table = this.input.auth.table
-    const path = `${this.input.spaPath}/src/views/setting/Security.vue`
+    const path = `${this.input.spaPath}/src/views/setting/SecurityView.vue`
     const password = table.columns.find((c) => c.name === 'Password')
     const exists = await HelperService.fileExists(path)
     if (!exists) {

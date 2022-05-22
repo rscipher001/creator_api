@@ -130,38 +130,58 @@
                       @endeach
                     </b-select>
                   @endif
-                @elseif(column.type === 'Number')
-                  <b-input
-                    v-model="filter.{{ column.names.camelCase }}"
-                    type="number"
-                    @if(column.meta.max !== undefined)
-                      max="{{ column.meta.max }}"
-                    @endif
-                    @if(column.meta.min !== undefined)
-                      min="{{ column.meta.min }}"
-                    @endif
-                  >
-                  </b-input>
+                @elseif(column.type === 'Integer')
+                  @if(column.input?.type === 'Input')
+                    <b-input
+                      v-model="filter.{{ column.names.camelCase }}"
+                      type="number"
+                      @if(column.meta.max !== undefined)
+                        max="{{ column.meta.max }}"
+                      @endif
+                      @if(column.meta.min !== undefined)
+                        min="{{ column.meta.min }}"
+                      @endif
+                    >
+                    </b-input>
+                  @elseif(column.input?.type === 'Select')
+                    <b-select v-model="filter.{{ column.names.camelCase }}" expanded>
+                      @each(option in column.input?.select.options)
+                        @if(option.value)
+                          <option value="{{ option.value }}">{{ option.label }}</option>
+                        @else
+                          <option value="{{ option }}">{{ option }}</option>
+                        @endif
+                      @endeach
+                    </b-select>
+                  @endif
                 @elseif(column.type === 'Decimal')
-                  <b-input
-                    v-model="filter.{{ column.names.camelCase }}"
-                    type="number"
-                    @if(column.input?.decimal.step !== undefined)
-                      step="{{ column.input?.decimal.step }}"
-                    @else
-                      step="any"
-                    @endif
-                    @if(column.meta.max !== undefined)
-                      max="{{ column.meta.max }}"
-                    @endif
-                    @if(column.meta.min !== undefined)
-                      min="{{ column.meta.min }}"
-                    @endif
-                  ></b-input>
-                @elseif(column.type === 'Boolean')
-                  <b-switch v-model="filter.{{ column.names.camelCase }}">
-                    @{{ column.input?.displayName ?? column.names.camelCase }}
-                  </b-switch>
+                  @if(column.input?.type === 'Input')
+                    <b-input
+                      v-model="filter.{{ column.names.camelCase }}"
+                      type="number"
+                      @if(column.input?.decimal.step !== undefined)
+                        step="{{ column.input?.decimal.step }}"
+                      @else
+                        step="any"
+                      @endif
+                      @if(column.meta.max !== undefined)
+                        max="{{ column.meta.max }}"
+                      @endif
+                      @if(column.meta.min !== undefined)
+                        min="{{ column.meta.min }}"
+                      @endif
+                    ></b-input>
+                  @elseif(column.input?.type === 'Select')
+                    <b-select v-model="filter.{{ column.names.camelCase }}" expanded>
+                      @each(option in column.input?.select.options)
+                        @if(option.value)
+                          <option value="{{ option.value }}">{{ option.label }}</option>
+                        @else
+                          <option value="{{ option }}">{{ option }}</option>
+                        @endif
+                      @endeach
+                    </b-select>
+                  @endif
                 @elseif(column.type === 'Date')
                   <b-datepicker v-model="filter.{{ column.names.camelCase }}" />
                 @endif
@@ -333,7 +353,7 @@ import { mapActions, mapState } from 'vuex';
 @endif
 
 export default {
-  name: '{{ table.names.pascalCase }}List',
+  name: '{{ table.names.pascalCase }}IndexView',
 
   data() {
     return {
@@ -349,7 +369,7 @@ export default {
       multiSelect: false,
       @if(hasFilterableColumn)
         filter: {
-          @each(column in table.columns.filter(c => c.meta.filterable))
+          @each(column in table.columns.filter(c => c.meta.filterable && column.type !== 'Boolean'))
             {{ column.names.camelCase }}: null,
           @endeach
         },

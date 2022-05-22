@@ -75,3 +75,19 @@ In the above snippet you can see the routes for workers are nested inside projec
 - Install stripe CLI: https://stripe.com/docs/stripe-cli
 - Stripe login: `stripe login`
 - Listen to webhooks in local: `stripe listen --forward-to localhost:3000/api/webhook/stripe`
+
+## Automatd Test cases
+
+- Code 1: One table called countries with name and description (Done)
+- One table called Forms with all type of fields
+- One table that belongs to user
+- One table that belongs to the user and another table like state
+- One table that belongs to the user and another table like state and uses parent routes
+- Two tables with many to many relations
+- Two tables with many to many relations and both belongs to the user
+- One global singleton
+- One singleton to the user
+- One singleton that belongs to another table
+- All the above tables with RBAC and without RBAC
+- All the above tables with and without mailer
+- All the above tables with different databases

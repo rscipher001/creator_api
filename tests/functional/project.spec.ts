@@ -1,11 +1,16 @@
 import User from 'App/Models/User'
 import { test } from '@japa/runner'
+import codeOne from './input/codeOne'
+import codeTwo from './input/codeTwo'
 import Database from '@ioc:Adonis/Lucid/Database'
 import HelperService from 'App/Services/HelperService'
-import createProjectInput from './input/createProject'
 
+const testCases = {
+  codeOne,
+  codeTwo,
+}
 test.group('Project', async (group) => {
-  let projectId: number
+  const user = await User.findByOrFail('email', 'john@example.com')
 
   group.each.setup(async () => {
     await Database.beginGlobalTransaction()
@@ -13,7 +18,6 @@ test.group('Project', async (group) => {
   })
 
   test('Get paginated list of projects', async ({ client }) => {
-    const user = await User.findByOrFail('email', 'john@example.com')
     const response = await client
       .get('/api/project')
       .guard('api')
@@ -25,49 +29,49 @@ test.group('Project', async (group) => {
     })
   })
 
-  test('Create a project', async ({ client }) => {
-    const user = await User.findByOrFail('email', 'john@example.com')
-    const storeResponse = await client
-      .post('/api/project')
-      .guard('api')
-      .loginAs(user as never)
-      .json(createProjectInput)
-
-    storeResponse.assertStatus(200)
-    projectId = storeResponse.body().id
-
-    let shouldCheckAgain = true
-    while (shouldCheckAgain) {
-      const showResponse = await client
-        .get(`/api/project/${projectId}`)
+  for (const [name, input] of Object.entries(testCases)) {
+    test(`Create ${name}`, async ({ client }) => {
+      const storeResponse = await client
+        .post('/api/project')
         .guard('api')
         .loginAs(user as never)
+        .json(input)
 
-      const body = showResponse.body()
-      if (body.status === 'failed') throw new Error('Project creation failed')
-      if (body.status === 'done') {
-        shouldCheckAgain = false
-        if (createProjectInput.generate.api.generate) {
-          try {
-            await HelperService.execute('npm', ['run', 'build'], {
-              cwd: body.projectInput.path,
-            })
-          } catch (_) {
-            throw new Error('API build is failing')
+      storeResponse.assertStatus(200)
+      const projectId: number = storeResponse.body().id
+
+      let shouldCheckAgain = true
+      while (shouldCheckAgain) {
+        const showResponse = await client
+          .get(`/api/project/${projectId}`)
+          .guard('api')
+          .loginAs(user as never)
+
+        const body = showResponse.body()
+        if (body.status === 'failed') throw new Error('Project creation failed')
+        if (body.status === 'done') {
+          shouldCheckAgain = false
+          if (codeOne.generate.api.generate) {
+            try {
+              await HelperService.execute('npm', ['run', 'build'], {
+                cwd: body.projectInput.path,
+              })
+            } catch (_) {
+              throw new Error('API build is failing')
+            }
           }
-        }
-        if (createProjectInput.generate.spa.generate) {
-          try {
-            // Temporary disabled till CSV build is fixed
-            // await HelperService.execute('npm', ['run', 'build'], {
-            //   cwd: body.projectInput.spaPath,
-            // })
-          } catch (_) {
-            throw new Error('UI build is failing')
+          if (codeOne.generate.spa.generate) {
+            try {
+              await HelperService.execute('npm', ['run', 'build'], {
+                cwd: body.projectInput.spaPath,
+              })
+            } catch (_) {
+              throw new Error('UI build is failing')
+            }
           }
+          showResponse.assertStatus(200)
         }
-        showResponse.assertStatus(200)
       }
-    }
-  }).timeout(600000)
+    }).timeout(600000)
+  }
 })

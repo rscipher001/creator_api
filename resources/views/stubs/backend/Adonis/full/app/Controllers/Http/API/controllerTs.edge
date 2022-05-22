@@ -103,7 +103,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @endif
 
       {{--  Create filters for filterable columns  --}}
-      @each(column in table.columns.filter(c => c.meta.filterable))
+      @each(column in table.columns.filter(c => c.meta.filterable && c.type !== 'Boolean'))
         if (request.input('{{
           input.camelCaseStrategy ?
             column.names.camelCase :
@@ -115,11 +115,25 @@ export default class {{ table.names.pascalCasePlural }}Controller {
           @if(column.type === 'String')
             'like',
           @endif
-          `%${request.input('{{
-            input.camelCaseStrategy ?
-              column.names.camelCase :
-              column.names.snakeCase
-          }}')}%`);
+          @if(column.type === 'Date')
+            new Date(request.input('{{
+              input.camelCaseStrategy ?
+                column.names.camelCase :
+                column.names.snakeCase
+            }}')));
+          @elseif(column.type === 'String')
+            `%${request.input('{{
+              input.camelCaseStrategy ?
+                column.names.camelCase :
+                column.names.snakeCase
+            }}')}%`);
+          @elseif(['Integer', 'Decimal'].includes(column.type))
+            {{ column.type === 'Integer' ? 'parseInt': 'parseFloat' }}(request.input('{{
+              input.camelCaseStrategy ?
+                column.names.camelCase :
+                column.names.snakeCase
+            }}')));
+          @endif
         }
       @endeach
 
@@ -409,7 +423,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
             `${parentRelation.names.snakeCase}_id`
         }} = {{ parentRelation.names.camelCase }}Id;
       @endif
-      
+
       @if(!table.singleton)
         const id = request.param('id')
         condition.id = id

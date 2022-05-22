@@ -2,20 +2,20 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import store from '../store';
 
-import HomeView from '../views/Home.vue';
+import HomeView from '../views/HomeView.vue';
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'HomePage',
     component: HomeView,
   },
   {
     path: '/login',
-    name: 'Login',
-    component: () => import('../views/Login.vue'),
+    name: 'LoginPage',
+    component: () => import('../views/LoginView.vue'),
     meta: {
       guest: true,
     },
@@ -23,8 +23,8 @@ const routes = [
   @if(input.auth.register)
     {
       path: '/register',
-      name: 'Register',
-      component: () => import('../views/Register.vue'),
+      name: 'RegisterPage',
+      component: () => import('../views/RegisterView.vue'),
       meta: {
         guest: true,
       },
@@ -33,35 +33,35 @@ const routes = [
   @if(input.auth.passwordReset)
     {
       path: "/forgot_password/request",
-      name: "Forgot Password Request",
-      component: () => import("../views/ForgotPasswordRequest.vue"),
+      name: "ForgotPasswordRequestPage",
+      component: () => import("../views/ForgotPasswordRequestView.vue"),
       meta: {
         guest: true,
       },
     },
     {
       path: "/forgot_password/verify",
-      name: "Forgot Password Verify",
-      component: () => import("../views/ForgotPasswordUpdate.vue"),
+      name: "ForgotPasswordVerifyPage",
+      component: () => import("../views/ForgotPasswordUpdateView.vue"),
       meta: {
         guest: true,
       },
     },
     {
       path: "/email/verify",
-      name: "VerifyEmail",
-      component: () => import("../views/VerifyEmail.vue"),
+      name: "VerifyEmailPage",
+      component: () => import("../views/VerifyEmailPage.vue"),
     },
     {
       path: "/emailUpdate",
-      name: "UpdateEmail",
+      name: "UpdateEmailPage",
       component: () =>
-        import(/* webpackChunkName: "updateEmail" */ "../views/UpdateEmail.vue"),
+        import(/* webpackChunkName: "updateEmailView" */ "../views/UpdateEmailView.vue"),
     },
     {
       path: "/email/verificationPending",
-      name: "EmailVerificationPending",
-      component: () => import("../views/EmailVerificationPending.vue"),
+      name: "EmailVerificationPendingPage",
+      component: () => import("../views/EmailVerificationPendingView.vue"),
       meta: {
         auth: true,
         emailUnverified: true,
@@ -71,8 +71,8 @@ const routes = [
   @if(input.rbac.enabled)
     {
       path: "/rbacMatrix",
-      name: "RbacMatrix",
-      component: () => import("../views/RbacMatrix.vue"),
+      name: "RbacMatrixPage",
+      component: () => import("../views/RbacMatrixView.vue"),
       meta: {
         auth: true,
         ensureEmailIsVerified: true,
@@ -81,8 +81,8 @@ const routes = [
   @endif
   {
     path: "/setting",
-    name: "Setting",
-    component: () => import("../views/Setting.vue"),
+    name: "SettingPage",
+    component: () => import("../views/SettingView.vue"),
     meta: {
       auth: true,
       @if(input.mailEnabled)
@@ -92,8 +92,8 @@ const routes = [
   },
   {
     path: '/dashboard',
-    name: 'Dashboard',
-    component: () => import('../views/Dashboard.vue'),
+    name: 'DashboardPage',
+    component: () => import('../views/DashboardView.vue'),
     meta: {
       auth: true,
       ensureEmailIsVerified: true,
@@ -123,7 +123,7 @@ router.beforeEach((to, from, next) => {
   if (meta.guest) {
     if (store.state.auth.token) {
       return next({
-        name: 'Dashboard',
+        name: 'DashboardPage',
       });
     }
   }
@@ -131,7 +131,7 @@ router.beforeEach((to, from, next) => {
   if (meta.auth) {
     if (!store.state.auth.token) {
       return next({
-        name: 'Login',
+        name: 'LoginPage',
       });
     }
   }
@@ -143,7 +143,7 @@ router.beforeEach((to, from, next) => {
   if (meta.emailUnverified) {
     if (store.state.auth.user && store.state.auth.user.emailVerifiedAt) {
       return next({
-        name: "Dashboard",
+        name: "DashboardPage",
       });
     }
   }
@@ -151,7 +151,7 @@ router.beforeEach((to, from, next) => {
   if (meta.ensureEmailIsVerified) {
     if (!store.state.auth.user.emailVerifiedAt) {
       return next({
-        name: "EmailVerificationPending",
+        name: "EmailVerificationPendingPage",
       });
     }
   }
