@@ -150,7 +150,7 @@ export default class ProjectsController {
 
         if (['Boolean', 'File'].includes(column.type) && column.meta?.filterable) {
           return response.badRequest({
-            error: `On ${table.names.pascalCase} table ${column.names.pascalCase} file type cannot be filterable`,
+            error: `On ${table.names.pascalCase} table ${column.names.pascalCase} cannot be filterable`,
           })
         }
       })

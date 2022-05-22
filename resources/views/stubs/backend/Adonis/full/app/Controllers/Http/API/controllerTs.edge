@@ -120,20 +120,21 @@ export default class {{ table.names.pascalCasePlural }}Controller {
               input.camelCaseStrategy ?
                 column.names.camelCase :
                 column.names.snakeCase
-            }}')));
+            }}'))
           @elseif(column.type === 'String')
             `%${request.input('{{
               input.camelCaseStrategy ?
                 column.names.camelCase :
                 column.names.snakeCase
-            }}')}%`);
+            }}')}%`
           @elseif(['Integer', 'Decimal'].includes(column.type))
             {{ column.type === 'Integer' ? 'parseInt': 'parseFloat' }}(request.input('{{
               input.camelCaseStrategy ?
                 column.names.camelCase :
                 column.names.snakeCase
-            }}')));
+            }}'))
           @endif
+          );
         }
       @endeach
 
