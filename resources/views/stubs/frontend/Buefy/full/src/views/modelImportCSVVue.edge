@@ -181,7 +181,7 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
-const { parse } = require("csv-parse/lib/sync");
+import { parse } from "csv-parse/browser/esm/sync";
 import ValidationException from "../exceptions/ValidationException";
 import { API_URL } from "../constants";
 
@@ -291,45 +291,45 @@ export default {
     isFailingRequiredValidation(value) {
       const result = value === null || value === undefined;
       if (result) {
+        this.haveValidationErrors = true;
         return true;
       }
-      this.haveValidationErrors = true;
       return false;
     },
 
     isFailingMinLengthValidation(value, minLength) {
       const result = value.length < minLength;
       if (result) {
+        this.haveValidationErrors = true;
         return true;
       }
-      this.haveValidationErrors = true;
       return false;
     },
 
     isFailingMaxLengthValidation(value, maxLength) {
       const result = value.length > maxLength;
       if (result) {
+        this.haveValidationErrors = true;
         return true;
       }
-      this.haveValidationErrors = true;
       return false;
     },
 
     isFailingMinValidation(value, min) {
       const result = value < min;
       if (result) {
+        this.haveValidationErrors = true;
         return true;
       }
-      this.haveValidationErrors = true;
       return false;
     },
 
     isFailingMaxValidation(value, max) {
       const result = value < max;
       if (result) {
+        this.haveValidationErrors = true;
         return true;
       }
-      this.haveValidationErrors = true;
       return false;
     },
   },
