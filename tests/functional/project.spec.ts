@@ -2,6 +2,7 @@ import User from 'App/Models/User'
 import { test } from '@japa/runner'
 import codeOne from './input/codeOne'
 import codeTwo from './input/codeTwo'
+import Logger from '@ioc:Adonis/Core/Logger'
 import Database from '@ioc:Adonis/Lucid/Database'
 import HelperService from 'App/Services/HelperService'
 
@@ -10,6 +11,7 @@ const testCases = {
   codeTwo,
 }
 test.group('Project', async (group) => {
+  Logger.info('Started testing project')
   const user = await User.findByOrFail('email', 'john@example.com')
 
   group.each.setup(async () => {

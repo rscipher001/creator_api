@@ -103,7 +103,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
       @endif
 
       {{--  Create filters for filterable columns  --}}
-      @each(column in table.columns.filter(c => c.meta.filterable && c.type !== 'Boolean'))
+      @each(column in table.columns.filter(c => c.meta.filterable))
         if (request.input('{{
           input.camelCaseStrategy ?
             column.names.camelCase :

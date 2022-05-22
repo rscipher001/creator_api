@@ -559,10 +559,10 @@ export default class SwaggerGenerator {
     this.input.tables.forEach((table) => {
       const columnsSchema = {}
       let relationsSchema = {}
-      table.columns.map((column) => {
+      table.columns.forEach((column) => {
         columnsSchema[column.columnName] = this.getColumnDetails(column)
       })
-      table.relations.map((relation) => {
+      table.relations.forEach((relation) => {
         relationsSchema = {
           ...relationsSchema,
           ...this.getRelationDetails(relation),
@@ -623,7 +623,7 @@ export default class SwaggerGenerator {
    * 2. Write it as json file or convert it to yaml and write
    */
   protected async start() {
-    const openApi3Schema = {
+    return {
       openapi: '3.0.1',
       info: this.prepareInfo(),
       servers: [
@@ -635,7 +635,6 @@ export default class SwaggerGenerator {
       paths: this.preparePaths(),
       components: this.prepareComponents(),
     }
-    return openApi3Schema
   }
 
   public async init() {

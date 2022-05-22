@@ -66,23 +66,21 @@ export default class ProjectsController {
       })
     }
     if (!projectInput.storageEnabled) {
-      let isFileColumnExists = false
-      for (let i = 0; i < projectInput.tables.length; i++) {
-        const table = projectInput.tables[i]
+      let fileColumnExists = false
+      for (const table of projectInput.tables) {
         if (table.columns.find((column) => column.type === 'File')) {
-          isFileColumnExists = true
+          fileColumnExists = true
           break
         }
       }
-      for (let i = 0; i < projectInput.tables.length; i++) {
-        const table = projectInput.tables[i]
+      for (const table of projectInput.tables) {
         if (Project.blacklistedClassNames.includes(table.names.pascalCase)) {
           return response.badRequest({
             error: `Class name ${table.names.pascalCase} is not allowed`,
           })
         }
       }
-      if (isFileColumnExists) {
+      if (fileColumnExists) {
         return response.badRequest({
           error: 'Enable storage to supoort file upload',
         })
@@ -108,8 +106,7 @@ export default class ProjectsController {
     // Ensure there is no duplicate relatiosn
     // Ensure default value has correct data type
     // Ensure select drodown have correct data type
-    for (let i = 0; i < projectInput.tables.length; i++) {
-      const table = projectInput.tables[i]
+    for (const table of projectInput.tables) {
       const relations: string[] = []
       table.relations.forEach((relation) => {
         relations.push(`${relation.modelNames.pascalCase}:${relation.names?.pascalCase}`)
@@ -151,20 +148,11 @@ export default class ProjectsController {
           }
         }
 
-        // If column is select dropdown then default should be same as column type
-        // if (column.input?.select) {
-        // if (column.input?.select.type === 'String') {
-        // if (column.type === 'Integer') {
-        // column.input?.select.options.forEach(option => {
-        // if (!Number.isInteger(option)) {
-        // return response.badRequest({
-        // error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
-        // })
-        // }
-        // })
-        // }
-        // ]}
-        // }
+        if (['Boolean', 'File'].includes(column.type) && column.meta?.filterable) {
+          return response.badRequest({
+            error: `On ${table.names.pascalCase} table ${column.names.pascalCase} file type cannot be filterable`,
+          })
+        }
       })
     }
 
@@ -202,13 +190,12 @@ export default class ProjectsController {
         error: 'Tenant table should be selected when tenant option is enabled',
       })
     }
-    const project = await Project.create({
+    return Project.create({
       status: 'draft',
       name: input.name,
       rawInput: input,
       userId: auth.user!.id,
     })
-    return project
   }
 
   public async updateDraft({ request, response, auth }: HttpContextContract) {
@@ -322,7 +309,7 @@ export default class ProjectsController {
         await HelperService.execute('rm', ['-rf', apiPath, uiPath], {
           cwd: basePath,
         })
-      } catch (e) {}
+      } catch (_) {}
       project.status = 'failed'
       project.isCleaned = false
       await project.save()

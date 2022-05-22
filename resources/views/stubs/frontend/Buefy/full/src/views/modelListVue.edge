@@ -369,7 +369,7 @@ export default {
       multiSelect: false,
       @if(hasFilterableColumn)
         filter: {
-          @each(column in table.columns.filter(c => c.meta.filterable && c.type !== 'Boolean'))
+          @each(column in table.columns.filter(c => c.meta.filterable))
             {{ column.names.camelCase }}: null,
           @endeach
         },
