@@ -7,7 +7,6 @@
 
 import type { Config } from '@japa/runner'
 import TestUtils from '@ioc:Adonis/Core/TestUtils'
-import HelperService from 'App/Services/HelperService'
 import { assert, runFailedTests, specReporter, apiClient } from '@japa/preset-adonis'
 
 /*
@@ -49,7 +48,6 @@ export const reporters: Config['reporters'] = [specReporter()]
 */
 export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
   setup: [
-    () => HelperService.execute('rm', ['-rf', `${process.env.PROJECT_PATH as string}/*`]),
     () => TestUtils.ace().loadCommands(),
     () => TestUtils.db().migrate(),
     () => TestUtils.db().seed(),
