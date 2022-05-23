@@ -236,8 +236,9 @@
                 }}}
               @elseif(currentColumn.type === 'Date')
                 {{{
-                  `new Date({{ props.row.${camelCase(column)} }}).toLocaleString()`
+                  `{{ new Date(props.row.${camelCase(column)}).toLocaleString() }}`
                 }}}
+                {{ new Date(props.row.date).toLocaleString() }}
               @else
                 {{{
                   `{{ props.row.${camelCase(column)} }}`
