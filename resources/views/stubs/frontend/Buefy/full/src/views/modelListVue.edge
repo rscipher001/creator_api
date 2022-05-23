@@ -5,8 +5,9 @@
     findRelationModel(input, t.routeParentRelations[t.routeParentRelations.length - 1])
     .names.camelCase === table.names.camelCase
 ))
+@set('hasFileTypeColumns', table.indexColumns.find(c => c.type === 'File'))
 <template>
-  <section class="container">
+  <section class="{{ table.indexColumns.length > 7 > 'container-fluid' : 'container' }}">
     <b-loading v-model="isLoading" is-full-page></b-loading>
     <div class="section py-4">
       <div class="columns">
@@ -238,7 +239,19 @@
                 {{{
                   `{{ new Date(props.row.${camelCase(column)}).toLocaleString() }}`
                 }}}
-                {{ new Date(props.row.date).toLocaleString() }}
+              @elseif(currentColumn.type === 'File')
+                <b-image
+                  v-if="['png', 'jpg', 'jpeg', 'gif', 'bmp'].includes(props.row.{{ camelCase(column) }}.extname)"
+                  :src="`${assetUrl}${props.row.fiileImage.url}`"
+                ></b-image>
+                <b-button
+                  v-else
+                  tag="a"
+                  :href="`${assetUrl}${props.row.file.url}`"
+                  icon-left="download"
+                >
+                  Download
+                </b-button>
               @else
                 {{{
                   `{{ props.row.${camelCase(column)} }}`
@@ -347,6 +360,9 @@
 </template>
 
 <script>
+@if(hasFileTypeColumns)
+  import constants from "@/constants";\
+@endif
 import debounce from "lodash/debounce";
 import { mapActions, mapState } from 'vuex';
 @if(hasRouteParents || routeChildren.length)
@@ -358,6 +374,9 @@ export default {
 
   data() {
     return {
+      @if(hasFileTypeColumns)
+        assetUrl: constants.ASSET_URL,
+      @endif
       parent: {
         @each(routeParent in table.routeParentRelations)
           {{ routeParent.names.camelCase }}Id: null,
