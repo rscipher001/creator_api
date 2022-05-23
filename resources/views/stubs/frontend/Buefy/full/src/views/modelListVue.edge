@@ -7,7 +7,7 @@
 ))
 @set('hasFileTypeColumns', table.indexColumns.find(c => c.type === 'File'))
 <template>
-  <section class="{{ table.indexColumns.length > 7 > 'container-fluid' : 'container' }}">
+  <section class="{{ table.indexColumns.length > 7 ? 'container-fluid' : 'container' }}">
     <b-loading v-model="isLoading" is-full-page></b-loading>
     <div class="section py-4">
       <div class="columns">
