@@ -5,7 +5,7 @@
     findRelationModel(input, t.routeParentRelations[t.routeParentRelations.length - 1])
     .names.camelCase === table.names.camelCase
 ))
-@set('hasFileTypeColumns', table.indexColumns.find(c => c.type === 'File'))
+@set('hasFileTypeColumns', false)
 <template>
   <section class="{{ table.indexColumns.length > 7 ? 'container-fluid' : 'container' }}">
     <b-loading v-model="isLoading" is-full-page></b-loading>
@@ -240,6 +240,7 @@
                   `{{ new Date(props.row.${camelCase(column)}).toLocaleString() }}`
                 }}}
               @elseif(currentColumn.type === 'File')
+                @set('hasFileTypeColumns', true)
                 <b-image
                   v-if="['png', 'jpg', 'jpeg', 'gif', 'bmp'].includes(props.row.{{ camelCase(column) }}.extname)"
                   :src="`${assetUrl}${props.row.fiileImage.url}`"
@@ -361,7 +362,7 @@
 
 <script>
 @if(hasFileTypeColumns)
-  import constants from "@/constants";\
+  import constants from "@/constants";
 @endif
 import debounce from "lodash/debounce";
 import { mapActions, mapState } from 'vuex';
