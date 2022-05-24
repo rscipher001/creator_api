@@ -539,7 +539,7 @@ export default {
         if (
           @each((column, index) in fileColumns)
             this.form.{{ column.names.camelCase }} !== null {{{
-              fileColumnsLastIndex && fileColumnsLastIndex !== index ? '&&': ''
+              fileColumnsLastIndex && fileColumnsLastIndex !== index ? '||': ''
             }}}
           @endeach
         ) {
