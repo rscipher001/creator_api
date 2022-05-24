@@ -2,6 +2,7 @@ import User from 'App/Models/User'
 import { test } from '@japa/runner'
 import codeOne from './input/codeOne'
 import codeTwo from './input/codeTwo'
+import codeThree from './input/codeThree'
 import Logger from '@ioc:Adonis/Core/Logger'
 import Database from '@ioc:Adonis/Lucid/Database'
 import HelperService from 'App/Services/HelperService'
@@ -9,6 +10,7 @@ import HelperService from 'App/Services/HelperService'
 const testCases = {
   codeOne,
   codeTwo,
+  codeThree,
 }
 test.group('Project', async (group) => {
   Logger.info('Started testing project')
