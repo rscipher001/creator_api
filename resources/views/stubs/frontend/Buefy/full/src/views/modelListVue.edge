@@ -241,18 +241,20 @@
                 }}}
               @elseif(currentColumn.type === 'File')
                 @set('hasFileTypeColumns', true)
-                <b-image
-                  v-if="['png', 'jpg', 'jpeg', 'gif', 'bmp'].includes(props.row.{{ camelCase(column) }}.extname)"
-                  :src="`${assetUrl}${props.row.fiileImage.url}`"
-                ></b-image>
-                <b-button
-                  v-else
-                  tag="a"
-                  :href="`${assetUrl}${props.row.file.url}`"
-                  icon-left="download"
-                >
-                  Download
-                </b-button>
+                <template v-if="props.row.{{ camelCase(column) }}">
+                  <b-image
+                    v-if="['png', 'jpg', 'jpeg', 'gif', 'bmp'].includes(props.row.{{ camelCase(column) }}.extname)"
+                    :src="`${assetUrl}${props.row.fiileImage.url}`"
+                  ></b-image>
+                  <b-button
+                    v-else
+                    tag="a"
+                    :href="`${assetUrl}${props.row.file.url}`"
+                    icon-left="download"
+                  >
+                    Download
+                  </b-button>
+                </template>
               @else
                 {{{
                   `{{ props.row.${camelCase(column)} }}`
