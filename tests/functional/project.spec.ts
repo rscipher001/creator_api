@@ -3,14 +3,16 @@ import { test } from '@japa/runner'
 import Logger from '@ioc:Adonis/Core/Logger'
 import Database from '@ioc:Adonis/Lucid/Database'
 import HelperService from 'App/Services/HelperService'
-import { codeOne, codeTwo, codeThree, codeFour } from './input'
+import { codeOne, codeTwo, codeThree, codeFour, codeFive } from './input'
 
 const testCases = {
   codeOne,
   codeTwo,
   codeThree,
   codeFour,
+  codeFive,
 }
+
 test.group('Project', async (group) => {
   Logger.info('Started testing project')
   const user = await User.findByOrFail('email', 'john@example.com')
