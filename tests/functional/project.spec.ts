@@ -3,7 +3,7 @@ import { test } from '@japa/runner'
 import Logger from '@ioc:Adonis/Core/Logger'
 import Database from '@ioc:Adonis/Lucid/Database'
 import HelperService from 'App/Services/HelperService'
-import { codeOne, codeTwo, codeThree, codeFour, codeFive } from './input'
+import { codeOne, codeTwo, codeThree, codeFour, codeFive, codeSix } from './input'
 
 const testCases = {
   codeOne,
@@ -11,6 +11,7 @@ const testCases = {
   codeThree,
   codeFour,
   codeFive,
+  codeSix,
 }
 
 test.group('Project', async (group) => {
