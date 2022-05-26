@@ -138,12 +138,12 @@
             </b-field>
             @elseif(column.type === 'Boolean')
             <b-field
-              horizontal
               label="{{
                 column.input?.displayName || capitalCase(column.names.pascalCase)
               }}{{ column.meta.required ? ' *' : '' }}"
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
+              horizontal
             >
               <b-switch v-model="form.{{ column.names.camelCase }}">{{
                 column.input?.displayName ?? column.names.camelCase
@@ -151,24 +151,29 @@
             </b-field>
             @elseif(column.type === 'Date')
             <b-field
-              horizontal
               label="{{
                 column.input?.displayName || capitalCase(column.names.pascalCase)
               }}{{ column.meta.required ? ' *' : '' }}"
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
+              horizontal
               open-on-focus
             >
               <b-datepicker v-model="form.{{ column.names.camelCase }}" />
             </b-field>
             @elseif(column.type === 'File')
             <b-field
-              class="file" horizontal
-              label="{{
-                column.input?.displayName || capitalCase(column.names.pascalCase)
-              }}{{ column.meta.required ? ' *' : '' }}"
+              class="file"
+              @if(!column.meta.required)
+                label="{{ column.input?.displayName || capitalCase(column.names.pascalCase) }}"
+              @else
+                :label="`{{
+                  column.input?.displayName || capitalCase(column.names.pascalCase)
+                }} ${editMode.enabled ? '' : ' *'}`"
+              @endif
               :type="errors.{{ column.names.camelCase }} ? 'is-danger' : ''"
               :message="errors.{{ column.names.camelCase }}"
+              horizontal
             >
               <b-upload @input="onFileAdd($event, '{{
                 column.names.camelCase
