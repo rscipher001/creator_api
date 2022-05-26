@@ -244,12 +244,12 @@
                 <template v-if="props.row.{{ camelCase(column) }}">
                   <b-image
                     v-if="['png', 'jpg', 'jpeg', 'gif', 'bmp'].includes(props.row.{{ camelCase(column) }}.extname)"
-                    :src="`${assetUrl}${props.row.fiileImage.url}`"
+                    :src="`${assetUrl}${props.row.{{ camelCase(column) }}.url}`"
                   ></b-image>
                   <b-button
                     v-else
                     tag="a"
-                    :href="`${assetUrl}${props.row.file.url}`"
+                    :href="`${assetUrl}${props.row.{{ camelCase(column) }}.url}`"
                     icon-left="download"
                   >
                     Download
