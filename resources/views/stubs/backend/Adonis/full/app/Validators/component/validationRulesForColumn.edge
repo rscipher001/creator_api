@@ -10,7 +10,12 @@
 @elseif(column.type === 'File')
   file
 @endif
-{{ column.meta.required ? '' : '.optional' }}(
+{{ column.meta.required ? '' : '.optional' }}{{
+  column.meta.required
+    && column.type === 'File'
+    && action === 'update'
+      ? '.optional' : ''
+}}(
   {{{ column.meta.trim ? '{ trim: true },': column.type === 'String' ? '{},' :
     column.type === 'Date' ? "{ format: 'iso' },": '' }}}
   @if(column.type === 'File')
