@@ -59,15 +59,15 @@ In the above snippet you can see the routes for workers are nested inside projec
 
 ## How Payment works
 
-- Every payment system have a prepare stage
+- Every payment system has a prepare stage
 - A webhook for verification
-- Middle steps based on payment platform
+- Middle steps based on the payment platform
 
 ## How Stripe Payment Works
 
 - Create a payment intent
 - Send payment intent to frontend and generate UI
-- Complete payment from frontend and wait from webhook on backend
+- Complete payment from frontend and wait from webhook on back-end
 - On webhook, verify payment intent and complete payment
 
 ## How to test stripe payments locally
@@ -76,15 +76,16 @@ In the above snippet you can see the routes for workers are nested inside projec
 - Stripe login: `stripe login`
 - Listen to webhooks in local: `stripe listen --forward-to localhost:3000/api/webhook/stripe`
 
-## Automatd Test cases
+## Automated Test cases
 
 - Code 1: One table called countries with name and description (Done)
-- One table called Forms with all type of fields
+- One table called Forms with all types of fields
 - One table that belongs to user
-- One table that belongs to the user and another table like state
-- One table that belongs to the user and another table like state and uses parent routes
-- Two tables with many to many relations
-- Two tables with many to many relations and both belongs to the user
+- One table belongs to the user and another table like the state
+- One table belongs to the user and another table like state and uses parent routes
+- Two tables with many-to-many relations
+- Two tables with many-to-many relations and both belong to the user
+- One table with storage.
 - One global singleton
 - One singleton to the user
 - One singleton that belongs to another table
