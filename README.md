@@ -83,10 +83,10 @@ In the above snippet, you can see the routes for workers are nested inside proje
 - CodeThree: One table that belongs to the user
 - CodeFour: One table belongs to the user and another table like the state
 - CodeFive: One table belongs to the user and another table like state and uses parent routes
-- CodeFix: Two tables with many-to-many relations
+- CodeSix: Two tables with many-to-many relations
 - CodeSeven: Two tables with many-to-many relations and both belong to the user
 - CodeEight: One table with storage.
-- CodeNineOne global singleton
+- CodeNine: One global singleton
 - CodeTen: One singleton to the user
 - CodeEleven: One singleton that belongs to another table
 - All the above tables with RBAC and without RBAC

@@ -6,5 +6,18 @@ import codeFive from './codeFive'
 import codeSix from './codeSix'
 import codeSeven from './codeSeven'
 import codeEight from './codeEight'
+import codeNine from './codeNine'
+import codeTen from './codeTen'
 
-export { codeOne, codeTwo, codeThree, codeFour, codeFive, codeSix, codeSeven, codeEight }
+export {
+  codeOne,
+  codeTwo,
+  codeThree,
+  codeFour,
+  codeFive,
+  codeSix,
+  codeSeven,
+  codeEight,
+  codeNine,
+  codeTen,
+}

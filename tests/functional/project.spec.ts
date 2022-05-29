@@ -12,6 +12,8 @@ import {
   codeSix,
   codeSeven,
   codeEight,
+  codeNine,
+  codeTen,
 } from './input'
 
 const testCases = {
@@ -23,6 +25,8 @@ const testCases = {
   codeSix,
   codeSeven,
   codeEight,
+  codeNine,
+  codeTen,
 }
 
 test.group('Project', async (group) => {
