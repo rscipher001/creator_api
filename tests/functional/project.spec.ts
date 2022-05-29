@@ -51,7 +51,7 @@ test.group('Project', async (group) => {
   })
 
   for (const [name, input] of Object.entries(testCases)) {
-    test(`Create ${name}`, async ({ client }) => {
+    test(`Create ${name}`, async ({ client, assert }) => {
       const storeResponse = await client
         .post('/api/project')
         .guard('api')
@@ -74,18 +74,20 @@ test.group('Project', async (group) => {
           shouldCheckAgain = false
           if (codeOne.generate.api.generate) {
             try {
-              await HelperService.execute('npm', ['run', 'build'], {
+              const returnCode = await HelperService.execute('npm', ['run', 'build'], {
                 cwd: body.projectInput.path,
               })
+              assert.equal(returnCode, 0)
             } catch (_) {
               throw new Error('API build is failing')
             }
           }
           if (codeOne.generate.spa.generate) {
             try {
-              await HelperService.execute('npm', ['run', 'build'], {
+              const returnCode = await HelperService.execute('npm', ['run', 'build'], {
                 cwd: body.projectInput.spaPath,
               })
+              assert.equal(returnCode, 0)
             } catch (_) {
               throw new Error('UI build is failing')
             }

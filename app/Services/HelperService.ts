@@ -45,7 +45,7 @@ class HelperService {
     options: Options = {
       stdio: 'inherit',
     }
-  ) =>
+  ): Promise<number | null> =>
     new Promise((resolve, reject) => {
       if (options) {
         options.stdio = 'inherit'
