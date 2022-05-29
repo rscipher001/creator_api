@@ -5,9 +5,9 @@
         <div class="columns">
           <div class="column px-0">
             <div class="level">
-              <div class="level-left is-size-3">Roles &amp; Permissions</div>
+              <div class="level-left is-size-5">Roles &amp; Permissions</div>
               <div class="level-right">
-                <div class="buttons">      
+                <div class="buttons">
                   <b-button tag="router-link" to="/role/create" type="is-white"
                     >New Role</b-button
                   >
@@ -95,17 +95,17 @@
 
     </section>
   </template>
-  
+
   <script>
   import { mapActions, mapState } from "vuex";
-  
+
   export default {
     name: "RbacMatrix",
-  
+
     created() {
       this.index();
     },
-  
+
     data() {
       return {
         loading: false,
@@ -115,7 +115,7 @@
         },
       };
     },
-  
+
     methods: {
       ...mapActions("role", {
         roleIndexAction: "index",
@@ -125,7 +125,7 @@
       ...mapActions("permission", {
         permissionIndexAction: "index",
       }),
-  
+
       index() {
         this.roleIndexAction({
           size: 1000,
@@ -135,11 +135,11 @@
           size: 1000,
         });
       },
-  
+
       hasPermission(role, permission) {
         return role.permissions.find((p) => p.name === permission.name);
       },
-  
+
       togglePermission(role, permission) {
         if (this.hasPermission(role, permission)) {
           this.removePermission(role, permission);
@@ -147,7 +147,7 @@
           this.addPermission(role, permission);
         }
       },
-  
+
       addPermission(role, permission) {
         this.roleAttachAction({
           id: role.id,
@@ -155,7 +155,7 @@
           relationId: permission.id,
         });
       },
-  
+
       removePermission(role, permission) {
         this.roleDetachAction({
           id: role.id,
@@ -164,7 +164,7 @@
         });
       },
     },
-  
+
     computed: {
       ...mapState("auth", {
         user: (state) => state.user,
@@ -193,4 +193,3 @@
     },
   };
   </script>
-  

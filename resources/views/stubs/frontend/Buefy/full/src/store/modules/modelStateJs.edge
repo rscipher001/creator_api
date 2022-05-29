@@ -44,25 +44,25 @@ export default {
       },
     @endif
     loading: {
-      @if(table.operations.index)
+      @if(table.operations.index && !table.singleton)
         index: false,
       @endif
       @if(table.operations.store)
         store: false,
       @endif
-      @if(table.operations.storeMany)
+      @if(table.operations.storeMany && !table.singleton)
         storeMany: false,
       @endif
       @if(table.operations.show || table.operations.edit)
         show: false,
       @endif
-      @if(table.operations.update)
+      @if(table.operations.update && !table.singleton)
         update: false,
       @endif
       @if(table.operations.destroy)
         destroy: false,
       @endif
-      @if(table.operations.destroyMany)
+      @if(table.operations.destroyMany && !table.singleton)
         destroyMany: false,
       @endif
       @if(table.relations.find((relation) => relation.type === 'ManyToMany'))
@@ -71,8 +71,10 @@ export default {
         sync: false,
       @endif
     },
-    meta: {},
-    items: [],
+    @if(!table.singleton)
+      meta: {},
+      items: [],
+    @endif
   }),
 
   getters: {},
@@ -84,7 +86,7 @@ export default {
       }
     },
 
-    @if(table.operations.index)
+    @if(table.operations.index && !table.singleton)
       async index({ state, commit }, {
         @if(hasRouteParents)
           parent,
@@ -132,7 +134,7 @@ export default {
       }) {
         commit('setLoading', { key: 'store', value: true });
         try {
-          const item = await HttpService.authPost(
+          {{{ table.singleton ? '': 'const item =' }}} await HttpService.authPost(
             `{{
               hasRouteParents ? '${HelperService.prepareRouteParent(parent)}' : ''
             }}/${state.resource}`,
@@ -143,14 +145,16 @@ export default {
             @endif
           );
           commit('setLoading', { key: 'store', value: false });
-          commit(
-            'add',
-            @if(!input.camelCaseStrategy)
-              toCamelCase(item)
-            @else
-              item
-            @endif
-          );
+          @if(!table.singleton)
+            commit(
+              'add',
+              @if(!input.camelCaseStrategy)
+                toCamelCase(item)
+              @else
+                item
+              @endif
+            );
+          @endif
         } catch (e) {
           commit('setLoading', { key: 'store', value: false });
           if (e.response && e.response.status === 422) {
@@ -161,7 +165,7 @@ export default {
       },
     @endif
 
-    @if(table.operations.storeMany)
+    @if(table.operations.storeMany && !table.singleton)
       async storeMany({ state, commit }, {
         @if(hasRouteParents)
           parent,
@@ -204,14 +208,16 @@ export default {
         @if(hasRouteParents)
           parent,
         @endif
-        id,
+        @if(!table.singleton)
+          id,
+        @endif
         filter
       }) {
         commit("setLoading", { key: "show", value: true });
         try {
           const item = await HttpService.authGet(`{{
               hasRouteParents ? '${HelperService.prepareRouteParent(parent)}' : ''
-            }}/${state.resource}/${id}`, filter);
+            }}${state.resource}/{{{ table.singleton ? '': '/${id}' }}}`, filter);
           commit("setLoading", { key: "show", value: false });
           return item;
         } catch (e) {
@@ -275,7 +281,9 @@ export default {
           await HttpService.authDelete(`{{
               hasRouteParents ? '${HelperService.prepareRouteParent(parent)}' : ''
             }}/${state.resource}/${id}`);
-          commit('remove', id);
+          @if(!table.singleton)
+            commit('remove', id);
+          @endif
           commit('setLoading', { key: 'destroy', value: false });
         } catch (e) {
           commit('setLoading', { key: 'destroy', value: false });
@@ -284,7 +292,7 @@ export default {
       },
     @endif
 
-    @if(table.operations.destroyMany)
+    @if(table.operations.destroyMany && !table.singleton)
       async destroyMany({ state, commit }, {
         @if(hasRouteParents)
           parent,
@@ -358,20 +366,20 @@ export default {
       },
     @endif
 
-    @if(table.operations.storeMany)
+    @if(table.operations.storeMany && !table.singleton)
       addMany(state, items) {
         state.items.push(...items);
       },
     @endif
 
-    @if(table.operations.destroy)
+    @if(table.operations.destroy && !table.singleton)
       remove(state, id) {
         const index = state.items.findIndex((t) => t.id === id);
         if (index !== -1) state.items.splice(index, 1);
       },
     @endif
 
-    @if(table.operations.destroyMany)
+    @if(table.operations.destroyMany && !table.singleton)
       removeMany(state, ids) {
         ids.map((id) => {
           const index = state.items.findIndex((t) => t.id === id);
@@ -380,7 +388,7 @@ export default {
       },
     @endif
 
-    @if(table.operations.update)
+    @if(table.operations.update && !table.singleton)
       replace(state, { id, item }) {
         const index = state.items.findIndex((t) => t.id === id);
         if (index !== -1) state.items.splice(index, 1, item);

@@ -311,7 +311,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     }
   @endif
 
-  @if(table.operations.storeMany)
+  @if(table.operations.storeMany && !table.singleton)
     {{--  Returns CSV template  --}}
     public async csvTemplate({ response }: HttpContextContract) {
       const content = [
@@ -560,7 +560,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
     }
   @endif
 
-  @if(table.operations.destroy)
+  @if(table.operations.destroy && !table.singleton)
     public async destroy({
       @if (!table.singleton || table.routeParentRelations.length)
         request,

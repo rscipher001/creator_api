@@ -38,16 +38,14 @@
     }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.show');
   @endif
 @endif
-@if(table.operations.update)~
-  @if(!table.singleton)
-    Route.put('{{
-      table.routeParentRelations.length ? table.routeParentRelations.map(
-        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
-      ).join('') : ''
-    }}/{{
-      table.names.camelCase
-    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update');
-  @endif
+@if(table.operations.update && !table.singleton)~
+  Route.put('{{
+    table.routeParentRelations.length ? table.routeParentRelations.map(
+      parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+    ).join('') : ''
+  }}/{{
+    table.names.camelCase
+  }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update');
 @endif
 @if(table.operations.destroy)~
   @if(table.singleton)
@@ -68,7 +66,7 @@
     }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.destroy');
   @endif
 @endif
-@if(table.operations.storeMany)
+@if(table.operations.storeMany && !table.singleton)
   Route.post('{{
     table.routeParentRelations.length ? table.routeParentRelations.map(
       parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
@@ -77,7 +75,7 @@
     table.names.camelCase
   }}/store/many', 'API/{{ table.names.pascalCasePlural }}Controller.storeMany');
 @endif
-@if(table.operations.destroyMany)
+@if(table.operations.destroyMany && !table.singleton)
   Route.post('{{
     table.routeParentRelations.length ? table.routeParentRelations.map(
       parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`

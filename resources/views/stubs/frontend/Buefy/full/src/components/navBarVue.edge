@@ -1,5 +1,5 @@
 <template>
-  <b-navbar type="is-primary">
+  <b-navbar type="is-light">
     <template #brand>
       <b-navbar-item tag="router-link" :to="{ path: '/' }">
         <img src="@/assets/logo.png" alt="{{ input.name }}">
@@ -22,9 +22,9 @@
       </b-navbar-item>
       <b-navbar-dropdown label="Pages">
         @if(!auth)
-        {{--  Generate links for all resources who doesn't have route parent  --}}
+        {{--  Generate links for all resources which doesn't have route parent  --}}
           @each(table in input.tables.concat([input.auth.table]).filter(t => t.routeParentRelations.length === 0))
-            @if(table.operations.index)
+            @if(table.operations.index && !table.singleton)
               <b-navbar-item
                 @if(input.rbac.enabled)
                   v-if="authorize('{{ table.names.camelCase }}:index')"
@@ -32,7 +32,7 @@
                 tag="router-link"
                 :to="{ path: '/{{ table.names.camelCase }}' }"
               >
-                {{ table.names.pascalCase }} List
+                {{ capitalCase(noCase(table.names.pascalCase)) }} List
               </b-navbar-item>
             @endif
             @if(table.operations.create)
@@ -43,7 +43,7 @@
                 tag="router-link"
                 :to="{ path: '/{{ table.names.camelCase }}/create' }"
               >
-                Create {{ table.names.pascalCase }}
+                {{ table.singleton ? '': 'Create ' }}{{ capitalCase(noCase(table.names.pascalCase)) }}
               </b-navbar-item>
             @endif
           @endeach

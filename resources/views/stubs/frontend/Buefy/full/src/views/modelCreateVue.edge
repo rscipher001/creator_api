@@ -24,11 +24,21 @@
       <div class="columns">
         <div class="column px-0">
           <div class="level">
-            <div class="level-left is-size-3">@{{ editMode.enabled ? 'Update' : 'Create' }} {{
+            <div class="level-left is-size-5">@{{ editMode.enabled ? 'Update' : 'Create' }} {{
               capitalCase(table.names.pascalCase)
             }}</div>
             <div class="level-right">
-              <b-button @click="list" type="is-white">Back</b-button>
+              @if(table.singleton)
+                <b-button
+                  type="secondary"
+                  tag="router-link"
+                  :to="{ path: '/dashboard' }"
+                >
+                  Dashboard
+                </b-button>
+              @else
+                <b-button @click="list" type="is-white">Back</b-button>
+              @endif
             </div>
           </div>
         </div>
@@ -38,7 +48,11 @@
     <div class="section py-4">
       <div class="columns box">
         <div class="column">
-          <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
+          @if(table.singleton)
+            <form method="POST" @submit.prevent="store">
+          @else
+            <form method="POST" @submit.prevent="editMode.enabled ? update() : store()">
+          @endif
             @each(column in exposedColumns)
             @if(column.type === 'String')
             <b-field
@@ -312,41 +326,45 @@ export default {
     )
       this.{{ relation.modelNames.camelCase }}Index();
     @endeach
-    if (this.$route.params.id) {
-      const id = parseInt(this.$route.params.id, 10);
-      this.editMode.enabled = true;
-      this.editMode.id = id;
-      @if(table.columns.find(column => column.type !== 'File') || hasM2MRelationOnCreatePage)
-        @if(hasM2MRelationOnCreatePage)
-          this.show();
-        @else
-          const {{ table.names.camelCase }} = this.{{
-            table.names.camelCasePlural
-          }}.find((t) => t.id === id);
-          if (!{{ table.names.camelCase }}) {
-            return this.show();
-          }
-          @each(column in exposedColumns.filter(c =>!c.secret && c.type !== 'File'))~
-            @if(column.type === 'Date')
-              this.form.{{ column.names.camelCase }} = new Date({{
+    @if(table.singleton)
+      return this.show();
+    @else
+      if (this.$route.params.id) {
+        const id = parseInt(this.$route.params.id, 10);
+        this.editMode.enabled = true;
+        this.editMode.id = id;
+        @if(table.columns.find(column => column.type !== 'File') || hasM2MRelationOnCreatePage)
+          @if(hasM2MRelationOnCreatePage)
+            this.show();
+          @else
+            const {{ table.names.camelCase }} = this.{{
+              table.names.camelCasePlural
+            }}.find((t) => t.id === id);
+            if (!{{ table.names.camelCase }}) {
+              return this.show();
+            }
+            @each(column in exposedColumns.filter(c =>!c.secret && c.type !== 'File'))~
+              @if(column.type === 'Date')
+                this.form.{{ column.names.camelCase }} = new Date({{
+                  table.names.camelCase
+                }}.{{ column.names.camelCase }});
+              @else
+                this.form.{{ column.names.camelCase }} = {{
+                  table.names.camelCase
+                }}.{{ column.names.camelCase }};
+              @endif
+            @endeach
+            @each(relation in nonAuthBelongsToRelations.filter(
+              r => !routeParentColumns.includes('{{ r.names.camelCase }}Id'))
+            )
+              this.form.{{ relation.names.camelCase }}Id = {{
                 table.names.camelCase
-              }}.{{ column.names.camelCase }});
-            @else
-              this.form.{{ column.names.camelCase }} = {{
-                table.names.camelCase
-              }}.{{ column.names.camelCase }};
-            @endif
-          @endeach
-          @each(relation in nonAuthBelongsToRelations.filter(
-            r => !routeParentColumns.includes('{{ r.names.camelCase }}Id'))
-          )
-            this.form.{{ relation.names.camelCase }}Id = {{
-              table.names.camelCase
-            }}.{{ relation.names.camelCase }}Id;
-          @endeach
+              }}.{{ relation.names.camelCase }}Id;
+            @endeach
+          @endif
         @endif
-      @endif
-    }
+      }
+    @endif
   },
 
   data() {
@@ -390,7 +408,9 @@ export default {
     ...mapActions('{{ table.names.camelCase }}', {
       showAction: 'show',
       storeAction: 'store',
-      updateAction: 'update',
+      @if(!table.singleton)
+        updateAction: 'update',
+      @endif
     }),
     @each(relation in nonAuthBelongsToRelations)
       ...mapActions("{{ relation.modelNames.camelCase }}", {
@@ -431,7 +451,11 @@ export default {
         }
         @endif
         await this.storeAction({ parent: this.parent, input });
-        this.list();
+        @if(table.singleton)
+          this.show();
+        @else
+          this.list();
+        @endif
         this.$buefy.toast.open({
           message: '{{ capitalCase(table.names.pascalCase) }} created',
           position: 'is-bottom-right',
@@ -454,8 +478,13 @@ export default {
     },
 
     async show() {
+        @if(table.singleton)
+          this.editMode.enabled = true;
+        @endif
       const item = await this.showAction({
-        id: this.editMode.id,
+          @if(table.singleton)
+            id: this.editMode.id,
+          @endif
         @if(hasM2MRelationOnCreatePage)
           @set('relationNames', table.relations.filter(
             r => r.type === 'ManyToMany' && r.showInputOnCreatePage
@@ -488,55 +517,57 @@ export default {
       @endif
     },
 
-    async update() {
-      try {
-        @if(table.columns.find(column => column.type === 'File'))
-          const input = this.prepareRequestBody();
-        @else
-        const input = {
-          @each(column in exposedColumns)
-            {{ column.names.camelCase }}: this.form.{{
-              column.names.camelCase
-            }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
-          @endeach
-          @each(relation in nonAuthBelongsToRelations)
-            {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
-          @endeach
-          @each(relation in table.relations.filter(
-            r => r.type === 'ManyToMany' && r.showInputOnCreatePage
-          ))
-            {{ relation.names.camelCase }}Ids: this.form.{{
-              relation.names.camelCasePlural
-            }}.map(({ id }) => id),
-          @endeach
+    @if(table.singleton)
+      async update() {
+        try {
+          @if(table.columns.find(column => column.type === 'File'))
+            const input = this.prepareRequestBody();
+          @else
+          const input = {
+            @each(column in exposedColumns)
+              {{ column.names.camelCase }}: this.form.{{
+                column.names.camelCase
+              }}{{ column.type === 'Date' ? '.toISOString()' : ''}},
+            @endeach
+            @each(relation in nonAuthBelongsToRelations)
+              {{ relation.names.camelCase }}Id: this.form.{{ relation.names.camelCase }}Id,
+            @endeach
+            @each(relation in table.relations.filter(
+              r => r.type === 'ManyToMany' && r.showInputOnCreatePage
+            ))
+              {{ relation.names.camelCase }}Ids: this.form.{{
+                relation.names.camelCasePlural
+              }}.map(({ id }) => id),
+            @endeach
+          }
+          @endif
+          await this.updateAction({
+            parent: this.parent,
+            id: this.editMode.id,
+            input: input,
+          });
+          this.list();
+          this.$buefy.toast.open({
+            message: '{{ sentenceCase(table.names.pascalCase) }} updated',
+            position: 'is-bottom-right',
+            type: 'is-success'
+          });
+        } catch (e) {
+          let message = 'Unable to update {{ noCase(table.names.pascalCase) }}';
+          if (e instanceof ValidationException) {
+            this.errors = e.errors;
+            message = 'Validation failed';
+          } else {
+            console.error(e);
+          }
+          this.$buefy.toast.open({
+            message,
+            type: 'is-danger',
+            position: 'is-bottom-right',
+          });
         }
-        @endif
-        await this.updateAction({
-          parent: this.parent,
-          id: this.editMode.id,
-          input: input,
-        });
-        this.list();
-        this.$buefy.toast.open({
-          message: '{{ sentenceCase(table.names.pascalCase) }} updated',
-          position: 'is-bottom-right',
-          type: 'is-success'
-        });
-      } catch (e) {
-        let message = 'Unable to update {{ noCase(table.names.pascalCase) }}';
-        if (e instanceof ValidationException) {
-          this.errors = e.errors;
-          message = 'Validation failed';
-        } else {
-          console.error(e);
-        }
-        this.$buefy.toast.open({
-          message,
-          type: 'is-danger',
-          position: 'is-bottom-right',
-        });
-      }
-    },
+      },
+    @endif
 
     @if(table.columns.find(column => column.type === 'File'))
       prepareRequestBody (){
@@ -595,14 +626,16 @@ export default {
       },
     @endif
 
-    list() {
-      @if(hasRouteParents)
-        const url = `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}`;
-      @else
-        const url = `/{{ table.names.camelCase }}`;
-      @endif
-      this.$router.push(url);
-    },
+    @if(!table.singleton)
+      list() {
+        @if(hasRouteParents)
+          const url = `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}`;
+        @else
+          const url = `/{{ table.names.camelCase }}`;
+        @endif
+        this.$router.push(url);
+      },
+    @endif
 
     @each(relation in table.relations.filter(
       r => r.type === 'ManyToMany' && r.showInputOnCreatePage
