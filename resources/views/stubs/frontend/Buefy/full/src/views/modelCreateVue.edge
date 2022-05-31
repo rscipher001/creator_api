@@ -305,7 +305,7 @@
 </template>
 <script>
 import { mapState, mapActions } from 'vuex';
-@if(hasRouteParents)
+@if(hasRouteParents && ! table.singleton)
   import HelperService from "../services/helper.service";
 @endif
 import ValidationException from '../exceptions/ValidationException';
@@ -483,6 +483,9 @@ export default {
         @endif
       const item = await this.showAction({
           @if(table.singleton)
+            @if(Array.isArray(table.routeParentRelations) && table.routeParentRelations.length)
+              parent: this.parent,
+            @endif
             id: this.editMode.id,
           @endif
         @if(hasM2MRelationOnCreatePage)

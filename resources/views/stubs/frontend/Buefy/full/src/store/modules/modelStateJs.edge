@@ -217,7 +217,7 @@ export default {
         try {
           const item = await HttpService.authGet(`{{
               hasRouteParents ? '${HelperService.prepareRouteParent(parent)}' : ''
-            }}${state.resource}/{{{ table.singleton ? '': '/${id}' }}}`, filter);
+            }}/${state.resource}/{{{ table.singleton ? '': '/${id}' }}}`, filter);
           commit("setLoading", { key: "show", value: false });
           return item;
         } catch (e) {

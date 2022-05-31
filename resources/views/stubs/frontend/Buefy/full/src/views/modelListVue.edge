@@ -300,15 +300,26 @@
                 </b-dropdown-item>
               @endif
               @each(childTable in routeChildren)
-                <b-dropdown-item
-                  @if(input.rbac.enabled)
-                    v-if="authorize('{{ childTable.names.camelCase }}:index')"
-                  @endif
-                  aria-role="listitem"
-                  @click="list{{ childTable.names.pascalCasePlural }}(props.row.id)"
-                >
-                  List {{ noCase(childTable.names.camelCase) }}
-                </b-dropdown-item>
+                @if(childTable.singleton)
+                  <b-dropdown-item
+                    @if(input.rbac.enabled)
+                      v-if="authorize('{{ childTable.names.camelCase }}:create')"
+                    @endif
+                    @click="{{ childTable.names.pascalCase }}(props.row.id)"
+                  >
+                    {{ noCase(childTable.names.camelCase) }}
+                  </b-dropdown-item>
+                @else
+                  <b-dropdown-item
+                    @if(input.rbac.enabled)
+                      v-if="authorize('{{ childTable.names.camelCase }}:index')"
+                    @endif
+                    aria-role="listitem"
+                    @click="list{{ childTable.names.pascalCasePlural }}(props.row.id)"
+                  >
+                    List {{ noCase(childTable.names.camelCase) }}
+                  </b-dropdown-item>
+                @endif
               @endeach
             </b-dropdown>
           </b-table-column>
@@ -557,13 +568,23 @@ export default {
     @endif
 
     @each(childTable in routeChildren)
-      list{{ childTable.names.pascalCasePlural }}({{ table.names.camelCase }}Id) {
-        const parent = {
-          {{ table.names.camelCase }}Id,
-        };
-        const url = `${HelperService.prepareRouteParent(parent)}/{{ childTable.names.camelCase }}`;
-        this.$router.push(url);
-      },
+      @if(table.singleton)
+        {{ childTable.names.pascalCase }}({{ table.names.camelCase }}Id) {
+          const parent = {
+            {{ table.names.camelCase }}Id,
+          };
+          const url = `${HelperService.prepareRouteParent(parent)}/{{ childTable.names.camelCase }}/create`;
+          this.$router.push(url);
+        },
+      @else
+        list{{ childTable.names.pascalCasePlural }}({{ table.names.camelCase }}Id) {
+          const parent = {
+            {{ table.names.camelCase }}Id,
+          };
+          const url = `${HelperService.prepareRouteParent(parent)}/{{ childTable.names.camelCase }}`;
+          this.$router.push(url);
+        },
+      @endif
     @endeach
   },
 
