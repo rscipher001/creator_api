@@ -54,15 +54,17 @@ test.group('Project', async (group) => {
 
   databases.forEach((database) => {
     for (const [name, input] of Object.entries(testCases)) {
+      input.database = database
+      // Don't generate UI for other databases
+      if (database !== databases[0]) {
+        input.generate.spa.generate = false
+      }
       test(`Create ${name}`, async ({ client, assert }) => {
         const storeResponse = await client
           .post('/api/project')
           .guard('api')
           .loginAs(user as never)
-          .json({
-            ...input,
-            ...{ database },
-          })
+          .json(input)
 
         storeResponse.assertStatus(200)
         const projectId: number = storeResponse.body().id
