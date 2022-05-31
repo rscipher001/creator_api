@@ -305,9 +305,9 @@
                     @if(input.rbac.enabled)
                       v-if="authorize('{{ childTable.names.camelCase }}:create')"
                     @endif
-                    @click="{{ childTable.names.pascalCase }}(props.row.id)"
+                    @click="create{{ childTable.names.pascalCase }}(props.row.id)"
                   >
-                    {{ noCase(childTable.names.camelCase) }}
+                    {{ capitalCase(noCase(childTable.names.camelCase)) }}
                   </b-dropdown-item>
                 @else
                   <b-dropdown-item
@@ -568,8 +568,8 @@ export default {
     @endif
 
     @each(childTable in routeChildren)
-      @if(table.singleton)
-        {{ childTable.names.pascalCase }}({{ table.names.camelCase }}Id) {
+      @if(childTable.singleton)
+        create{{ childTable.names.pascalCase }}({{ table.names.camelCase }}Id) {
           const parent = {
             {{ table.names.camelCase }}Id,
           };
