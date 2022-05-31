@@ -29,6 +29,8 @@ const testCases = {
   codeTen,
 }
 
+const databases = ['MySQL', 'PostgreSQL', 'SQLite', 'MSSQL', 'OracleDB']
+
 test.group('Project', async (group) => {
   Logger.info('Started testing project')
   const user = await User.findByOrFail('email', 'john@example.com')
@@ -50,51 +52,56 @@ test.group('Project', async (group) => {
     })
   })
 
-  for (const [name, input] of Object.entries(testCases)) {
-    test(`Create ${name}`, async ({ client, assert }) => {
-      const storeResponse = await client
-        .post('/api/project')
-        .guard('api')
-        .loginAs(user as never)
-        .json(input)
-
-      storeResponse.assertStatus(200)
-      const projectId: number = storeResponse.body().id
-
-      let shouldCheckAgain = true
-      while (shouldCheckAgain) {
-        const showResponse = await client
-          .get(`/api/project/${projectId}`)
+  databases.forEach((database) => {
+    for (const [name, input] of Object.entries(testCases)) {
+      test(`Create ${name}`, async ({ client, assert }) => {
+        const storeResponse = await client
+          .post('/api/project')
           .guard('api')
           .loginAs(user as never)
+          .json({
+            ...input,
+            ...{ database },
+          })
 
-        const body = showResponse.body()
-        if (body.status === 'failed') throw new Error('Project creation failed')
-        if (body.status === 'done') {
-          shouldCheckAgain = false
-          if (codeOne.generate.api.generate) {
-            try {
-              const returnCode = await HelperService.execute('npm', ['run', 'build'], {
-                cwd: body.projectInput.path,
-              })
-              assert.equal(returnCode, 0)
-            } catch (_) {
-              throw new Error('API build is failing')
+        storeResponse.assertStatus(200)
+        const projectId: number = storeResponse.body().id
+
+        let shouldCheckAgain = true
+        while (shouldCheckAgain) {
+          const showResponse = await client
+            .get(`/api/project/${projectId}`)
+            .guard('api')
+            .loginAs(user as never)
+
+          const body = showResponse.body()
+          if (body.status === 'failed') throw new Error('Project creation failed')
+          if (body.status === 'done') {
+            shouldCheckAgain = false
+            if (codeOne.generate.api.generate) {
+              try {
+                const returnCode = await HelperService.execute('npm', ['run', 'build'], {
+                  cwd: body.projectInput.path,
+                })
+                assert.equal(returnCode, 0)
+              } catch (_) {
+                throw new Error('API build is failing')
+              }
             }
-          }
-          if (codeOne.generate.spa.generate) {
-            try {
-              const returnCode = await HelperService.execute('npm', ['run', 'build'], {
-                cwd: body.projectInput.spaPath,
-              })
-              assert.equal(returnCode, 0)
-            } catch (_) {
-              throw new Error('UI build is failing')
+            if (codeOne.generate.spa.generate) {
+              try {
+                const returnCode = await HelperService.execute('npm', ['run', 'build'], {
+                  cwd: body.projectInput.spaPath,
+                })
+                assert.equal(returnCode, 0)
+              } catch (_) {
+                throw new Error('UI build is failing')
+              }
             }
+            showResponse.assertStatus(200)
           }
-          showResponse.assertStatus(200)
         }
-      }
-    }).timeout(600000)
-  }
+      }).timeout(600000)
+    }
+  })
 })
