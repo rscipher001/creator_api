@@ -520,7 +520,7 @@ export default {
       @endif
     },
 
-    @if(table.singleton)
+    @if(!table.singleton)
       async update() {
         try {
           @if(table.columns.find(column => column.type === 'File'))
