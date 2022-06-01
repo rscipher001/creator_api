@@ -484,7 +484,7 @@ export default class Project extends BaseModel {
      * It will allow CI to run migrations and tests
      */
     if (Env.get('NODE_ENV') === 'test') {
-      this.projectInput.hosting.databaseName = `${this.projectInput.names.camelCase}${this.projectInput.id}`
+      this.projectInput.hosting.databaseName = `db${this.projectInput.id}`
       this.projectInput.hosting.databaseUser = 'ci'
       this.projectInput.hosting.databasePassword = 'secret'
     }
