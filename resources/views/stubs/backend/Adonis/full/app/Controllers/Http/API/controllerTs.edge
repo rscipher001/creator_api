@@ -383,7 +383,7 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.show)
     public async show({
-      @if(hasRelations)
+      @if(hasRelations || !table.singleton)
         request,
       @endif
       @if(belongsToAuth || routeParentBelongsToAuth)
