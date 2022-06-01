@@ -168,6 +168,7 @@ export default class MailerGenerator {
     await this.updateAceManifestJson()
     await this.updateDotEnv('.env')
     await this.updateDotEnv('.env.example')
+    await this.updateDotEnv('.env.test')
     await this.updateEnvTs()
 
     // Copy config, contracts, etc

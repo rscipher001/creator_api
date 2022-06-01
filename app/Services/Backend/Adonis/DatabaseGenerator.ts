@@ -200,6 +200,7 @@ export default class DatabaseGenerator {
     }
     await this.updateDotEnv('.env')
     await this.updateDotEnv('.env.example')
+    await this.updateDotEnv('.env.test')
     await this.updateEnvTs()
     await this.createConfigDatabaseTs()
     await mkdirp(`${this.input.path}/database/factories`)

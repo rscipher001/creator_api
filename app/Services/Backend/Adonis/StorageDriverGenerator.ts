@@ -139,6 +139,7 @@ export default class StorageDriverGenerator {
     await this.updateTsconfigJson()
     await this.updateDotEnv('.env')
     await this.updateDotEnv('.env.example')
+    await this.updateDotEnv('.env.test')
     await this.updateEnvTs()
     await HelperService.execute('node', ['ace', 'generate:manifest'], {
       cwd: this.input.path,
