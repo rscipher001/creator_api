@@ -87,6 +87,14 @@ test.group('Project', async (group) => {
                   cwd: body.projectInput.path,
                 })
                 assert.equal(buildReturnCode, 0)
+                const migrationReturnCode = await HelperService.execute(
+                  'node',
+                  ['ace', 'migration:run'],
+                  {
+                    cwd: body.projectInput.path,
+                  }
+                )
+                assert.equal(migrationReturnCode, 0)
                 const testReturnCode = await HelperService.execute('npm', ['test'], {
                   cwd: body.projectInput.path,
                 })

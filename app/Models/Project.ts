@@ -478,6 +478,16 @@ export default class Project extends BaseModel {
       databaseUser: `${this.projectInput.names.camelCase}`,
       databasePassword: `${this.projectInput.names.camelCase}`,
     }
+    /**
+     * Override values for test env
+     * @see .github/workflows/run_integratio_tests.yml
+     * It will allow CI to run migrations and tests
+     */
+    if (Env.get('NODE_ENV') === 'test') {
+      this.projectInput.hosting.databaseName = `${this.projectInput.names.camelCase}${this.projectInput.id}`
+      this.projectInput.hosting.databaseUser = 'ci'
+      this.projectInput.hosting.databasePassword = 'secret'
+    }
   }
 
   protected prepareTenantSettings() {
