@@ -155,7 +155,7 @@ export default class AuthGenerator {
     const exists = await HelperService.fileExists(path)
     if (!exists) {
       const content = await View.render(
-        `stubs/frontend/${this.input.tech.frontend}/full/src/views/VerifyEmailVue`
+        `stubs/frontend/${this.input.tech.frontend}/full/src/views/VerifyEmailView`
       )
       await HelperService.writeFile(path, content)
     }
