@@ -95,7 +95,7 @@ export default class CRUDGenerator {
       }
     }
 
-    if (table.operations.storeMany) {
+    if (table.operations.storeMany && !table.singleton) {
       const filePath = `${this.input.path}/app/Validators/StoreMany${table.names.pascalCase}Validator.ts`
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {
@@ -110,7 +110,7 @@ export default class CRUDGenerator {
       }
     }
 
-    if (table.operations.update) {
+    if (table.operations.update && !table.singleton) {
       const filePath = `${this.input.path}/app/Validators/Update${table.names.pascalCase}Validator.ts`
       const fileExists = await HelperService.fileExists(filePath)
       if (!fileExists) {

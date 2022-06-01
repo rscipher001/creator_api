@@ -29,7 +29,8 @@ const testCases = {
   codeTen,
 }
 
-const databases = ['MySQL', 'PostgreSQL', 'SQLite', 'MSSQL', 'OracleDB']
+const databases = ['MySQL']
+// const databases = ['MySQL', 'PostgreSQL', 'SQLite', 'MSSQL', 'OracleDB']
 
 test.group('Project', async (group) => {
   Logger.info('Started testing project')
@@ -82,10 +83,14 @@ test.group('Project', async (group) => {
             shouldCheckAgain = false
             if (codeOne.generate.api.generate) {
               try {
-                const returnCode = await HelperService.execute('npm', ['run', 'build'], {
+                const buildReturnCode = await HelperService.execute('npm', ['run', 'build'], {
                   cwd: body.projectInput.path,
                 })
-                assert.equal(returnCode, 0)
+                assert.equal(buildReturnCode, 0)
+                const testReturnCode = await HelperService.execute('npm', ['test'], {
+                  cwd: body.projectInput.path,
+                })
+                assert.equal(testReturnCode, 0)
               } catch (_) {
                 throw new Error('API build is failing')
               }

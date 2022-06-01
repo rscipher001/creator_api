@@ -22,7 +22,7 @@ import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }
   import {{ model }} from 'App/Models/{{ model }}';
 @endeach
 {{--  Required for loading relations  --}}
-@if((table.operations.index || table.operations.show ) && hasRelations && !table.singleton)
+@if((table.operations.index || table.operations.show) && hasRelations)
   import { ExtractModelRelations } from '@ioc:Adonis/Lucid/Orm'
 @endif
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
@@ -42,7 +42,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
     }}Validator from 'App/Validators/Update{{ table.names.pascalCase }}Validator';
   @endif
 @endif
-@if(table.operations.storeMany)
+@if(table.operations.storeMany && !table.singleton)
   import StoreMany{{
     table.names.pascalCase
   }}Validator from 'App/Validators/StoreMany{{ table.names.pascalCase }}Validator';
@@ -383,7 +383,9 @@ export default class {{ table.names.pascalCasePlural }}Controller {
 
   @if(table.operations.show)
     public async show({
-      request,
+      @if(hasRelations)
+        request,
+      @endif
       @if(belongsToAuth || routeParentBelongsToAuth)
         auth,
       @endif
