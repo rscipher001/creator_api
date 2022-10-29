@@ -1,0 +1,642 @@
+@set('hasRouteParents', table.routeParentRelations.length)
+@set('fileColumns', table.columns.filter(c => c.type === 'File'))
+@set('fileColumnsLastIndex', fileColumns.length - 1)
+@set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
+@set(
+  'nonAuthBelongsToRelations',
+  table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth')
+)
+@set(
+  'hasM2MRelationOnCreatePage',
+  table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage)
+)
+@set('routeParentColumns', table.routeParentRelations.map(r => `${r.names.camelCase}Id`))
+@set('effectiveRouteParent', null)
+@set('effectiveRouteParentColumn', null)
+@if(Array.isArray(table.routeParentRelations) && table.routeParentRelations.length)
+  @set('effectiveRouteParent', table.routeParentRelations[table.routeParentRelations.length - 1])
+  @set('effectiveRouteParentColumn', `${effectiveRouteParent.names.camelCase}Id`)
+@endif
+@if(fileColumns.length)
+  import 'dart:io';
+  import 'package:path/path.dart' as path;
+
+  import 'package:file_picker/file_picker.dart';
+@endif
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:app/components/global/my_drawer.dart';
+import 'package:app/exceptions/validation.exception.dart';
+@set('classPrefix', useAliasForClass ? `${table.names.snakeCase}_models.` : '')
+@if(useAliasForClass)
+  import 'package:app/models/{{ table.names.camelCase }}.model.dart' as {{ table.names.snakeCase }}_models;
+@else
+  import 'package:app/models/{{ table.names.camelCase }}.model.dart';
+@endif
+import 'package:app/state/{{ table.names.snakeCase }}_edit.state.dart';
+import 'package:app/services/{{ table.names.snakeCase }}.service.dart' as {{ table.names.snakeCase }}_service;
+@if(table.columns.find(c => c.type === 'Date'))
+  import 'package:validators/validators.dart';
+@endif
+@each(relation in nonAuthBelongsToRelations)
+  @set('relationModel', findRelationModel(input, relation))
+  @set('parentRelation', null)
+  @set('parentRelationColumn', null)
+  {{--  If table has parent relation then prepare variable for it  --}}
+  @if(table.routeParentRelations.length)
+    @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+    @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+  @endif
+  import 'package:app/state/{{ relationModel.names.snakeCase }}_index.state.dart';
+@endeach
+
+class {{ table.names.pascalCase }}Create extends StatefulWidget {
+  const {{ table.names.pascalCase }}Create({Key? key}) : super(key: key);
+
+  @override
+  _{{ table.names.pascalCase }}CreateState createState() => _{{ table.names.pascalCase }}CreateState();
+}
+
+class _{{ table.names.pascalCase }}CreateState extends State<{{ table.names.pascalCase }}Create> {
+  bool editMode = false;
+  var _autoValidateMode = AutovalidateMode.disabled;
+  var _isLoading = false;
+  final _{{ table.names.camelCase }}CreateKey = GlobalKey<FormState>();
+  Map<String, List<String>> _validationErrors = {};
+
+  {{--  Dropdown value holders  --}}
+  @each(column in exposedColumns)
+    @if(['String', 'Integer', 'Decimal'].includes(column.type))
+      @if(column.input?.type === 'Select')
+        {{
+          column.type === 'String'
+              ? 'String'
+              : column.type === 'Integer'
+                  ? 'int'
+                  : 'double'
+         }}? selected{{ column.names.pascalCase }};
+        final {{ column.names.camelCasePlural }} = [
+        @set('quote', column.type === 'String' ? "'" : '')
+        @each(option in column.input?.select.options)
+          @if(option.value)
+            {
+              'label': '{{ option.label }}',
+              'value': {{{ quote }}}{{ option.value }}{{{ quote }}},
+            },
+          @else
+            {{{ quote }}}{{ option }}{{{ quote }}},
+          @endif
+        @endeach
+        ];
+      @endif
+    @elseif(column.type === 'Boolean')
+      bool {{ column.names.camelCase }} = false;
+    @endif
+  @endeach
+  @each(relation in nonAuthBelongsToRelations)
+    @set('relationModel', findRelationModel(input, relation))
+    @set('parentRelation', null)
+    @set('parentRelationColumn', null)
+    {{--  If table has parent relation then prepare variable for it  --}}
+    @if(table.routeParentRelations.length)
+      @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+      @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+    @endif
+    int? selected{{ relation.names.pascalCase }}Id;
+  @endeach
+
+  @each(column in exposedColumns)~
+    @if(column.type === 'String' && ['Input', 'Select'].includes(column.input?.type))
+      FocusNode? _{{ column.names.camelCase }}Focus;
+    @elseif(['Integer', 'Decimal'].includes(column.type))
+      FocusNode? _{{ column.names.camelCase }}Focus;
+    @elseif(column.type === 'Date')
+      FocusNode? _{{ column.names.camelCase }}Focus;
+    @endif
+  @endeach
+  @each(relation in nonAuthBelongsToRelations)
+    @set('relationModel', findRelationModel(input, relation))
+    @set('parentRelation', null)
+    @set('parentRelationColumn', null)
+    {{--  If table has parent relation then prepare variable for it  --}}
+    @if(table.routeParentRelations.length)
+      @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+      @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+    @endif
+    FocusNode? _{{ relation.names.camelCase }}Focus;
+  @endeach
+
+  @each(column in exposedColumns)~
+    @if(['String', 'Integer', 'Decimal'].includes(column.type) && column.input?.type === 'Input')
+      final _{{ column.names.camelCase }}Controller = TextEditingController();
+    @elseif(column.type === 'Date')
+      final _{{ column.names.camelCase }}Controller = TextEditingController();
+    @endif
+  @endeach
+
+  @each(column in exposedColumns.filter(c => c.type === 'File'))
+    File? _{{ column.names.camelCase }};
+    String? _{{ column.names.camelCase }}Path;
+  @endeach
+
+  @override
+  void initState() {
+    editMode = context.read<{{ table.names.pascalCase }}EditState>().editMode;
+    if (editMode) {
+      final {{ table.names.camelCase }} = context.read<{{ table.names.pascalCase }}EditState>().{{ table.names.camelCase }}!;
+      @each(column in exposedColumns)
+        @if(column.type === 'Boolean')
+          @if(column.meta.required)
+            {{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }};
+          @else
+            if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
+              {{ column.names.camelCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}!;
+            }
+          @endif
+        @elseif(column.type === 'Date')
+          @if(column.meta.required)
+            _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }};
+          @else
+            if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
+              _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }}!;
+            }
+          @endif
+        @elseif(['String', 'Integer', 'Decimal'].includes(column.type))
+          @if(column.input?.type === 'Select')
+            @if(column.meta.required)
+              selected{{ column.names.pascalCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }};
+            @else
+              if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
+                selected{{ column.names.pascalCase }} = {{ table.names.camelCase }}.{{ column.names.camelCase }}!;
+              }
+            @endif
+          @else
+            @if(column.meta.required)
+            _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }};
+            @else
+              if ({{ table.names.camelCase }}.{{ column.names.camelCase }} != null) {
+                _{{ column.names.camelCase }}Controller.text = {{ table.names.camelCase }}.{{ column.names.camelCase }}!;
+               }
+            @endif
+          @endif
+        @endif
+      @endeach
+    }
+    @each(column in exposedColumns)~
+      @if(column.type === 'String' && column.input?.type === 'Input')
+        _{{ column.names.camelCase }}Focus = FocusNode();
+      @elseif(['Integer', 'Decimal'].includes(column.type))
+        _{{ column.names.camelCase }}Focus = FocusNode();
+      @elseif(column.type === 'Date')
+        _{{ column.names.camelCase }}Focus = FocusNode();
+      @endif
+    @endeach
+    @each(relation in nonAuthBelongsToRelations)
+      @set('relationModel', findRelationModel(input, relation))
+      @set('parentRelation', null)
+      @set('parentRelationColumn', null)
+      {{--  If table has parent relation then prepare variable for it  --}}
+      @if(table.routeParentRelations.length)
+        @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+        @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+      @endif
+      _{{ relation.names.camelCase }}Focus = FocusNode();
+    @endeach
+    super.initState();
+  }
+
+  Future store{{ table.names.pascalCase }}() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _validationErrors = {};
+      });
+
+      if (!_{{ table.names.camelCase }}CreateKey.currentState!.validate()) {
+        return setState(() {
+          _isLoading = false;
+          _autoValidateMode = AutovalidateMode.always;
+        });
+      }
+
+      final {{ table.names.camelCase }} = {{ classPrefix }}{{ table.names.pascalCase }}(
+        @each(column in exposedColumns)
+          @if (column.type === 'File')
+            {{--  Map<String, String>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
+          @elseif(column.type === 'Date')
+            {{ column.names.camelCase }}: DateTime.parse(_{{ column.names.camelCase }}Controller.text.split('/').reversed.join('-')),
+          @elseif(column.type === 'Decimal')
+            @if(column.input?.type === 'Select')
+              {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
+            @else
+              {{ column.names.camelCase }}: double.parse(_{{ column.names.camelCase }}Controller.text),
+            @endif
+          @elseif(column.type === 'Integer')
+            @if(column.input?.type === 'Select')
+              {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
+            @else
+              {{ column.names.camelCase }}: int.parse(_{{ column.names.camelCase }}Controller.text),
+            @endif
+          @elseif(column.type === 'String')
+            @if(column.input?.type === 'Select')
+              {{ column.names.camelCase }}: selected{{ column.names.pascalCase }}{{ column.meta.required ? '!': '' }},
+            @else
+              {{ column.names.camelCase }}: _{{ column.names.camelCase }}Controller.text,
+            @endif
+          @elseif(column.type === 'Boolean')
+            {{ column.names.camelCase }}: {{ column.names.camelCase }},
+          @else
+            {{--  {{
+              column.type === 'Boolean' ? 'boolean' : column.type.toLowerCase()
+            }}{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};  --}}
+          @endif
+        @endeach
+        @each(relation in nonAuthBelongsToRelations)
+          @set('relationModel', findRelationModel(input, relation))
+          @set('parentRelation', null)
+          @set('parentRelationColumn', null)
+          {{--  If table has parent relation then prepare variable for it  --}}
+          @if(table.routeParentRelations.length)
+            @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+            @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+          @endif
+          {{ relation.names.camelCase }}Id: selected{{ relation.names.pascalCase }}Id{{ relation.required ? '!' : '' }},
+        @endeach
+      );
+      final Map<String, String> files = {};
+      @each(column in exposedColumns.filter(c => c.type === 'File'))
+        if (_{{ column.names.camelCase }}Path != null) {
+          files['{{ column.names.camelCase }}'] = _{{ column.names.camelCase }}Path!;
+        }
+      @endeach
+      if (editMode) {
+        await {{ table.names.snakeCase }}_service.update(
+          context,
+          context.read<{{ table.names.pascalCase }}EditState>().{{ table.names.camelCase }}!.id!,
+          {{ table.names.camelCase }},
+        );
+        context.read<{{ table.names.pascalCase }}EditState>().clearState();
+      } else {
+        await {{ table.names.snakeCase }}_service.store(
+          context,
+          {{ table.names.camelCase }},
+          files,
+        );
+      }
+      Navigator.pushReplacementNamed(context, '{{ table.names.snakeCase }}_index');
+    } on ValidationException catch (e) {
+      setState(() {
+        _validationErrors = e.getFormattedMessages();
+        _isLoading = false;
+        _autoValidateMode = AutovalidateMode.always;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("${editMode ? 'Update' : 'Save'} failed"),
+        ),
+      );
+    }
+  }
+
+  onDateSelect(
+    final BuildContext context,
+    final TextEditingController controller,
+  ) async {
+    final DateTime? newDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(0),
+      lastDate: DateTime(DateTime.now().year + 100),
+    );
+    if (newDate != null) {
+      setState(() {
+        controller.text = "${newDate.day.toString().padLeft(2, '0')}/${newDate.month.toString().padLeft(2, '0')}/${newDate.year}";
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    @each(relation in nonAuthBelongsToRelations)
+      @set('relationModel', findRelationModel(input, relation))
+      @set('parentRelation', null)
+      @set('parentRelationColumn', null)
+      {{--  If table has parent relation then prepare variable for it  --}}
+      @if(table.routeParentRelations.length)
+        @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+        @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+      @endif
+      final {{ relation.names.camelCasePlural }} = context.read<{{ relationModel.names.pascalCase }}IndexState>().{{ relation.names.camelCasePlural }};
+    @endeach
+    return Scaffold(
+      drawer: const MyDrawer(),
+      extendBody: true,
+      appBar: AppBar(
+        title: const Text('Add new {{ table.names.pascalCase }}'),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+      body: SafeArea(
+        child: Form(
+          autovalidateMode: _autoValidateMode,
+          key: _{{ table.names.camelCase }}CreateKey,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16),
+            child: ListView(children: [
+              const SizedBox(height: 16.0),
+              @each(column in exposedColumns)
+                @if(column.type === 'String')
+                  @if(column.input?.type === 'Input')
+                    TextFormField(
+                      @if(column.meta.multiline)
+                        maxLines: 3,
+                      @endif
+                      controller: _{{ column.names.camelCase }}Controller,
+                      focusNode: _{{ column.names.camelCase }}Focus,
+                      textInputAction: TextInputAction.next,
+                      validator: (String? value) {
+                        @if(column.meta.required)
+                          if (value == '' || value == null) {
+                            return 'Please enter {{ noCase(column.names.camelCase) }}';
+                          }
+                        @endif
+                        if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
+                          return _validationErrors['{{ column.names.camelCase }}']?[0];
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        {{--  prefixIcon: Icon(Icons.person),  --}}
+                        labelText: '{{ capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
+                      ),
+                      @if(column.meta.maxLength)
+                        maxLength: {{ column.meta.maxLength }},
+                      @endif
+                    ),
+                    const SizedBox(height: 16.0),
+                  @elseif(column.input?.type === 'Select')
+                    @!component('stubs/app/Flutter/full/lib/pages/components/dropDownFormDart', {
+                      table,
+                      column,
+                      input
+                    })~
+                  @endif
+                @elseif(['Integer', 'Decimal'].includes(column.type))
+                  @if(column.input?.type === 'Select')
+                    @!component('stubs/app/Flutter/full/lib/pages/components/dropDownFormDart', {
+                      table,
+                      column,
+                      input
+                    })~
+                    const SizedBox(height: 16.0),
+                  @else
+                    TextFormField(
+                      controller: _{{ column.names.camelCase }}Controller,
+                      focusNode: _{{ column.names.camelCase }}Focus,
+                      @if(column.type === 'Integer')
+                        keyboardType: TextInputType.number,
+                      @else
+                        inputFormatters: [
+                          WhitelistingTextInputFormatter.digitsOnly,
+                        ],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      @endif
+                      textInputAction: TextInputAction.next,
+                      validator: (String? value) {
+                        @if(column.meta.required)
+                          if (value == '' || value == null) {
+                            return 'Please enter {{ noCase(column.names.camelCase) }}';
+                          }
+                        @endif
+                        @if(column.meta.min)
+                          if ({{ column.type === 'Decimal' ? 'double' : 'int' }}.parse(value) < {{ column.meta.min }}) {
+                            return 'Please enter {{ noCase(column.names.camelCase) }} more than {{ column.meta.min }}';
+                          }
+                        @endif
+                        @if(column.meta.max)
+                          if ({{ column.type === 'Decimal' ? 'double' : 'int' }}.parse(value) > {{ column.meta.max }}) {
+                            return 'Please enter {{ noCase(column.names.camelCase) }} less than {{ column.meta.min }}';
+                          }
+                        @endif
+                        if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
+                          return _validationErrors['{{ column.names.camelCase }}']?[0];
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        {{--  prefixIcon: Icon(Icons.person),  --}}
+                        labelText: '{{ capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
+                      ),
+                      @if(column.meta.maxLength)
+                        maxLength: {{ column.meta.maxLength }},
+                      @endif
+                    ),
+                    const SizedBox(height: 16.0),
+                  @endif
+                @elseif(column.type === 'Date')
+                  TextFormField(
+                    controller: _{{ column.names.camelCase }}Controller,
+                    keyboardType: TextInputType.datetime,
+                    focusNode: _{{ column.names.camelCase }}Focus,
+                    textInputAction: TextInputAction.next,
+                    validator: (String? value) {
+                      @if(column.meta.required)
+                        if (value == '' || value == null) {
+                          return 'Please enter {{ noCase(column.names.camelCase) }}';
+                        }
+                      @endif
+                      if (!isDate(value.split('/').reversed.join('-'))) {
+                        return 'Please enter valid date';
+                      }
+                      if (_validationErrors.containsKey('{{ column.names.camelCase }}')) {
+                        return _validationErrors['{{ column.names.camelCase }}']?[0];
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      labelText: '{{ capitalCase(column.names.pascalCase) }}{{ column.meta.required ? ' *' : '' }}',
+                      hintText: 'DD/MM/YYYY',
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          onDateSelect(context, _dateController);
+                        },
+                        child: const Icon(Icons.calendar_month),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                @elseif(column.type === 'Boolean')
+                  @if(column.input.type === 'Swtich')
+                    ListTile(
+                      title: const Text('{{ noCase(column.names.pascalCase) }}'),
+                      trailing: Switch(
+                        value: {{ noCase(column.names.camelCase) }},
+                        onChanged: (final bool value) {
+                          setState(() {
+                            {{ noCase(column.names.camelCase) }} = value;
+                          });
+                        },
+                      ),
+                    ),
+                  @else
+                    CheckboxListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.all(0),
+                      value: {{ capitalCase(noCase(column.names.camelCase)) }},
+                      controlAffinity: ListTileControlAffinity.leading,
+                      activeColor: Theme.of(context).primaryColor,
+                      onChanged: (final bool? value) {
+                        if (value != null) {
+                          setState(() {
+                            {{ noCase(column.names.camelCase) }} = value;
+                          });
+                        }
+                      },
+                      title: const Text('{{ noCase(column.names.camelCase) }}'),
+                    ),
+                  @endif
+                @endif
+              @endeach
+
+              @each(relation in nonAuthBelongsToRelations)
+                @set('relationModel', findRelationModel(input, relation))
+                @set('parentRelation', null)
+                @set('parentRelationColumn', null)
+                {{--  If table has parent relation then prepare variable for it  --}}
+                @if(table.routeParentRelations.length)
+                  @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+                  @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+                @endif
+                @if(parentRelationColumn !== `${relation.modelNames.camelCase}Id`)
+                  @set('columnDataType', 'int')
+                  DropdownButtonFormField(
+                    focusNode: _{{ relation.names.camelCase }}Focus,
+                    value: selected{{ relation.names.pascalCase }}Id,
+                    decoration: const InputDecoration(
+                      labelText: '{{ capitalCase(relation.names.pascalCase) }}{{ relation.required ? ' *' : '' }}',
+                    ),
+                    items: {{ relation.names.camelCasePlural }}.map<DropdownMenuItem<{{ columnDataType }}>>(
+                      ({{ relationModel.names.camelCase }}) {
+                        return DropdownMenuItem<{{ columnDataType }}>(
+                          value: {{ relationModel.names.camelCase }}.id,
+                          child: Text({{ relationModel.names.camelCase }}.{{ relationModel.defaultColumn }}),
+                        );
+                      },
+                    ).toList(),
+                    onChanged: (dynamic newValue) {
+                      setState(() {
+                        selected{{ relation.names.pascalCase }}Id = newValue;
+                      });
+                    },
+                    validator: ({{ columnDataType }}? value) {
+                      @if(relation.required)
+                        if (
+                          @if(columnDataType === 'String')
+                            value == '' ||
+                          @endif
+                          value == null
+                        ) {
+                          return 'Please select {{ noCase(relationModel.names.camelCase) }}';
+                        }
+                      @endif
+                      if (_validationErrors.containsKey('{{ relation.names.camelCase }}Id')) {
+                        return _validationErrors['{{ relation.names.camelCase }}Id']?[0];
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                @endif
+              @endeach
+
+              @each(relation in table.relations.filter(r => r.type === 'ManyToMany' && r.showInputOnCreatePage))
+                @set(
+                  'relationModel',
+                  ['$auth', '$nonAuth'].includes(relation.withModel) ?
+                    input.auth.table :
+                    input.tables.find(
+                      (table) => table.names.camelCase === relation.modelNames.camelCase
+                    )
+                )
+                @if(relationModel)
+                  <b-field
+                    label="{{ capitalCase(relation.names.pascalCasePlural) }}"
+                    :type="errors.{{ relation.names.camelCasePlural }} ? 'is-danger' : ''"
+                    :message="errors.{{ relation.names.camelCasePlural }}"
+                    horizontal
+                  >
+                    <b-taginput
+                      v-model="form.{{ relation.names.camelCasePlural }}"
+                      field="{{ relationModel.defaultColumn }}"
+                      :data="filtered{{ relationModel.names.pascalCasePlural }}"
+                      expanded
+                      autocomplete
+                      open-on-focus
+                      @typing="getFiltered{{ relationModel.names.pascalCasePlural }}"
+                    >
+                    </b-taginput>
+                  </b-field>
+                @else
+                  // Debug: Relation: {{ relation.modelNames.camelCase }}. Table: {{ table.name }}
+                @endif
+              @endeach
+              @each(column in exposedColumns.filter(c => c.type === 'File'))
+                if (_{{ column.names.camelCase }} == null)
+                  OutlinedButton(
+                    onPressed: () async {
+                      if (_{{ column.names.camelCase }} == null) {
+                        FilePickerResult? result =
+                            await FilePicker.platform.pickFiles();
+                        if (result != null) {
+                          if (result.files.single.path != null) {
+                            setState(() {
+                              _{{ column.names.camelCase }}Path = result.files.single.path!;
+                              _{{ column.names.camelCase }} = File(result.files.single.path!);
+                            });
+                          }
+                        }
+                      }
+                    },
+                    child: Text(
+                      _{{ column.names.camelCase }} != null ? _{{ column.names.camelCase }}!.path : 'Select file',
+                    ),
+                  ),
+                if (_{{ column.names.camelCase }} != null)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          path.basename(_{{ column.names.camelCase }}!.path),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _{{ column.names.camelCase }} = null;
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      )
+                    ],
+                  ),
+                const SizedBox(height: 16.0),
+              @endeach
+              ElevatedButton(
+                child: Text(_isLoading ? 'Loading...' : 'Submit'),
+                onPressed: _isLoading ? null : store{{ table.names.pascalCase }},
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}

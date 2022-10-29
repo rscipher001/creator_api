@@ -1,0 +1,113 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:app/state/{{ table.names.camelCase }}_index.state.dart';
+@if(table.columns.find(c => c.meta.filterable))
+  import 'package:app/state/{{ table.names.camelCase }}_filter.state.dart';
+@endif
+import 'package:app/components/global/my_drawer.dart';
+import 'package:app/services/{{ table.names.camelCase }}.service.dart' as {{ table.names.snakeCase }}_service;
+@if(table.operations.show)
+  import 'package:app/state/{{ table.names.snakeCase }}_show.state.dart';
+@endif
+
+class {{ table.names.pascalCase }}Index extends StatefulWidget {
+  const {{ table.names.pascalCase }}Index({Key? key}) : super(key: key);
+
+  @override
+  _{{ table.names.pascalCase }}IndexState createState() => _{{ table.names.pascalCase }}IndexState();
+}
+
+class _{{ table.names.pascalCase }}IndexState extends State<{{ table.names.pascalCase }}Index> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      drawer: const MyDrawer(),
+      extendBody: true,
+      appBar: AppBar(
+        title: const Text('{{ table.names.pascalCasePlural }}'),
+        backgroundColor: Theme.of(context).primaryColor,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list_rounded),
+            onPressed: () => Navigator.pushNamed(context, '{{ table.names.camelCase }}_filter'),
+          )
+        ],
+      ),
+      body: SafeArea(
+        child: FutureBuilder(
+          future: {{ table.names.snakeCase }}_service.index(context),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final List<Widget> filterWidgets = [];
+            @if(table.columns.find(c => c.meta.filterable))
+              final filters = context.watch<{{ table.names.pascalCase }}FilterState>();
+            @endif
+            @each(column in table.columns.filter(c => c.meta.filterable))
+              if (filters.name != null && filters.name != '') {
+                filterWidgets.add(Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Chip(
+                    label: Text('{{ noCase(column.names.pascalCase) }}: ${filters.{{ column.names.camelCase }}}'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    deleteIcon: const Icon(Icons.clear),
+                    onDeleted: () async {
+                      context.read<{{ table.names.pascalCase }}FilterState>().resetName();
+                      await {{ table.names.snakeCase }}_service.index(context);
+                    },
+                  ),
+                ));
+              }
+            @endeach
+            final {{ table.names.camelCasePlural }} = context.watch<{{ table.names.pascalCase }}IndexState>().{{ table.names.camelCasePlural }};
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8,
+                    right: 8,
+                    top: 8,
+                  ),
+                  child: Wrap(
+                    children: [
+                      ...filterWidgets,
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemBuilder: ((context, index) {
+                      final {{ table.names.camelCase }} = {{ table.names.camelCasePlural }}[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 4.0, right: 4.0),
+                        child: Card(
+                          child: ListTile(
+                            title: Text({{ table.names.camelCase }}.{{ table.defaultColumn }}),
+                            {{--  subtitle: Text({{ table.names.camelCase }}.description),  --}}
+                            @if(table.operations.show)
+                              onTap: () {
+                                context
+                                    .read<{{ table.names.pascalCase }}ShowState>()
+                                    .loadState({{ table.names.camelCase }});
+                                Navigator.pushNamed(context, '{{ table.names.snakeCase }}_show');
+                              },
+                            @endif
+                          ),
+                        ),
+                      );
+                    }),
+                    itemCount: {{ table.names.camelCasePlural }}.length,
+                  ),
+                ),
+              ],
+            );
+          }),
+      ),
+    );
+  }
+}

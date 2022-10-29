@@ -1,0 +1,136 @@
+@set(
+  'hasManyRoles',
+  input.auth.table.relations.find(
+    r => r.type === 'ManyToMany' && r.modelNames.pascalCase === 'Role'
+  )
+)
+import LoginValidator from 'App/Validators/LoginValidator'
+@if(input.auth.register)
+  @if(input.rbac.enabled)
+    import Role from 'App/Models/Role'
+  @endif
+  import {{ table.names.pascalCase }} from 'App/Models/{{ table.names.pascalCase }}'
+  import RegisterValidator from 'App/Validators/RegisterValidator'
+@endif
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+
+export default class AuthController {
+  public async login({
+    request,
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('AuthController.login')
+    @endif
+    const input = await request.validate(LoginValidator)
+    const { email, password } = input
+    const token = await auth.use('api').attempt(email, password)
+    const { token: tokenString } = token.toJSON()
+    const user = auth.user!;
+    @if(input.rbac.enabled)~
+      @if(hasManyRoles)
+        await user.load('roles', (rolesQuery) => {
+          rolesQuery.preload('permissions')
+        });
+      @else
+        await user.load('role', (roleQuery) => {
+          roleQuery.preload('permissions')
+        });
+      @endif
+    @endif
+    return {
+      token: tokenString,
+      user: user,
+    }
+  }
+
+  @if(input.auth.register)
+    public async register({
+      request,
+      auth,
+      @if(input.logging.enabled)
+        logger,
+      @endif
+    }: HttpContextContract) {
+      @if(input.logging.enabled)
+        logger.info('AuthController.register')
+      @endif
+      const input: { [key: string]: any } = await request.validate(RegisterValidator)
+      @if (input.rbac.enabled && !hasManyRoles)
+        const defaultRole = await Role.findBy('default', true);
+        if(defaultRole) {
+          input.roleId = defaultRole.id;
+        }
+      @endif
+
+      /**
+      * Create a new user
+      */
+      const user = await {{ table.names.pascalCase }}.create(input)
+      await user.save()
+      @if (input.rbac.enabled && hasManyRoles)
+        const defaultRole = await Role.findBy('default', true);
+        if (defaultRole) {
+          await user.related('roles').attach([defaultRole.id]);
+        }
+      @endif
+      const token = await auth.use('api').login(user)
+      const { token: tokenString } = token.toJSON()
+      @if(input.rbac.enabled)
+        @if(hasManyRoles)
+          await user.load('roles', (rolesQuery) => {
+            rolesQuery.preload('permissions')
+          });
+        @else
+          await user.load('role', (roleQuery) => {
+            roleQuery.preload('permissions')
+          });
+        @endif
+      @endif
+      return {
+        token: tokenString,
+        user,
+      }
+    }
+  @endif
+
+  public async logout({
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('AuthController.logout')
+    @endif
+    await auth.use('api').revoke()
+    return 'You have been logged out'
+  }
+
+  public async me({
+    auth,
+    @if(input.logging.enabled)
+      logger,
+    @endif
+  }: HttpContextContract) {
+    @if(input.logging.enabled)
+      logger.info('AuthController.me');
+    @endif
+    const user = auth.user!;
+    @if(input.rbac.enabled)
+      @if(hasManyRoles)
+        await user.load('roles', (rolesQuery) => {
+          rolesQuery.preload('permissions')
+        });
+      @else
+        await user.load('role', (roleQuery) => {
+          roleQuery.preload('permissions')
+        });
+      @endif
+    @endif
+    return user;
+  }
+}

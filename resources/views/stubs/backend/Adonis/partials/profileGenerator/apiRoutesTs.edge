@@ -1,0 +1,29 @@
+@if(input.mailEnabled)
+  Route.group(() => {
+    // Email verification
+    Route.post('/email/verify', 'API/EmailVerificationController.verifyEmail')
+    Route.post('/email/update', 'API/EmailVerificationController.updateEmail')
+  })
+    .prefix('/api')
+@endif
+
+Route.group(() => {
+  // Profile routes
+  Route.post('/me/profile', 'API/ProfileController.updateProfile')
+  @if(input.mailEnabled)
+    Route.get('/me/profile/account', 'API/ProfileController.getAccount')
+    Route.post('/me/profile/account', 'API/ProfileController.updateAccount')
+    Route.delete('/me/profile/account', 'API/ProfileController.deleteAccount')
+    @endif
+  Route.post('/me/profile/password', 'API/ProfileController.updatePassword')
+  @if(input.storageEnabled)
+  Route.post('/me/profile/avatar', 'API/ProfileController.updateAvatar')
+  @endif
+})
+.middleware([
+  'auth',
+  @if(input.mailEnabled)
+  'ensureEmailIsVerified'
+  @endif
+  ])
+.prefix('/api')

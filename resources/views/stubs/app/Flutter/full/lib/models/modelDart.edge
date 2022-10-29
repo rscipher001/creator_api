@@ -1,0 +1,169 @@
+@set('hasRouteParents', table.routeParentRelations.length)
+@set('fileColumns', table.columns.filter(c => c.type === 'File'))
+@set('fileColumnsLastIndex', fileColumns.length - 1)
+@set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
+@set(
+  'nonAuthBelongsToRelations',
+  table.relations.filter(r => r.type === 'BelongsTo' && r.withModel !== '$auth')
+)
+@set(
+  'hasM2MRelationOnCreatePage',
+  table.relations.find(r => r.type === 'ManyToMany' && r.showInputOnCreatePage)
+)
+@set('routeParentColumns', table.routeParentRelations.map(r => `${r.names.camelCase}Id`))
+@set('effectiveRouteParent', null)
+@set('effectiveRouteParentColumn', null)
+@if(Array.isArray(table.routeParentRelations) && table.routeParentRelations.length)
+  @set('effectiveRouteParent', table.routeParentRelations[table.routeParentRelations.length - 1])
+  @set('effectiveRouteParentColumn', `${effectiveRouteParent.names.camelCase}Id`)
+@endif
+import 'package:app/models/pagination_meta.model.dart';
+
+class {{ table.names.pascalCase }} {
+  final int? id;
+  @each(column in table.columns)
+    {{ column.meta.required ? 'final': '' }}
+    @if (column.type === 'File')
+      Map<String, dynamic>{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @elseif(column.type === 'Date')
+      DateTime{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @elseif(column.type === 'Decimal')
+      double{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @elseif(column.type === 'Integer')
+      int{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @elseif(column.type === 'String')
+      String{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @else
+      {{
+        column.type === 'Boolean' ? 'bool' : column.type.toLowerCase()
+      }}{{ column.meta.required ? '': '?' }} {{ column.names.camelCase }};
+    @endif
+  @endeach
+  @each(relation in nonAuthBelongsToRelations)
+    @set('relationModel', findRelationModel(input, relation))
+    @set('parentRelation', null)
+    @set('parentRelationColumn', null)
+    {{--  If table has parent relation then prepare variable for it  --}}
+    @if(table.routeParentRelations.length)
+      @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+      @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+    @endif
+    @if(parentRelationColumn !== `${relation.modelNames.camelCase}Id`)
+      final int{{ relation.required ? '?' : '' }} {{ relation.names.camelCase }}Id;
+    @endif
+  @endeach
+
+  {{ table.names.pascalCase }}({
+    this.id,
+    @each(column in table.columns)
+      {{ column.meta.required ? 'required': '' }} this.{{ column.names.camelCase }},
+    @endeach
+    @each(relation in nonAuthBelongsToRelations)
+      @set('relationModel', findRelationModel(input, relation))
+      @set('parentRelation', null)
+      @set('parentRelationColumn', null)
+      {{--  If table has parent relation then prepare variable for it  --}}
+      @if(table.routeParentRelations.length)
+        @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+        @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+      @endif
+      @if(parentRelationColumn !== `${relation.modelNames.camelCase}Id`)
+        {{ relation.required ? 'required': '' }} this.{{ relation.names.camelCase }}Id,
+      @endif
+    @endeach
+  });
+
+  factory {{ table.names.pascalCase }}.fromJson(Map<String, dynamic> json) {
+    return {{ table.names.pascalCase }}(
+      id: json['id'],
+      @each(column in table.columns)
+        @if(column.type === 'Decimal')
+          {{ column.names.camelCase }}: json['decimal'] is double
+              ? json['decimal']
+              : double.parse(json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'].toString()),
+        @elseif(column.type === 'Date')
+          {{ column.names.camelCase }}: DateTime.parse(json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}']),
+        @else
+          {{ column.names.camelCase }}: json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'],
+        @endif
+      @endeach
+      @each(relation in nonAuthBelongsToRelations)
+        @set('relationModel', findRelationModel(input, relation))
+        @set('parentRelation', null)
+        @set('parentRelationColumn', null)
+        {{--  If table has parent relation then prepare variable for it  --}}
+        @if(table.routeParentRelations.length)
+          @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+          @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+        @endif
+        @if(parentRelationColumn !== `${relation.modelNames.camelCase}Id`)
+          {{ relation.names.camelCase }}Id: json['{{
+            input.camelCaseStrategy
+                ? `${relation.names.camelCase}Id`
+                : `{relation.names..snakeCase}_id`
+          }}'],
+        @endif
+      @endeach
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = {
+      @each(column in table.columns.filter(c => c.meta.required))
+        @if(column.type === 'Date')
+          '{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}': {{ column.names.camelCase }}.toIso8601String(),
+        @else
+          '{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}': {{ column.names.camelCase }},
+        @endif
+      @endeach
+    };
+    @each(column in table.columns.filter(c => !c.meta.required))
+      if ({{ column.names.camelCase }} != null) {
+        @if(column.type === 'Date')
+          json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }}.toIso8601String();
+        @else
+          json['{{ input.camelCaseStrategy ? column.names.camelCase : column.names.snakeCase }}'] = {{ column.names.camelCase }};
+        @endif
+      }
+    @endeach
+    @each(relation in nonAuthBelongsToRelations)
+      @set('relationModel', findRelationModel(input, relation))
+      @set('parentRelation', null)
+      @set('parentRelationColumn', null)
+      {{--  If table has parent relation then prepare variable for it  --}}
+      @if(table.routeParentRelations.length)
+        @set('parentRelation', table.routeParentRelations[table.routeParentRelations.length - 1])
+        @set('parentRelationColumn', `${parentRelation.names.camelCase}Id`)
+      @endif
+      @if(parentRelationColumn !== `${relation.modelNames.camelCase}Id`)
+        '{{
+          input.camelCaseStrategy
+              ? `${relation.names.camelCase}Id`
+              : `{relation.names..snakeCase}_id`
+        }}': {{ relation.names.camelCase }}Id,
+      @endif
+    @endeach
+    return json;
+  }
+}
+
+class {{ table.names.pascalCase }}Page {
+  final List<{{ table.names.pascalCase }}> {{ table.names.camelCasePlural }};
+  final PaginationMeta meta;
+
+  {{ table.names.pascalCase }}Page({
+    required this.{{ table.names.camelCasePlural }},
+    required this.meta,
+  });
+
+  factory {{ table.names.pascalCase }}Page.fromJson(Map<String, dynamic> json) {
+    final List<{{ table.names.pascalCase }}> {{ table.names.camelCasePlural }} = [];
+    for (final {{ table.names.camelCase }}Map in json["data"]) {
+      {{ table.names.camelCasePlural }}.add({{ table.names.pascalCase }}.fromJson({{ table.names.camelCase }}Map));
+    }
+    return {{ table.names.pascalCase }}Page(
+      {{ table.names.camelCasePlural }}: {{ table.names.camelCasePlural }},
+      meta: PaginationMeta.fromJson(json),
+    );
+  }
+}

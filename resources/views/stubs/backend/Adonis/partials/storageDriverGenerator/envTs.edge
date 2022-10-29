@@ -1,0 +1,11 @@
+@if(storageDrivers.includes('S3'))
+S3_KEY: Env.schema.string(),
+S3_SECRET: Env.schema.string(),
+S3_BUCKET: Env.schema.string(),
+S3_REGION: Env.schema.string(),
+S3_ENDPOINT: Env.schema.string.optional(),
+@endif
+@if(storageDrivers.includes('GCS'))
+GCS_KEY_FILENAME: Env.schema.string(),
+GCS_BUCKET: Env.schema.string(),
+@endif

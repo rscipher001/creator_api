@@ -1,0 +1,141 @@
+
+@if(table.operations.index)~
+  @if (!table.singleton)
+    Route.get('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}', 'API/{{ table.names.pascalCasePlural }}Controller.index');
+  @endif
+@endif
+@if(table.operations.store)
+  Route.post('{{
+    table.routeParentRelations.length ? table.routeParentRelations.map(
+      parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+    ).join('') : ''
+  }}/{{
+    table.names.camelCase
+  }}', 'API/{{ table.names.pascalCasePlural }}Controller.store');
+@endif
+@if(table.operations.show)~
+  @if (table.singleton)
+    Route.get('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}', 'API/{{ table.names.pascalCasePlural }}Controller.show');
+  @else
+    Route.get('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.show');
+  @endif
+@endif
+@if(table.operations.update)~
+  @if(!table.singleton)
+    Route.put('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.update');
+  @endif
+@endif
+@if(table.operations.destroy)~
+  @if(table.singleton)
+    Route.delete('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}', 'API/{{ table.names.pascalCasePlural }}Controller.destroy');
+  @else
+    Route.delete('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}/:id', 'API/{{ table.names.pascalCasePlural }}Controller.destroy');
+  @endif
+@endif
+@if(table.operations.storeMany)
+  Route.post('{{
+    table.routeParentRelations.length ? table.routeParentRelations.map(
+      parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+    ).join('') : ''
+  }}/{{
+    table.names.camelCase
+  }}/store/many', 'API/{{ table.names.pascalCasePlural }}Controller.storeMany');
+@endif
+@if(table.operations.destroyMany)
+  Route.post('{{
+    table.routeParentRelations.length ? table.routeParentRelations.map(
+      parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+    ).join('') : ''
+  }}/{{
+    table.names.camelCase
+  }}/destroy/many', 'API/{{ table.names.pascalCasePlural }}Controller.destroyMany');
+@endif
+@if(Array.isArray(table.customOperations) && table.customOperations.length)~
+  @each(operation in table.customOperations)
+    Route.{{ operation.method.toLowerCase() }}('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}{{
+      operation.singular ?
+      '/:id' : ''
+    }}/{{ operation.name }}', 'API/{{
+      table.names.pascalCasePlural
+    }}Controller.{{ operation.name }}');
+  @endeach
+@endif
+@if(Array.isArray(table.relations) && table.relations.length)~
+  @each(relation in table.relations.filter((relation) => relation.type === 'ManyToMany'))
+    Route.post('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}/:id/{{
+      relation.modelNames.camelCasePlural
+    }}/:{{ relation.modelNames.camelCase }}Id/attach', 'API/{{
+      table.names.pascalCasePlural
+    }}Controller.attach{{ relation.modelNames.pascalCase }}');
+    Route.post('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}/:id/{{
+      relation.modelNames.camelCasePlural
+    }}/:{{ relation.modelNames.camelCase }}Id/detach', 'API/{{
+      table.names.pascalCasePlural
+    }}Controller.detach{{ relation.modelNames.pascalCase }}');
+    Route.post('{{
+      table.routeParentRelations.length ? table.routeParentRelations.map(
+        parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+      ).join('') : ''
+    }}/{{
+      table.names.camelCase
+    }}/:id/{{
+      relation.modelNames.camelCasePlural
+    }}/sync', 'API/{{
+      table.names.pascalCasePlural
+    }}Controller.sync{{ relation.modelNames.pascalCasePlural }}');
+  @endeach
+@endif

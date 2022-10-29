@@ -1,0 +1,64 @@
+name: Run tests
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+env:
+  PORT: 3333
+  HOST: 0.0.0.0
+  NODE_ENV: development
+  APP_KEY: randomSecureKeyGoesBrr
+  DRIVE_DISK: local
+  CACHE_VIEWS: false
+  PROJECT_PATH: ../Projects
+  UI_URL: http://localhost:8080
+  AUTO_VERIFY_EMAIL: true
+  DB_CONNECTION: mysql
+  MYSQL_HOST: localhost
+  MYSQL_PORT: 3306
+  MYSQL_USER: root
+  MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+  MYSQL_DB_NAME: creator
+  MAIL_FROM_ADDRESS: noreply@example.com
+  SMTP_HOST: example.com
+  SMTP_PORT: 587
+  SMTP_USERNAME: placeholder
+  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  REDIS_CONNECTION: local
+  REDIS_HOST: 127.0.0.1
+  REDIS_PORT: 6379
+  REDIS_PASSWORD: placeholder
+  STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+  GIT_REPO_API_ADONIS: https://github.com/SecureSnowball/creator_adonis_api_starter
+  GIT_REPO_WEB_ADONIS: https://github.com/SecureSnowball/creator_adonis_web_starter
+  GIT_REPO_SPA_VUE_BUEFY: https://github.com/SecureSnowball/creator_vue_spa_starter
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: bitnami/mysql:8.0.20
+        env:
+          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE: creator
+        ports: ['3306:3306']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: mkdir -p ../Projects
+      - run: npm ci
+      - run: npm install -g @vue/cli
+      - name: Run Migrations
+        run: node ace migration:run
+      - name: Run Tests
+        run: |
+          npm run format
+          npm run build
+      - name: Run project creation test
+        run: |
+          npm test

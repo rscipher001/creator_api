@@ -1,0 +1,9 @@
+@if(table.operations.storeMany)
+  Route.get('{{
+    table.routeParentRelations.length ? table.routeParentRelations.map(
+      parentTable => `/${parentTable.names.camelCase}/:${parentTable.names.camelCase}Id`
+    ).join('') : ''
+  }}/{{
+    table.names.camelCase
+  }}/csvTemplate', 'API/{{ table.names.pascalCasePlural }}Controller.csvTemplate');
+@endif

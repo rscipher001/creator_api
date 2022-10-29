@@ -1,0 +1,116 @@
+@set('fileColumns', table.columns.filter(c => c.type === 'File'))
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:app/config/constants.dart';
+@set('classPrefix', useAliasForClass ? `${table.names.snakeCase}_models.` : '')
+@if(useAliasForClass)
+  import 'package:app/models/{{ table.names.camelCase }}.model.dart' as {{ table.names.snakeCase }}_models;
+@else
+  import 'package:app/models/{{ table.names.camelCase }}.model.dart';
+@endif
+import 'package:app/state/{{ table.names.camelCase }}_filter.state.dart';
+@if(table.operations.show)
+  import 'package:app/state/{{ table.names.camelCase }}_show.state.dart';
+@endif
+import 'package:app/state/{{ table.names.camelCase }}_index.state.dart';
+import 'package:app/exceptions/unknown.exception.dart';
+import 'package:app/services/http.service.dart' as http_service;
+
+Future<{{ classPrefix }}{{ table.names.pascalCase }}Page> index(final BuildContext context) async {
+  final filter = context.read<{{ table.names.pascalCase }}FilterState>();
+  final pageNo = filter.pageNo;
+  final pageSize = filter.pageSize;
+  var url = baseUrl + '/api/{{ table.names.camelCase }}?page_no=$pageNo&page_size=$pageSize';
+  @if(table.columns.find(c => c.meta.filterable))
+    @each(column in table.columns.filter(c => c.meta.filterable))
+      if (filter.{{ column.names.camelCase }} != null && filter.{{ column.names.camelCase }} != '') {
+        url += '&{{ column.names.camelCase }}=${filter.{{ column.names.camelCase }}}';
+      }
+    @endeach
+  @endif
+  final response = await http_service.authorizedGet(
+    context,
+    url: url,
+  );
+  if (response!.statusCode != 200) {
+    throw UnknownException();
+  }
+  final {{ table.names.camelCase }}Page = {{ classPrefix }}{{ table.names.pascalCase }}Page.fromJson(json.decode(response.body));
+  Provider.of<{{ table.names.pascalCase }}IndexState>(context, listen: false).loadState({{ table.names.camelCase }}Page);
+  return {{ table.names.camelCase }}Page;
+}
+
+@if(table.operations.show)
+  Future<{{ classPrefix }}{{ table.names.pascalCase }}> show(final BuildContext context, final int {{ table.names.camelCase }}Id) async {
+    final response = await http_service.authorizedGet(
+      context,
+      url: baseUrl + '/api/{{ table.names.camelCase }}/${{ table.names.camelCase }}Id',
+    );
+    if (response!.statusCode != 200) {
+      throw UnknownException();
+    }
+    final {{ table.names.camelCase }} = {{ classPrefix }}{{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+    Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
+    return {{ table.names.camelCase }};
+  }
+@endif
+
+Future<{{ classPrefix }}{{ table.names.pascalCase }}> store(
+  final BuildContext context,
+  final {{ classPrefix }}{{ table.names.pascalCase }} input,
+  final Map<String, String>? files,
+) async {
+  final response = files != null && files.isEmpty
+      ? await http_service.authorizedPost(
+        context,
+        baseUrl + '/api/{{ table.names.camelCase }}',
+        body: input.toJson(),
+        jsonContent: true,
+      )
+    : await http_service.authorizedMultipart(
+        context,
+        url: baseUrl + '/api/{{ table.names.camelCase }}',
+        body: input.toJson(),
+        filePath: files,
+      );
+  if (response!.statusCode != 200) {
+    throw UnknownException();
+  }
+  final {{ table.names.camelCase }} = {{ classPrefix }}{{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+  Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
+  return {{ table.names.camelCase }};
+}
+
+@if(table.operations.update)
+  Future<{{ classPrefix }}{{ table.names.pascalCase }}> update(
+    final BuildContext context,
+    final int id,
+    final {{ classPrefix }}{{ table.names.pascalCase }} input
+  ) async {
+    final response = await http_service.authorizedPut(
+      context,
+      baseUrl + '/api/{{ table.names.camelCase }}/$id',
+      body: input.toJson(),
+      jsonContent: true,
+    );
+    if (response!.statusCode != 200) {
+      throw UnknownException();
+    }
+    final {{ table.names.camelCase }} = {{ classPrefix }}{{ table.names.pascalCase }}.fromJson(json.decode(response.body));
+    Provider.of<{{ table.names.pascalCase }}ShowState>(context, listen: false).loadState({{ table.names.camelCase }});
+    return {{ table.names.camelCase }};
+  }
+@endif
+
+@if(table.operations.destroy)
+  Future destroy(final BuildContext context, final int id) async {
+    final response = await http_service.authorizedDelete(
+      context,
+      url: baseUrl + '/api/{{ table.names.camelCase }}/$id',
+    );
+    if (response!.statusCode != 204) {
+      throw UnknownException();
+    }
+  }
+@endif

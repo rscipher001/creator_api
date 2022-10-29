@@ -1,0 +1,163 @@
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import store from '../store';
+
+import HomeView from '../views/HomeView.vue';
+
+Vue.use(VueRouter);
+
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: HomeView,
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/Login.vue'),
+    meta: {
+      guest: true,
+    },
+  },
+  @if(input.auth.register)
+    {
+      path: '/register',
+      name: 'Register',
+      component: () => import('../views/Register.vue'),
+      meta: {
+        guest: true,
+      },
+    },
+  @endif
+  @if(input.auth.passwordReset)
+    {
+      path: "/forgot_password/request",
+      name: "Forgot Password Request",
+      component: () => import("../views/ForgotPasswordRequest.vue"),
+      meta: {
+        guest: true,
+      },
+    },
+    {
+      path: "/forgot_password/verify",
+      name: "Forgot Password Verify",
+      component: () => import("../views/ForgotPasswordUpdate.vue"),
+      meta: {
+        guest: true,
+      },
+    },
+    {
+      path: "/email/verify",
+      name: "VerifyEmail",
+      component: () => import("../views/VerifyEmail.vue"),
+    },
+    {
+      path: "/emailUpdate",
+      name: "UpdateEmail",
+      component: () =>
+        import(/* webpackChunkName: "updateEmail" */ "../views/UpdateEmail.vue"),
+    },
+    {
+      path: "/email/verificationPending",
+      name: "EmailVerificationPending",
+      component: () => import("../views/EmailVerificationPending.vue"),
+      meta: {
+        auth: true,
+        emailUnverified: true,
+      },
+    },
+  @endif
+  @if(input.rbac.enabled)
+    {
+      path: "/rbacMatrix",
+      name: "RbacMatrix",
+      component: () => import("../views/RbacMatrix.vue"),
+      meta: {
+        auth: true,
+        ensureEmailIsVerified: true,
+      },
+    },
+  @endif
+  {
+    path: "/setting",
+    name: "Setting",
+    component: () => import("../views/Setting.vue"),
+    meta: {
+      auth: true,
+      @if(input.mailEnabled)
+        ensureEmailIsVerified: true,
+      @endif
+    },
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('../views/Dashboard.vue'),
+    meta: {
+      auth: true,
+      ensureEmailIsVerified: true,
+    },
+  },
+  {{--  Generate routes for each model  --}}
+  @each(table in input.tables.concat([input.auth.table]))~
+    @!component(`stubs/frontend/${input.tech.frontend}/partial/crudGenerator/routerJs`, {
+      table,
+      input,
+    })~
+  @endeach
+];
+
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes,
+});
+
+router.beforeEach((to, from, next) => {
+  if (!to.meta) {
+    return next();
+  }
+
+  const { meta } = to;
+  if (meta.guest) {
+    if (store.state.auth.token) {
+      return next({
+        name: 'Dashboard',
+      });
+    }
+  }
+
+  if (meta.auth) {
+    if (!store.state.auth.token) {
+      return next({
+        name: 'Login',
+      });
+    }
+  }
+
+  @if(input.mailEnabled)
+  /**
+   * Redirect users to dashboard when email verified but tries to access verification page
+   */
+  if (meta.emailUnverified) {
+    if (store.state.auth.user && store.state.auth.user.emailVerifiedAt) {
+      return next({
+        name: "Dashboard",
+      });
+    }
+  }
+
+  if (meta.ensureEmailIsVerified) {
+    if (!store.state.auth.user.emailVerifiedAt) {
+      return next({
+        name: "EmailVerificationPending",
+      });
+    }
+  }
+  @endif
+
+  return next();
+});
+
+export default router;
