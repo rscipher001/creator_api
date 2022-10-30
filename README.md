@@ -2,10 +2,9 @@
 
 A Code Generator
 
-### How to run locally
-
+### How to run
 - Clone both API and UI repository
-- Create a folder named `Projects` parallel to UI and API folder (Can be configured using .env if you want another location)
+- Create a folder named `Projects` parallel to UI and API folder (Can be configured using `.env` if you want another location) but keep it outside this project
 - Install Vue CLI `npm install -g @vue/cli`
 
 ### (Alpha) Local Hosting Requirements
@@ -17,8 +16,9 @@ There is an option to host the project after generation, it was created so you c
 - Ensure Nginx server is installed
 
 ## Glossary
+Meaning of common words used in thie UI to help you use the project.
 
-Meaning of common words
+*NOTE*: Gloassary is being migrated to GitHub wiki with detailed explaination
 
 #### Singleton
 
@@ -59,8 +59,45 @@ In the above snippet you can see the routes for workers are nested inside projec
 - API proxy runs at 20K + projectId
 - API runs at 30K + projectId
 
-## How Payment works
+## Using docker to setup mysql
+Create a MySQL server using Docker container. The following command will create a MySQL container name `main-mysql` with `ravindra` as root password, feel free to change these to whatever you like
+```bash
+docker run --name main-mysql -e MYSQL_ROOT_PASSWORD=ravindra -p 3306:3306 -d mysql
+```
 
+To Stop the container use
+```bash
+docker stop main-mysql
+```
+
+To restart the container after system reboot use
+```bash
+docker start main-mysql
+```
+
+To get a shell into container to run commands use
+```bash
+docker exec -it main-mysql bash
+```
+
+Update the default MySQL user with the follwoing commands.
+```bash
+docker exec -it main-mysql bash
+# You will get into container shell now type
+mysql -uroot -p
+# Press enter and type your MySQL password
+```
+```sql
+-- Run this command to use MySQL native password (Native password is required or it won't work)
+CREATE USER 'ravindra'@'%' IDENTIFIED WITH mysql_native_password BY 'ravindra';
+GRANT ALL PRIVILEGES ON * . * TO 'ravindra'@'%';
+FLUSH PRIVILEGES;
+```
+
+# Stripe
+You can skip this seciton, project has been made open source, no need to deal with payment stuff anymore.
+
+## How Payment works
 - Every payment system have a prepare stage
 - A webhook for verification
 - Middle steps based on payment platform
