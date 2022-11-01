@@ -25,7 +25,7 @@ jobs:
           chmod 700 ~/.ssh
           ssh-keyscan -p $DEPLOYMENT_SSH_PORT $DEPLOYMENT_SSH_HOST >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
-          rsync -az -e "ssh -p $DEPLOYMENT_SSH_PORT" ./build/ $DEPLOYMENT_SSH_USER@$DEPLOYMENT_SSH_HOST:~/$DEPLOYMENT_PROJECT_PATH
+          rsync -az -e "ssh -p $DEPLOYMENT_SSH_PORT" ./build/ $DEPLOYMENT_SSH_USER@$DEPLOYMENT_SSH_HOST:$DEPLOYMENT_PROJECT_PATH
           ssh $DEPLOYMENT_SSH_USER@$DEPLOYMENT_SSH_HOST -p $DEPLOYMENT_SSH_PORT 'cd ~/$DEPLOYMENT_PROJECT_PATH && npm ci --ignore-scripts && node ace migration:run && pm2 restart $DEPLOYMENT_PM2_NAME -a'
         env:
           DEPLOYMENT_SSH_KEY: ${{ secrets.DEPLOYMENT_SSH_KEY }}

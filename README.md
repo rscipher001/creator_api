@@ -87,10 +87,16 @@ docker exec -it main-mysql bash
 mysql -uroot -p
 # Press enter and type your MySQL password
 ```
+
 ```sql
--- Run this command to use MySQL native password (Native password is required or it won't work)
-CREATE USER 'ravindra'@'%' IDENTIFIED WITH mysql_native_password BY 'ravindra';
-GRANT ALL PRIVILEGES ON * . * TO 'ravindra'@'%';
+-- Create database
+CREATE DATABASE creator;
+```
+
+```SQL
+-- Create user with native password (Required)
+CREATE USER 'creator'@'%' IDENTIFIED WITH mysql_native_password BY 'creator';
+GRANT ALL PRIVILEGES ON * . * TO 'creator'@'%';
 FLUSH PRIVILEGES;
 ```
 
