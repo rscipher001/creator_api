@@ -265,7 +265,7 @@ export default class ProjectsController {
     if (project.status === 'queued') throw new Error('Build is in progress')
     if (project.status === 'failed') throw new Error('Build failed')
     return Route.makeSignedUrl('projectDownload', {
-      projectId,
+      id: projectId,
       type,
     })
   }
