@@ -125,15 +125,15 @@ export default class HostingService {
       console.error(e)
     }
 
-    // Change permission to ensure you can create files and folders
-    // Inside the projects folder
-    await HelperService.execute('sudo', [
-      'chmod',
-      '-R',
-      '777',
-      `${this.input.path}`,
-      `${this.input.spaPath}`,
-    ])
+    // // Change permission to ensure you can create files and folders
+    // // Inside the projects folder
+    // await HelperService.execute('sudo', [
+    //   'chmod',
+    //   '-R',
+    //   '777',
+    //   `${this.input.path}`,
+    //   `${this.input.spaPath}`,
+    // ])
     await this.updateApiDotEnvPort()
 
     // Run migration
@@ -147,7 +147,6 @@ export default class HostingService {
       cwd: this.input.path,
       env: this.prepareEnv(),
     })
-    Logger.info(`Copying ${this.input.path}/.env to ${this.input.path}/build/.env`)
     await HelperService.copyFile(`${this.input.path}/.env`, `${this.input.path}/build/.env`)
 
     // Build Frontend
