@@ -161,7 +161,7 @@ export default class HostingService {
     let content = await HelperService.readFile(filePath)
     await HelperService.writeFile(
       filePath,
-      content.replace('PORT=3333', `PORT=${HostingPorts.nodeApi + this.input.id}`)
+      content.replace('PORT=3333', `PORT=${HostingPorts.nginxApi + this.input.id}`)
     )
   }
 
