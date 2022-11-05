@@ -52,8 +52,6 @@ export default Env.rules({
   ROOT_MYSQL_PORT: Env.schema.number.optional(),
   ROOT_MYSQL_PASSWORD: Env.schema.string.optional(),
 
-  STRIPE_SECRET_KEY: Env.schema.string(),
-
   GIT_REPO_API_ADONIS: Env.schema.string(),
   GIT_REPO_WEB_ADONIS: Env.schema.string(),
   GIT_REPO_SPA_VUE_BUEFY: Env.schema.string(),
