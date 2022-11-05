@@ -125,7 +125,7 @@ export default class HostingService {
       console.error(e)
     }
 
-    await this.updateApiDotEnvPort()
+    await Promise.all([this.updateApiDotEnvPort(), this.updateUiDotEnvPort()])
 
     // Run migration
     await HelperService.execute('node', ['ace', 'migration:run', '--env=production', '--force'], {
@@ -133,18 +133,20 @@ export default class HostingService {
       env: this.prepareEnv(),
     })
 
-    // Build Backend and copy .env to build folder
-    await HelperService.execute('npm', ['run', 'build'], {
-      cwd: this.input.path,
-      env: this.prepareEnv(),
-    })
-    await HelperService.copyFile(`${this.input.path}/.env`, `${this.input.path}/build/.env`)
+    const envForBuildCommand = this.prepareEnv()
 
-    // Build Frontend
-    await HelperService.execute('npm', ['run', 'build'], {
-      cwd: this.input.spaPath,
-      env: this.prepareEnv(),
-    })
+    await Promise.all([
+      HelperService.execute('npm', ['run', 'build'], {
+        cwd: this.input.path,
+        env: envForBuildCommand,
+      }),
+      await HelperService.execute('npm', ['run', 'build'], {
+        cwd: this.input.spaPath,
+        env: envForBuildCommand,
+      }),
+    ])
+
+    await HelperService.copyFile(`${this.input.path}/.env`, `${this.input.path}/build/.env`)
 
     // Run PM2
     await HelperService.execute('pm2', ['start', 'server.js', '--name', `api-${this.input.id}`], {
@@ -165,7 +167,7 @@ export default class HostingService {
 
   protected async updateUiDotEnvPort() {
     // Update UI port in .env to ensure it connects on correct port
-    const filePath = `${this.input.spaPath}/.env`
+    const filePath = `${this.input.spaPath}/.env.local`
     let content = await HelperService.readFile(filePath)
     await HelperService.writeFile(
       filePath,
