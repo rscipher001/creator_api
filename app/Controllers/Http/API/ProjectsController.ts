@@ -150,21 +150,6 @@ export default class ProjectsController {
               break
           }
         }
-
-        // If column is select dropdown then default should be same as column type
-        // if (column.input?.select) {
-        // if (column.input?.select.type === 'String') {
-        // if (column.type === 'Integer') {
-        // column.input?.select.options.forEach(option => {
-        // if (!Number.isInteger(option)) {
-        // return response.badRequest({
-        // error: `On ${table.names.pascalCase} table ${column.names.pascalCase} have invalid default value`,
-        // })
-        // }
-        // })
-        // }
-        // ]}
-        // }
       })
     }
 

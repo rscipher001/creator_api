@@ -125,6 +125,15 @@ export default class HostingService {
       console.error(e)
     }
 
+    // Change permission to ensure you can create files and folders
+    // Inside the projects folder
+    await HelperService.execute('sudo', [
+      'chmod',
+      '-R',
+      '777',
+      `${this.input.path}`,
+      `${this.input.spaPath}`,
+    ])
     await this.updateApiDotEnvPort()
 
     // Run migration
