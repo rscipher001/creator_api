@@ -276,12 +276,9 @@ export default class ProjectsController {
     }
     const id = request.param('id')
     const type = request.param('type')
-    const project = await Project.findOrFail(id)
-    const input = project.rawInput
     const basePath = Application.makePath(Env.get('PROJECT_PATH'))
-    const names = HelperService.generateExtendedNames(input.name)
-    const apiPath = `${basePath}/${id}-${names.dashCase}`
-    const uiPath = `${basePath}/${id}-${names.dashCase}-spa`
+    const apiPath = `${basePath}/${id}/api`
+    const uiPath = `${basePath}/${id}/spa`
 
     if (type === 'api') {
       await HelperService.execute(
