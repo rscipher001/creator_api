@@ -125,15 +125,6 @@ export default class HostingService {
       console.error(e)
     }
 
-    // // Change permission to ensure you can create files and folders
-    // // Inside the projects folder
-    // await HelperService.execute('sudo', [
-    //   'chmod',
-    //   '-R',
-    //   '777',
-    //   `${this.input.path}`,
-    //   `${this.input.spaPath}`,
-    // ])
     await this.updateApiDotEnvPort()
 
     // Run migration
@@ -169,6 +160,21 @@ export default class HostingService {
     await HelperService.writeFile(
       filePath,
       content.replace('PORT=3333', `PORT=${HostingPorts.nodeApi + this.input.id}`)
+    )
+  }
+
+  protected async updateUiDotEnvPort() {
+    // Update UI port in .env to ensure it connects on correct port
+    const filePath = `${this.input.spaPath}/.env`
+    let content = await HelperService.readFile(filePath)
+    await HelperService.writeFile(
+      filePath,
+      content.replace(
+        'VUE_APP_API_URL=http://localhost:3333',
+        `VUE_APP_API_URL=https://${Env.get('HOSTING_API_DOMAIN')}:${
+          HostingPorts.nodeApi + this.input.id
+        }`
+      )
     )
   }
 
