@@ -47,7 +47,6 @@ export default class HostingService {
       'ROOT_MYSQL_HOST',
       'ROOT_MYSQL_PORT',
       'ROOT_MYSQL_PASSWORD',
-      'STRIPE_SECRET_KEY',
     ]
     const env = JSON.parse(JSON.stringify(process.env))
     keysToRemove.forEach((key) => delete env[key])
