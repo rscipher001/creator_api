@@ -1,0 +1,83 @@
+<template>
+  <section>
+    <svg
+      style="position: absolute"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1440 320"
+    >
+      <path
+        fill="#7957d5"
+        fill-opacity="1"
+        d="M0,32L26.7,64C53.3,96,107,160,160,160C213.3,160,267,96,320,80C373.3,64,427,96,480,117.3C533.3,139,587,149,640,144C693.3,139,747,117,800,90.7C853.3,64,907,32,960,69.3C1013.3,107,1067,213,1120,229.3C1173.3,245,1227,171,1280,144C1333.3,117,1387,139,1413,149.3L1440,160L1440,0L1413.3,0C1386.7,0,1333,0,1280,0C1226.7,0,1173,0,1120,0C1066.7,0,1013,0,960,0C906.7,0,853,0,800,0C746.7,0,693,0,640,0C586.7,0,533,0,480,0C426.7,0,373,0,320,0C266.7,0,213,0,160,0C106.7,0,53,0,27,0L0,0Z"
+      ></path>
+    </svg>
+    <div class="section container" style="position: relative">
+      <div class="columns box">
+        <div class="column">
+          <div
+            class="container is-max-desktop has-text-centered"
+            style="margin-top: 72px"
+          >
+            <h1 class="is-size-4 has-text-weight-bold has-text-primary">
+              Welcome to your new project
+            </h1>
+            <p class="mt-2">
+              Check README.md for information about the project, Go to
+              <a class="has-text-weight-bold" href="https://bulma.io">Bulma</a>
+              for UI documentation and
+              <a
+                class="has-text-weight-bold"
+                href="https://buefy.org/documentation/start"
+                >Buefy</a
+              >
+              for this Vue UI library documentation.
+            </p>
+            <div class="mb-6 mt-5 buttons is-centered">
+              <template v-if="!user">
+                @if(input.auth.register)
+                  <b-button tag="router-link" to="/register" type="is-primary"
+                    >Register</b-button
+                  >
+                @endif
+                <b-button tag="router-link" to="/login" type="is-secondary"
+                  >Login</b-button
+                >
+              </template>
+              <b-button
+                v-else
+                tag="router-link"
+                to="/dashboard"
+                type="is-primary"
+                >Dashboard</b-button
+              >
+            </div>
+            <div>
+              <img
+                style="max-width: 480px"
+                src="@/assets/welcome.svg"
+                alt="Two cats sitting on Welcome text illustration"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script>
+import { mapState } from "vuex";
+
+export default {
+  name: "HomePage",
+
+  computed: mapState("auth", {
+    user: (state) => state.user,
+    token: (state) => state.token,
+
+    currentRouteName() {
+      return this.$route.name;
+    },
+  }),
+};
+</script>

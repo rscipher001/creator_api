@@ -41,6 +41,18 @@ export default class SPAGenerator {
     await HelperService.writeFile(filePath, content)
   }
 
+  public async updateSrcViewsHomeVue() {
+    const filePath = `${this.input.spaPath}/src/views/HomeView.vue`
+
+    const content = await View.render(
+      `stubs/frontend/${this.input.tech.frontend}/full/src/views/HomeViewVue`,
+      {
+        input: this.input,
+      }
+    )
+    await HelperService.writeFile(filePath, content)
+  }
+
   protected async createSrcComponentsNavBarVue() {
     const filePath = `${this.input.spaPath}/src/components/NavBar.vue`
     const content = await View.render(
@@ -59,6 +71,7 @@ export default class SPAGenerator {
   public async addBasicStuff() {
     await this.createSrcComponentsNavBarVue()
     await this.updateSrcAppVue()
+    await this.updateSrcViewsHomeVue()
   }
 
   /**
