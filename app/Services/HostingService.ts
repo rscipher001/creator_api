@@ -161,7 +161,7 @@ export default class HostingService {
     let content = await HelperService.readFile(filePath)
     await HelperService.writeFile(
       filePath,
-      content.replace('PORT=3333', `PORT=${HostingPorts.nginxApi + this.input.id}`)
+      content.replace('PORT=3333', `PORT=${HostingPorts.nodeApi + this.input.id}`)
     )
   }
 
@@ -174,7 +174,7 @@ export default class HostingService {
       content.replace(
         'VUE_APP_API_URL=http://localhost:3333',
         `VUE_APP_API_URL=https://${Env.get('HOSTING_API_DOMAIN')}:${
-          HostingPorts.nodeApi + this.input.id
+          HostingPorts.nginxApi + this.input.id
         }`
       )
     )
