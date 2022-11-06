@@ -165,6 +165,14 @@ export default class HostingService {
       env: envForBuildCommand,
     })
 
+    // Run seeders
+    if (this.input.rbac.enabled) {
+      await HelperService.execute('node', ['ace', 'db:seed'], {
+        cwd: this.input.path,
+        env: envForBuildCommand,
+      })
+    }
+
     // Run PM2
     await HelperService.execute('pm2', ['start', 'server.js', '--name', `api-${this.input.id}`], {
       cwd: `${this.input.path}/build`,
