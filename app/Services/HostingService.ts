@@ -165,8 +165,12 @@ export default class HostingService {
       env: envForBuildCommand,
     })
 
-    // Run seeders
+    // Run seeders twice
     if (this.input.rbac.enabled) {
+      await HelperService.execute('node', ['ace', 'db:seed'], {
+        cwd: this.input.path,
+        env: envForBuildCommand,
+      })
       await HelperService.execute('node', ['ace', 'db:seed'], {
         cwd: this.input.path,
         env: envForBuildCommand,
