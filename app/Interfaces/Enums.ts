@@ -8,8 +8,8 @@ export enum Database {
 
 export enum HostingPorts {
   nginxUi = 10000, // Static FE files server by Nginx
-  nodeApi = 20000, // Node BE files served by PM2
-  nginxApi = 30000, // Node BE files server by Nginx
+  nginxApi = 20000, // Node BE files server by Nginx
+  nodeApi = 30000, // Node BE files served by PM2
 }
 
 export enum Mailer {
@@ -65,18 +65,4 @@ export enum APIInput {
 export enum UIInput {
   INPUT = 'Input',
   SELECT = 'Select',
-}
-
-// Prices in dollar
-export enum Price {
-  api = 5,
-  app = 5,
-  spa = 5,
-}
-
-export enum PaymentStatus {
-  started = 'started',
-  processing = 'processing',
-  done = 'done',
-  failed = 'failed',
 }

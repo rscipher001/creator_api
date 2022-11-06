@@ -1,5 +1,4 @@
 import mkdirp from 'mkdirp'
-import Env from '@ioc:Adonis/Core/Env'
 import Logger from '@ioc:Adonis/Core/Logger'
 import ProjectInput from 'App/Interfaces/ProjectInput'
 import SystemService from 'App/Services/SystemService'
@@ -21,8 +20,6 @@ import BuefyAuthGenerator from 'App/Services/Frontend/Buefy/AuthGenerator'
 import BuefyCRUDGenerator from 'App/Services/Frontend/Buefy/CRUDGenerator'
 
 import FlutterInit from 'App/Services//App/Flutter/Init'
-
-// import HostingService from 'App/Services/HostingService'
 
 class BackendProjectService {
   public projectInput: ProjectInput
@@ -143,11 +140,6 @@ class BackendProjectService {
       ])
 
       Logger.info(JSON.stringify(generationResults, null, 2))
-
-      if (Env.get('ENABLE_HOSTING')) {
-        // const hostingService = new HostingService(this.projectInput)
-        // await hostingService.init()
-      }
     } catch (e) {
       console.error(e)
       throw e
