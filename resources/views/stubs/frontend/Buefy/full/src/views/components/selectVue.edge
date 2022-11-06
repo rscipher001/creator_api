@@ -1,0 +1,15 @@
+<b-select
+  v-model="form.{{ column.names.camelCase }}"
+  expanded
+  @if(column.meta.required)
+    required
+  @endif
+>
+  @each(option in column.input?.select.options)
+    @if(option.value)
+      <option value="{{ option.value }}">{{ option.label }}</option>
+    @else
+      <option value="{{ option }}">{{ option }}</option>
+    @endif
+  @endeach
+</b-select>

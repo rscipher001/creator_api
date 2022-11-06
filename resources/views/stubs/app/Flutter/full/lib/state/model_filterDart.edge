@@ -1,0 +1,46 @@
+import 'package:flutter/foundation.dart';
+
+class {{ table.names.pascalCase }}FilterState extends ChangeNotifier {
+  int _pageSize = 500, _pageNo = 1;
+  @each(column in table.columns.filter(c => c.meta.filterable))
+    String? _{{ column.names.camelCase }};
+  @endeach
+
+  int get pageNo => _pageNo;
+  int get pageSize => _pageSize;
+  @each(column in table.columns.filter(c => c.meta.filterable))
+    String? get {{ column.names.camelCase }} => _{{ column.names.camelCase }};
+  @endeach
+
+  setPageSize(final int pageSize) {
+    _pageSize = pageSize;
+    notifyListeners();
+  }
+
+  resetPageSize() {
+    _pageSize = 500;
+    notifyListeners();
+  }
+
+  setPageNo(final int pageNo) {
+    _pageNo = pageNo;
+    notifyListeners();
+  }
+
+  resetPageNo() {
+    _pageNo = 1;
+    notifyListeners();
+  }
+
+  @each(column in table.columns.filter(c => c.meta.filterable))
+    set{{ column.names.pascalCase }}(final String {{ column.names.camelCase }}) {
+      _{{ column.names.camelCase }} = {{ column.names.camelCase }};
+      notifyListeners();
+    }
+
+    reset{{ column.names.pascalCase }}() {
+      _{{ column.names.camelCase }} = null;
+      notifyListeners();
+    }
+  @endeach
+}

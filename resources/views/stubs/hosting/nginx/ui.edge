@@ -1,0 +1,14 @@
+server {
+    server_name {{ uiDomain }};
+    root {{ input.spaPath }}/dist;
+    index index.html;
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    listen [::]:{{ nginxUiPort + input.id }} ssl http2;
+    listen {{ nginxUiPort + input.id }} ssl http2;
+    ssl_certificate /etc/letsencrypt/live/{{ uiDomain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ uiDomain }}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}

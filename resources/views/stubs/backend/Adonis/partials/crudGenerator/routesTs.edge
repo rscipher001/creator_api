@@ -1,0 +1,14 @@
+@if(apiPublicContent)
+  Route.group(() => {
+      {{{ apiPublicContent }}}
+    })
+    .prefix('/api')
+@endif
+
+@if(apiAuthContent)
+  Route.group(() => {
+      {{{ apiAuthContent }}}
+    })
+    .middleware(['auth'])
+    .prefix('/api')
+@endif

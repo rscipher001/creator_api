@@ -1,0 +1,17 @@
+class ValidationException implements Exception {
+  final List errors;
+  final String? message;
+
+  ValidationException({
+    required this.errors,
+    this.message,
+  });
+
+  Map<String, List<String>> getFormattedMessages() {
+    final Map<String, List<String>> messages = {};
+    for (var error in errors) {
+      messages[error['field']] = [error['message']];
+    }
+    return messages;
+  }
+}

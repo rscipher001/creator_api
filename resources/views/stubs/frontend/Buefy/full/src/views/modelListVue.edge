@@ -1,0 +1,560 @@
+@set('hasFilterableColumn', !!table.columns.find(c => c.meta.filterable))
+@set('hasRouteParents', table.routeParentRelations.length)
+@set('routeChildren', input.tables.filter(
+  t => t.routeParentRelations.length &&
+    findRelationModel(input, t.routeParentRelations[t.routeParentRelations.length - 1])
+    .names.camelCase === table.names.camelCase
+))
+<template>
+  <section class="container">
+    <b-loading v-model="isLoading" is-full-page></b-loading>
+    <div class="section py-4">
+      <div class="columns">
+        <div class="column px-0">
+          <div class="level">
+            <div class="level-left is-size-3">@{{ items.length }} {{
+              capitalCase(table.names.pascalCasePlural)
+            }}</div>
+            @if(
+              table.operations.storeMany || table.operations.store || table.operations.destroyMany
+            )
+              <div
+                class="level-right buttons"
+                @if(input.rbac.enabled)
+                  v-if="
+                    authorize('{{ table.names.camelCase }}:storeMany') ||
+                    authorize('{{ table.names.camelCase }}:destroyMany') ||
+                    authorize('{{ table.names.camelCase }}:store')
+                  "
+                @endif
+              >
+                @if(table.operations.destroyMany)
+                  <b-button
+                    v-if="
+                    selectedItems.length
+                    @if(input.rbac.enabled)
+                      && authorize('{{ table.names.camelCase }}:destroyMany')
+                    @endif
+                    "
+                    @click="destroyMany"
+                    type="is-danger"
+                  >
+                    Delete Selected
+                  </b-button>
+                @endif
+                @if(table.operations.storeMany)
+                  <b-dropdown
+                    @if(input.rbac.enabled)
+                      v-if="authorize('{{ table.names.camelCase }}:storeMany')"
+                    @endif
+                    aria-role="list"
+                    class="mx-1"
+                  >
+                    <template #trigger="{ active }">
+                      <b-button
+                        label="Import From"
+                        type="is-white"
+                        :icon-right="active ? 'menu-up' : 'menu-down'"
+                      />
+                    </template>
+                    <b-dropdown-item
+                      @click="$router.push('/{{ table.names.camelCase }}/import/csv')"
+                      aria-role="listitem"
+                    >
+                      CSV
+                    </b-dropdown-item>
+                  </b-dropdown>
+                @endif
+                <b-button @click="toggleMultiselect" type="is-white">
+                  @{{ multiSelect ? "Disable" : "Enable" }} Multiselect
+                </b-button>
+                @if(table.operations.create)
+                  <b-button
+                    @if(input.rbac.enabled)
+                      v-if="authorize('{{ table.names.camelCase }}:create')"
+                    @endif
+                    @click="create"
+                    type="is-primary"
+                  >
+                    New
+                  </b-button>
+                @endif
+              </div>
+            @endif
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if(hasFilterableColumn)
+      <div class="section py-4">
+        <div class="columns box py-0">
+          <div class="column">
+            <b-field label="Page Size">
+              <b-select
+                v-model="currentPageSize"
+                placeholder="Select page size"
+                expanded
+              >
+                <option
+                  v-for="(option, index) in [10, 25, 50, 100, 200, 500]"
+                  :value="option"
+                  :key="index"
+                >
+                  @{{ option }}
+                </option>
+              </b-select>
+            </b-field>
+          </div>
+          @each(column in table.columns.filter(c => c.meta.filterable))
+            <div class="column">
+              <b-field label="{{
+                column.input?.displayName || capitalCase(column.names.pascalCase)
+              }}">
+                @if(column.type === 'String')
+                  @if(column.input?.type === 'Input')
+                    <b-input
+                      v-model="filter.{{ column.names.camelCase }}"
+                      @if(column.meta.maxLength !== undefined)
+                        maxlength="{{ column.meta.maxLength }}"
+                      @endif
+                    ></b-input>
+                  @elseif(column.input?.type === 'Select')
+                    <b-select v-model="filter.{{ column.names.camelCase }}" expanded>
+                      @each(option in column.input?.select.options)
+                        @if(option.value)
+                          <option value="{{ option.value }}">{{ option.label }}</option>
+                        @else
+                          <option value="{{ option }}">{{ option }}</option>
+                        @endif
+                      @endeach
+                    </b-select>
+                  @endif
+                @elseif(column.type === 'Number')
+                  <b-input
+                    v-model="filter.{{ column.names.camelCase }}"
+                    type="number"
+                    @if(column.meta.max !== undefined)
+                      max="{{ column.meta.max }}"
+                    @endif
+                    @if(column.meta.min !== undefined)
+                      min="{{ column.meta.min }}"
+                    @endif
+                  >
+                  </b-input>
+                @elseif(column.type === 'Decimal')
+                  <b-input
+                    v-model="filter.{{ column.names.camelCase }}"
+                    type="number"
+                    @if(column.input?.decimal.step !== undefined)
+                      step="{{ column.input?.decimal.step }}"
+                    @else
+                      step="any"
+                    @endif
+                    @if(column.meta.max !== undefined)
+                      max="{{ column.meta.max }}"
+                    @endif
+                    @if(column.meta.min !== undefined)
+                      min="{{ column.meta.min }}"
+                    @endif
+                  ></b-input>
+                @elseif(column.type === 'Boolean')
+                  <b-switch v-model="filter.{{ column.names.camelCase }}">
+                    @{{ column.input?.displayName ?? column.names.camelCase }}
+                  </b-switch>
+                @elseif(column.type === 'Date')
+                  <b-datepicker v-model="filter.{{ column.names.camelCase }}" />
+                @endif
+              </b-field>
+            </div>
+          @endeach
+        </div>
+      </div>
+    @endif
+
+    <div class="section py-4">
+      <div class="columns box">
+        <b-table
+          v-if="items.length"
+          class="column"
+          :data="items"
+          :default-sort="['id', 'desc']"
+          @sort="sort"
+          backend-sorting
+          @if(table.operations.storeMany)
+            :checked-rows.sync="selectedItems"
+            :checkable="
+            multiSelect
+            @if(input.rbac.enabled)
+              && authorize('{{ table.names.camelCase }}:destroyMany')
+            @endif
+            "
+          @endif
+          hoverable
+          bordered
+        >
+          <b-table-column field="id" label="ID" v-slot="props" sortable>
+            @{{ props.row.id }}
+          </b-table-column>
+          @each(column in table.indexColumns)
+            @set('currentColumn', table.columns.find(
+              (c) => c.names.pascalCase === pascalCase(column)
+            ))
+            <b-table-column field="{{ camelCase(column) }}" label="{{
+              currentColumn.input?.displayName || capitalCase(column)
+            }}" v-slot="props" {{
+              ['Decimal', 'Integer'].includes(currentColumn.type) ? 'numeric' : ''
+            }}
+            @if(currentColumn.meta.sortable)
+              sortable
+            @endif
+            >
+              @if('Decimal' === currentColumn.type && currentColumn.input?.decimal.step !== 'any')
+                @set('decimalCount', `${currentColumn.input?.decimal.step}`.split('.')[1].length)
+                {{{
+                  `{{ props.row.${camelCase(column)}.toFixed(${decimalCount}) }}`
+                }}}
+              @elseif(currentColumn.type === 'Date')
+                {{{
+                  `new Date({{ props.row.${camelCase(column)} }}).toLocaleString()`
+                }}}
+              @else
+                {{{
+                  `{{ props.row.${camelCase(column)} }}`
+                }}}
+              @endif
+            </b-table-column>
+          @endeach
+          <b-table-column
+            label="Action"
+            @if(table.operations.edit && table.operations.destroy)
+              v-slot="props"
+            @endif
+          >
+            <b-dropdown aria-role="list">
+              <template #trigger="{ active }">
+                <b-button
+                  label="More"
+                  type="is-primary"
+                  outlined
+                  :icon-right="active ? 'menu-up' : 'menu-down'"
+                />
+              </template>
+              @if(table.operations.edit)
+                <b-dropdown-item
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ table.names.camelCase }}:edit')"
+                  @endif
+                  @click="edit(props.row.id)"
+                  aria-role="edititem"
+                >
+                  Edit
+                </b-dropdown-item>
+              @endif
+              @if(table.operations.destroy)
+                <b-dropdown-item
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ table.names.camelCase }}:destroy')"
+                  @endif
+                  @click="destroy(props.row.id)"
+                  aria-role="listitem"
+                >
+                  Delete
+                </b-dropdown-item>
+              @endif
+              @each(childTable in routeChildren)
+                <b-dropdown-item
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ childTable.names.camelCase }}:index')"
+                  @endif
+                  aria-role="listitem"
+                  @click="list{{ childTable.names.pascalCasePlural }}(props.row.id)"
+                >
+                  List {{ noCase(childTable.names.camelCase) }}
+                </b-dropdown-item>
+              @endeach
+            </b-dropdown>
+          </b-table-column>
+        </b-table>
+        <div v-else class="hero is-medium column">
+          <div class="hero-body container is-flex has-text-centered">
+            <div class="is-flex-direction-colomn">
+              @if(table.operations.create)
+                <h1 class="is-size-2">Create a {{ capitalCase(table.names.pascalCase) }}</h1>
+                <p class="is-size-4">Click new to create your first {{
+                  noCase(table.names.pascalCasePlural)
+                }}</p>
+                <b-button
+                  @if(input.rbac.enabled)
+                    v-if="authorize('{{ table.names.camelCase }}:create')"
+                  @endif
+                  @click="create"
+                  type="is-primary block mt-5"
+                >
+                  New
+                </b-button>
+              @else
+                <h1 class="is-size-2">There are no {{ capitalCase(table.names.pascalCase) }}</h1>
+              @endif
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="meta.total > 1" class="section py-4">
+      <div class="columns">
+        <div class="column px-0">
+          <b-pagination
+            v-if="meta.lastPage > 1"
+            v-model="currentPageNo"
+            :current.sync="currentPageNo"
+            :total="meta.total"
+            :per-page="meta.perPage"
+            icon-prev="arrow-left"
+            icon-next="arrow-right"
+            order="is-centered"
+            aria-next-label="Next page"
+            aria-previous-label="Previous page"
+            aria-page-label="Page"
+            aria-current-label="Current page">
+          </b-pagination>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script>
+import debounce from "lodash/debounce";
+import { mapActions, mapState } from 'vuex';
+@if(hasRouteParents || routeChildren.length)
+  import HelperService from "../services/helper.service";
+@endif
+
+export default {
+  name: '{{ table.names.pascalCase }}List',
+
+  data() {
+    return {
+      parent: {
+        @each(routeParent in table.routeParentRelations)
+          {{ routeParent.names.camelCase }}Id: null,
+        @endeach
+      },
+      currentPageNo: 1,
+      currentPageSize: 10,
+      sortBy: "id",
+      sortType: "desc",
+      multiSelect: false,
+      @if(hasFilterableColumn)
+        filter: {
+          @each(column in table.columns.filter(c => c.meta.filterable))
+            {{ column.names.camelCase }}: null,
+          @endeach
+        },
+      @endif
+      @if(table.operations.storeMany)
+        selectedItems: [],
+      @endif
+    };
+  },
+
+  created() {
+    @each(routeParent in table.routeParentRelations)
+      if (this.$route.params.{{ routeParent.names.camelCase }}Id) {
+        this.parent.{{ routeParent.names.camelCase }}Id = this.$route.params.{{ routeParent.names.camelCase }}Id;
+      }
+    @endeach
+    this.index();
+  },
+
+  methods: {
+    ...mapActions('{{ table.names.camelCase }}', {
+      indexAction: 'index',
+      @if(table.operations.destroy)
+        destroyAction: 'destroy',
+      @endif
+      @if(table.operations.destroyMany)
+        destroyManyAction: "destroyMany",
+      @endif
+    }),
+    @if(input.rbac.enabled)
+      authorize(permission) {
+        return this.permissions.indexOf(permission) !== -1;
+      },
+    @endif
+
+    _index: debounce(function () {
+      this.index();
+    }, 2000),
+
+    sort(sortBy, sortType) {
+      this.sortBy = sortBy;
+      this.sortType = sortType;
+      this.index();
+    },
+
+    index() {
+      const filter = {
+        size: this.currentPageSize,
+        page: this.currentPageNo,
+        sortBy: this.sortBy,
+        sortType: this.sortType,
+      };
+      @if(hasFilterableColumn)
+        @each(column in table.columns.filter(c => c.meta.filterable))
+          if (this.filter.{{ column.names.camelCase }}) {
+            filter.{{ column.names.camelCase }} = this.filter.{{
+              column.names.camelCase
+            }}{{ column.type === 'Date' ? '.toISOString()' : ''}};
+          }
+        @endeach
+      @endif
+      this.indexAction({
+        parent: this.parent,
+        filter,
+      });
+    },
+
+    create() {
+      @if(hasRouteParents)
+        const url = `${HelperService.prepareRouteParent(
+          this.parent
+        )}/{{ table.names.camelCase }}/create`;
+      @else
+        const url = `/{{ table.names.camelCase }}/create`;
+      @endif
+      this.$router.push(url);
+    },
+
+    @if(table.operations.edit)
+      edit(id) {
+        this.$router.push(
+          @if(hasRouteParents)
+            `${HelperService.prepareRouteParent(this.parent)}/{{ table.names.camelCase }}/${id}/edit`
+          @else
+            `/{{ table.names.camelCase }}/${id}/edit`
+          @endif
+        );
+      },
+    @endif
+
+    @if(table.operations.destroyMany)
+      destroy(id) {
+        this.$buefy.dialog.confirm({
+          title: 'Deleting {{ capitalCase(table.names.pascalCase) }}',
+          message: 'Are you sure you want to <b>delete</b> this {{
+            table.names.camelCase
+          }}? Only unused {{ table.names.camelCase }} can be deleted',
+          confirmText: 'Delete {{ capitalCase(table.names.pascalCase) }}',
+          type: 'is-danger',
+          hasIcon: true,
+          onConfirm: async () => {
+            try {
+              await this.destroyAction({ id });
+              this.$buefy.toast.open({
+                message: 'Deleted',
+                type: 'is-success',
+                position: 'is-bottom-right',
+              });
+            } catch(e) {
+              console.error(e);
+              this.$buefy.toast.open({
+                message: 'Unable to delete',
+                type: 'is-danger',
+                position: 'is-bottom-right',
+              });
+            }
+          },
+        });
+      },
+    @endif
+
+    @if(table.operations.destroyMany)
+      destroyMany() {
+        this.$buefy.dialog.confirm({
+          title: 'Deleting {{ capitalCase(table.names.pascalCasePlural) }}',
+          message:
+            "Are you sure you want to <b>delete</b> these {{
+              noCase(table.names.pascalCasePlural)
+            }}? Only unused {{ noCase(table.names.pascalCase) }} can be deleted",
+          confirmText: 'Delete {{ capitalCase(table.names.pascalCasePlural) }}',
+          type: "is-danger",
+          hasIcon: true,
+          onConfirm: async () => {
+            try {
+              await this.destroyManyAction({
+                ids: this.selectedItems.map((i) => i.id)
+              });
+              this.$buefy.toast.open({
+                message: "Deleted",
+                type: "is-success",
+                position: "is-bottom-right",
+              });
+              this.currentPageNo = 1;
+              this.selectedItems = [];
+              await this.index();
+            } catch (e) {
+              console.error(e);
+              this.$buefy.toast.open({
+                message: "Unable to delete",
+                type: "is-danger",
+                position: "is-bottom-right",
+              });
+            }
+          },
+        });
+      },
+
+      toggleMultiselect() {
+        this.multiSelect = !this.multiSelect;
+        this.selectedItems = [];
+      },
+    @endif
+
+    @each(childTable in routeChildren)
+      list{{ childTable.names.pascalCasePlural }}({{ table.names.camelCase }}Id) {
+        const parent = {
+          {{ table.names.camelCase }}Id,
+        };
+        const url = `${HelperService.prepareRouteParent(parent)}/{{ childTable.names.camelCase }}`;
+        this.$router.push(url);
+      },
+    @endeach
+  },
+
+  watch: {
+    async currentPageNo() {
+      return this.index();
+    },
+    async currentPageSize() {
+      return this._index();
+    },
+    @if(hasFilterableColumn)
+      @each(column in table.columns.filter(c => c.meta.filterable))
+        'filter.{{ column.names.camelCase }}': function() {
+          this._index()
+        },
+      @endeach
+    @endif
+  },
+
+  computed: {
+    ...mapState('auth', {
+      user: (state) => state.user,
+      @if(input.rbac.enabled)
+        permissions: (state) => state.permissions,
+      @endif
+    }),
+    ...mapState('{{ table.names.camelCase }}', {
+      items: (state) => state.items,
+      meta: (state) => state.meta,
+      loading: (state) => state.loading,
+    }),
+    isLoading() {
+      return this.loading.index;
+    },
+  },
+};
+</script>

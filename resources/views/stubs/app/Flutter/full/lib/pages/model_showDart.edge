@@ -1,0 +1,126 @@
+@set('exposedColumns', table.columns.filter(c => c.meta.expose !== false))
+@set('fileColumns', table.columns.filter(c => c.type === 'File'))
+@if(fileColumns.length)
+  import 'package:app/config/constants.dart';
+  import 'package:cached_network_image/cached_network_image.dart';
+@endif
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+@if(table.operations.edit)
+  import 'package:app/state/{{ table.names.camelCase }}_edit.state.dart';
+@endif
+import 'package:app/state/{{ table.names.snakeCase }}_show.state.dart';
+import 'package:app/components/global/my_drawer.dart';
+import 'package:app/services/{{ table.names.camelCase }}.service.dart' as {{ table.names.snakeCase }}_service;
+
+class {{ table.names.pascalCase }}Show extends StatefulWidget {
+  const {{ table.names.pascalCase }}Show({Key? key}) : super(key: key);
+
+  @override
+  _{{ table.names.pascalCase }}ShowState createState() => _{{ table.names.pascalCase }}ShowState();
+}
+
+class _{{ table.names.pascalCase }}ShowState extends State<{{ table.names.pascalCase }}Show> {
+  final imageExtensions = ['jpg', 'png', 'gif', 'jpeg'];
+  final imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+  List<Widget> labelValue(String label, String? value) {
+    const boldFont = TextStyle(fontWeight: FontWeight.bold);
+    if (value == null) return [];
+    final children = [
+      Text(
+        label,
+        style: boldFont,
+      ),
+      Text(value),
+      const SizedBox(height: 8),
+    ];
+    return children;
+  }
+
+  @if(fileColumns.length)
+    List<Widget> labelFile(String label, Map<String, dynamic>? value) {
+      const boldFont = TextStyle(fontWeight: FontWeight.bold);
+      if (value == null) return [];
+      final children = [
+        Text(
+          label,
+          style: boldFont,
+        ),
+        (imageExtensions.contains(value['extname']) &&
+                imageMimeTypes.contains(value['mimeType']))
+            ? CachedNetworkImage(imageUrl: baseUrl + value['url'])
+            : Text(value.toString()),
+        const SizedBox(height: 8),
+      ];
+      return children;
+    }
+  @endif
+
+  @if(table.operations.destroy)
+    Future destroy() async {
+      final {{ table.names.camelCase }} = context.read<{{ table.names.pascalCase }}ShowState>().{{ table.names.camelCase }}!;
+      await {{ table.names.snakeCase }}_service.destroy(context, {{ table.names.camelCase }}.id!);
+      Navigator.pushNamed(context, '{{ table.names.snakeCase }}_index');
+    }
+  @endif
+
+  @override
+  Widget build(BuildContext context) {
+    final {{ table.names.camelCase }} = context.read<{{ table.names.pascalCase }}ShowState>().{{ table.names.camelCase }}!;
+    return Scaffold(
+      drawer: const MyDrawer(),
+      extendBody: true,
+      appBar: AppBar(
+        title: const Text('{{ capitalCase(noCase(table.names.pascalCase)) }} Detail'),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+      body: SizedBox(
+        width: double.infinity,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView(
+              children: [
+                @each(column in exposedColumns)
+                  @if (column.type === 'File')
+                    ...labelFile("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}
+                  @else
+                    ...labelValue("{{ noCase(column.names.pascalCase) }}", {{ table.names.camelCase }}.{{ column.names.camelCase }}
+                    @if (column.type !== 'String')
+                      {{ column.meta.required ? '' : '?' }}.toString()
+                    @endif
+                  @endif
+                  ),
+                @endeach
+                ButtonBar(
+                  alignment: MainAxisAlignment.end,
+                  children: [
+                    @if(table.operations.edit)
+                      TextButton(
+                        onPressed: () {
+                          final editMode = context.read<{{ table.names.pascalCase }}EditState>();
+                          editMode.loadState({{ table.names.camelCase }});
+                          Navigator.pushNamed(context, '{{ table.names.snakeCase }}_create');
+                        },
+                        child: const Text('Edit'),
+                      ),
+                    @endif
+                    @if(table.operations.destroy)
+                      TextButton(
+                        onPressed: () {
+                          destroy();
+                        },
+                        child: const Text('Delete'),
+                      ),
+                    @endif
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

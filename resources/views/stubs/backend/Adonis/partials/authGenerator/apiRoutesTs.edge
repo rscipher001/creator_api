@@ -1,0 +1,14 @@
+Route.group(() => {
+  Route.post('/login', 'API/AuthController.login')
+  @if(input.auth.register)
+    Route.post('/register', 'API/AuthController.register')
+  @endif
+}).prefix('/api')
+
+Route.group(() => {
+  Route.get('/me', 'API/AuthController.me')
+  Route.post('/logout', 'API/AuthController.logout')
+  @if(input.mailEnabled)
+    Route.post('/email/resend', 'API/EmailVerificationController.resendEmail')
+  @endif
+}).middleware(['auth']).prefix('/api')
