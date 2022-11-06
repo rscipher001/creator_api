@@ -299,7 +299,7 @@ export default class AuthGenerator {
   protected async copyAsset() {
     const path = `${this.input.spaPath}/src/assets/programming.svg`
     await HelperService.copyFile(
-      `resources/views/stubs/frontend/${this.input.tech.frontend}/full/src/assets/programmingSvg.edge`,
+      `resources/views/stubs/frontend/${this.input.tech.frontend}/full/src/assets/welcomeSvg.edge`,
       path
     )
   }
