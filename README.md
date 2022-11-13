@@ -8,8 +8,7 @@ A Code Generator
 - Create a folder named `Projects` parallel to UI and API folder (Can be configured using `.env` if you want another location) but keep it outside this project
 - Install Vue CLI `npm install -g @vue/cli`
 
-### (Alpha) Local Hosting Requirements
-
+### (Alpha) Hosting Generated Projectss
 There is an option to host the project after generation, it was created so you can preview the project.
 
 - Ensure `pm2` is installed globally
@@ -63,10 +62,10 @@ In the above snippet you can see the routes for workers are nested inside projec
 
 ## Using docker to setup mysql
 
-Create a MySQL server using Docker container. The following command will create a MySQL container name `main-mysql` with `ravindra` as root password, feel free to change these to whatever you like
+Create a MySQL server using Docker container. The following command will create a MySQL container name `main-mysql` with `creator` as root password, feel free to change these to whatever you like
 
 ```bash
-docker run --name main-mysql -e MYSQL_ROOT_PASSWORD=ravindra -p 3306:3306 -d mysql
+docker run --name main-mysql -e MYSQL_ROOT_PASSWORD=creator -p 3306:3306 -d mysql
 ```
 
 To Stop the container use
@@ -106,4 +105,24 @@ CREATE DATABASE creator;
 CREATE USER 'creator'@'%' IDENTIFIED WITH mysql_native_password BY 'creator';
 GRANT ALL PRIVILEGES ON * . * TO 'creator'@'%';
 FLUSH PRIVILEGES;
+```
+
+## How to use docker for demo
+This script is intended for only demo, development
+docker scripts have not been added yet.
+
+To start run
+```bash
+./docker-compose up -d
+./helper.sh node ace migration:run # It will run migration
+```
+
+To stop run
+```bash
+./docker-compose down
+```
+
+To run any command on continer use the helper script
+```bash
+./helper.sh <command>
 ```
