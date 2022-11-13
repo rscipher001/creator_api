@@ -110,6 +110,7 @@
                 (row) =>
                   row.hasValidationErrors && 'has-background-danger-light'
               "
+              bordered
             >
               @each(column in table.columns.filter(column => column.type !== 'File'))
                 <b-table-column field="{{
@@ -124,28 +125,16 @@
                     {{{
                       `{{ props.row.${column.names.camelCase}.toFixed(${decimalCount}) }}`
                     }}}
-                    @!component(
-                      `stubs/frontend/${input.tech.frontend}/full/src/views/components/csvRequiredTooltip`, {
-                      column,
-                    })
                   @elseif(column.type === 'Date')
                     {{{
                       `new Date({{ props.row.${column.names.camelCase} }}).toLocaleString()`
                     }}}
-                    @!component(
-                      `stubs/frontend/${input.tech.frontend}/full/src/views/components/csvRequiredTooltip`, {
-                      column,
-                    })
                   @else
                     {{{
                       `{{ props.row.${column.names.camelCase} }}`
                     }}}
-                    @!component(
-                      `stubs/frontend/${input.tech.frontend}/full/src/views/components/csvRequiredTooltip`, {
-                      column,
-                    })
                     <b-tooltip
-                      v-for="(error, errorIndex) in props.row.validationErrors.name"
+                      v-for="(error, errorIndex) in props.row.validationErrors.{{ column.names.camelCase }}"
                       :key="errorIndex"
                       :label="error"
                       type="is-danger"
@@ -193,12 +182,12 @@ export default {
 
   data() {
     return {
-      currentPageSize: 10,
-      pageSizeLimit: 1000,
-      validationFilter: "all",
+      currentPageSize: 1000, // How many rows are shown
+      pageSizeLimit: 1000, // Max row limit, setting it too high can crash page
+      validationFilter: "all", // Show all, valid or only invalid fields
       csvUrl: `${API_URL}/{{ table.names.camelCase }}/csvTemplate`,
-      activeScreen: "upload",
-      parseLoading: false,
+      activeScreen: "upload", // Upload shows page to upload, preview shows CSV preview
+      parseLoading: false, // True when csv is being processed
       file: null,
       haveValidationErrors: false, // Set to true if there are validation errors in data
       form: {
@@ -253,6 +242,11 @@ export default {
               itemInput.{{ column.names.camelCase }} = item.{{ column.names.camelCase }};
               itemInput.validationErrors.{{ column.names.camelCase }} = [];
             @endif
+
+            if (this.isFailingRequiredValidation(item.{{ column.names.camelCase }})) {
+              itemInput.hasValidationErrors = true;
+              itemInput.validationErrors.{{ column.names.camelCase }}.push("{{ column.input?.displayName || capitalCase(column.names.camelCase) }} is required");
+            }
 
             @if(column.type === 'String' && column.meta.minLength)
               if (this.isFailingMinLengthValidation(item.{{ column.names.camelCase }}, {{ column.meta.minLength }})) {
