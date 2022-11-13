@@ -5,15 +5,59 @@
       <div class="columns">
         <div class="column px-0">
           <div class="level">
-            <div class="level-left is-size-3">Import {{
-              capitalCase(table.names.pascalCase)
-            }}</div>
+            <div class="level-left is-size-3">
+              <span v-if="activeScreen === 'preview'">
+                @{{ form.items.length }} {{ capitalCase(table.names.pascalCase) }}
+              </span>
+              <span v-else>
+                Import {{ capitalCase(table.names.pascalCase) }}
+              </span>
+            </div>
             <div class="level-right">
               <b-button tag="router-link" to="/{{ table.names.camelCase }}" type="is-white">
                 Back
               </b-button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="activeScreen === 'preview'" class="section py-4">
+      <div class="columns box py-0">
+        <div class="column">
+          <b-field label="Page Size">
+            <b-select
+              v-model="currentPageSize"
+              placeholder="Select page size"
+              expanded
+            >
+              <option
+                v-for="(option, index) in [10, 100, 500, 1000]"
+                :value="option"
+                :key="index"
+              >
+                @{{ option }}
+              </option>
+            </b-select>
+          </b-field>
+        </div>
+        <div class="column">
+          <b-field label="Show Data">
+            <b-select
+              v-model="validationFilter"
+              placeholder="Show data"
+              expanded
+            >
+              <option
+                v-for="(option, index) in ['all', 'valid', 'invalid']"
+                :value="option"
+                :key="index"
+              >
+                <span class="is-capitalized">@{{ capitalize(option) }}</span>
+              </option>
+            </b-select>
+          </b-field>
         </div>
       </div>
     </div>
@@ -48,13 +92,24 @@
           <div v-else>
             <div class="section px-0 pb-5 pt-1">
               <h1 class="is-size-4 has-text-centered">
-                Review the following @{{ form.items.length }} items
-                <em>carefully</em> and click upload button to start importing.
+                <span v-if="haveValidationErrors">
+                  Please upload a file without validation errors.
+                </span>
+                <span v-else>
+                  Review the following @{{ form.items.length }} items
+                  <em>carefully</em> and click upload button to start importing.
+                </span>
               </h1>
             </div>
             <b-table
-              v-if="form.items.length && form.items.length <= 1000"
-              :data="form.items"
+              v-if="
+                filteredItems.length && filteredItems.length <= currentPageSize
+              "
+              :data="filteredItems"
+              :row-class="
+                (row) =>
+                  row.hasValidationErrors && 'has-background-danger-light'
+              "
               bordered
             >
               @each(column in table.columns.filter(column => column.type !== 'File'))
@@ -70,95 +125,30 @@
                     {{{
                       `{{ props.row.${column.names.camelCase}.toFixed(${decimalCount}) }}`
                     }}}
-                    @!component(
-                      `stubs/frontend/${input.tech.frontend}/full/src/views/components/csvRequiredTooltip`, {
-                      column,
-                    })
                   @elseif(column.type === 'Date')
                     {{{
                       `new Date({{ props.row.${column.names.camelCase} }}).toLocaleString()`
                     }}}
-                    @!component(
-                      `stubs/frontend/${input.tech.frontend}/full/src/views/components/csvRequiredTooltip`, {
-                      column,
-                    })
                   @else
                     {{{
                       `{{ props.row.${column.names.camelCase} }}`
                     }}}
-                    @!component(
-                      `stubs/frontend/${input.tech.frontend}/full/src/views/components/csvRequiredTooltip`, {
-                      column,
-                    })
-                    @if(column.type === 'String' && column.meta.minLength)
-                      <b-tooltip
-                        v-if="isFailingMinLengthValidation(props.row.{{ column.names.camelCase }}, {{
-                          column.meta.minLength
-                        }})"
-                        label="Minimum length should be {{ column.meta.minLength }}"
+                    <b-tooltip
+                      v-for="(error, errorIndex) in props.row.validationErrors.{{ column.names.camelCase }}"
+                      :key="errorIndex"
+                      :label="error"
+                      type="is-danger"
+                    >
+                      <b-icon
+                        size="is-small"
                         type="is-danger"
-                      >
-                        <b-icon
-                          size="is-small"
-                          type="is-danger"
-                          icon="alert-circle-outline"
-                        ></b-icon>
-                      </b-tooltip>
-                    @endif
-                    @if(column.type === 'String' && column.meta.maxLength)
-                      <b-tooltip
-                        v-if="isFailingMaxLengthValidation(props.row.{{ column.names.camelCase }}, {{
-                          column.meta.maxLength
-                        }})"
-                        label="Maximim length should be {{ column.meta.maxLength }}"
-                        type="is-danger"
-                      >
-                        <b-icon
-                          size="is-small"
-                          type="is-danger"
-                          icon="alert-circle-outline"
-                        ></b-icon>
-                      </b-tooltip>
-                    @endif
-                    @if(column.type === 'Integer' && column.meta.min !== undefined)
-                      <b-tooltip
-                        v-if="isFailingMinValidation(props.row.{{ column.names.camelCase }}, {{ column.meta.min }})"
-                        label="Minimum allowed value is {{ column.meta.min }}"
-                        type="is-danger"
-                      >
-                        <b-icon
-                          size="is-small"
-                          type="is-danger"
-                          icon="alert-circle-outline"
-                        ></b-icon>
-                      </b-tooltip>
-                    @endif
-                    @if(column.type === 'Integer' && column.meta.max !== undefined)
-                      <b-tooltip
-                        v-if="isFailingMaxValidation(props.row.{{ column.names.camelCase }}, {{ column.meta.max }})"
-                        label="Maximum allowed value is {{ column.meta.max }}"
-                        type="is-danger"
-                      >
-                        <b-icon
-                          size="is-small"
-                          type="is-danger"
-                          icon="alert-circle-outline"
-                        ></b-icon>
-                      </b-tooltip>
-                    @endif
+                        icon="alert-circle-outline"
+                      ></b-icon>
+                    </b-tooltip>
                   @endif
                 </b-table-column>
               @endeach
             </b-table>
-            <div v-else class="has-text-centered">
-              <div class="notification is-warning is-light">
-                This CSV file contain more than 1000 items, displaying a large
-                number of items may crash your browser or freeze your system, to
-                ensure your system safety preview is disabled for large amount
-                of items.
-                <strong>You can still import items without preview</strong>.
-              </div>
-            </div>
             <div class="buttons mt-5">
               <b-button
                 @click="storeMany"
@@ -171,6 +161,7 @@
                   `{{ haveValidationErrors ? 'Please upload a file without errors' : 'Start Importing' }}`
                 }}}
               </b-button>
+              <b-button @click="resetPage" expanded>Cancel</b-button>
             </div>
           </div>
         </div>
@@ -182,6 +173,7 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import { parse } from "csv-parse/browser/esm/sync";
+import capitalize from "lodash/capitalize";
 import ValidationException from "../exceptions/ValidationException";
 import { API_URL } from "../constants";
 
@@ -190,9 +182,12 @@ export default {
 
   data() {
     return {
+      currentPageSize: 1000, // How many rows are shown
+      pageSizeLimit: 1000, // Max row limit, setting it too high can crash page
+      validationFilter: "all", // Show all, valid or only invalid fields
       csvUrl: `${API_URL}/{{ table.names.camelCase }}/csvTemplate`,
-      activeScreen: "upload",
-      parseLoading: false,
+      activeScreen: "upload", // Upload shows page to upload, preview shows CSV preview
+      parseLoading: false, // True when csv is being processed
       file: null,
       haveValidationErrors: false, // Set to true if there are validation errors in data
       form: {
@@ -222,7 +217,10 @@ export default {
           skip_empty_lines: true,
         });
         newItems.forEach((item) => {
-          const itemInput = {};
+          const itemInput = {
+            hasValidationErrors: false,
+            validationErrors: [],
+          };
           @each(column in table.columns.filter(c => c.type !== 'File'))~
             @if(column.type === 'Integer')
               @if(column.meta.required)
@@ -231,6 +229,7 @@ export default {
               itemInput.{{ column.names.camelCase }} = parseInt(item.{{
                 column.names.camelCase
               }});
+              itemInput.validationErrors.{{ column.names.camelCase }} = [];
             @elseif(column.type === 'Decimal')
               @if(column.meta.required)
                 if(item.{{ column.names.camelCase }})
@@ -238,16 +237,54 @@ export default {
               itemInput.{{ column.names.camelCase }} = parseFloat(item.{{
                 column.names.camelCase
               }});
+              itemInput.validationErrors.{{ column.names.camelCase }} = [];
             @else
               itemInput.{{ column.names.camelCase }} = item.{{ column.names.camelCase }};
+              itemInput.validationErrors.{{ column.names.camelCase }} = [];
+            @endif
+
+            if (this.isFailingRequiredValidation(item.{{ column.names.camelCase }})) {
+              itemInput.hasValidationErrors = true;
+              itemInput.validationErrors.{{ column.names.camelCase }}.push("{{ column.input?.displayName || capitalCase(column.names.camelCase) }} is required");
+            }
+
+            @if(column.type === 'String' && column.meta.minLength)
+              if (this.isFailingMinLengthValidation(item.{{ column.names.camelCase }}, {{ column.meta.minLength }})) {
+                itemInput.hasValidationErrors = true;
+                itemInput.validationErrors.{{ column.names.camelCase }}.push("Minimum length should be {{ column.meta.minLength }} characters");
+              }
+            @endif
+
+            @if(column.type === 'String' && column.meta.maxLength)
+              if (this.isFailingMaxLengthValidation(item.{{ column.names.camelCase }}, {{ column.meta.min }})) {
+                itemInput.hasValidationErrors = true;
+                itemInput.validationErrors.{{ column.names.camelCase }}.push("Maximum length should be {{ column.meta.min }} characters");
+              }
+            @endif
+
+            @if(column.type === 'Integer' && column.meta.min !== undefined)
+              if (this.isFailingMinValidation(item.{{ column.names.camelCase }}, {{ column.meta.min }}))) {
+                itemInput.hasValidationErrors = true;
+                itemInput.validationErrors.{{ column.names.camelCase }}.push("Minimum allowed value is {{ column.meta.min }}");
+              }
+            @endif
+
+            @if(column.type === 'Integer' && column.meta.max !== undefined)
+              if (this.isFailingMinValidation(item.{{ column.names.camelCase }}, {{ column.meta.min }}))) {
+                itemInput.hasValidationErrors = true;
+                itemInput.validationErrors.{{ column.names.camelCase }}.push("Maximum allowed value is {{ column.meta.max }}");
+              }
             @endif
           @endeach
           this.form.items.push(itemInput);
         });
+        if (this.form.items > this.pageSizeLimit) {
+          this.currentPageSize === 1000;
+        }
         this.activeScreen = "preview";
         this.parseLoading = false;
         return this.$buefy.toast.open({
-          message: "File Selected",
+          message: "File Selected and processed",
           type: "is-success",
           position: "is-bottom-right",
         });
@@ -260,6 +297,18 @@ export default {
           position: "is-bottom-right",
         });
       }
+    },
+
+    resetPage() {
+      this.currentPageSize = 10;
+      this.pageSizeLimit = 1000;
+      this.validationFilter = "all";
+      this.csvUrl = `${API_URL}/{{ table.names.camelCase }}/csvTemplate`;
+      this.activeScreen = "upload";
+      this.parseLoading = false;
+      this.file = null;
+      this.haveValidationErrors = false; // Set to true if there are validation errors in data
+      this.form.items = [];
     },
 
     async storeMany() {
@@ -332,17 +381,34 @@ export default {
       }
       return false;
     },
+
+    capitalize,
   },
 
   computed: {
     ...mapState("auth", {
       user: (state) => state.user,
     }),
+
     ...mapState("{{ table.names.camelCase }}", {
       items: (state) => state.items,
       meta: (state) => state.meta,
       loading: (state) => state.loading,
     }),
+
+    filteredItems() {
+      if (this.validationFilter === "all") {
+        return this.form.items.slice(0, this.currentPageSize - 1);
+      }
+      if (this.validationFilter === "valid") {
+        return this.form.items
+          .filter((i) => i.hasValidationErrors === false)
+          .slice(0, this.currentPageSize - 1);
+      }
+      return this.form.items
+        .filter((i) => i.hasValidationErrors)
+        .slice(0, this.currentPageSize - 1);
+    },
   },
 };
 </script>
